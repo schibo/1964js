@@ -1,0 +1,281 @@
+<html>
+<head>
+</head>
+
+<body onload="webGLStart()">
+
+<script src="js/lib/BigInt.js"></script>
+<script src="js/lib/closure/goog/base.js" type="text/javascript"></script>
+<script src="js/lib/Stats.js"></script>
+<script src="js/helpers.js"></script>
+<script src="js/opcodeMap.js"></script>
+<script src="js/boot.js"></script>
+<script src="js/lib/closure/goog/math/long.js"></script>
+<script src="js/constants.js"></script>
+<script src="js/pif.js"></script>
+<script src="js/1964.js"></script>
+<script src="js/memory.js"></script>
+<script src="js/dma.js"></script>
+<script src="js/interrupts.js"></script>
+<script src="js/lib/glMatrix-0.9.5.min.js"></script>
+<script src="js/lib/webgl-utils.js"></script>
+<script src="js/gfxHelpers.js"></script>
+<script src="js/tests.js"></script>
+<script src="js/videoHLE.js"></script>
+<script src="js/webGL.js"></script>
+
+
+<!--<script src="1964js-0.0.1.min.js"></script>
+-->
+<script id="shader-fs" type="x-shader/x-fragment">
+    precision mediump float;
+    
+    void main(void) {
+        gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);
+    }
+</script>
+
+<script id="shader-vs" type="x-shader/x-vertex">
+    attribute vec3 aVertexPosition;
+    
+    uniform mat4 uMVMatrix;
+    uniform mat4 uPMatrix;
+    
+    void main(void) {
+        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+    }
+</script>
+
+
+<style>
+  #byte_content {
+    margin: 5px 0;
+    max-height: 100px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+  #byte_range { margin-top: 5px; }
+</style>
+
+<style>
+
+#originScrubber {
+    -webkit-appearance: slider-vertical;
+    width: 20px;
+    height: 240;
+}
+  #progress_bar {
+    margin: 10px 0;
+    padding: 3px;
+    border: 1px solid #000;
+    font-size: 14px;
+    clear: both;
+    opacity: 0;
+    -moz-transition: opacity 1s linear;
+    -o-transition: opacity 1s linear;
+    -webkit-transition: opacity 1s linear;
+  }
+  #progress_bar.loading {
+    opacity: 1.0;
+  }
+  #progress_bar .percent {
+    background-color: #99ccff;
+    height: auto;
+    width: 0;
+  }
+</style>
+
+<canvas id="Canvas" style="width: 100%; height: 100%; position: fixed; z-index: -1000; top: 0; left: 0; background-color: #000000; margin: 0;" width=320 height=240>I'm sorry your browser does not support the HTML5 canvas element.</canvas>
+
+
+<div style=" margin: 50 px 10 px;">
+<table style="opacity:0.6; z-index:-10" border="0">
+<tr>
+<td colspan="3" style="background-color:#FFA500;text-align:center;">
+<h2>1964js Debugger</h2>
+<input type="file" id="files" name="file" />
+<button onclick="abortRead();">Cancel read</button>
+<div id="progress_bar"><div class="percent">0%</div></div>
+</td>
+</tr>
+</div>
+
+<div id="speedScrubber" style="opacity: 0.0; z-index: 1000; position: fixed; top: 10 px; left: 10 px; background-color: #CC8822; border: 2px solid #aa6600; font-size: 13px; color: white; font-weight: bold; font-family:Arial,Helvetica,sans-serif;">Slower (less CPU)<input id="speed" name="Speed" width=640 type="range" min=0 max=131072 value=65535 step=100 onchange="changeSpeed(this.value)"/>Faster (more CPU)
+</div>
+
+
+<tr valign="top">
+
+<td style="background-color:#EEEEEE;text-align:top;">
+<span id="screen"></span>
+
+<!-- note: canvas textures need to be powers of 2 for WebGL -->
+</td>
+
+<td>
+<canvas id="Canvas3D" style="display: block;" width="320" height="240">I'm sorry your browser does not support the HTML5 canvas element.</canvas>
+</td>
+
+
+<td>
+<canvas id="DebugCanvas" style="display: block;" width="320" height="240">I'm sorry your browser does not support the HTML5 canvas element.</canvas>
+</td>
+<td>
+<input id="originScrubber" width=640 type="range" min=0 max=3000000 value=25 step=100 onchange="showValue(this.value)" />
+</td>
+
+</tr>
+
+<tr>
+<td colspan="3" style="background-color:#FFA500;text-align:center;">
+</td>
+</tr>
+<tr>
+<td colspan="3" style="background-color:#FFD700;height:240px;text-align:top;">
+<div id="error" style="height:240px;overflow-x: scroll;overflow-y: scroll;width:400px;"></div>
+</td>
+
+
+</tr>
+</table>
+
+<span id="range">0</span>
+<script type="text/javascript">
+function showValue(newValue)
+{
+	document.getElementById("range").innerHTML=newValue;
+    var c = document.getElementById("DebugCanvas");
+    var ctx = c.getContext("2d");
+  
+    if (ImDat2)  
+    repaint(ctx,ImDat2,newValue|0);
+}
+</script>
+
+
+<script>
+    var gg = goog; //Google Closure API
+    
+  var reader;
+  var progress = document.querySelector('.percent');
+  var alertMessage = "";
+    // Check for the various File API support.
+
+    if (!window.File)
+         alertMessage += ' window.File';
+    else if (!window.FileReader)
+         alertMessage += ' window.FileReader';
+    else if (!window.FileList)
+         alertMessage += ' window.FileList';
+    else if (!window.Blob)
+        alertMessge += ' window.Blob';
+
+    if (alertMessage.length > 0)
+        log('Unsupported in this browser: ' + alertMessage);
+
+  function abortRead() {
+    reader.abort();
+  }
+
+  function fatal(message)
+  {
+    var myDiv = document.getElementById("error");
+    myDiv.innerHTML += '<b><font size=2 color=\"red\">'+message + '</font></b><br>';
+    
+    myDiv.innerHTML += '<font size=2 color=\"black\">pc='+dec2hex(programCounter) + '<br>' + dec2hex(r[0]) + ' ' + dec2hex(r[1])
+        + '<br>' + dec2hex(r[2]) + ' ' + dec2hex(r[3])
+        + '<br>' + dec2hex(r[4]) + ' ' + dec2hex(r[5])
+        + '<br>' + dec2hex(r[6]) + ' ' + dec2hex(r[7])
+        + '<br>' + dec2hex(r[8]) + ' ' + dec2hex(r[9])
+        + '<br>' + dec2hex(r[10]) + ' ' + dec2hex(r[11])
+        + '<br>' + dec2hex(r[12]) + ' ' + dec2hex(r[13])
+        + '<br>' + dec2hex(r[14]) + ' ' + dec2hex(r[15])
+        + '<br>' + dec2hex(r[16]) + ' ' + dec2hex(r[17])
+        + '<br>' + dec2hex(r[18]) + ' ' + dec2hex(r[19])
+        + '<br>' + dec2hex(r[20]) + ' ' + dec2hex(r[21])
+        + '<br>' + dec2hex(r[22]) + ' ' + dec2hex(r[23])
+        + '<br>' + dec2hex(r[24]) + ' ' + dec2hex(r[25])
+        + '<br>' + dec2hex(r[26]) + ' ' + dec2hex(r[27])
+        + '<br>' + dec2hex(r[28]) + ' ' + dec2hex(r[29])
+        + '<br>' + dec2hex(r[30]) + ' ' + dec2hex(r[31])
+        + '<br>';
+        
+        myDiv.innerHTML += '</font>';
+  }
+
+
+  function log(message)
+  {
+    console.log(message);
+    
+    //scroll to the bottom
+   // myDiv.scrollTop = myDiv.scrollHeight;
+  }
+
+  function errorHandler(evt) {
+    switch(evt.target.error.code) {
+      case evt.target.error.NOT_FOUND_ERR:
+        alert('File Not Found!');
+        break;
+      case evt.target.error.NOT_READABLE_ERR:
+        alert('File is not readable');
+        break;
+      case evt.target.error.ABORT_ERR:
+        break; // noop
+      default:
+        alert('An error occurred reading this file.');
+    };
+  }
+
+  function updateProgress(evt) {
+    // evt is a ProgressEvent.
+    if (evt.lengthComputable) {
+      var percentLoaded = Math.round((evt.loaded / evt.total) * 100);
+      // Increase the progress bar length.
+      if (percentLoaded < 100) {
+        progress.style.width = percentLoaded + '%';
+        progress.textContent = percentLoaded + '%';
+      }
+    }
+  }
+
+  function handleFileSelect(evt) {
+    // Reset progress indicator on new file selection.
+    progress.style.width = '0%';
+    progress.textContent = '0%';
+
+    reader = new FileReader();
+    reader.onerror = errorHandler;
+    reader.onprogress = updateProgress;
+    reader.onabort = function(e) {
+      alert('File read cancelled');
+    };
+    reader.onloadstart = function(e) {
+      document.getElementById('progress_bar').className = 'loading';
+    };
+    reader.onload = function(e) {
+      // Ensure that the progress bar displays 100% at the end.
+      progress.style.width = '100%';
+      progress.textContent = '100%';
+      setTimeout("document.getElementById('progress_bar').className='';", 2000);
+      //todo: add zip support (from index.html)
+      var buffer = new Uint8Array(reader.result);
+      romLength = buffer.byteLength;
+      try {
+        init(buffer);
+        }
+        catch(error)
+        {
+            log(error);
+        }
+    }
+
+    // Read in the file as an array buffer.
+    reader.readAsArrayBuffer(evt.target.files[0]);
+  }
+
+  document.getElementById('files').addEventListener('change', handleFileSelect, false);
+</script>
+</body>
+
+</html>
