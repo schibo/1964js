@@ -369,6 +369,11 @@ function testHi()
 }
 
 function changeSpeed(s) {
+    if (s > 131072)
+        s = 131072;
+    if (s < 0)
+        s = 0;
+
     speed = s;
 }
 
