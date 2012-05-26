@@ -17,6 +17,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+//GBI0 MoveWord struct
 function getGbi0MoveWordType(pc) {
     return getInt32(rdramUint8Array, rdramUint8Array, pc) & 0x00ff;
 }
@@ -26,6 +27,8 @@ function getGbi0MoveWordOffset(pc) {
 function getGbi0MoveWordValue(pc) {
     return getInt32(rdramUint8Array, rdramUint8Array, pc+4);
 }
+
+//GBI0 Dlist struct
 function getGbi0DlistParam(pc) {
     return getInt32(rdramUint8Array, rdramUint8Array, pc) >>> 16 & 0x00ff;
 }
@@ -37,9 +40,58 @@ function getCommand(pc) {
     return getInt32(rdramUint8Array, rdramUint8Array, pc) >>> 24 & 0x00ff;
 }
 
+//GBI0 Tri1 struct
+function getGbi0Tri1V2(pc) {
+    return Number(rdramUint8Array[pc+7]<<24>>24);
+}
+function getGbi0Tri1V1(pc) {
+    return Number(rdramUint8Array[pc+6]<<24>>24);
+}
+function getGbi0Tri1V0(pc) {
+    return Number(rdramUint8Array[pc+5]<<24>>24);
+}
 
-
-
+//TexRect struct
+//	uint32 dwXH		= (((gfx->words.w0)>>12)&0x0FFF)/4;
+//	uint32 dwYH		= (((gfx->words.w0)    )&0x0FFF)/4;
+//	uint32 tileno	= ((gfx->words.w1)>>24)&0x07;
+//	uint32 dwXL		= (((gfx->words.w1)>>12)&0x0FFF)/4;
+//	uint32 dwYL		= (((gfx->words.w1)    )&0x0FFF)/4;
+//	uint16 uS		= (uint16)(  dwCmd2>>16)&0xFFFF;
+//	uint16 uT		= (uint16)(  dwCmd2    )&0xFFFF;
+//	uint16  uDSDX 	= (uint16)((  dwCmd3>>16)&0xFFFF);
+//	uint16  uDTDY	    = (uint16)((  dwCmd3    )&0xFFFF);
+//X coordinate of upper left
+function getTexRectXh(pc) { 
+    return (getInt32(rdramUint8Array, rdramUint8Array, pc)>>>12&0x0FFF)/4;
+}
+//Y coordinate of upper left
+function getTexRectYh(pc) { 
+    return (getInt32(rdramUint8Array, rdramUint8Array, pc)&0x0FFF)/4;
+}
+function getTexRectTileNo(pc) {
+    return 0;
+}
+//X coordinate of lower right
+function getTexRectXl(pc) {
+    return (getInt32(rdramUint8Array, rdramUint8Array, pc+4)>>>12&0x0FFF)/4;
+}
+//Y coordinate of lower right
+function getTexRectYl(pc) {
+    return (getInt32(rdramUint8Array, rdramUint8Array, pc+4)&0x0FFF)/4;
+}
+function getTexRectS(pc) {
+    return 0;
+}
+function getTexRectT(pc) {
+    return 0;
+}
+function getTexRectDsDx(pc) {
+    return 0;
+}
+function getTexRectDtDy(pc) {
+    return 0;
+}
 
 
 

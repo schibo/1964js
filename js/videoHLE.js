@@ -17,6 +17,11 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+//todo: make gRSP a class object.
+var gRSP = new Object();
+gRSP.vertexMult = 10;
+
+
 function processDisplayList()
 {
     log('todo: process display list');
@@ -46,6 +51,9 @@ function dlParserProcess()
     dlistStack[dlistStackPointer].pc = getInt32(spMemUint8Array, spMemUint8Array, TASK_DATA_PTR);
     dlistStack[dlistStackPointer].countdown = MAX_DL_COUNT;
 
+    this.vertices = [];
+    squareVertexPositionBuffer.numItems = 0;
+
     //see RSP_Parser.cpp
     //TODO: purge old textures
     //TODO: stats
@@ -60,8 +68,6 @@ function dlParserProcess()
     {
         var pc = dlistStack[dlistStackPointer].pc;
         var cmd = getCommand(pc);
-        
-        log('cmd = ' + dec2hex(cmd));
 
         dlistStack[dlistStackPointer].pc += 8;
 
@@ -139,7 +145,8 @@ function DLParser_SetTImg(pc)
     texImg.addr = getRspSegmentAddr(pc);
     texImg.bpl = texImg.width << texImg.size >> 1;
 
-    log('Texture: format=' + texImg.format + ' size=' + texImg.size + ' ' + 'width=' + texImg.width + ' addr=' + texImg.addr + ' bpl=' + texImg.bpl);
+    log('TODO: DLParser_SetTImg');
+    //log('Texture: format=' + texImg.format + ' size=' + texImg.size + ' ' + 'width=' + texImg.width + ' addr=' + texImg.addr + ' bpl=' + texImg.bpl);
 }
 
 function RSP_GBI0_Vtx(pc)
@@ -363,7 +370,21 @@ function RSP_GBI1_CullDL(pc) {
 }
 
 function RSP_GBI1_Tri1(pc) {
-    log('TODO: RSP_GBI1_Tri1');
+    var v0 = getGbi0Tri1V0(pc) / gRSP.vertexMult;
+    var v1 = getGbi0Tri1V1(pc) / gRSP.vertexMult;
+    var v2 = getGbi0Tri1V2(pc) / gRSP.vertexMult;
+//        triangleVertexPositionBuffer = gl.createBuffer();
+//        gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
+//        var vertices = [
+//             0.0,  v1,  0.0,
+//            -1.0, -1.0,  v0,
+//             v2, -1.0,  0.0
+//        ];
+//        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+//        triangleVertexPositionBuffer.itemSize = 3;
+//        triangleVertexPositionBuffer.numItems = 3;
+
+//    log('TODO: RSP_GBI1_Tri1');
 }
 
 function RSP_GBI1_Noop(pc) {
@@ -404,6 +425,44 @@ function RDP_TriShadeTxtrZ(pc) {
 
 function DLParser_TexRect(pc) {
     log('TODO: DLParser_TexRect');
+    
+    dlistStack[dlistStackPointer].pc += 16;
+
+	var xh = getTexRectXh(pc);
+	var yh = getTexRectYh(pc);
+	var tileno = getTexRectTileNo(pc);
+	var xl = getTexRectXl(pc);
+	var yl = getTexRectYl(pc);
+	var s = getTexRectS(pc);
+	var t = getTexRectT(pc);
+	var dsdx = getTexRectDsDx(pc);
+	var dtdy = getTexRectDtDy(pc);
+    
+    //temp: use 320x240. todo: ortho projection based on screen res
+    xh -= 160; xh /= 160;
+    xl -= 160; xl /= 160;
+    yl -= 120; yl /= 120;
+    yh -= 120; yh /= 120;
+    
+        gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
+        
+        var offset = 12*(squareVertexPositionBuffer.numItems/4);
+        this.vertices[offset] = xh;
+        this.vertices[offset+1] = yh;
+        this.vertices[offset+2] = 0.0;
+        this.vertices[offset+3] = xl;
+        this.vertices[offset+4] = yh;
+        this.vertices[offset+5] = 0.0;
+        this.vertices[offset+6] = xl;
+        this.vertices[offset+7] = yl;
+        this.vertices[offset+8] = 0.0;
+        this.vertices[offset+9] = xl;
+        this.vertices[offset+10] = yh;
+        this.vertices[offset+11] = 0.0;
+
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
+        squareVertexPositionBuffer.itemSize = 3;
+        squareVertexPositionBuffer.numItems += 4;
 }
 
 function DLParser_TexRectFlip(pc) {
@@ -505,26 +564,30 @@ function DLParser_SetZImg(pc) {
     
         triangleVertexPositionBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
-        var vertices = [
+        this.vertices = [
              0.0,  1.0,  0.0,
             -1.0, -1.0,  0.0,
-             1.0, -1.0,  0.0
+             1.0, -1.0,  0.0,
+            //if wireframe mode, close the line strip. end vertex = start vertex.
+             0.0,  1.0,  0.0
         ];
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
         triangleVertexPositionBuffer.itemSize = 3;
-        triangleVertexPositionBuffer.numItems = 3;
+        triangleVertexPositionBuffer.numItems = this.vertices.length/3;
 
         squareVertexPositionBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
-        vertices = [
+        this.vertices = [
              1.0,  1.0,  0.0,
-            -1.0,  1.0,  0.0,
              1.0, -1.0,  0.0,
-            -1.0, -1.0,  0.0
+            -1.0, -1.0,  0.0,
+            -1.0,  1.0,  0.0,
+            //if wireframe mode, close the line strip. end vertex = start vertex.
+             1.0, 1.0,   0.0
         ];
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
         squareVertexPositionBuffer.itemSize = 3;
-        squareVertexPositionBuffer.numItems = 4;
+        squareVertexPositionBuffer.numItems = this.vertices.length/3;
     }
 
 var deg = 0;
@@ -536,10 +599,10 @@ function drawScene() {
 
         mat4.identity(mvMatrix);
 
-        mat4.translate(mvMatrix, [-1.5, 0.0, -7.0]);
-        
+        mat4.translate(mvMatrix, [0.0, 0.0, -2.0]);
+ /*       
         mvPushMatrix();
-        mat4.rotate(mvMatrix, deg++*Math.PI/180, [1, 0, 0]);
+       // mat4.rotate(mvMatrix, deg++*Math.PI/180, [1, 0, 0]);
         
         if (deg == 360)
             deg = 0;
@@ -547,13 +610,16 @@ function drawScene() {
         gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
         gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
         setMatrixUniforms();
-        gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
+        //gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
+        gl.drawArrays(gl.LINE_STRIP, 0, triangleVertexPositionBuffer.numItems);
 
         mvPopMatrix();
-
-        mat4.translate(mvMatrix, [3.0, 0.0, 0.0]);
+*/
+ //       mat4.translate(mvMatrix, [3.0, 0.0, 0.0]);
         gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
         gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
         setMatrixUniforms();
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, squareVertexPositionBuffer.numItems);
+       // gl.drawArrays(gl.TRIANGLE_STRIP, 0, squareVertexPositionBuffer.numItems);
+       gl.drawArrays(gl.LINE_STRIP, 0, squareVertexPositionBuffer.numItems);
+       
     }
