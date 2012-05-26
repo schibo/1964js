@@ -441,17 +441,23 @@ function DLParser_TexRect(pc) {
     //temp: use 320x240. todo: ortho projection based on screen res
     xh -= 160; xh /= 160;
     xl -= 160; xl /= 160;
-    yl -= 120; yl /= 120;
-    yh -= 120; yh /= 120;
+    yl -= 120; yl /= -120;
+    yh -= 120; yh /= -120;
     
         gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
+
+
+//             1.0,  1.0,  0.0,
+//             1.0, -1.0,  0.0,
+//            -1.0, -1.0,  0.0,
+//            -1.0,  1.0,  0.0,
         
         var offset = 12*(squareVertexPositionBuffer.numItems/4);
         this.vertices[offset] = xh;
         this.vertices[offset+1] = yh;
         this.vertices[offset+2] = 0.0;
-        this.vertices[offset+3] = xl;
-        this.vertices[offset+4] = yh;
+        this.vertices[offset+3] = xh;
+        this.vertices[offset+4] = yl;
         this.vertices[offset+5] = 0.0;
         this.vertices[offset+6] = xl;
         this.vertices[offset+7] = yl;
