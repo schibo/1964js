@@ -24,7 +24,7 @@ function processDisplayList()
     dlParserProcess();
     drawScene();
 
-   // triggerDPInterrupt(0, false);
+//    triggerDPInterrupt(0, false);
     triggerSPInterrupt(0, false);
 }
 
@@ -78,6 +78,11 @@ function dlParserProcess()
     triggerSPInterrupt(0, false);
     
     //TODO: end rendering
+}
+
+function RDP_GFX_PopDL()
+{
+    dlistStackPointer--;
 }
 
 function RSP_RDP_Nothing(pc)
@@ -173,7 +178,8 @@ function DLParser_SetCImg(pc)
 //Gets new display list address
 function RSP_GBI0_DL(pc)
 {
-    var addr = getRspSegmentAddr(pc);
+    var seg = getGbi0DlistAddr(pc);
+    var addr = getRspSegmentAddr(seg);
     log('dlist address = ' + dec2hex(addr));
     
     //TODO: address adjust
@@ -192,47 +198,305 @@ function DLParser_SetCombine(pc)
     log('TODO: DLParser_SetCombine');
 }
 
+function RSP_GBI1_MoveWord(pc)
+{
+    log('RSP_GBI1_MoveWord');
+    
+    switch (getGbi0MoveWordType(pc))
+	{
+	case RSP_MOVE_WORD_MATRIX:
+//		RSP_RDP_InsertMatrix(gfx);
+		break;
+	case RSP_MOVE_WORD_NUMLIGHT:
+		{
+//			uint32 dwNumLights = (((gfx->gbi0moveword.value)-0x80000000)/32)-1;
+//			gRSP.ambientLightIndex = dwNumLights;
+//			SetNumLights(dwNumLights);
+		}
+		break;
+	case RSP_MOVE_WORD_CLIP:
+		{
+//			switch (gfx->gbi0moveword.offset)
+//			{
+//			case RSP_MV_WORD_OFFSET_CLIP_RNX:
+//			case RSP_MV_WORD_OFFSET_CLIP_RNY:
+//			case RSP_MV_WORD_OFFSET_CLIP_RPX:
+//			case RSP_MV_WORD_OFFSET_CLIP_RPY:
+//				CRender::g_pRender->SetClipRatio(gfx->gbi0moveword.offset, gfx->gbi0moveword.value);
+//				break;
+//			default:
+//				break;
+//			}
+		}
+		break;
+	case RSP_MOVE_WORD_SEGMENT:
+		{
+            var dwSegment = (getGbi0MoveWordOffset(pc) >> 2) & 0x0F;
+            var dwBase = getGbi0MoveWordValue(pc)&0x00FFFFFF;
+            segments[dwSegment] = dwBase;
+		}
+		break;
+	case RSP_MOVE_WORD_FOG:
+//		{
+//			uint16 wMult = (uint16)(((gfx->gbi0moveword.value) >> 16) & 0xFFFF);
+//			uint16 wOff  = (uint16)(((gfx->gbi0moveword.value)      ) & 0xFFFF);
 
+//			float fMult = (float)(short)wMult;
+//			float fOff = (float)(short)wOff;
 
+//			float rng = 128000.0f / fMult;
+//			float fMin = 500.0f - (fOff*rng/256.0f);
+//			float fMax = rng + fMin;
 
+//			//if( fMult <= 0 || fMin > fMax || fMax < 0 || fMin > 1000 )
+//			if( fMult <= 0 || fMax < 0 )
+//			{
+//				// Hack
+//				fMin = 996;
+//				fMax = 1000;
+//				fMult = 0;
+//				fOff = 1;
+//			}
 
+//			SetFogMinMax(fMin, fMax, fMult, fOff);
+//		}
+		break;
+	case RSP_MOVE_WORD_LIGHTCOL:
+/*		{
+			uint32 dwLight = gfx->gbi0moveword.offset / 0x20;
+			uint32 dwField = (gfx->gbi0moveword.offset & 0x7);
 
+			switch (dwField)
+			{
+			case 0:
+				if (dwLight == gRSP.ambientLightIndex)
+				{
+					SetAmbientLight( ((gfx->gbi0moveword.value)>>8) );
+				}
+				else
+				{
+					SetLightCol(dwLight, gfx->gbi0moveword.value);
+				}
+				break;
 
+			case 4:
+				break;
 
+			default:
+				break;
+			}
+		}
+*/		break;
+	case RSP_MOVE_WORD_POINTS:
+/*		{
+			uint32 vtx = gfx->gbi0moveword.offset/40;
+			uint32 where = gfx->gbi0moveword.offset - vtx*40;
+			ModifyVertexInfo(where, vtx, gfx->gbi0moveword.value);
+		}
+*/		break;
+	case RSP_MOVE_WORD_PERSPNORM:
+		break;
+	default:
+		break;
+	}
+}
 
+function DLParser_SetScissor(pc) {
+    log('TODO: DLParser_SetScissor');
+}
 
+function RSP_GBI1_SetOtherModeH(pc) {
+    log('TODO: DLParser_GBI1_SetOtherModeH');
+}
 
+function RSP_GBI1_SetOtherModeL(pc) {
+    log('TODO: DLParser_GBI1_SetOtherModeL');
+}
 
+function RSP_GBI0_Sprite2DBase(pc) {
+    log('TODO: RSP_GBI0_Sprite2DBase');
+}
 
+function RSP_GBI0_Tri4(pc) {
+    log('TODO: RSP_GBI0_Tri4');
+}
 
+function RSP_GBI1_RDPHalf_Cont(pc) {
+    log('TODO: RSP_GBI1_RDPHalf_Cont');
+}
 
+function RSP_GBI1_RDPHalf_2(pc) {
+    log('TODO: RSP_GBI1_RDPHalf_2');
+}
 
+function RSP_GBI1_RDPHalf_1(pc) {
+    log('TODO: RSP_GBI1_RDPHalf_1');
+}
 
+function RSP_GBI1_Line3D(pc) {
+    log('TODO: RSP_GBI1_Line3D');
+}
 
+function RSP_GBI1_ClearGeometryMode(pc) {
+    log('TODO: RSP_GBI1_ClearGeometryMode');
+}
 
+function RSP_GBI1_SetGeometryMode(pc) {
+    log('TODO: RSP_GBI1_SetGeometryMode');
+}
 
+function RSP_GBI1_EndDL(pc) {
+    log('RSP_GBI1_EndDL');
+    RDP_GFX_PopDL();
+}
 
+function RSP_GBI1_Texture(pc) {
+    log('TODO: RSP_GBI1_Texture');
+}
 
+function RSP_GBI1_PopMtx(pc) {
+    log('TODO: RSP_GBI1_PopMtx');
+}
 
+function RSP_GBI1_CullDL(pc) {
+    log('TODO: RSP_GBI1_CullDL');
+}
 
+function RSP_GBI1_Tri1(pc) {
+    log('TODO: RSP_GBI1_Tri1');
+}
 
+function RSP_GBI1_Noop(pc) {
+    log('TODO: RSP_GBI1_Noop');
+}
 
+function RDP_TriFill(pc) {
+    log('TODO: RDP_TriFill');
+}
 
+function RDP_TriFillZ(pc) {
+    log('RDP_TriFillZ');
+}
 
+function RDP_TriTxtr(pc) {
+    log('TODO: RDP_TriTxtr');
+}
 
+function RDP_TriTxtrZ(pc) {
+    log('TODO: RDP_TriTxtrZ');
+}
 
+function RDP_TriShade(pc) {
+    log('TODO: RDP_TriShade');
+}
 
+function RDP_TriShadeZ(pc) {
+    log('TODO: RDP_TriShadeZ');
+}
 
+function RDP_TriShadeTxtr(pc) {
+    log('TODO: RDP_TriShadeTxtr');
+}
 
+function RDP_TriShadeTxtrZ(pc) {
+    log('TODO: RDP_TriShadeTxtrZ');
+}
 
+function DLParser_TexRect(pc) {
+    log('TODO: DLParser_TexRect');
+}
 
+function DLParser_TexRectFlip(pc) {
+    log('TODO: DLParser_TexRectFlip');
+}
 
+function DLParser_RDPLoadSync(pc) {
+    log('TODO: DLParser_RDPLoadSync');
+}
 
+function DLParser_RDPPipeSync(pc) {
+    log('TODO: DLParser_RDPPipeSync');
+}
 
+function DLParser_RDPTileSync(pc) {
+    log('TODO: DLParser_RDPTileSync');
+}
 
+function DLParser_RDPFullSync(pc) {
+    log('TODO: DLParser_RDPFullSync');
+    triggerDPInterrupt(0, false);
 
+}
 
+function DLParser_SetKeyGB(pc) {
+    log('TODO: DLParser_SetKeyGB');
+}
 
+function DLParser_SetKeyR(pc) {
+    log('TODO: DLParser_SetKeyR');
+}
+
+function DLParser_SetConvert(pc) {
+    log('TODO: DLParser_SetConvert');
+}
+
+function DLParser_SetPrimDepth(pc) {
+    log('TODO: DLParser_SetPrimDepth');
+}
+
+function DLParser_RDPSetOtherMode(pc) {
+    log('TODO: DLParser_RDPSetOtherMode');
+}
+
+function DLParser_LoadTLut(pc) {
+    log('TODO: DLParser_LoadTLut');
+}
+
+function DLParser_SetTileSize(pc) {
+    log('TODO: DLParser_SetTileSize');
+}
+
+function DLParser_LoadBlock(pc) {
+    log('TODO: DLParser_LoadBlock');
+}
+
+function DLParser_LoadTile(pc) {
+    log('TODO: DLParser_LoadTile');
+}
+
+function DLParser_SetTile(pc) {
+    log('TODO: DLParser_SetTile');
+}
+
+function DLParser_FillRect(pc) {
+    log('TODO: DLParser_FillRect');
+}
+
+function DLParser_SetFillColor(pc) {
+    log('TODO: DLParser_SetFillColor');
+}
+
+function DLParser_SetFogColor(pc) {
+    log('TODO: DLParser_SetFogColor');
+}
+
+function DLParser_SetBlendColor(pc) {
+    log('TODO: DLParser_SetBlendColor');
+}
+
+function DLParser_SetPrimColor(pc) {
+    log('TODO: DLParser_SetPrimColor');
+}
+
+function DLParser_SetEnvColor(pc) {
+    log('TODO: DLParser_SetEnvColor');
+}
+
+function DLParser_SetZImg(pc) {
+    log('TODO: DLParser_SetZImg');
+}
+
+////////////////////////////
 
     var triangleVertexPositionBuffer;
     var squareVertexPositionBuffer;

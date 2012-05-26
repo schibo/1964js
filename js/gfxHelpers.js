@@ -17,14 +17,31 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-function getCommand(pc) {
+function getGbi0MoveWordType(pc) {
     return getInt32(rdramUint8Array, rdramUint8Array, pc) & 0x00ff;
 }
-
-function getGbi0DlistParam(pc)
-{
-    return getInt32(rdramUint8Array, rdramUint8Array, pc) >>> 8 & 0x00ff;
+function getGbi0MoveWordOffset(pc) {
+    return getInt32(rdramUint8Array, rdramUint8Array, pc) >> 8 & 0x00ffff;
 }
+function getGbi0MoveWordValue(pc) {
+    return getInt32(rdramUint8Array, rdramUint8Array, pc+4);
+}
+function getGbi0DlistParam(pc) {
+    return getInt32(rdramUint8Array, rdramUint8Array, pc) >>> 16 & 0x00ff;
+}
+function getGbi0DlistAddr(pc) {
+    return getInt32(rdramUint8Array, rdramUint8Array, pc+4);
+}
+
+function getCommand(pc) {
+    return getInt32(rdramUint8Array, rdramUint8Array, pc) >>> 24 & 0x00ff;
+}
+
+
+
+
+
+
 
 function getGbi1Type(pc) {
 //    return rdramView.getInt32(pc+4, false) >>> 16 & 0x00ff;
@@ -38,11 +55,9 @@ function getGbi1RspSegmentAddr(pc) {
 //    return rdramView.getInt32(pc, false);
 }
 
-function getRspSegmentAddr(pc) {
-    var addr = getInt32(rdramUint8Array, rdramUint8Array, pc+4);
+function getRspSegmentAddr(seg) {
 //TODO: May need to mask with rdram size - 1    
-    //return segments[addr>>24&0x0F] + (addr&0x00FFFFFF);
-    return addr;
+    return segments[seg>>24&0x0F] + (seg&0x00FFFFFF);
 }
 
 function getTexImgWidth(pc) {
