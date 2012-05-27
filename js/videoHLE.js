@@ -18,6 +18,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 //todo: make gRSP a class object.
+var vtxTransformed = new Array(MAX_VERTS);
+var vtxNonTransformed = new Array(MAX_VERTS);
+var	vtxProjected5 = new Array(1000);
 var gRSP = new Object();
 gRSP.vertexMult = 10;
 
@@ -151,9 +154,10 @@ function DLParser_SetTImg(pc)
 
 function RSP_GBI0_Vtx(pc)
 {
-    var num = getGbi0NumVertices(pc);
+    var num = getGbi0NumVertices(pc) + 1;
     var v0 = getGbi0Vertex0(pc);
-    var addr = getRspSegmentAddr(pc);
+    var seg = getGbi0DlistAddr(pc);
+    var addr = getRspSegmentAddr(seg);
 
     if ((v0 + num) > 80)
         num = 32 - v0;
@@ -164,16 +168,13 @@ function RSP_GBI0_Vtx(pc)
 }
 
 function processVertexData(addr, v0, num)
-{
-    log('processVertexData: addr=' + addr + ' v0=' + v0 + ' num=' + num); 
-    
+{    
     for (var i=v0; i<v0+num; i++)
     {
-        //var x = rdramView.getInt16(i-v0, false);
-        //var y = rdramView.getInt16(i-v0+2, false);
-        //var z = rdramView.getInt16(i-v0+4, false);
-        
-        log('vertex: x=' + x + ' y=' + y + 'z=' + z);
+        var a = addr + 16*(i-v0);
+        var x = getFiddledVertexX(a);
+        var y = getFiddledVertexY(a);
+        var z = getFiddledVertexZ(a);
     }
 }
 
@@ -384,7 +385,7 @@ function RSP_GBI1_Tri1(pc) {
 //        triangleVertexPositionBuffer.itemSize = 3;
 //        triangleVertexPositionBuffer.numItems = 3;
 
-//    log('TODO: RSP_GBI1_Tri1');
+    prepareTriangle(v0, v2, v1);
 }
 
 function RSP_GBI1_Noop(pc) {
@@ -562,6 +563,40 @@ function DLParser_SetZImg(pc) {
 }
 
 ////////////////////////////
+
+function prepareTriangle(dwV0, dwV1, dwV2) {
+	//SP_Timing(SP_Each_Triangle);
+
+	var textureFlag = false;//(CRender::g_pRender->IsTextureEnabled() || gRSP.ucode == 6 );
+
+	initVertex(dwV0, gRSP.numVertices, textureFlag);
+	initVertex(dwV1, gRSP.numVertices+1, textureFlag);
+	initVertex(dwV2, gRSP.numVertices+2, textureFlag);
+
+	gRSP.numVertices += 3;
+}
+
+function initVertex(dwV, vtxIndex, bTexture) {
+    
+    if (vtxProjected5[vtxIndex] === undefined && vtxIndex < MAX_VERTS)
+        vtxProjected5[vtxIndex] = new Array();
+        
+    if (vtxTransformed[dwV] === undefined)
+        return;
+    
+    
+    vtxProjected5[vtxIndex][0] = vtxTransformed[dwV].x;
+    vtxProjected5[vtxIndex][1] = vtxTransformed[dwV].y;
+    vtxProjected5[vtxIndex][2] = vtxTransformed[dwV].z;
+    vtxProjected5[vtxIndex][3] = vtxTransformed[dwV].w;
+    vtxProjected5[vtxIndex][4] = vecProjected[dwV].z;
+    if( vtxTransformed[dwV].w < 0 )	vtxProjected5[vtxIndex][4] = 0;
+		vtxIndex[vtxIndex] = vtxIndex;
+}
+
+
+////////////////////////////
+
 
     var triangleVertexPositionBuffer;
     var squareVertexPositionBuffer;

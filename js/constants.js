@@ -412,6 +412,7 @@ var TASK_YIELD_DATA_SIZE = 0x00000FFC
 //custom
 var MAX_DL_STACK_SIZE = 32
 var MAX_DL_COUNT = 1000000
+var MAX_VERTS = 80
 
 var RSP_SPNOOP = 0	// handle 0 gracefully 
 var RSP_MTX = 1

@@ -51,6 +51,27 @@ function getGbi0Tri1V0(pc) {
     return Number(rdramUint8Array[pc+5]<<24>>24);
 }
 
+//GBI0 vertex struct
+function getGbi0NumVertices(pc) {
+    return getInt32(rdramUint8Array, rdramUint8Array, pc) >>> 20 & 0x0F;
+}
+function getGbi0Vertex0(pc) {
+    return getInt32(rdramUint8Array, rdramUint8Array, pc) >>> 16 & 0x0F;
+}
+
+// Fiddled vertex struct
+function getFiddledVertexX(pc) {
+    return Number(getInt32(rdramUint8Array, rdramUint8Array, pc) >> 16);    
+}
+function getFiddledVertexY(pc) {
+    return Number(getInt32(rdramUint8Array, rdramUint8Array, pc) << 16 >> 16);    
+}
+function getFiddledVertexZ(pc) {
+    return Number(getInt32(rdramUint8Array, rdramUint8Array, pc+4) >> 16);    
+}
+
+
+
 //TexRect struct
 //	uint32 dwXH		= (((gfx->words.w0)>>12)&0x0FFF)/4;
 //	uint32 dwYH		= (((gfx->words.w0)    )&0x0FFF)/4;
@@ -122,12 +143,4 @@ function getTexImgSize(pc) {
 
 function getTexImgFormat(pc) {
     return getInt32(rdramUint8Array, rdramUint8Array, pc) >>> 8 & 0x7;
-}
-
-function getGbi0NumVertices(pc) {
-    return getInt32(rdramUint8Array, rdramUint8Array, pc) >>> 8 & 0x0F;
-}
-
-function getGbi0Vertex0(pc) {
-    return getInt32(rdramUint8Array, rdramUint8Array, pc) >>> 12 & 0x0F;
 }
