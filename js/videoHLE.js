@@ -427,8 +427,6 @@ function RDP_TriShadeTxtrZ(pc) {
 function DLParser_TexRect(pc) {
     log('TODO: DLParser_TexRect');
     
-    dlistStack[dlistStackPointer].pc += 16;
-
 	var xh = getTexRectXh(pc);
 	var yh = getTexRectYh(pc);
 	var tileno = getTexRectTileNo(pc);
@@ -470,6 +468,8 @@ function DLParser_TexRect(pc) {
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
         squareVertexPositionBuffer.itemSize = 3;
         squareVertexPositionBuffer.numItems += 4;
+        
+    dlistStack[dlistStackPointer].pc += 16;
 }
 
 function DLParser_TexRectFlip(pc) {

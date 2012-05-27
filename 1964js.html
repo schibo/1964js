@@ -2,36 +2,15 @@
 <head>
 </head>
 
-<body onload="loadRom()">
+<body onload="webGLStart(); loadRom()">
 
-<script src="js/lib/BigInt.js"></script>
-<script src="js/lib/closure/goog/base.js" type="text/javascript"></script>
-<script src="js/lib/Stats.js"></script>
-<script src="js/helpers.js"></script>
-<script src="js/opcodeMap.js"></script>
-<script src="js/boot.js"></script>
-<script src="js/lib/closure/goog/math/long.js"></script>
-<script src="js/constants.js"></script>
-<script src="js/pif.js"></script>
-<script src="js/1964.js"></script>
-<script src="js/memory.js"></script>
-<script src="js/dma.js"></script>
-<script src="js/interrupts.js"></script>
-<script src="js/lib/glMatrix-0.9.5.min.js"></script>
-<script src="js/lib/webgl-utils.js"></script>
-<script src="js/gfxHelpers.js"></script>
-<script src="js/tests.js"></script>
-<script src="js/videoHLE.js"></script>
-<script src="js/webGL.js"></script>
-<script src="js/lib/bitjs/io.js"></script>
-<script src="js/lib/bitjs/archive.js"></script>
-<script src="js/ui.js"></script>
+<script src="js/1964js-0.0.3.min.js"></script>
 
 <script id="shader-fs" type="x-shader/x-fragment">
     precision mediump float;
     
     void main(void) {
-        gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);
+        gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
     }
 </script>
 

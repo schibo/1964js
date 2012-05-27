@@ -110,11 +110,3 @@ function loadRom()
         console.log(dec2hex(r[28]) + ' ' + dec2hex(r[29]));
         console.log(dec2hex(r[30]) + ' ' + dec2hex(r[31]));
   }
-
-  function log(message)
-  {
-    console.log(message);
-    
-    //scroll to the bottom
-   // myDiv.scrollTop = myDiv.scrollHeight;
-  }
