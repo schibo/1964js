@@ -24,8 +24,8 @@ gRSP.vertexMult = 10;
 
 function processDisplayList()
 {
-    log('todo: process display list');
-    
+    showFB = false;
+
     dlParserProcess();
     drawScene();
 

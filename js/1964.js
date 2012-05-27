@@ -142,7 +142,7 @@ var docElement,errorElement,g,s,interval,keepRunning,offset,programCounter, romL
 var terminate=false;
 
 //window.onload = init;
-var c,ctx, ImDat,ImDat2;
+var c,ctx, ImDat,ImDat2, showFB;
 
 //todo: get from emulation
 var NUM_CHANNELS = 1;
@@ -153,8 +153,14 @@ var audioContext;
 var isLittleEndian = 0;
 var isBigEndian = 0;
 
+function log(message)
+{
+//  console.log(message);
+}
+
 function init(buffer)
 {
+    showFB = true;
     endianTest();
     //runTest();
 
@@ -319,6 +325,9 @@ function endianTest()
 
 function repaint(ctx, ImDat, origin)
 {
+    if (!showFB)
+        return;
+
     if (!stats)
     {
         stats = new Stats();
