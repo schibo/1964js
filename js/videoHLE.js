@@ -382,16 +382,6 @@ function RSP_GBI1_Tri1(pc) {
     var v0 = getGbi0Tri1V0(pc) / gRSP.vertexMult;
     var v1 = getGbi0Tri1V1(pc) / gRSP.vertexMult;
     var v2 = getGbi0Tri1V2(pc) / gRSP.vertexMult;
-//        triangleVertexPositionBuffer = gl.createBuffer();
-//        gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
-//        var vertices = [
-//             0.0,  v1,  0.0,
-//            -1.0, -1.0,  v0,
-//             v2, -1.0,  0.0
-//        ];
-//        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-//        triangleVertexPositionBuffer.itemSize = 3;
-//        triangleVertexPositionBuffer.numItems = 3;
 
     prepareTriangle(v0, v2, v1);
 }
@@ -614,15 +604,10 @@ function initVertex(dwV, vtxIndex, bTexture) {
         gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
 
 
-//             1.0,  1.0,  0.0,
-//             1.0, -1.0,  0.0,
-//            -1.0, -1.0,  0.0,
-//            -1.0,  1.0,  0.0,
-        
         var offset = 3*(triangleVertexPositionBuffer.numItems);
         this.trivertices[offset] = vtxProjected5[vtxIndex][0];
         this.trivertices[offset+1] = vtxProjected5[vtxIndex][1];
-        this.trivertices[offset+2] = 0.0;
+        this.trivertices[offset+2] = vtxProjected5[vtxIndex][2];
 
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.trivertices), gl.STATIC_DRAW);
         triangleVertexPositionBuffer.itemSize = 3;
