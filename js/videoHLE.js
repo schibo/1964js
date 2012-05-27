@@ -55,7 +55,11 @@ function dlParserProcess()
     dlistStack[dlistStackPointer].countdown = MAX_DL_COUNT;
 
     this.vertices = [];
+    this.trivertices = [];
     squareVertexPositionBuffer.numItems = 0;
+    triangleVertexPositionBuffer.numItems = 0;
+    gRSP.numVertices = 0;
+
 
     //see RSP_Parser.cpp
     //TODO: purge old textures
@@ -172,9 +176,13 @@ function processVertexData(addr, v0, num)
     for (var i=v0; i<v0+num; i++)
     {
         var a = addr + 16*(i-v0);
-        var x = getFiddledVertexX(a);
-        var y = getFiddledVertexY(a);
-        var z = getFiddledVertexZ(a);
+        vtxNonTransformed[i] = new Object();
+        vtxNonTransformed[i].x = getFiddledVertexX(a) / 20.0;
+        vtxNonTransformed[i].y = getFiddledVertexY(a) / 20.0;
+        vtxNonTransformed[i].z = getFiddledVertexZ(a) / 20.0;
+        
+        //temp
+        vtxTransformed[i] = vtxNonTransformed[i];
     }
 }
 
@@ -569,29 +577,65 @@ function prepareTriangle(dwV0, dwV1, dwV2) {
 
 	var textureFlag = false;//(CRender::g_pRender->IsTextureEnabled() || gRSP.ucode == 6 );
 
-	initVertex(dwV0, gRSP.numVertices, textureFlag);
-	initVertex(dwV1, gRSP.numVertices+1, textureFlag);
-	initVertex(dwV2, gRSP.numVertices+2, textureFlag);
+	var didSucceed = initVertex(dwV0, gRSP.numVertices, textureFlag);
+	
+    if (didSucceed)
+        didSucceed = initVertex(dwV1, gRSP.numVertices+1, textureFlag);
+	
+    if (didSucceed)
+        didSucceed = initVertex(dwV2, gRSP.numVertices+2, textureFlag);
 
-	gRSP.numVertices += 3;
+    if (didSucceed)
+        gRSP.numVertices += 3;
+        
+    return didSucceed;
 }
 
 function initVertex(dwV, vtxIndex, bTexture) {
     
+    if (vtxIndex >= MAX_VERTS)
+        return false;
+    
     if (vtxProjected5[vtxIndex] === undefined && vtxIndex < MAX_VERTS)
-        vtxProjected5[vtxIndex] = new Array();
+        vtxProjected5[vtxIndex] = new Array(4);
         
     if (vtxTransformed[dwV] === undefined)
-        return;
+        return false;
     
     
     vtxProjected5[vtxIndex][0] = vtxTransformed[dwV].x;
     vtxProjected5[vtxIndex][1] = vtxTransformed[dwV].y;
     vtxProjected5[vtxIndex][2] = vtxTransformed[dwV].z;
     vtxProjected5[vtxIndex][3] = vtxTransformed[dwV].w;
-    vtxProjected5[vtxIndex][4] = vecProjected[dwV].z;
+//    vtxProjected5[vtxIndex][4] = vecProjected[dwV].z;
     if( vtxTransformed[dwV].w < 0 )	vtxProjected5[vtxIndex][4] = 0;
 		vtxIndex[vtxIndex] = vtxIndex;
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
+
+
+//             1.0,  1.0,  0.0,
+//             1.0, -1.0,  0.0,
+//            -1.0, -1.0,  0.0,
+//            -1.0,  1.0,  0.0,
+        
+        var offset = 3*(triangleVertexPositionBuffer.numItems);
+        this.trivertices[offset] = vtxProjected5[vtxIndex][0];
+        this.trivertices[offset+1] = vtxProjected5[vtxIndex][1];
+        this.trivertices[offset+2] = 0.0;
+
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.trivertices), gl.STATIC_DRAW);
+        triangleVertexPositionBuffer.itemSize = 3;
+        triangleVertexPositionBuffer.numItems += 1;
+
+//        this.vertices = [
+//             0.0,  1.0,  0.0,
+//            -1.0, -1.0,  0.0,
+//             1.0, -1.0,  0.0
+//        ];
+
+return true;
+
 }
 
 
@@ -605,16 +649,14 @@ function initVertex(dwV, vtxIndex, bTexture) {
     
         triangleVertexPositionBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
-        this.vertices = [
+        this.trivertices = [
              0.0,  1.0,  0.0,
             -1.0, -1.0,  0.0,
-             1.0, -1.0,  0.0,
-            //if wireframe mode, close the line strip. end vertex = start vertex.
-             0.0,  1.0,  0.0
+             1.0, -1.0,  0.0
         ];
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.trivertices), gl.STATIC_DRAW);
         triangleVertexPositionBuffer.itemSize = 3;
-        triangleVertexPositionBuffer.numItems = this.vertices.length/3;
+        triangleVertexPositionBuffer.numItems = this.trivertices.length/3;
 
         squareVertexPositionBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
@@ -622,9 +664,7 @@ function initVertex(dwV, vtxIndex, bTexture) {
              1.0,  1.0,  0.0,
              1.0, -1.0,  0.0,
             -1.0, -1.0,  0.0,
-            -1.0,  1.0,  0.0,
-            //if wireframe mode, close the line strip. end vertex = start vertex.
-             1.0, 1.0,   0.0
+            -1.0,  1.0,  0.0
         ];
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
         squareVertexPositionBuffer.itemSize = 3;
@@ -641,9 +681,10 @@ function drawScene() {
         mat4.identity(mvMatrix);
 
         mat4.translate(mvMatrix, [0.0, 0.0, -2.0]);
- /*       
+        
         mvPushMatrix();
-       // mat4.rotate(mvMatrix, deg++*Math.PI/180, [1, 0, 0]);
+        mat4.translate(mvMatrix, [0.0, 0.0, -2.0]);
+        mat4.rotate(mvMatrix, deg++*Math.PI/180, [1, 0, 0]);
         
         if (deg == 360)
             deg = 0;
@@ -655,7 +696,7 @@ function drawScene() {
         gl.drawArrays(gl.LINE_STRIP, 0, triangleVertexPositionBuffer.numItems);
 
         mvPopMatrix();
-*/
+
  //       mat4.translate(mvMatrix, [3.0, 0.0, 0.0]);
         gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
         gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);

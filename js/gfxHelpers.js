@@ -42,13 +42,13 @@ function getCommand(pc) {
 
 //GBI0 Tri1 struct
 function getGbi0Tri1V2(pc) {
-    return Number(rdramUint8Array[pc+7]<<24>>24);
+    return rdramUint8Array[pc+7];
 }
 function getGbi0Tri1V1(pc) {
-    return Number(rdramUint8Array[pc+6]<<24>>24);
+    return rdramUint8Array[pc+6];
 }
 function getGbi0Tri1V0(pc) {
-    return Number(rdramUint8Array[pc+5]<<24>>24);
+    return rdramUint8Array[pc+5];
 }
 
 //GBI0 vertex struct
