@@ -156,7 +156,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     var keepRunning;
     var forceRepaint = false; //presumably origin reg doesn't change because not double or triple-buffered (single-buffered)
     //main run loop
-    var fnName; //todo: pass locally.
     var doOnce=0;
     //#define NTSC_MAX_VI_LINE		525
     //#define PAL_MAX_VI_LINE			625
@@ -171,19 +170,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     var kfi=512;
     
     //called function, not compiled
-    this.mtc0 = function(f, rt, isDelaySlot, pc)
-    {
+    this.mtc0 = function(f, rt, isDelaySlot, pc) {
         //incomplete:
-        switch (f)
-        {
+        switch (f) {
             case CAUSE:
                 cp0[f] &= ~0x300;
                 cp0[f] |= r[rt] & 0x300;
-                if(r[rt] & 0x300)
-                {
+                if(r[rt] & 0x300) {
               //      if (((r[rt] & 1)===1) && (cp0[f] & 1)===0) //possible fix over 1964cpp?
-                    if((cp0[CAUSE] & cp0[STATUS] & 0x0000FF00) !== 0)
-                    {
+                    if((cp0[CAUSE] & cp0[STATUS] & 0x0000FF00) !== 0) {
                         setException(EXC_INT, 0, pc, isDelaySlot);
                         //processException(pc, isDelaySlot);
                     }
@@ -198,10 +193,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                 break;
             break;
             case STATUS:
-                if (((r[rt] & EXL)===0) && ((cp0[f] & EXL)===1))
-                {
-                    if((cp0[CAUSE] & cp0[STATUS] & 0x0000FF00) !== 0)
-                    {
+                if (((r[rt] & EXL)===0) && ((cp0[f] & EXL)===1)) {
+                    if((cp0[CAUSE] & cp0[STATUS] & 0x0000FF00) !== 0) {
                         cp0[f] = r[rt];
                         setException(EXC_INT, 0, pc, isDelaySlot);
                         //processException(pc, isDelaySlot);
@@ -209,10 +202,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     }
                 }
                 
-                if (((r[rt] & IE)===1) && ((cp0[f] & IE)===0))
-                {
-                    if((cp0[CAUSE] & cp0[STATUS] & 0x0000FF00) !== 0)
-                    {
+                if (((r[rt] & IE)===1) && ((cp0[f] & IE)===0)) {
+                    if((cp0[CAUSE] & cp0[STATUS] & 0x0000FF00) !== 0) {
                         cp0[f] = r[rt];
                         setException(EXC_INT, 0, pc, isDelaySlot);
                         //processException(pc, isDelaySlot);
@@ -252,95 +243,25 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         }
     }
     
-    this.getFnName = function(pc)
-    {
+    this.getFnName = function(pc) {
         return '_' + (pc>>>2);
     }
     
     //not compiled
-    this.eret = function()
-    {
-        if((cp0[STATUS] & ERL) !== 0)
-        {
+    this.eret = function() {
+        if((cp0[STATUS] & ERL) !== 0) {
             alert('error epc');
             programCounter = cp0[ERROREPC];
             cp0[STATUS] &= ~ERL;
-        }
-        else
-        {
+        } else {
             programCounter = cp0[EPC];
             cp0[STATUS] &= ~EXL;
         }
 
         LLbit = 0;
     }
-    
-    this.inter_lwl = function(i, vAddr)
-    {
-        var vAddrAligned = (vAddr&0xfffffffc)|0;
-        var value = loadWord(vAddrAligned);
-
-        switch(vAddr & 3)
-        {
-        case 0: r[rt(i)] = value; break;
-        case 1: r[rt(i)] = (r[rt(i)] & 0x000000ff) | ((value << 8)>>>0); break;
-        case 2: r[rt(i)] = (r[rt(i)] & 0x0000ffff) | ((value << 16)>>>0); break;
-        case 3: r[rt(i)] = (r[rt(i)] & 0x00ffffff) | ((value << 24)>>>0); break;
-        }
-
-        h[rt(i)] = r[rt(i)]>>31;
-    }
-
-    this.inter_lwr = function(i, vAddr)
-    {
-        var vAddrAligned = (vAddr&0xfffffffc)|0;    
-        var value = loadWord(vAddrAligned);
-
-        switch(vAddr & 3)
-        {
-        case 3: r[rt(i)] = value; break;
-        case 2: r[rt(i)] = (r[rt(i)] & 0xff000000) | (value >>> 8); break;
-        case 1: r[rt(i)] = (r[rt(i)] & 0xffff0000) | (value >>> 16); break;
-        case 0: r[rt(i)] = (r[rt(i)] & 0xffffff00) | (value >>> 24); break;
-        }
-
-        h[rt(i)] = r[rt(i)]>>31;
-    }
-
-    this.inter_swl = function(i, vAddr)
-    {
-        var vAddrAligned = (vAddr&0xfffffffc)|0;
-        var value = loadWord(vAddrAligned);
-
-        switch(vAddr & 3)
-        {
-        case 0: value = r[rt(i)]; break;
-        case 1: value = ((value & 0xff000000) | (r[rt(i)] >>> 8) ); break;
-        case 2: value = ((value & 0xffff0000) | (r[rt(i)] >>> 16) ); break;
-        case 3: value = ((value & 0xffffff00) | (r[rt(i)] >>> 24) ); break;
-        }
-
-        storeWord(value, vAddrAligned, false);
-    }
-
-    this.inter_swr = function(i, vAddr)
-    {
-        var vAddrAligned = (vAddr&0xfffffffc)|0;
-        var value = loadWord(vAddrAligned);
-
-        switch(vAddr & 3)
-        {
-        case 3: value = r[rt(i)]; break;
-        case 2: value = ((value & 0x000000FF) | ((r[rt(i)] << 8)>>>0 ) ); break;
-        case 1: value = ((value & 0x0000FFFF) | ((r[rt(i)] << 16)>>>0) ); break;
-        case 0: value = ((value & 0x00FFFFFF) | ((r[rt(i)] << 24)>>>0) ); break;
-        }
-        
-        storeWord(value, vAddrAligned, false);
-    }
 
 //////////////end globals that need to be refactored
-
 
 _1964jsEmulator = function() {
     this.log = function(message) {
@@ -534,11 +455,9 @@ _1964jsEmulator = function() {
         ctx.putImageData(ImDat,0,0);
     }
 
-    this.testHi = function()
-    {    
+    this.testHi = function() {    
         var w = new Int32Array(34);
-        for (var i=0; i<34; i++)
-        {
+        for (var i=0; i<34; i++) {
             w[i] = r[i]>>31;
             if (w[i] !== h[i])
                 alert(dec2hex(programCounter) + ' ' + h[i] + ' ' + w[i]);
@@ -554,8 +473,7 @@ _1964jsEmulator = function() {
         speed = s;
     }
 
-    this.runLoop = function()
-    {
+    this.runLoop = function() {
         var _this = window['emu'];
         
         if (terminate === false)
@@ -568,23 +486,19 @@ _1964jsEmulator = function() {
         fnName = '_' + pc; 
         fn = code[fnName];
 
-        while (keepRunning-- > 0)
-        {
+        while (keepRunning-- > 0) {
             if (!fn)
                 fn = _this.decompileBlock(programCounter);    
         
             fn = fn(lr);
         
-            if (magic_number >= 0)
-            {
+            if (magic_number >= 0) {
                 _this.repaintWrapper();
                 magic_number = -625000;
                 cp0[COUNT] += 625000;
-                if (cp0[COUNT] >= cp0[COMPARE])
-                {
+                if (cp0[COUNT] >= cp0[COMPARE]) {
                     triggerCompareInterrupt(0, false);
-                    if (processException(programCounter))
-                    {
+                    if (processException(programCounter)) {
     //                  return;
                     }
                     cp0[COUNT] = 0;
@@ -592,8 +506,7 @@ _1964jsEmulator = function() {
                 }
                 triggerVIInterrupt(0, false);
                 checkInterrupts();
-                if((cp0[CAUSE] & cp0[STATUS] & 0x0000FF00) !== 0)
-                {
+                if((cp0[CAUSE] & cp0[STATUS] & 0x0000FF00) !== 0) {
                     setException(EXC_INT, 0, programCounter, false);
                     if (processException(programCounter));
                 }
@@ -603,30 +516,26 @@ _1964jsEmulator = function() {
         return this;
     }
 
-    this.repaintWrapper = function()
-    {
+    this.repaintWrapper = function() {
         this.repaint(ctx, ImDat, getInt32(viUint8Array, viUint8Array, VI_ORIGIN_REG) & 0x00FFFFFF)
     }
 
-    this.startEmulator = function()
-    {
+    this.startEmulator = function() {
         terminate = false;
         this.log('startEmulator');
         
         var speedScrubber = document.getElementById("speedScrubber");
-        if (speedScrubber != undefined)
-        {
+        if (speedScrubber != undefined) {
             speedScrubber.value = 65535;
             this.changeSpeed(speedScrubber.value);
             speedScrubber.style.opacity = 1.0;
         }
         if (terminate === false)
-           this.runLoop();
-             //interval = setInterval(runLoop, 0);
+            this.runLoop();
+            //interval = setInterval(runLoop, 0);
     }
 
-    this.stopEmulator = function()
-    {
+    this.stopEmulator = function() {
         stopCompiling = true;
         terminate = true;
         
@@ -634,11 +543,10 @@ _1964jsEmulator = function() {
         clearInterval(interval);
     }
 
-    this.decompileBlock = function(pc)
-    {
+    this.decompileBlock = function(pc) {
         offset = 0;
         var string;
-        
+
         fnName = '_' + (pc>>>2); 
 
         if (writeToDom === true)
@@ -646,16 +554,14 @@ _1964jsEmulator = function() {
         else
             string = 'code.' + fnName + '=function(r){';
 
-        while (!stopCompiling)
-        {
+        while (!stopCompiling) {
             var instruction = loadWord(pc+offset);
             var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction);
-            //trace2(programCounter+offset, opcode);
+
             string += 'magic_number++;';
             string += opcode;
             offset+=4;
-            if (offset > 10000)
-            {
+            if (offset > 10000) {
                 throw 'too many instructions! bailing.';
             }
         }
@@ -665,8 +571,7 @@ _1964jsEmulator = function() {
         string += 'programCounter='+((pc+offset)>>0);
         string += ';return code["'+getFnName((pc+offset)>>0)+'"];}';
 
-        if (writeToDom === true)
-        {
+        if (writeToDom === true) {
             g = document.createElement('script');
             s = document.getElementsByTagName('script')[kk++];
             s.parentNode.insertBefore(g, s);
@@ -723,18 +628,14 @@ _1964jsEmulator = function() {
         return '{'+setVAddr(i)+_RT(i)+'=loadWord(vAddr);'+_RTH(i)+'=0}';
     }
 
-    this.r4300i_sw = function(i, isDelaySlot)
-    {
+    this.r4300i_sw = function(i, isDelaySlot) {
         var string = '{'+setVAddr(i)+'storeWord('+RT(i)+',vAddr'; 
 
         //So we can process exceptions
-        if (isDelaySlot === true)
-        {
+        if (isDelaySlot === true) {
             var a = (programCounter+offset+4)|0;
             string += ', ' + a + ', true)}';
-        }
-        else
-        {
+        } else {
             var a = (programCounter+offset)|0;
             string += ', ' + a + ')}';
         }   
@@ -742,8 +643,7 @@ _1964jsEmulator = function() {
         return string;
     }
 
-    this.r4300i_bne = function(i)
-    {
+    this.r4300i_bne = function(i) {
         stopCompiling = true;
 
         var string= 'if (('+RS(i)+'!=='+RT(i)+')||('+RSH(i)+'!=='+RTH(i)+')){';
@@ -765,8 +665,7 @@ _1964jsEmulator = function() {
         return string;
     }
 
-    this.r4300i_beq = function(i)
-    {
+    this.r4300i_beq = function(i) {
         stopCompiling = true;
 
         var string= 'if (('+RS(i)+'==='+RT(i)+')&&('+RSH(i)+'==='+RTH(i)+')){';
@@ -786,8 +685,7 @@ _1964jsEmulator = function() {
         return string;
     }
 
-    this.r4300i_bnel = function(i)
-    {
+    this.r4300i_bnel = function(i) {
         stopCompiling = true;
 
         var string= 'if (('+RS(i)+'!=='+RT(i)+')||(' +RSH(i)+'!=='+RTH(i)+')){';
@@ -804,8 +702,7 @@ _1964jsEmulator = function() {
         return string;
     }
 
-    this.r4300i_blez = function(i)
-    {
+    this.r4300i_blez = function(i) {
         stopCompiling = true;
 
         var string= 'if (('+RSH(i)+'<0)||(('+RSH(i)+'===0)&&('+RS(i)+'===0))){';
@@ -825,8 +722,7 @@ _1964jsEmulator = function() {
         return string;
     }
 
-    this.r4300i_blezl = function(i)
-    {
+    this.r4300i_blezl = function(i) {
         stopCompiling = true;
 
         var string= 'if (('+RSH(i)+'<0)||(('+RSH(i)+'===0)&&('+RS(i)+'===0))){';
@@ -843,8 +739,7 @@ _1964jsEmulator = function() {
         return string;
     }
 
-    this.r4300i_bgez = function(i)
-    {
+    this.r4300i_bgez = function(i) {
         stopCompiling = true;
 
         var string= 'if ('+RSH(i)+'>=0){';
@@ -863,8 +758,7 @@ _1964jsEmulator = function() {
         return string;
     }
 
-    this.r4300i_bgezl = function(i)
-    {
+    this.r4300i_bgezl = function(i) {
         stopCompiling = true;
 
         var string= 'if ('+RSH(i)+'>=0){';
@@ -881,8 +775,7 @@ _1964jsEmulator = function() {
         return string;
     }
 
-    this.r4300i_bgtzl = function(i) // 2 blokes demo
-    {
+    this.r4300i_bgtzl = function(i) {
         stopCompiling = true;
 
         var string= 'if (('+RSH(i)+'>0)||(('+RSH(i)+'===0)&&('+RS(i)+'!==0))){';
@@ -900,8 +793,7 @@ _1964jsEmulator = function() {
         return string;
     }
 
-    this.r4300i_bltzl = function(i) //2 blokes demo
-    {
+    this.r4300i_bltzl = function(i) {
         stopCompiling = true;
 
         var string= 'if ('+RSH(i)+'<0){';
@@ -918,8 +810,7 @@ _1964jsEmulator = function() {
         return string;
     }
 
-    this.r4300i_bgezal = function(i)
-    {
+    this.r4300i_bgezal = function(i) {
         stopCompiling = true;    
 
         var string= 'if ('+RSH(i)+'>=0){';
@@ -942,8 +833,7 @@ _1964jsEmulator = function() {
         return string;
     }
 
-    this.r4300i_bgezall = function(i)
-    {
+    this.r4300i_bgezall = function(i) {
         stopCompiling = true;    
 
         var string= 'if ('+RSH(i)+'>=0){';
@@ -963,8 +853,7 @@ _1964jsEmulator = function() {
         return string;
     }
 
-    this.r4300i_bltz = function(i)
-    {
+    this.r4300i_bltz = function(i) {
         stopCompiling = true;
 
         var string= 'if ('+RSH(i)+'<0){';
@@ -984,8 +873,7 @@ _1964jsEmulator = function() {
         return string;
     }
 
-    this.r4300i_bgtz = function(i)
-    {
+    this.r4300i_bgtz = function(i) {
         stopCompiling = true;
 
         var string= 'if (('+RSH(i)+'>0)||(('+RSH(i)+'===0)&&('+RS(i)+'!==0))){';
@@ -1005,8 +893,7 @@ _1964jsEmulator = function() {
         return string;
     }
 
-    this.r4300i_beql = function(i)
-    {
+    this.r4300i_beql = function(i) {
         stopCompiling = true;
 
         var string= 'if (('+RS(i)+'==='+RT(i)+')&&('+RSH(i)+'==='+RTH(i)+')){';
@@ -1023,8 +910,7 @@ _1964jsEmulator = function() {
         return string;
     }
 
-    this.r4300i_j = function(i)
-    {
+    this.r4300i_j = function(i) {
         stopCompiling = true;
 
         var instr_index = (((((programCounter+offset+4) & 0xF0000000)) | ((i & 0x03FFFFFF) << 2))|0);
@@ -1034,8 +920,7 @@ _1964jsEmulator = function() {
         var instruction = loadWord((programCounter+offset+4)|0);
 
         string += 'magic_number++;';
-        if (((instr_index>>0) === (programCounter+offset)>>0) && (instruction === 0))
-        {
+        if (((instr_index>>0) === (programCounter+offset)>>0) && (instruction === 0)) {
             string+= 'magic_number=0;keepRunning=0;'
         }
 
@@ -1046,8 +931,7 @@ _1964jsEmulator = function() {
         return string;
     }
 
-    this.r4300i_jal = function(i)
-    {
+    this.r4300i_jal = function(i) {
         stopCompiling = true;
 
         var instr_index = (((((programCounter+offset+4) & 0xF0000000)) | ((i & 0x03FFFFFF) << 2))|0);
@@ -1064,8 +948,7 @@ _1964jsEmulator = function() {
     }
 
     //should we set the programCounter after the delay slot or before it?
-    this.r4300i_jalr = function(i)
-    {
+    this.r4300i_jalr = function(i) {
         stopCompiling = true;
 
         var string = '{var temp='+RS(i)+';'; 
@@ -1082,8 +965,7 @@ _1964jsEmulator = function() {
         return string;
     }
 
-    this.r4300i_jr = function(i)
-    {
+    this.r4300i_jr = function(i) {
         stopCompiling = true;
 
         var string = '{var temp='+RS(i)+';'; 
@@ -1097,22 +979,17 @@ _1964jsEmulator = function() {
         return string;
     }
 
-    this.UNUSED = function(i)
-    {
+    this.UNUSED = function(i) {
         this.log('warning: UNUSED');
         return('');
     }
 
-    this.r4300i_COP0_mtc0 = function(i, isDelaySlot)
-    {
+    this.r4300i_COP0_mtc0 = function(i, isDelaySlot) {
         var delaySlot;
-        if (isDelaySlot === true)
-        {
+        if (isDelaySlot === true) {
             pc = (programCounter + offset + 4)|0;
             delaySlot = "true";
-        }
-        else
-        {
+        } else {
             pc = (programCounter + offset)|0;
             delaySlot = "false";
         }
@@ -1151,24 +1028,21 @@ _1964jsEmulator = function() {
         return '{'+_RT(i)+'='+RS(i)+'+'+soffset_imm(i)+';'+_RTH(i)+'='+RT(i)+'>>31;}'; 
     }
 
-    this.r4300i_slt = function(i)
-    {
+    this.r4300i_slt = function(i) {
         return '{if('+RSH(i)+'>'+RTH(i)+')'+_RD(i)+'=0;'
         +'else if('+RSH(i)+'<'+RTH(i)+')'+_RD(i)+'=1;'
         +'else if('+uRS(i)+'<'+uRT(i)+')'+_RD(i)+'=1;'
         +'else '+_RD(i)+'=0;'+_RDH(i)+'=0;}';
     }
 
-    this.r4300i_sltu = function(i)
-    {
+    this.r4300i_sltu = function(i) {
         return '{if('+uRSH(i)+'>'+uRTH(i)+')'+_RD(i)+'=0;'
         +'else if('+uRSH(i)+'<'+uRTH(i)+')'+_RD(i)+'=1;'
         +'else if('+uRS(i)+'<'+uRT(i)+')'+_RD(i)+'=1;'
         +'else '+_RD(i)+'=0;'+_RDH(i)+'=0;}';
     }
 
-    this.r4300i_slti = function(i)
-    {
+    this.r4300i_slti = function(i) {
         var soffset_imm_hi = (soffset_imm(i))>>31;
         var uoffset_imm_lo = (soffset_imm(i))>>>0;
 
@@ -1178,8 +1052,7 @@ _1964jsEmulator = function() {
         +'else '+_RT(i)+'=0;'+_RTH(i)+'=0;}';
     }
 
-    this.r4300i_sltiu = function(i)
-    {
+    this.r4300i_sltiu = function(i) {
         var uoffset_imm_hi = (soffset_imm(i)>>31)>>>0;
         var uoffset_imm_lo = (soffset_imm(i))>>>0;
 
@@ -1189,8 +1062,7 @@ _1964jsEmulator = function() {
         +'else '+_RT(i)+'=0;'+_RTH(i)+'=0;}';
     }
 
-    this.r4300i_cache = function(i)
-    {
+    this.r4300i_cache = function(i) {
         this.log('todo: r4300i_cache');
         return('');
     }
@@ -1220,16 +1092,14 @@ _1964jsEmulator = function() {
     }
 
     //todo: timing
-    this.getCountRegister = function()
-    {
+    this.getCountRegister = function() {
         return 1;
     }
 
     this.r4300i_COP0_mfc0 = function(i) {
         var string = '{';
 
-        switch (fs(i))
-        {
+        switch (fs(i)) {
             case RANDOM:
                 alert('RANDOM');
             break;
@@ -1281,32 +1151,26 @@ _1964jsEmulator = function() {
         return '{'+_RD(i)+'='+RT(i)+'>>('+RS(i)+'&0x1f);'+_RDH(i)+'='+RT(i)+'>>31;}'; 
     }
 
-    this.r4300i_COP1_cfc1 = function(i)
-    {
-        if(fs(i) === 0 || fs(i) === 31)
-        {
+    this.r4300i_COP1_cfc1 = function(i) {
+        if(fs(i) === 0 || fs(i) === 31) {
             return '{'+_RT(i)+'=cp1Con['+fs(i)+'];'+_RTH(i)+'=cp1Con['+fs(i)+']>>31;}';
         }
     }
 
-    this.r4300i_COP1_ctc1 = function(i)
-    {
+    this.r4300i_COP1_ctc1 = function(i) {
         //incomplete:
-        if (fs(i) === 31)
-        {
+        if (fs(i) === 31) {
             return 'cp1Con[31]='+RT(i)+';'
         }
     }
 
-    this.r4300i_ld = function(i)
-    {
+    this.r4300i_ld = function(i) {
         var string = '{'+setVAddr(i)+_RT(i)+'=loadWord((vAddr+4)|0);'+_RTH(i)+'=loadWord(vAddr);}';
 
         return string;
     }
 
-    this.r4300i_lld = function(i)
-    {
+    this.r4300i_lld = function(i) {
         var string = '{'+setVAddr(i)+_RT(i)+'=loadWord((vAddr+4)|0);'+_RTH(i)+'=loadWord(vAddr);LLbit=1;}';
 
         return string;
@@ -1315,35 +1179,27 @@ _1964jsEmulator = function() {
     //address error exceptions in ld and sd are weird since this is split up 
     //into 2 reads or writes. i guess they're fatal exceptions, so
     //doesn't matter. 
-    this.r4300i_sd = function(i, isDelaySlot)
-    {
-    //lo
-
+    this.r4300i_sd = function(i, isDelaySlot) {
+        //lo
         var string = '{'+setVAddr(i)+'storeWord('+RT(i)+',(vAddr+4)|0'; 
 
         //So we can process exceptions
-        if (isDelaySlot === true)
-        {
+        if (isDelaySlot === true) {
             var a = (programCounter+offset+4)|0;
             string += ', ' + a + ', true);';
-        }
-        else
-        {
+        } else {
             var a = (programCounter+offset)|0;
             string += ', ' + a + ');';
         }   
 
-    //hi
+        //hi
         string += 'storeWord('+RTH(i)+',vAddr'; 
 
         //So we can process exceptions
-        if (isDelaySlot === true)
-        {
+        if (isDelaySlot === true) {
             var a = (programCounter+offset+4)|0;
             string += ', ' + a + ', true);';
-        }
-        else
-        {
+        } else {
             var a = (programCounter+offset)|0;
             string += ', ' + a + ');';
         }
@@ -1381,16 +1237,13 @@ _1964jsEmulator = function() {
         return r4300i_dadd(i);
     }
 
-    this.r4300i_break = function(i)
-    {
+    this.r4300i_break = function(i) {
         this.log('todo: break');
         return('');
     }
 
-    this.r4300i_COP0_tlbwi = function(i)
-    {
+    this.r4300i_COP0_tlbwi = function(i) {
         //var index = cp0[INDEX] & NTLBENTRIES;
-            
         this.log('todo: tlbwi');
         return('');
     }
@@ -1408,82 +1261,93 @@ _1964jsEmulator = function() {
         return '{'+_RD(i)+'='+RT(i)+'>>'+sa(i)+';'+_RDH(i)+'='+RT(i)+'>>31}';
     }
 
-    this.r4300i_COP0_eret = function(i)
-    {
+    this.r4300i_COP0_eret = function(i) {
         stopCompiling = true;
         
         return '{eret(); return code[getFnName(programCounter)];}';
     }
 
-    this.r4300i_COP0_tlbp = function(i)
-    {
+    this.r4300i_COP0_tlbp = function(i) {
         this.log('todo: tlbp');
         return('');
     }
 
-    this.r4300i_COP0_tlbr = function(i)
-    {
+    this.r4300i_COP0_tlbr = function(i) {
         this.log('todo: tlbr');
         return('');
     }
 
-    this.r4300i_lwl = function(i)
-    {
+    this.r4300i_lwl = function(i) {
         var string = '{'+setVAddr(i);
-        string += 'inter_lwl('+i+', vAddr);}';
+
+        string += 'var vAddrAligned=(vAddr&0xfffffffc)|0;var value=loadWord(vAddrAligned);';
+        string += 'switch(vAddr&3){case 0:'+_RT(i)+'=value;break;';
+        string += 'case 1:'+_RT(i)+'=('+RT(i)+'&0x000000ff)|((value<<8)>>>0);break;';
+        string += 'case 2:'+_RT(i)+'=('+RT(i)+'&0x0000ffff)|((value<<16)>>>0);break;';
+        string += 'case 3:'+_RT(i)+'=('+RT(i)+'&0x00ffffff)|((value<<24)>>>0);break;}';
+        string += _RTH(i)+'='+RT(i)+'>>31;}';
+
+        return string;
+    }
+
+    this.r4300i_lwr = function(i) {
+        var string = '{'+setVAddr(i);
+        
+        string += 'var vAddrAligned=(vAddr&0xfffffffc)|0;var value=loadWord(vAddrAligned);';
+        string += 'switch(vAddr&3){case 3:'+_RT(i)+'=value;break;';
+        string += 'case 2:'+_RT(i)+'=('+RT(i)+'&0xff000000)|(value>>>8);break;';
+        string += 'case 1:'+_RT(i)+'=('+RT(i)+'&0xffff0000)|(value>>>16);break;';
+        string += 'case 0:'+_RT(i)+'=('+RT(i)+'&0xffffff00)|(value>>>24);break;}';
+        string += _RTH(i)+'='+RT(i)+'>>31;}';
         
         return string;
     }
 
-    this.r4300i_lwr = function(i)
-    {
+    this.r4300i_swl = function(i) {
         var string = '{'+setVAddr(i);
-        string += 'inter_lwr('+i+', vAddr);}';
         
+        string += 'var vAddrAligned=(vAddr&0xfffffffc)|0;var value=loadWord(vAddrAligned);';
+        string += 'switch(vAddr&3){case 0:value='+RT(i)+';break;';
+        string += 'case 1:value=((value&0xff000000)|('+RT(i)+'>>>8));break;';
+        string += 'case 2:value=((value&0xffff0000)|('+RT(i)+'>>>16));break;';
+        string += 'case 3:value=((value&0xffffff00)|('+RT(i)+'>>>24));break;}';
+        string += 'storeWord(value,vAddrAligned,false);}';
+
         return string;
     }
 
-    this.r4300i_swl = function(i)
-    {
+    this.r4300i_swr = function(i) {
         var string = '{'+setVAddr(i);
-        string += 'inter_swl('+i+', vAddr);}';
         
+        string += 'var vAddrAligned=(vAddr&0xfffffffc)|0;var value=loadWord(vAddrAligned);';
+        string += 'switch(vAddr&3){case 3:value='+RT(i)+';break;';
+        string += 'case 2:value=((value & 0x000000FF)|(('+RT(i)+'<<8)>>>0));break;';
+        string += 'case 1:value=((value & 0x0000FFFF)|(('+RT(i)+'<<16)>>>0));break;';
+        string += 'case 0:value=((value & 0x00FFFFFF)|(('+RT(i)+'<<24)>>>0));break;}';        
+        string += 'storeWord(value,vAddrAligned,false);}'
+
         return string;
     }
 
-    this.r4300i_swr = function(i)
-    {
-        var string = '{'+setVAddr(i);
-        string += 'inter_swr('+i+', vAddr);}';
-        
-        return string;
-    }
-
-    this.r4300i_lwc1 = function(i)
-    {
+    this.r4300i_lwc1 = function(i) {
         return '{'+setVAddr(i)+'cp1_i['+FT32ArrayView(i)+']=loadWord(vAddr);}';
     }
 
-    this.r4300i_ldc1 = function(i)
-    {
+    this.r4300i_ldc1 = function(i) {
         var string = '{'+setVAddr(i)+'cp1_i['+FT32ArrayView(i)+']=loadWord((vAddr+4)|0);'; 
         string += 'cp1_i['+FT32HIArrayView(i)+']=loadWord((vAddr)|0);}'; 
 
         return string;
     }
 
-    this.r4300i_swc1 = function(i, isDelaySlot)
-    {
+    this.r4300i_swc1 = function(i, isDelaySlot) {
         var string = '{'+setVAddr(i)+'storeWord(cp1_i['+FT32ArrayView(i)+'],vAddr'; 
 
         //So we can process exceptions
-        if (isDelaySlot === true)
-        {
+        if (isDelaySlot === true) {
             var a = (programCounter+offset+4)|0;
             string += ', ' + a + ', true)}';
-        }
-        else
-        {
+        } else {
             var a = (programCounter+offset)|0;
             string += ', ' + a + ')}';
         }   
@@ -1491,18 +1355,14 @@ _1964jsEmulator = function() {
         return string;
     }
 
-    this.r4300i_sdc1 = function(i, isDelaySlot)
-    {
+    this.r4300i_sdc1 = function(i, isDelaySlot) {
         var string = '{'+setVAddr(i)+'storeWord(cp1_i['+FT32ArrayView(i)+'],(vAddr+4)|0'; 
 
         //So we can process exceptions
-        if (isDelaySlot === true)
-        {
+        if (isDelaySlot === true) {
             var a = (programCounter+offset+4)|0;
             string += ', ' + a + ', true);';
-        }
-        else
-        {
+        } else {
             var a = (programCounter+offset)|0;
             string += ', ' + a + ');';
         }   
@@ -1510,13 +1370,10 @@ _1964jsEmulator = function() {
         string += 'storeWord(cp1_i['+FT32HIArrayView(i)+'],(vAddr)|0'; 
 
         //So we can process exceptions
-        if (isDelaySlot === true)
-        {
+        if (isDelaySlot === true) {
             var a = (programCounter+offset+4)|0;
             string += ', ' + a + ', true);';
-        }
-        else
-        {
+        } else {
             var a = (programCounter+offset)|0;
             string += ', ' + a + ');';
         }
@@ -1578,8 +1435,7 @@ _1964jsEmulator = function() {
         return 'cp1_f64['+FD64ArrayView(i)+']=cp1_f['+FS32ArrayView(i)+'];';
     }
 
-    this.r4300i_COP1_cvtd_w = function(i)
-    {
+    this.r4300i_COP1_cvtd_w = function(i) {
         return 'cp1_f64['+FD64ArrayView(i)+']=cp1_i['+FS32ArrayView(i)+'];';
     }
 
@@ -1608,117 +1464,96 @@ _1964jsEmulator = function() {
         return 'cp1_i['+FD32ArrayView(i)+']=cp1_f['+FS32ArrayView(i)+'];';
     }
 
-    this.r4300i_COP1_neg_s = function(i)
-    {
+    this.r4300i_COP1_neg_s = function(i) {
         return 'cp1_i['+FD32ArrayView(i)+']=cp1_i['+FS32ArrayView(i)+']^0x80000000;';
     }
 
-    this.r4300i_COP1_neg_d = function(i)
-    {
+    this.r4300i_COP1_neg_d = function(i) {
         return 'cp1_i['+FD32HIArrayView(i)+']=cp1_i['+FS32HIArrayView(i)+']^0x80000000;';
     }
 
-    this.r4300i_COP1_sqrt_s = function(i)
-    {
+    this.r4300i_COP1_sqrt_s = function(i) {
         return 'cp1_f['+FD32ArrayView(i)+']=Math.sqrt(cp1_f['+FS32ArrayView(i)+']);';
     }
 
-    this.r4300i_sync = function(i)
-    {
+    this.r4300i_sync = function(i) {
         this.log('todo: sync');
         return('');
     }
 
-    this.r4300i_sdr = function(i)
-    {
+    this.r4300i_sdr = function(i) {
         this.log('todo: sdr');
         return('');
     }
 
-    this.r4300i_ldl = function(i)
-    {
+    this.r4300i_ldl = function(i) {
         this.log('todo: sdr');
         return('');
     }
 
-    this.r4300i_daddi = function(i)
-    {
+    this.r4300i_daddi = function(i) {
         return 'inter_daddi('+i+');';
     }
 
-    this.r4300i_teq = function(i)
-    {
+    this.r4300i_teq = function(i) {
         this.log('todo: r4300i_teq');
         return ('');
     }
 
-    this.r4300i_tgeu = function(i)
-    {
+    this.r4300i_tgeu = function(i) {
         this.log('todo: r4300i_tgeu');
         return ('');
     }
 
-    this.r4300i_tlt = function(i)
-    {
+    this.r4300i_tlt = function(i) {
         this.log('todo: r4300i_tlt');
         return ('');
     }
 
-    this.r4300i_tltu = function(i)
-    {
+    this.r4300i_tltu = function(i) {
         this.log('todo: r4300i_tltu');
         return ('');
     }
 
-    this.r4300i_tne = function(i)
-    {
+    this.r4300i_tne = function(i) {
         this.log('todo: r4300i_tne');
         return ('');
     }
 
     //using same as daddi
-    this.r4300i_daddiu = function(i)
-    {
+    this.r4300i_daddiu = function(i) {
         return 'inter_daddiu('+i+');';
     }
 
-    this.r4300i_daddu = function(i)
-    {
+    this.r4300i_daddu = function(i) {
         return 'inter_daddu('+i+');';
     }
 
-    this.r4300i_C_EQ_D = function(i)
-    {
+    this.r4300i_C_EQ_D = function(i) {
         return 'inter_r4300i_C_cond_fmt_d('+i+');';
     }
 
-    this.r4300i_C_EQ_S = function(i)
-    {
+    this.r4300i_C_EQ_S = function(i) {
         return 'inter_r4300i_C_cond_fmt_s('+i+');';
     }
 
-    this.r4300i_C_LT_S = function(i)
-    {
+    this.r4300i_C_LT_S = function(i) {
         return 'inter_r4300i_C_cond_fmt_s('+i+');';
     }
 
-    this.r4300i_C_LT_D = function(i)
-    {
+    this.r4300i_C_LT_D = function(i) {
         return 'inter_r4300i_C_cond_fmt_d('+i+');';
     }
 
-    this.r4300i_C_LE_S = function(i)
-    {
+    this.r4300i_C_LE_S = function(i) {
         return 'inter_r4300i_C_cond_fmt_s('+i+');';
     }
 
-    this.r4300i_C_LE_D = function(i)
-    {
+    this.r4300i_C_LE_D = function(i) {
         return 'inter_r4300i_C_cond_fmt_d('+i+');';
     }
 
-    this.r4300i_COP1_bc1f = function(i)
-    {
+    this.r4300i_COP1_bc1f = function(i) {
         stopCompiling = true;
 
         var string = 'if((cp1Con[31]&0x00800000)===0)';
@@ -1740,8 +1575,7 @@ _1964jsEmulator = function() {
         return string;
     }
 
-    this.r4300i_COP1_bc1t = function(i)
-    {
+    this.r4300i_COP1_bc1t = function(i) {
         stopCompiling = true;
 
         var string = 'if((cp1Con[31]&0x00800000)!==0)';
@@ -1763,9 +1597,7 @@ _1964jsEmulator = function() {
         return string;
     }
 
-
-    this.r4300i_COP1_bc1tl = function(i)
-    {
+    this.r4300i_COP1_bc1tl = function(i) {
         stopCompiling = true;
 
         var string = 'if((cp1Con[31]&0x00800000)!==0)';
@@ -1784,8 +1616,7 @@ _1964jsEmulator = function() {
         return string;
     }
 
-    this.r4300i_COP1_bc1fl = function(i)
-    {
+    this.r4300i_COP1_bc1fl = function(i) {
         stopCompiling = true;
 
         var string = 'if((cp1Con[31]&0x00800000)===0)';
