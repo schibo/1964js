@@ -441,6 +441,13 @@ function DLParser_TexRect(pc) {
     yl -= 120; yl /= -120;
     yh -= 120; yh /= -120;
     
+        gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
+
+
+//             1.0,  1.0,  0.0,
+//             1.0, -1.0,  0.0,
+//            -1.0, -1.0,  0.0,
+//            -1.0,  1.0,  0.0,
         
         var offset = 12*(squareVertexPositionBuffer.numItems/4);
         this.vertices[offset] = xh;
@@ -456,6 +463,7 @@ function DLParser_TexRect(pc) {
         this.vertices[offset+10] = yh;
         this.vertices[offset+11] = 0.0;
 
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
         squareVertexPositionBuffer.itemSize = 3;
         squareVertexPositionBuffer.numItems += 4;
         
@@ -593,6 +601,7 @@ function initVertex(dwV, vtxIndex, bTexture) {
     if( vtxTransformed[dwV].w < 0 )	vtxProjected5[vtxIndex][4] = 0;
 		vtxIndex[vtxIndex] = vtxIndex;
 
+        gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
 
 
         var offset = 3*(triangleVertexPositionBuffer.numItems);
@@ -600,6 +609,7 @@ function initVertex(dwV, vtxIndex, bTexture) {
         this.trivertices[offset+1] = vtxProjected5[vtxIndex][1];
         this.trivertices[offset+2] = vtxProjected5[vtxIndex][2];
 
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.trivertices), gl.STATIC_DRAW);
         triangleVertexPositionBuffer.itemSize = 3;
         triangleVertexPositionBuffer.numItems += 1;
 
@@ -650,8 +660,6 @@ var deg = 0;
 function drawScene() {
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        
-
 
         mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
 
