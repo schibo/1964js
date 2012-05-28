@@ -17,6 +17,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+function log(message) {
+   // console.log(message);
+}
+
 function copyCartToDram(pc, isDelaySlot)
 {
 	var end = getInt32(piUint8Array, piUint8Array, PI_WR_LEN_REG);
@@ -158,8 +162,6 @@ function copyDramToAi(pc, isDelaySlot)
     clrFlag(aiUint8Array, AI_STATUS_REG, AI_STATUS_FIFO_FULL);
 }
 
-var startTime = 0;
-var audioBuffer;
 function processAudio(from, length)
 {
     try 

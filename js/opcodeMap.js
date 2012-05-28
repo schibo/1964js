@@ -609,53 +609,43 @@ var COP1_L_Instruction =
 	'UNUSED'
 ];
 
-function instr(i, isDelay)
-{
-	return window[r4300i_Instruction[fn(i)]](i, isDelay);
+_1964jsEmulator.prototype.instr = function(i, isDelay) {
+	return this[r4300i_Instruction[fn(i)]](i, isDelay);
 }
 
-function REGIMM_instr(i, isDelay)
-{
-	return window[REGIMM_Instruction[rt(i)]](i, isDelay);
+_1964jsEmulator.prototype.REGIMM_instr = function(i, isDelay) {
+	return this[REGIMM_Instruction[rt(i)]](i, isDelay);
 }
 
-function COP0_instr(i, isDelay)
-{
-	return window[COP0_Instruction[rs(i)]](i, isDelay);
+_1964jsEmulator.prototype.COP0_instr = function(i, isDelay) {
+	return this[COP0_Instruction[rs(i)]](i, isDelay);
 }
 
-function COP1_instr(i, isDelay)
-{
-	return window[COP1_Instruction[rs(i)]](i, isDelay);
+_1964jsEmulator.prototype.COP1_instr = function(i, isDelay) {
+	return this[COP1_Instruction[rs(i)]](i, isDelay);
 }
 
-function TLB_instr(i, isDelay)
-{
-	return window[TLB_Instruction[fn(i)]](i, isDelay);
+_1964jsEmulator.prototype.TLB_instr = function(i, isDelay) {
+	return this[TLB_Instruction[fn(i)]](i, isDelay);
 }
 
-function COP1_BC_instr(i, isDelay)
-{
-	return window[COP1_BC_Instruction[rt(i)]](i, isDelay);
+_1964jsEmulator.prototype.COP1_BC_instr = function(i, isDelay) {
+	return this[COP1_BC_Instruction[rt(i)]](i, isDelay);
 }
 
-function COP1_S_instr(i, isDelay)
-{
-	return window[COP1_S_Instruction[fn(i)]](i, isDelay);
+_1964jsEmulator.prototype.COP1_S_instr = function(i, isDelay) {
+	return this[COP1_S_Instruction[fn(i)]](i, isDelay);
 }
 
-function COP1_D_instr(i, isDelay)
-{
-	return window[COP1_D_Instruction[fn(i)]](i, isDelay);
+_1964jsEmulator.prototype.COP1_D_instr = function(i, isDelay) {
+	return this[COP1_D_Instruction[fn(i)]](i, isDelay);
 }
 
-function COP1_W_instr(i, isDelay)
-{
-	return window[COP1_W_Instruction[fn(i)]](i, isDelay);
+_1964jsEmulator.prototype.COP1_W_instr = function(i, isDelay) {
+	return this[COP1_W_Instruction[fn(i)]](i, isDelay);
 }
 
-function COP1_L_instr(i, isDelay)
-{
+_1964jsEmulator.prototype.COP1_L_instr = function(i, isDelay) {
 	return window[COP1_L_Instruction[fn(i)]](i, isDelay);
 }
 

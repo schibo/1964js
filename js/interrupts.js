@@ -281,7 +281,6 @@ function readSIStatusReg()
         clrFlag(siUint8Array, SI_STATUS_REG, SI_STATUS_INTERRUPT);
 }
 
-var kfi=512;
 function readAI(offset)
 {
     switch (offset)

@@ -17,10 +17,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-var TV_SYSTEM_NTSC = 1
-var TV_SYSTEM_PAL = 0
-
-function getTVSystem(countryCode)
+_1964jsEmulator.prototype.getTVSystem = function(countryCode)
 {
 	var system;
 	switch(countryCode)
@@ -78,8 +75,7 @@ function getTVSystem(countryCode)
 	return system;
 }
 
-function getCIC()
-{
+_1964jsEmulator.prototype.getCIC = function() {
 	var CIC_CRC = 0;
     var cic = 0;
 	var i;
@@ -91,39 +87,39 @@ function getCIC()
 	{
 	case 0x33a27: //CIC-NUS-6101 (starfox)
 	case 0x3421e:
-		log("Using CIC-NUS-6101 for starfox\n");
+		this.log("Using CIC-NUS-6101 for starfox\n");
 		cic = 0x3f;
 	//	rominfo.RDRam_Size_Hack = (uint32) 0x318;
 		break;
 	case 0x34044: //CIC-NUS-6102 (mario)
-		log("Using CIC-NUS-6102 for mario\n");
+		this.log("Using CIC-NUS-6102 for mario\n");
 		cic = 0x3f;
 	//	rominfo.RDRam_Size_Hack = (uint32) 0x318;
 	//	ROM_CheckSumMario();
 		break;
 	case 0x357d0: //CIC-NUS-6103 (Banjo)
-		log("Using CIC-NUS-6103 for Banjo\n");
+		this.log("Using CIC-NUS-6103 for Banjo\n");
 		cic = 0x78;
 	//	rominfo.RDRam_Size_Hack = (uint32) 0x318;
 		break;
 	case 0x47a81: //CIC-NUS-6105 (Zelda)
-		log("Using CIC-NUS-6105 for Zelda\n");
+		this.log("Using CIC-NUS-6105 for Zelda\n");
 		rominfo.CIC = 0x91;
 	//	rominfo.RDRam_Size_Hack = (uint32) 0x3F0;
 	//	ROM_CheckSumZelda();
 		break;
 	case 0x371cc: //CIC-NUS-6106 (F-Zero X)
-		log("Using CIC-NUS-6106 for F-Zero/Yoshi Story\n");
+		this.log("Using CIC-NUS-6106 for F-Zero/Yoshi Story\n");
 		cic = 0x85;
 	//	rominfo.RDRam_Size_Hack = (uint32) 0x318;
 		break;
 	case 0x343c9: //F1 World Grand Prix
-		log("Using Boot Code for F1 World Grand Prix\n");
+		this.log("Using Boot Code for F1 World Grand Prix\n");
 		cic = 0x85;
 	//	rominfo.RDRam_Size_Hack = (uint32) 0x3F0;
 		break;
 	default:
-		log("Unknown boot code, using Mario boot code instead");
+		this.log("Unknown boot code, using Mario boot code instead");
 		cic = 0x3f;
 	//	rominfo.RDRam_Size_Hack = (uint32) 0x318;
 		break;

@@ -171,8 +171,18 @@ function RSP_GBI0_Vtx(pc)
     processVertexData(addr, v0, num);
 }
 
+function updateCombinedMatrix() {
+	if(gRSP.bMatrixIsUpdated) {
+		gRSPworldProject = gRSP.modelviewMtxs[gRSP.modelViewMtxTop] * gRSP.projectionMtxs[gRSP.projectionMtxTop];
+		gRSP.bMatrixIsUpdated = false;
+		gRSP.bCombinedMatrixIsUpdated = true;
+	}
+}
+
 function processVertexData(addr, v0, num)
 {    
+    updateCombinedMatrix();
+    
     for (var i=v0; i<v0+num; i++)
     {
         var a = addr + 16*(i-v0);
@@ -221,7 +231,7 @@ function RSP_GBI1_MoveWord(pc)
     switch (getGbi0MoveWordType(pc))
 	{
 	case RSP_MOVE_WORD_MATRIX:
-//		RSP_RDP_InsertMatrix(gfx);
+		RSP_RDP_InsertMatrix();
 		break;
 	case RSP_MOVE_WORD_NUMLIGHT:
 		{
@@ -315,6 +325,28 @@ function RSP_GBI1_MoveWord(pc)
 	default:
 		break;
 	}
+}
+
+function resetMatrices() {
+	var mat = new Object();
+    mat.m = new Array(4);
+    mat.m[0] = new Array(1, 0, 0, 0);
+    mat.m[1] = new Array(0, 1, 0, 0);
+    mat.m[2] = new Array(0, 0, 1, 0);
+    mat.m[3] = new Array(0, 0, 0, 1);
+
+	gRSP.projectionMtxTop = 0;
+	gRSP.modelViewMtxTop = 0;
+	gRSP.projectionMtxs[0] = mat;
+	gRSP.modelviewMtxs[0] = mat;
+
+	gRSP.bMatrixIsUpdated = true;
+	UpdateCombinedMatrix();
+}
+
+function RSP_RDP_InsertMatrix() {
+	gRSP.bMatrixIsUpdated = false;
+	gRSP.bCombinedMatrixIsUpdated = true;
 }
 
 function DLParser_SetScissor(pc) {
