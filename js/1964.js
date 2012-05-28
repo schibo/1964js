@@ -246,20 +246,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     this.getFnName = function(pc) {
         return '_' + (pc>>>2);
     }
-    
-    //not compiled
-    this.eret = function() {
-        if((cp0[STATUS] & ERL) !== 0) {
-            alert('error epc');
-            programCounter = cp0[ERROREPC];
-            cp0[STATUS] &= ~ERL;
-        } else {
-            programCounter = cp0[EPC];
-            cp0[STATUS] &= ~EXL;
-        }
-
-        LLbit = 0;
-    }
 
 //////////////end globals that need to be refactored
 
@@ -984,6 +970,16 @@ _1964jsEmulator = function() {
         return('');
     }
 
+    this.r4300i_COP0_eret = function(i) {
+        stopCompiling = true;
+
+        var string = '{if((cp0['+STATUS+']&'+ERL+')!==0){alert("error epc");programCounter=cp0['+ERROREPC+'];';
+        string += 'cp0['+STATUS+']&=~'+ERL+';}else{programCounter=cp0['+EPC+'];cp0['+STATUS+']&=~'+EXL+';}';
+        string += 'LLbit=0;return code[getFnName(programCounter)];}';
+
+        return string;
+    }
+
     this.r4300i_COP0_mtc0 = function(i, isDelaySlot) {
         var delaySlot;
         if (isDelaySlot === true) {
@@ -1259,12 +1255,6 @@ _1964jsEmulator = function() {
     this.r4300i_sra = function(i) {
         //optimization: sra's r[hi] can safely right-shift RT.
         return '{'+_RD(i)+'='+RT(i)+'>>'+sa(i)+';'+_RDH(i)+'='+RT(i)+'>>31}';
-    }
-
-    this.r4300i_COP0_eret = function(i) {
-        stopCompiling = true;
-        
-        return '{eret(); return code[getFnName(programCounter)];}';
     }
 
     this.r4300i_COP0_tlbp = function(i) {
