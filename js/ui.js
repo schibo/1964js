@@ -45,7 +45,7 @@ function getUrlVars()
 
     var gg = goog; //Google Closure API
 
-function loadRom()
+function loadRom(emu)
 {
     vars = getUrlVars();
     var romPath;
@@ -69,7 +69,7 @@ function loadRom()
                     console.log("extracted: " + e.unarchivedFile.filename);
                     var buffer = new Uint8Array(e.unarchivedFile.fileData);
                     romLength = buffer.byteLength;
-                    init(buffer);
+                    emu.init(buffer);
                 }   
                 });
         unzipper.addEventListener(bitjs.archive.UnarchiveEvent.Type.INFO, function(e) {
