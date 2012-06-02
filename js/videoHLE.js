@@ -23,6 +23,7 @@ var MAX_TEXTURES = 8
 
 var vtxTransformed = new Array(MAX_VERTS);
 var vtxNonTransformed = new Array(MAX_VERTS);
+var vecProjected = new Array(MAX_VERTS);
 var	vtxProjected5 = new Array(1000);
 var gRSP = new Object();
 var matToLoad = mat4.create();
@@ -252,7 +253,7 @@ function updateCombinedMatrix() {
 		var vmtx = gRSP.modelviewMtxs[gRSP.modelViewMtxTop];
         var pmtx = gRSP.projectionMtxs[gRSP.projectionMtxTop];
         
-        mat4.multiply(vmtx, pmtx, gRSPworldProject); 
+        mat4.multiply(pmtx, vmtx, gRSPworldProject); 
         
         //gRSPworldProject = gRSP.modelviewMtxs[gRSP.modelViewMtxTop] * gRSP.projectionMtxs[gRSP.projectionMtxTop];
 		gRSP.bMatrixIsUpdated = false;
@@ -273,21 +274,27 @@ function processVertexData(addr, v0, num)
         vtxNonTransformed[i].x = getFiddledVertexX(a);
         vtxNonTransformed[i].y = getFiddledVertexY(a);
         vtxNonTransformed[i].z = getFiddledVertexZ(a);
-        
-        
-        
-        //temp
-        vtxTransformed[i] = vtxNonTransformed[i];
-        
-        vtxTransformed[i].x /= 20.0;
-        vtxTransformed[i].y /= 20.0;
-        vtxTransformed[i].z /= 20.0;
 
-        vtxTransformed[i].x *= (gRSPworldProject[0] / 20.0);
-        vtxTransformed[i].y *= (gRSPworldProject[1] / 20.0);
-        vtxTransformed[i].z *= (gRSPworldProject[2] / 20.0);
+        vtxTransformed[i] = new Object();
 
+        vtxTransformed[i].x = vtxNonTransformed[i].x*(gRSPworldProject[0]) + vtxNonTransformed[i].y*(gRSPworldProject[4]) + vtxNonTransformed[i].z*(gRSPworldProject[8]) + 1*(gRSPworldProject[12]);
+        vtxTransformed[i].y = vtxNonTransformed[i].x*(gRSPworldProject[1]) + vtxNonTransformed[i].y*(gRSPworldProject[5]) + vtxNonTransformed[i].z*(gRSPworldProject[9]) + 1*(gRSPworldProject[13]);
+        vtxTransformed[i].z = vtxNonTransformed[i].x*(gRSPworldProject[2]) + vtxNonTransformed[i].y*(gRSPworldProject[6]) + vtxNonTransformed[i].z*(gRSPworldProject[10]) + 1*(gRSPworldProject[14]);
+        vtxTransformed[i].w = vtxNonTransformed[i].x*(gRSPworldProject[3]) + vtxNonTransformed[i].y*(gRSPworldProject[7]) + vtxNonTransformed[i].z*(gRSPworldProject[11]) + 1*(gRSPworldProject[15]);
 
+    
+    vecProjected[i] = new Object();
+    vecProjected[i].w = 1.0 / vtxTransformed[i].w;
+    vecProjected[i].x = vtxTransformed[i].x * vecProjected[i].w;
+    vecProjected[i].y = vtxTransformed[i].y * vecProjected[i].w;
+    vecProjected[i].z = vtxTransformed[i].z * vecProjected[i].w;
+
+    //temp
+    vtxTransformed[i].x = vecProjected[i].x / 20.0;
+    vtxTransformed[i].y = vecProjected[i].y / 20.0;
+    //vtxTransformed[i].z = vecProjected[i].z / 20.0;
+
+    vtxTransformed[i].z = 3.9;     //hack for now
     }
 }
 
@@ -733,7 +740,7 @@ function initVertex(dwV, vtxIndex, bTexture) {
     vtxProjected5[vtxIndex][1] = vtxTransformed[dwV].y;
     vtxProjected5[vtxIndex][2] = vtxTransformed[dwV].z;
     vtxProjected5[vtxIndex][3] = vtxTransformed[dwV].w;
-//    vtxProjected5[vtxIndex][4] = vecProjected[dwV].z;
+    vtxProjected5[vtxIndex][4] = vecProjected[dwV].z;
     if( vtxTransformed[dwV].w < 0 )	vtxProjected5[vtxIndex][4] = 0;
 		vtxIndex[vtxIndex] = vtxIndex;
 
