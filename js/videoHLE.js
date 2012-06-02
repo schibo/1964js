@@ -606,7 +606,6 @@ function DLParser_TexRect(pc) {
         this.vertices[offset+10] = yh;
         this.vertices[offset+11] = 0.0;
 
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
         squareVertexPositionBuffer.itemSize = 3;
         squareVertexPositionBuffer.numItems += 4;
         
@@ -752,7 +751,6 @@ function initVertex(dwV, vtxIndex, bTexture) {
         this.trivertices[offset+1] = vtxProjected5[vtxIndex][1];
         this.trivertices[offset+2] = vtxProjected5[vtxIndex][2];
 
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.trivertices), gl.STATIC_DRAW);
         triangleVertexPositionBuffer.itemSize = 3;
         triangleVertexPositionBuffer.numItems += 1;
 
@@ -817,6 +815,7 @@ function drawScene() {
         if (deg == 360)
             deg = 0;
         
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
         gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
         gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
         setMatrixUniforms();
@@ -826,6 +825,7 @@ function drawScene() {
         mvPopMatrix();
 
  //       mat4.translate(mvMatrix, [3.0, 0.0, 0.0]);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.trivertices), gl.STATIC_DRAW);
         gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
         gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
         setMatrixUniforms();
