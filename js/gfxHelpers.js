@@ -32,7 +32,7 @@ function getGbi0MoveWordValue(pc) {
 function getGbi0DlistParam(pc) {
     return getInt32(rdramUint8Array, rdramUint8Array, pc) >>> 16 & 0x00ff;
 }
-function getGbi0DlistAddr(pc) {
+function getGbi0DlistAddr(pc) {//this will probably be generic getGbi0Addr 
     return getInt32(rdramUint8Array, rdramUint8Array, pc+4);
 }
 
@@ -59,7 +59,7 @@ function getGbi0Vertex0(pc) {
     return getInt32(rdramUint8Array, rdramUint8Array, pc) >>> 16 & 0x0F;
 }
 
-// Fiddled vertex struct
+//Fiddled vertex struct
 function getFiddledVertexX(pc) {
     return Number(getInt32(rdramUint8Array, rdramUint8Array, pc) >> 16);    
 }
@@ -70,7 +70,16 @@ function getFiddledVertexZ(pc) {
     return Number(getInt32(rdramUint8Array, rdramUint8Array, pc+4) >> 16);    
 }
 
-
+//GBI0 matrix struct
+function gbi0isProjectionMatrix(pc) {
+    return ((rdramUint8Array[pc+1] & 0x00000001) !== 0) ? true : false;
+}
+function gbi0LoadMatrix(pc) {
+    return ((rdramUint8Array[pc+1] & 0x00000002) !== 0) ? true : false;
+}
+function gbi0PushMatrix(pc) {
+    return ((rdramUint8Array[pc+1] & 0x00000004) !== 0) ? true : false;
+}
 
 //TexRect struct
 //	uint32 dwXH		= (((gfx->words.w0)>>12)&0x0FFF)/4;

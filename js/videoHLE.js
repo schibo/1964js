@@ -18,10 +18,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 //todo: make gRSP a class object.
+var RICE_MATRIX_STACK = 60
+var MAX_TEXTURES = 8
+
 var vtxTransformed = new Array(MAX_VERTS);
 var vtxNonTransformed = new Array(MAX_VERTS);
 var	vtxProjected5 = new Array(1000);
 var gRSP = new Object();
+var matToLoad = mat4.create();
+var gRSPworldProject = mat4.create();
+
+gRSP.projectionMtxs = new Array(RICE_MATRIX_STACK);
+gRSP.modelviewMtxs = new Array(RICE_MATRIX_STACK);
 gRSP.vertexMult = 10;
 
 
@@ -66,6 +74,7 @@ function dlParserProcess()
     //TODO: stats
     //TODO: force screen clear
     //TODO: set vi scales
+    renderReset();
     //TODO: render reset
     //TODO: begin rendering
     //TODO: set viewport
@@ -123,23 +132,90 @@ function RSP_GBI1_Reserved(pc)
     log('RSP_GBI1_Reserved');
 }
 
+function setProjection(mat, bPush, bReplace) 
+{
+	if (bPush) {
+		if (gRSP.projectionMtxTop >= (RICE_MATRIX_STACK-1)) {}
+		else
+			gRSP.projectionMtxTop++;
+
+		if (bReplace) {
+			// Load projection matrix
+			mat4.set(mat, gRSP.projectionMtxs[gRSP.projectionMtxTop]);
+		} else {
+			mat4.multiply(gRSP.projectionMtxs[gRSP.projectionMtxTop-1], mat, gRSP.projectionMtxs[gRSP.projectionMtxTop]);
+		}
+	} else {
+		if (bReplace) {
+			// Load projection matrix
+			mat4.set(mat, gRSP.projectionMtxs[gRSP.projectionMtxTop]);
+		} else {
+			mat4.multiply(gRSP.projectionMtxs[gRSP.projectionMtxTop], mat, gRSP.projectionMtxs[gRSP.projectionMtxTop]);
+		}
+	}
+	
+	gRSP.bMatrixIsUpdated = true;
+}
+
+function setWorldView(mat, bPush, bReplace) {
+	if (bPush === true) {
+		if (gRSP.modelViewMtxTop >= (RICE_MATRIX_STACK-1)) ;
+		else
+			gRSP.modelViewMtxTop++;
+
+		// We should store the current projection matrix...
+		if (bReplace) {
+			// Load projection matrix
+			mat4.set(mat, gRSP.modelviewMtxs[gRSP.modelViewMtxTop]);
+		} else { // Multiply projection matrix
+			mat4.multiply(gRSP.modelviewMtxs[gRSP.modelViewMtxTop-1], mat, gRSP.modelviewMtxs[gRSP.modelViewMtxTop]);
+          //  gRSP.modelviewMtxs[gRSP.modelViewMtxTop] = mat * gRSP.modelviewMtxs[gRSP.modelViewMtxTop-1];
+		}
+	} else { // NoPush
+		if (bReplace) {
+			// Load projection matrix
+			mat4.set(mat, gRSP.modelviewMtxs[gRSP.modelViewMtxTop]);
+		} else {
+			// Multiply projection matrix
+			mat4.multiply(gRSP.modelviewMtxs[gRSP.modelViewMtxTop], mat, gRSP.modelviewMtxs[gRSP.modelViewMtxTop]);
+			//gRSP.modelviewMtxs[gRSP.modelViewMtxTop] = mat * gRSP.modelviewMtxs[gRSP.modelViewMtxTop];
+		}
+	}
+
+	gRSPmodelViewTop = gRSP.modelviewMtxs[gRSP.modelViewMtxTop];
+	gRSP.bMatrixIsUpdated = true;
+}
+
 function RSP_GBI0_Mtx(pc)
 {
-    var addr = getRspSegmentAddr(pc);
+    var seg = getGbi0DlistAddr(pc);
+    var addr = getRspSegmentAddr(seg);
     log('RSP_GBI0_Mtx addr: ' + dec2hex(addr));
     loadMatrix(addr);
+
+    if (gbi0isProjectionMatrix(pc))
+        setProjection(matToLoad, gbi0PushMatrix(pc), gbi0LoadMatrix(pc));
+    else
+        setWorldView(matToLoad, gbi0PushMatrix(pc), gbi0LoadMatrix(pc));
 }
 
 function loadMatrix(addr)
 {
-	var i, j;
+//  todo: port and probably log warning message if true
+//	if (addr + 64 > g_dwRamSize)
+//	{
+//		return;
+//	}
+
+	var i, j, k;
+    k = 0;
 
 	for (i=0; i<4; i++) {
 		for (j=0; j<4; j++) {
-            var addr = addr+(i<<3)+(j<<1);
-            var hi = rdramUint8Array[addr]<<8 | rdramUint8Array[addr+1]; 
-            var lo = rdramUint8Array[addr+32]<<8 | rdramUint8Array[addr+32+1]; 
-		//	matToLoad.m[i][j] = (float)((hi<<16) | (lo))/ 65536.0f;
+            var a = addr+(i<<3)+(j<<1);
+            var hi = (rdramUint8Array[a]<<8 | rdramUint8Array[a+1])<<16>>16; 
+            var lo = (rdramUint8Array[a+32]<<8 | rdramUint8Array[a+32+1])&0x0000FFFF; 
+			matToLoad[k++] = ((hi<<16) | lo)/ 65536.0;
 		}
 	}
 }
@@ -173,10 +249,17 @@ function RSP_GBI0_Vtx(pc)
 
 function updateCombinedMatrix() {
 	if(gRSP.bMatrixIsUpdated) {
-		gRSPworldProject = gRSP.modelviewMtxs[gRSP.modelViewMtxTop] * gRSP.projectionMtxs[gRSP.projectionMtxTop];
+		var vmtx = gRSP.modelviewMtxs[gRSP.modelViewMtxTop];
+        var pmtx = gRSP.projectionMtxs[gRSP.projectionMtxTop];
+        
+        mat4.multiply(vmtx, pmtx, gRSPworldProject); 
+        
+        //gRSPworldProject = gRSP.modelviewMtxs[gRSP.modelViewMtxTop] * gRSP.projectionMtxs[gRSP.projectionMtxTop];
 		gRSP.bMatrixIsUpdated = false;
 		gRSP.bCombinedMatrixIsUpdated = true;
 	}
+    
+    gRSP.bCombinedMatrixIsUpdated = false;
 }
 
 function processVertexData(addr, v0, num)
@@ -187,12 +270,24 @@ function processVertexData(addr, v0, num)
     {
         var a = addr + 16*(i-v0);
         vtxNonTransformed[i] = new Object();
-        vtxNonTransformed[i].x = getFiddledVertexX(a) / 20.0;
-        vtxNonTransformed[i].y = getFiddledVertexY(a) / 20.0;
-        vtxNonTransformed[i].z = getFiddledVertexZ(a) / 20.0;
+        vtxNonTransformed[i].x = getFiddledVertexX(a);
+        vtxNonTransformed[i].y = getFiddledVertexY(a);
+        vtxNonTransformed[i].z = getFiddledVertexZ(a);
+        
+        
         
         //temp
         vtxTransformed[i] = vtxNonTransformed[i];
+        
+        vtxTransformed[i].x /= 20.0;
+        vtxTransformed[i].y /= 20.0;
+        vtxTransformed[i].z /= 20.0;
+
+        vtxTransformed[i].x *= (gRSPworldProject[0] / 20.0);
+        vtxTransformed[i].y *= (gRSPworldProject[1] / 20.0);
+        vtxTransformed[i].z *= (gRSPworldProject[2] / 20.0);
+
+
     }
 }
 
@@ -327,25 +422,34 @@ function RSP_GBI1_MoveWord(pc)
 	}
 }
 
+function renderReset()
+{
+//	UpdateClipRectangle();
+	resetMatrices();
+//	SetZBias(0);
+	gRSP.numVertices = 0;
+	gRSP.curTile = 0;
+	gRSP.fTexScaleX = 1/32.0;
+	gRSP.fTexScaleY = 1/32.0;
+}
+
 function resetMatrices() {
-	var mat = new Object();
-    mat.m = new Array(4);
-    mat.m[0] = new Array(1, 0, 0, 0);
-    mat.m[1] = new Array(0, 1, 0, 0);
-    mat.m[2] = new Array(0, 0, 1, 0);
-    mat.m[3] = new Array(0, 0, 0, 1);
 
 	gRSP.projectionMtxTop = 0;
 	gRSP.modelViewMtxTop = 0;
-	gRSP.projectionMtxs[0] = mat;
-	gRSP.modelviewMtxs[0] = mat;
+	gRSP.projectionMtxs[0] = mat4.create();
+	gRSP.modelviewMtxs[0] = mat4.create();
+    mat4.identity(gRSP.modelviewMtxs[0]);
+    mat4.identity(gRSP.projectionMtxs[0]);
 
 	gRSP.bMatrixIsUpdated = true;
-	UpdateCombinedMatrix();
+	updateCombinedMatrix();
 }
 
 function RSP_RDP_InsertMatrix() {
-	gRSP.bMatrixIsUpdated = false;
+	updateCombinedMatrix();
+    
+    gRSP.bMatrixIsUpdated = false;
 	gRSP.bCombinedMatrixIsUpdated = true;
 }
 
@@ -701,7 +805,7 @@ function drawScene() {
         
         mvPushMatrix();
         mat4.translate(mvMatrix, [0.0, 0.0, -2.0]);
-        mat4.rotate(mvMatrix, deg++*Math.PI/180, [1, 0, 0]);
+        //mat4.rotate(mvMatrix, deg++*Math.PI/180, [1, 0, 0]);
         
         if (deg == 360)
             deg = 0;
