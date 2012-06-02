@@ -544,7 +544,7 @@ _1964jsEmulator = function() {
             var instruction = loadWord(pc+offset);
             var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction);
 
-            string += 'magic_number++;';
+            string += 'magic_number+=1.5;';
             string += opcode;
             offset+=4;
             if (offset > 10000) {
@@ -639,13 +639,13 @@ _1964jsEmulator = function() {
         var instruction = loadWord((programCounter+offset+4)|0);
         var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
         string += opcode;
-        string += 'magic_number++;';
+        string += 'magic_number+=1.5;';
 
         string += 'programCounter='+pc+';return code["'+getFnName(pc)+'"];}';
 
         //delay slot
         string += opcode;
-        string += 'magic_number++;';
+        string += 'magic_number+=1.5;';
         offset+=4;
 
         return string;
@@ -661,11 +661,11 @@ _1964jsEmulator = function() {
         var instruction = loadWord((programCounter+offset+4)|0);
         var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
         string += opcode;
-        string += 'magic_number++;';
+        string += 'magic_number+=1.5;';
         string += 'programCounter='+pc+';return code["'+getFnName(pc)+'"];}';
 
         //delay slot
-        string += 'magic_number++;';
+        string += 'magic_number+=1.5;';
         string+=opcode;offset+=4;
 
         return string;
@@ -681,7 +681,7 @@ _1964jsEmulator = function() {
         var instruction = loadWord((programCounter+offset+4)|0);
         var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
         string += opcode;
-        string += 'magic_number++;';
+        string += 'magic_number+=1.5;';
         string += 'programCounter='+pc+';return code["'+getFnName(pc)+'"];}';
 
         offset+=4; //skip delay slot if branch is not taken
@@ -698,11 +698,11 @@ _1964jsEmulator = function() {
         var instruction = loadWord((programCounter+offset+4)|0);
         var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
         string += opcode;
-        string += 'magic_number++;';
+        string += 'magic_number+=1.5;';
         string += 'programCounter='+pc+';return code["'+getFnName(pc)+'"];}';
 
         //delay slot
-        string += 'magic_number++;';
+        string += 'magic_number+=1.5;';
         string+=opcode;offset+=4;
 
         return string;
@@ -718,7 +718,7 @@ _1964jsEmulator = function() {
         var instruction = loadWord((programCounter+offset+4)|0);
         var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
         string += opcode;
-        string += 'magic_number++;';
+        string += 'magic_number+=1.5;';
         string += 'programCounter='+pc+';return code["'+getFnName(pc)+'"];}';
 
         offset+=4; //skip delay slot if branch is not taken
@@ -735,10 +735,10 @@ _1964jsEmulator = function() {
         var instruction = loadWord((programCounter+offset+4)|0);
         var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
         string += opcode;
-        string += 'magic_number++;';
+        string += 'magic_number+=1.5;';
         string += 'programCounter='+pc+';return code["'+getFnName(pc)+'"];}';
 
-        string += 'magic_number++;';
+        string += 'magic_number+=1.5;';
         string+=opcode;offset+=4; //delay slot
 
         return string;
@@ -754,7 +754,7 @@ _1964jsEmulator = function() {
         var instruction = loadWord((programCounter+offset+4)|0);
         var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
         string += opcode;
-        string += 'magic_number++;';
+        string += 'magic_number+=1.5;';
         string += 'programCounter='+pc+';return code["'+getFnName(pc)+'"];}';
 
         offset+=4; //skip delay slot if branch is not taken
@@ -772,7 +772,7 @@ _1964jsEmulator = function() {
         var instruction = loadWord((programCounter+offset+4)|0);
         var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
         string += opcode;
-        string += 'magic_number++;';
+        string += 'magic_number+=1.5;';
         string += 'programCounter='+pc+';return code["'+getFnName(pc)+'"];}';
 
         offset+=4; //skip delay slot if branch is not taken
@@ -789,7 +789,7 @@ _1964jsEmulator = function() {
         var instruction = loadWord((programCounter+offset+4)|0);
         var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
         string += opcode;
-        string += 'magic_number++;';
+        string += 'magic_number+=1.5;';
         string += 'programCounter='+pc+';return code["'+getFnName(pc)+'"];}';
 
         offset+=4; //skip delay slot if branch is not taken
@@ -809,11 +809,11 @@ _1964jsEmulator = function() {
         var instruction = loadWord((programCounter+offset+4)|0);
         var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
         string += opcode;
-        string += 'magic_number++;';
+        string += 'magic_number+=1.5;';
         string += 'programCounter='+pc+';return code["'+getFnName(pc)+'"];}';
 
         //delay slot
-        string += 'magic_number++;';
+        string += 'magic_number+=1.5;';
         string+=opcode;offset+=4;
 
         return string;
@@ -832,7 +832,7 @@ _1964jsEmulator = function() {
         var instruction = loadWord((programCounter+offset+4)|0);
         var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
         string += opcode;
-        string += 'magic_number++;';
+        string += 'magic_number+=1.5;';
         string += 'programCounter='+pc+';return code["'+getFnName(pc)+'"];}';
 
         offset+=4; //skip delay slot if branch is not taken
@@ -849,11 +849,11 @@ _1964jsEmulator = function() {
         var instruction = loadWord((programCounter+offset+4)|0);
         var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
         string += opcode;
-        string += 'magic_number++;';
+        string += 'magic_number+=1.5;';
         string += 'programCounter='+pc+';return code["'+getFnName(pc)+'"];}';
 
         //delay slot
-        string += 'magic_number++;';
+        string += 'magic_number+=1.5;';
         string+=opcode;offset+=4;
 
         return string;
@@ -869,11 +869,11 @@ _1964jsEmulator = function() {
         var instruction = loadWord((programCounter+offset+4)|0);
         var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
         string += opcode;
-        string += 'magic_number++;';
+        string += 'magic_number+=1.5;';
         string += 'programCounter='+pc+';return code["'+getFnName(pc)+'"];}';
 
         //delay slot
-        string += 'magic_number++;';
+        string += 'magic_number+=1.5;';
         string+=opcode;offset+=4;
 
         return string;
@@ -889,7 +889,7 @@ _1964jsEmulator = function() {
         var instruction = loadWord((programCounter+offset+4)|0);
         var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
         string += opcode;
-        string += 'magic_number++;';
+        string += 'magic_number+=1.5;';
         string += 'programCounter='+pc+';return code["'+getFnName(pc)+'"];}';
 
         offset+=4; //skip delay slot if branch is not taken
@@ -905,7 +905,7 @@ _1964jsEmulator = function() {
         //delay slot
         var instruction = loadWord((programCounter+offset+4)|0);
 
-        string += 'magic_number++;';
+        string += 'magic_number+=1.5;';
         if (((instr_index>>0) === (programCounter+offset)>>0) && (instruction === 0)) {
             string+= 'magic_number=0;keepRunning=0;'
         }
@@ -927,7 +927,7 @@ _1964jsEmulator = function() {
         var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
         string += opcode;
         var pc = (programCounter+offset+8)|0;
-        string += 'magic_number++;';
+        string += 'magic_number+=1.5;';
         string += 'programCounter='+instr_index+';r[31]='+pc+';h[31]='+(pc>>31)+';return code["'+getFnName(instr_index)+'"];}';
 
         return string;
@@ -945,7 +945,7 @@ _1964jsEmulator = function() {
         var instruction = loadWord((programCounter+offset+4)|0);
         var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
         string += opcode;
-        string += 'magic_number++;';
+        string += 'magic_number+=1.5;';
         string += 'programCounter=temp;return code[getFnName(temp)];}';
         
         return string;
@@ -959,7 +959,7 @@ _1964jsEmulator = function() {
         var instruction = loadWord((programCounter+offset+4)|0);
         var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
         string += opcode;
-        string += 'magic_number++;';
+        string += 'magic_number+=1.5;';
         string += 'programCounter=temp;return code[getFnName(temp)];}';
         
         return string;
@@ -1555,11 +1555,11 @@ _1964jsEmulator = function() {
         var instruction = loadWord((programCounter+offset+4)|0);
         var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
         string += opcode;
-        string += 'magic_number++;';
+        string += 'magic_number+=1.5;';
         string += 'return code["'+getFnName(pc)+'"];}';
 
         //delay slot
-        string += 'magic_number++;';
+        string += 'magic_number+=1.5;';
         string+=opcode;offset+=4;
 
         return string;
@@ -1577,11 +1577,11 @@ _1964jsEmulator = function() {
         var instruction = loadWord((programCounter+offset+4)|0);
         var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
         string += opcode;
-        string += 'magic_number++;';
+        string += 'magic_number+=1.5;';
         string += 'return code["'+getFnName(pc)+'"];}';
 
         //delay slot
-        string += 'magic_number++;';
+        string += 'magic_number+=1.5;';
         string+=opcode;offset+=4;
 
         return string;
@@ -1599,7 +1599,7 @@ _1964jsEmulator = function() {
         var instruction = loadWord((programCounter+offset+4)|0);
         var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
         string += opcode;
-        string += 'magic_number++;';
+        string += 'magic_number+=1.5;';
         string += 'return code["'+getFnName(pc)+'"];}';
 
         offset+=4; //skip delay slot if branch is not taken
@@ -1618,7 +1618,7 @@ _1964jsEmulator = function() {
         var instruction = loadWord((programCounter+offset+4)|0);
         var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
         string += opcode;
-        string += 'magic_number++;';
+        string += 'magic_number+=1.5;';
         string += 'return code["'+getFnName(pc)+'"];}';
 
         offset+=4; //skip delay slot if branch is not taken
