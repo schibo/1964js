@@ -181,8 +181,13 @@ var request;
 
 _1964jsEmulator = function() {
 
-    this.runLoop = null;
     cancelRequestAnimFrame(request);
+    this.runLoop = null;
+    currentHack = 0;
+    startTime = 0;
+    kfi=512;
+    doOnce = 0;
+    magic_number = -625000;
     flushDynaCache();
 
     this.regBuffer = new ArrayBuffer(35*4);
