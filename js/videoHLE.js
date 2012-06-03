@@ -39,7 +39,6 @@ function processDisplayList()
     showFB = false;
 
     dlParserProcess();
-    drawScene();
 
 //    triggerDPInterrupt(0, false);
     triggerSPInterrupt(0, false);
@@ -629,6 +628,8 @@ function DLParser_RDPTileSync(pc) {
 function DLParser_RDPFullSync(pc) {
     log('TODO: DLParser_RDPFullSync');
     triggerDPInterrupt(0, false);
+        drawScene();
+
 
 }
 
@@ -778,7 +779,7 @@ return true;
             -1.0, -1.0,  0.0,
              1.0, -1.0,  0.0
         ];
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.trivertices), gl.STATIC_DRAW);
+   //     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.trivertices), gl.STATIC_DRAW);
         triangleVertexPositionBuffer.itemSize = 3;
         triangleVertexPositionBuffer.numItems = this.trivertices.length/3;
 
@@ -790,7 +791,7 @@ return true;
             -1.0, -1.0,  0.0,
             -1.0,  1.0,  0.0
         ];
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
+     //   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
         squareVertexPositionBuffer.itemSize = 3;
         squareVertexPositionBuffer.numItems = this.vertices.length/3;
     }
@@ -811,7 +812,7 @@ function drawScene() {
         if (deg == 360)
             deg = 0;
         
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.DYNAMIC_DRAW);
         gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
         gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
         setMatrixUniforms();
@@ -826,7 +827,7 @@ function drawScene() {
 
         //alert(squareVertexPositionBuffer.numItems);
 
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.trivertices), gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.trivertices), gl.DYNAMIC_DRAW);
         gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
         gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
         setMatrixUniforms();

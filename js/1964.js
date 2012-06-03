@@ -177,7 +177,13 @@ window.onerror = function() {
     terminate = true;
 }
 
+var request;
+
 _1964jsEmulator = function() {
+
+    this.runLoop = null;
+    cancelRequestAnimFrame(request);
+    flushDynaCache();
 
     this.regBuffer = new ArrayBuffer(35*4);
     this.r = new Int32Array(this.regBuffer);
@@ -395,7 +401,7 @@ _1964jsEmulator = function() {
         var _this = window["emu"];
         
         if (terminate === false)
-            requestAnimFrame(_this.runLoop);
+            request = requestAnimFrame(_this.runLoop);
         keepRunning = speed;
         var pc, fnName, fn;
         var lr=_this.r;
@@ -448,9 +454,8 @@ _1964jsEmulator = function() {
             this.changeSpeed(speedScrubber.value);
             speedScrubber.style.opacity = 1.0;
         }
-        if (terminate === false)
-            this.runLoop();
-            //interval = setInterval(runLoop, 0);
+        this.runLoop();
+        //interval = setInterval(runLoop, 0);
     }
 
     this.stopEmulator = function() {
@@ -458,7 +463,7 @@ _1964jsEmulator = function() {
         terminate = true;
         
         this.log('stopEmulator');
-        clearInterval(interval);
+        //clearInterval(interval);
     }
 
     this.decompileBlock = function(pc) {

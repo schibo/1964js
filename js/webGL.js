@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
    var gl;
     function initGL(canvas) {
         try {
-            gl = canvas.getContext("experimental-webgl");
+            gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
             gl.viewportWidth = canvas.width;
             gl.viewportHeight = canvas.height;
         } catch (e) {

@@ -89,24 +89,3 @@ function loadRom(emu)
         unzipper.start();
     };
 }
-    
-  function fatal(message)
-  {
-        console.log(message);
-        console.log(dec2hex(r[0]) + ' ' + dec2hex(r[1]));
-        console.log(dec2hex(r[2]) + ' ' + dec2hex(r[3]));
-        console.log(dec2hex(r[4]) + ' ' + dec2hex(r[5]));
-        console.log(dec2hex(r[6]) + ' ' + dec2hex(r[7]));
-        console.log(dec2hex(r[8]) + ' ' + dec2hex(r[9]));
-        console.log(dec2hex(r[10]) + ' ' + dec2hex(r[11]));
-        console.log(dec2hex(r[12]) + ' ' + dec2hex(r[13]));
-        console.log(dec2hex(r[14]) + ' ' + dec2hex(r[15]));
-        console.log(dec2hex(r[16]) + ' ' + dec2hex(r[17]));
-        console.log(dec2hex(r[18]) + ' ' + dec2hex(r[19]));
-        console.log(dec2hex(r[20]) + ' ' + dec2hex(r[21]));
-        console.log(dec2hex(r[22]) + ' ' + dec2hex(r[23]));
-        console.log(dec2hex(r[24]) + ' ' + dec2hex(r[25]));
-        console.log(dec2hex(r[26]) + ' ' + dec2hex(r[27]));
-        console.log(dec2hex(r[28]) + ' ' + dec2hex(r[29]));
-        console.log(dec2hex(r[30]) + ' ' + dec2hex(r[31]));
-  }

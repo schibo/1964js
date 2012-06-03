@@ -93,7 +93,6 @@ function flushDynaCache()
     }
     else while (kk)
     {
-
         //log('cleanup');
         s = document.getElementsByTagName('script')[--kk];
         

@@ -65,7 +65,7 @@ function initWebGL() {
   gl = null;
   
   try {
-    gl = canvas.getContext("experimental-webgl");
+    gl = m.webGL();//canvas.getContext("experimental-webgl");
   }
   catch(e) {
   }

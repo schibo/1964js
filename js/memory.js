@@ -139,7 +139,7 @@ function loadByte(addr)
         return ramRegs8Uint8Array[off];        
 	}
 	else {
-        fatal( ': warning: reading from dummy memory at ' + dec2hex(addr));
+        throw( 'reading from invalid memory at ' + dec2hex(addr));
         //stopEmulator();
         var off=a&0x0000fffc;
         return dummyReadWriteUint8Array[off];        
@@ -252,7 +252,7 @@ function loadHalf(addr)
         return ramRegs8Uint8Array[off]<<8 | ramRegs8Uint8Array[off+1];
 	}
 	else {
-        fatal( ': warning: reading from dummy memory at ' + dec2hex(addr));
+        throw( 'reading from invalid memory at ' + dec2hex(addr));
         //stopEmulator();
         var off=a&0x0000fffc;
         return dummyReadWriteUint8Array[off]<<8 | dummyReadWriteUint8Array[off+1];
@@ -368,7 +368,7 @@ function loadWord(addr)
         return ramRegs8Uint8Array[off]<<24 | ramRegs8Uint8Array[off+1]<<16 | ramRegs8Uint8Array[off+2]<<8 | ramRegs8Uint8Array[off+3];        
 	}
 	else {
-        fatal( ': warning: reading from dummy memory at ' + dec2hex(addr));
+        throw( 'reading from invalid memory at ' + dec2hex(addr));
         //stopEmulator();
         var off=a&0x0000fffc;
         return dummyReadWriteUint8Array[off]<<24 | dummyReadWriteUint8Array[off+1]<<16 | dummyReadWriteUint8Array[off+2]<<8 | dummyReadWriteUint8Array[off+3];        
@@ -496,7 +496,7 @@ function storeWord(val, addr, pc, isDelaySlot)
         return;
 	}
 	else {
-        fatal( dec2hex(pc) + ': warning: writing to dummy memory at ' + dec2hex(addr));
+        throw( dec2hex(pc) + ': warning: writing to invalid memory at ' + dec2hex(addr));
         //stopEmulator();
         var off=a&0x0000fffc;
         rdramUint8Array[off] = val>>24;rdramUint8Array[off+1] = val>>16;rdramUint8Array[off+2] = val>>8;rdramUint8Array[off+3] = val;
@@ -626,7 +626,7 @@ function storeByte(val, addr, pc, isDelaySlot)
         return;
 	}
 	else {
-        fatal( dec2hex(pc) + ': warning: writing to dummy memory at ' + dec2hex(addr));
+        throw( dec2hex(pc) + ': warning: writing to invalid memory at ' + dec2hex(addr));
         //stopEmulator();
         var off=a&0x0000fffc;
         rdramUint8Array[off] = val;
@@ -755,7 +755,7 @@ function storeHalf(val, addr, pc, isDelaySlot)
         return;
 	}
 	else {
-        fatal( dec2hex(pc) + ': warning: writing to dummy memory at ' + dec2hex(addr));
+        throw( dec2hex(pc) + ': warning: writing to invalid memory at ' + dec2hex(addr));
         //stopEmulator();
         var off=a&0x0000fffc;
         rdramUint8Array[off] = val>>8;rdramUint8Array[off+1] = val;
