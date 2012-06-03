@@ -932,7 +932,7 @@ _1964jsEmulator = function() {
             delaySlot = "false";
         }
 
-        return 'window["emu"].inter_mtc0(window["emu"].r,'+fs(i)+','+rt(i)+','+delaySlot+','+pc+');';
+        return 'window["emu"].inter_mtc0(r,'+fs(i)+','+rt(i)+','+delaySlot+','+pc+');';
     }
 
     this.r4300i_sll = function(i) {
@@ -1005,11 +1005,11 @@ _1964jsEmulator = function() {
     }
 
     this.r4300i_multu = function(i) {
-        return 'window["emu"].inter_multu(window["emu"].r,'+i+');';
+        return 'window["emu"].inter_multu(r,'+i+');';
     }
 
     this.r4300i_mult = function(i) {
-        return 'window["emu"].inter_mult(window["emu"].r,'+i+');'; 
+        return 'window["emu"].inter_mult(r,'+i+');'; 
     }
 
     this.r4300i_mflo = function(i) {
@@ -1147,7 +1147,7 @@ _1964jsEmulator = function() {
     }
 
     this.r4300i_dmultu = function(i) {
-        return 'window["emu"].inter_dmultu(window["emu"].r,'+i+');';
+        return 'window["emu"].inter_dmultu(r,'+i+');';
     }
 
     this.r4300i_dsll32 = function(i) {
@@ -1159,13 +1159,13 @@ _1964jsEmulator = function() {
     }
 
     this.r4300i_ddivu = function(i) {
-        return 'window["emu"].inter_ddivu(window["emu"].r,'+i+');'
+        return 'window["emu"].inter_ddivu(r,'+i+');'
     }
 
     this.r4300i_ddiv = function(i) {
         alert('ddiv');
 
-        return 'window["emu"].inter_ddiv(window["emu"].r,'+i+');'
+        return 'window["emu"].inter_ddiv(r,'+i+');'
     }
 
     this.r4300i_dadd = function(i) {
@@ -1186,11 +1186,11 @@ _1964jsEmulator = function() {
     }
 
     this.r4300i_div = function(i) {
-        return 'window["emu"].inter_div(window["emu"].r,'+i+');'; 
+        return 'window["emu"].inter_div(r,'+i+');'; 
     }
 
     this.r4300i_divu = function(i) {
-        return 'window["emu"].inter_divu(window["emu"].r,'+i+');'; 
+        return 'window["emu"].inter_divu(r,'+i+');'; 
     }
 
     this.r4300i_sra = function(i) {
@@ -1423,7 +1423,7 @@ _1964jsEmulator = function() {
     }
 
     this.r4300i_daddi = function(i) {
-        return 'window["emu"].inter_daddi(window["emu"].r,'+i+');';
+        return 'window["emu"].inter_daddi(r,'+i+');';
     }
 
     this.r4300i_teq = function(i) {
@@ -1453,11 +1453,11 @@ _1964jsEmulator = function() {
 
     //using same as daddi
     this.r4300i_daddiu = function(i) {
-        return 'window["emu"].inter_daddiu(window["emu"].r,'+i+');';
+        return 'window["emu"].inter_daddiu(r,'+i+');';
     }
 
     this.r4300i_daddu = function(i) {
-        return 'window["emu"].inter_daddu(window["emu"].r,'+i+');';
+        return 'window["emu"].inter_daddu(r,'+i+');';
     }
 
     this.r4300i_C_EQ_D = function(i) {
