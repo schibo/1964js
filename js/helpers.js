@@ -309,7 +309,82 @@ function dLogic(i, n) {
 //Interpreted opcode helpers
 ////////////////////////////
 
-function inter_mult(i)
+    //called function, not compiled
+_1964jsEmulator.prototype.inter_mtc0 = function(r, f, rt, isDelaySlot, pc) {
+        //incomplete:
+        switch (f) {
+            case CAUSE:
+                cp0[f] &= ~0x300;
+                cp0[f] |= r[rt] & 0x300;
+                if(r[rt] & 0x300) {
+              //      if (((r[rt] & 1)===1) && (cp0[f] & 1)===0) //possible fix over 1964cpp?
+                    if((cp0[CAUSE] & cp0[STATUS] & 0x0000FF00) !== 0) {
+                        setException(EXC_INT, 0, pc, isDelaySlot);
+                        //processException(pc, isDelaySlot);
+                    }
+                }
+            break;
+            case COUNT:
+                cp0[f] = r[rt];
+            break;
+            case COMPARE:
+                cp0[CAUSE] &= ~CAUSE_IP8;
+                cp0[f] = r[rt];
+                break;
+            break;
+            case STATUS:
+                if (((r[rt] & EXL)===0) && ((cp0[f] & EXL)===1)) {
+                    if((cp0[CAUSE] & cp0[STATUS] & 0x0000FF00) !== 0) {
+                        cp0[f] = r[rt];
+                        setException(EXC_INT, 0, pc, isDelaySlot);
+                        //processException(pc, isDelaySlot);
+                        return;
+                    }
+                }
+                
+                if (((r[rt] & IE)===1) && ((cp0[f] & IE)===0)) {
+                    if((cp0[CAUSE] & cp0[STATUS] & 0x0000FF00) !== 0) {
+                        cp0[f] = r[rt];
+                        setException(EXC_INT, 0, pc, isDelaySlot);
+                        //processException(pc, isDelaySlot);
+                        return;
+                    }
+                }
+
+                cp0[f] = r[rt];
+            break;
+            //tlb:
+            case BADVADDR: //read-only
+            case PREVID: //read-only
+            case RANDOM: //read-only
+            break;
+            case INDEX:
+                cp0[f] = r[rt] & 0x8000003F;
+            break;
+            case ENTRYLO0:
+                cp0[f] = r[rt] & 0x3FFFFFFF;
+            break;
+            case ENTRYLO1:
+                cp0[f] = r[rt] & 0x3FFFFFFF;
+            break;
+            case ENTRYHI:
+                cp0[f] = r[rt] & 0xFFFFE0FF;
+            break;
+            case PAGEMASK:
+                cp0[f] = r[rt] & 0x01FFE000;
+            break;
+            case WIRED:
+                cp0[f] = r[rt] & 0x1f;
+                cp0[RANDOM] = 0x1f;
+            break;
+            default:
+                cp0[f] = r[rt];
+            break;
+        }
+    }
+
+
+_1964jsEmulator.prototype.inter_mult = function(r, i)
 {
     var rs32 = r[rs(i)];
     var rt32 = r[rt(i)];
@@ -325,7 +400,7 @@ function inter_mult(i)
     h[33]=r[33]>>31;
 }
 
-function inter_multu(i)
+_1964jsEmulator.prototype.inter_multu = function(r, i)
 {
     var rs32 = r[rs(i)];
     var rt32 = r[rt(i)];
@@ -343,7 +418,7 @@ function inter_multu(i)
 //    alert('multu: '+r[rs(i)]+'*'+r[rt(i)]+'='+dec2hex(h[33]) +' '+dec2hex(r[33])+' '+dec2hex(h[32])+' '+dec2hex(r[32]));
 }
 
-function inter_daddi(i)
+_1964jsEmulator.prototype.inter_daddi = function(r, i)
 {    
     var rs1 = gg.math.Long.fromBits(r[rs(i)], h[rs(i)]);
     var imm = gg.math.Long.fromBits(soffset_imm(i), soffset_imm(i)>>31);
@@ -354,7 +429,7 @@ function inter_daddi(i)
     h[rt(i)]=rtres.getHighBits(); //hi
 }
 
-function inter_daddiu(i)
+_1964jsEmulator.prototype.inter_daddiu = function(r, i)
 {    
     var rs1 = gg.math.Long.fromBits(r[rs(i)], h[rs(i)]);
     var imm = gg.math.Long.fromBits(soffset_imm(i), soffset_imm(i)>>31);
@@ -365,7 +440,7 @@ function inter_daddiu(i)
     h[rt(i)]=rtres.getHighBits(); //hi
 }
 
-function inter_dadd(i)
+_1964jsEmulator.prototype.inter_dadd = function(r, i)
 {    
     var rs1 = gg.math.Long.fromBits(r[rs(i)], h[rs(i)]);
     var rt1 = gg.math.Long.fromBits(r[rt(i)], h[rt(i)]);
@@ -376,7 +451,7 @@ function inter_dadd(i)
     h[rd(i)]=rdres.getHighBits(); //hi
 }
 
-function inter_daddu(i)
+_1964jsEmulator.prototype.inter_daddu = function(r, i)
 {    
     var rs1 = gg.math.Long.fromBits(r[rs(i)], h[rs(i)]);
     var rt1 = gg.math.Long.fromBits(r[rt(i)], h[rt(i)]);
@@ -387,7 +462,7 @@ function inter_daddu(i)
     h[rd(i)]=rdres.getHighBits(); //hi
 }
 
-function inter_div(i)
+_1964jsEmulator.prototype.inter_div = function(r, i)
 {
     if (r[rt(i)] === 0)
     {
@@ -407,7 +482,7 @@ function inter_div(i)
 
 }
 
-function inter_ddiv(i)
+_1964jsEmulator.prototype.inter_ddiv = function(r, i)
 {
     var rs32 = r[rs(i)];
     var rt32 = r[rt(i)];
@@ -436,7 +511,7 @@ function inter_ddiv(i)
 }
 
 
-function inter_divu(i)
+_1964jsEmulator.prototype.inter_divu = function(r, i)
 {
 
     if (r[rt(i)] === 0)
@@ -456,7 +531,7 @@ function inter_divu(i)
 //    alert('divu: '+r[rs(i)]+'/'+r[rt(i)]+'='+dec2hex(h[33]) +' '+dec2hex(r[33])+' '+dec2hex(h[32])+' '+dec2hex(r[32]));
 }
 
-function inter_dmult(i)
+_1964jsEmulator.prototype.inter_dmult = function(r, i)
 {
     //this is wrong..i think BigInt it will treat hex as unsigned? 
     var rs64 = '0x' + dec2hex(h[rs(i)]) + '' + dec2hex(r[rs(i)]);
@@ -507,7 +582,7 @@ function inter_dmult(i)
 //    alert('dmult: '+rs64+'*'+rt64+'='+dec2hex(h[33]) +' '+dec2hex(r[33])+' '+dec2hex(h[32])+' '+dec2hex(r[32]));
 }
 
-function inter_dmultu(i)
+_1964jsEmulator.prototype.inter_dmultu = function(r, i)
 {
 //Attax demo
     var rs64 = '0x0' + dec2hex(h[rs(i)]) + '' + dec2hex(r[rs(i)]);
@@ -559,7 +634,7 @@ function inter_dmultu(i)
 }
 
 
-function inter_ddivu(i)
+_1964jsEmulator.prototype.inter_ddivu = function(r, i)
 {
     var rs64 = '0x0' + dec2hex(h[rs(i)]) + '' + dec2hex(r[rs(i)]);
     var rt64 = '0x0' + dec2hex(h[rt(i)]) + '' + dec2hex(r[rt(i)]);
@@ -619,7 +694,7 @@ function inter_ddivu(i)
 
 }
 
-function inter_r4300i_C_cond_fmt_s(instruction)
+_1964jsEmulator.prototype.inter_r4300i_C_cond_fmt_s = function(instruction)
 {
 	var	fcFS32, fcFT32;
 	var	less, equal, unordered, cond, cond0, cond1, cond2, cond3;
@@ -660,7 +735,7 @@ function inter_r4300i_C_cond_fmt_s(instruction)
 		cp1Con[31] |= COP1_CONDITION_BIT;
 }
 
-function inter_r4300i_C_cond_fmt_d(instruction)
+_1964jsEmulator.prototype.inter_r4300i_C_cond_fmt_d = function(instruction)
 {
 	var	fcFS64, fcFT64;
 	var	less, equal, unordered, cond, cond0, cond1, cond2, cond3;

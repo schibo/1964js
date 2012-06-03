@@ -68,7 +68,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     else
         code = new Object();
 
-    var regBuffer = new ArrayBuffer(35*4);
     var hRegBuffer = new ArrayBuffer(35*4);
     var vAddrBuffer = new ArrayBuffer(4);
     var cp0Buffer = new ArrayBuffer(32*4) 
@@ -100,7 +99,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     var RI = new ArrayBuffer(0x10000);
     var SI = new ArrayBuffer(0x10000);
 
-    var r = new Int32Array(regBuffer);
     var h = new Int32Array(hRegBuffer); //r hi
     var vAddr = new Int32Array(vAddrBuffer);
     var cp0 = new Int32Array(cp0Buffer);
@@ -168,88 +166,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     var audioBuffer;
     var currentHack = 0;
     var kfi=512;
-    
-    //called function, not compiled
-    this.mtc0 = function(f, rt, isDelaySlot, pc) {
-        //incomplete:
-        switch (f) {
-            case CAUSE:
-                cp0[f] &= ~0x300;
-                cp0[f] |= r[rt] & 0x300;
-                if(r[rt] & 0x300) {
-              //      if (((r[rt] & 1)===1) && (cp0[f] & 1)===0) //possible fix over 1964cpp?
-                    if((cp0[CAUSE] & cp0[STATUS] & 0x0000FF00) !== 0) {
-                        setException(EXC_INT, 0, pc, isDelaySlot);
-                        //processException(pc, isDelaySlot);
-                    }
-                }
-            break;
-            case COUNT:
-                cp0[f] = r[rt];
-            break;
-            case COMPARE:
-                cp0[CAUSE] &= ~CAUSE_IP8;
-                cp0[f] = r[rt];
-                break;
-            break;
-            case STATUS:
-                if (((r[rt] & EXL)===0) && ((cp0[f] & EXL)===1)) {
-                    if((cp0[CAUSE] & cp0[STATUS] & 0x0000FF00) !== 0) {
-                        cp0[f] = r[rt];
-                        setException(EXC_INT, 0, pc, isDelaySlot);
-                        //processException(pc, isDelaySlot);
-                        return;
-                    }
-                }
-                
-                if (((r[rt] & IE)===1) && ((cp0[f] & IE)===0)) {
-                    if((cp0[CAUSE] & cp0[STATUS] & 0x0000FF00) !== 0) {
-                        cp0[f] = r[rt];
-                        setException(EXC_INT, 0, pc, isDelaySlot);
-                        //processException(pc, isDelaySlot);
-                        return;
-                    }
-                }
 
-                cp0[f] = r[rt];
-            break;
-            //tlb:
-            case BADVADDR: //read-only
-            case PREVID: //read-only
-            case RANDOM: //read-only
-            break;
-            case INDEX:
-                cp0[f] = r[rt] & 0x8000003F;
-            break;
-            case ENTRYLO0:
-                cp0[f] = r[rt] & 0x3FFFFFFF;
-            break;
-            case ENTRYLO1:
-                cp0[f] = r[rt] & 0x3FFFFFFF;
-            break;
-            case ENTRYHI:
-                cp0[f] = r[rt] & 0xFFFFE0FF;
-            break;
-            case PAGEMASK:
-                cp0[f] = r[rt] & 0x01FFE000;
-            break;
-            case WIRED:
-                cp0[f] = r[rt] & 0x1f;
-                cp0[RANDOM] = 0x1f;
-            break;
-            default:
-                cp0[f] = r[rt];
-            break;
-        }
-    }
-    
     this.getFnName = function(pc) {
         return '_' + (pc>>>2);
     }
 
 //////////////end globals that need to be refactored
 
+window.onerror = function() {
+    terminate = true;
+}
+
 _1964jsEmulator = function() {
+
+    this.regBuffer = new ArrayBuffer(35*4);
+    this.r = new Int32Array(this.regBuffer);
+
     this.log = function(message) {
     //  console.log(message);
     }
@@ -259,41 +191,41 @@ _1964jsEmulator = function() {
         this.endianTest();
         //runTest();
 
-        r[0] = 0;
-        r[1] = 0;
-        r[2] = 0xd1731be9;
-        r[3] = 0xd1731be9;
-        r[4] = 0x001be9;
-        r[5] = 0xf45231e5;
-        r[6] = 0xa4001f0c;
-        r[7] = 0xa4001f08;
-        r[8] = 0x070; //check
-        r[9] = 0;
-        r[10] = 0x040;
-        r[11] = 0xA4000040;
-        r[12] = 0xd1330bc3;
-        r[13] = 0xd1330bc3;
-        r[14] = 0x025613a26;
-        r[15] = 0x02ea04317;
-        r[16] = 0;
-        r[17] = 0;
-        r[18] = 0;
-        r[19] = 0;
-        r[20] = 0;//TV System
-        r[21] = 0;
-        r[22] = 0;//CIC
-        r[23] = 0x06;
-        r[24] = 0;
-        r[25] = 0xd73f2993;
-        r[26] = 0;
-        r[27] = 0;
-        r[28] = 0;
-        r[29] = 0xa4001ff0;
-        r[30] = 0;
-        r[31] = 0xa4001554;
-        r[32] = 0; //LO for mult
-        r[33] = 0; //HI for mult
-        r[34] = 0; //to protect r0, write here. (r[34])
+        this.r[0] = 0;
+        this.r[1] = 0;
+        this.r[2] = 0xd1731be9;
+        this.r[3] = 0xd1731be9;
+        this.r[4] = 0x001be9;
+        this.r[5] = 0xf45231e5;
+        this.r[6] = 0xa4001f0c;
+        this.r[7] = 0xa4001f08;
+        this.r[8] = 0x070; //check
+        this.r[9] = 0;
+        this.r[10] = 0x040;
+        this.r[11] = 0xA4000040;
+        this.r[12] = 0xd1330bc3;
+        this.r[13] = 0xd1330bc3;
+        this.r[14] = 0x025613a26;
+        this.r[15] = 0x02ea04317;
+        this.r[16] = 0;
+        this.r[17] = 0;
+        this.r[18] = 0;
+        this.r[19] = 0;
+        this.r[20] = 0;//TV System
+        this.r[21] = 0;
+        this.r[22] = 0;//CIC
+        this.r[23] = 0x06;
+        this.r[24] = 0;
+        this.r[25] = 0xd73f2993;
+        this.r[26] = 0;
+        this.r[27] = 0;
+        this.r[28] = 0;
+        this.r[29] = 0xa4001ff0;
+        this.r[30] = 0;
+        this.r[31] = 0xa4001554;
+        this.r[32] = 0; //LO for mult
+        this.r[33] = 0; //HI for mult
+        this.r[34] = 0; //to protect r0, write here. (r[34])
 
         rom = buffer;
         //rom = new Uint8Array(buffer);
@@ -329,8 +261,8 @@ _1964jsEmulator = function() {
             spMemUint8Array[k] = rom[k];
         }
 
-        r[20] = this.getTVSystem(romUint8Array[0x3D]);
-        r[22] = this.getCIC();
+        this.r[20] = this.getTVSystem(romUint8Array[0x3D]);
+        this.r[22] = this.getCIC();
 
         cp0[STATUS] = 0x70400004;
         cp0[RANDOM] = 0x0000001f;
@@ -354,7 +286,7 @@ _1964jsEmulator = function() {
         //set hi vals
         var i=0;
         for (i=0; i<35; i++)
-            h[i] = r[i]>>31;
+            h[i] = this.r[i]>>31;
 
         this.startEmulator();
     }
@@ -460,13 +392,13 @@ _1964jsEmulator = function() {
     }
 
     this.runLoop = function() {
-        var _this = window['emu'];
+        var _this = window["emu"];
         
         if (terminate === false)
             requestAnimFrame(_this.runLoop);
         keepRunning = speed;
         var pc, fnName, fn;
-        var lr=r;
+        var lr=_this.r;
 
         pc = programCounter >>> 2;
         fnName = '_' + pc; 
@@ -989,10 +921,9 @@ _1964jsEmulator = function() {
             pc = (programCounter + offset)|0;
             delaySlot = "false";
         }
-            
-        return 'mtc0('+fs(i)+','+rt(i)+','+delaySlot+','+pc+');';
-    }
 
+        return 'window["emu"].inter_mtc0(window["emu"].r,'+fs(i)+','+rt(i)+','+delaySlot+','+pc+');';
+    }
 
     this.r4300i_sll = function(i) {
         if ((i&0x001FFFFF) === 0) return '';
@@ -1064,11 +995,11 @@ _1964jsEmulator = function() {
     }
 
     this.r4300i_multu = function(i) {
-        return 'inter_multu('+i+');';
+        return 'window["emu"].inter_multu(window["emu"].r,'+i+');';
     }
 
     this.r4300i_mult = function(i) {
-        return 'inter_mult('+i+');'; 
+        return 'window["emu"].inter_mult(window["emu"].r,'+i+');'; 
     }
 
     this.r4300i_mflo = function(i) {
@@ -1206,7 +1137,7 @@ _1964jsEmulator = function() {
     }
 
     this.r4300i_dmultu = function(i) {
-        return 'inter_dmultu('+i+');';
+        return 'window["emu"].inter_dmultu(window["emu"].r,'+i+');';
     }
 
     this.r4300i_dsll32 = function(i) {
@@ -1218,13 +1149,13 @@ _1964jsEmulator = function() {
     }
 
     this.r4300i_ddivu = function(i) {
-        return 'inter_ddivu('+i+');'
+        return 'window["emu"].inter_ddivu(window["emu"].r,'+i+');'
     }
 
     this.r4300i_ddiv = function(i) {
         alert('ddiv');
 
-        return 'inter_ddiv('+i+');'
+        return 'window["emu"].inter_ddiv(window["emu"].r,'+i+');'
     }
 
     this.r4300i_dadd = function(i) {
@@ -1245,11 +1176,11 @@ _1964jsEmulator = function() {
     }
 
     this.r4300i_div = function(i) {
-        return 'inter_div('+i+');'; 
+        return 'window["emu"].inter_div(window["emu"].r,'+i+');'; 
     }
 
     this.r4300i_divu = function(i) {
-        return 'inter_divu('+i+');'; 
+        return 'window["emu"].inter_divu(window["emu"].r,'+i+');'; 
     }
 
     this.r4300i_sra = function(i) {
@@ -1482,7 +1413,7 @@ _1964jsEmulator = function() {
     }
 
     this.r4300i_daddi = function(i) {
-        return 'inter_daddi('+i+');';
+        return 'window["emu"].inter_daddi(window["emu"].r,'+i+');';
     }
 
     this.r4300i_teq = function(i) {
@@ -1512,35 +1443,35 @@ _1964jsEmulator = function() {
 
     //using same as daddi
     this.r4300i_daddiu = function(i) {
-        return 'inter_daddiu('+i+');';
+        return 'window["emu"].inter_daddiu(window["emu"].r,'+i+');';
     }
 
     this.r4300i_daddu = function(i) {
-        return 'inter_daddu('+i+');';
+        return 'window["emu"].inter_daddu(window["emu"].r,'+i+');';
     }
 
     this.r4300i_C_EQ_D = function(i) {
-        return 'inter_r4300i_C_cond_fmt_d('+i+');';
+        return 'window["emu"].inter_r4300i_C_cond_fmt_d('+i+');';
     }
 
     this.r4300i_C_EQ_S = function(i) {
-        return 'inter_r4300i_C_cond_fmt_s('+i+');';
+        return 'window["emu"].inter_r4300i_C_cond_fmt_s('+i+');';
     }
 
     this.r4300i_C_LT_S = function(i) {
-        return 'inter_r4300i_C_cond_fmt_s('+i+');';
+        return 'window["emu"].inter_r4300i_C_cond_fmt_s('+i+');';
     }
 
     this.r4300i_C_LT_D = function(i) {
-        return 'inter_r4300i_C_cond_fmt_d('+i+');';
+        return 'window["emu"].inter_r4300i_C_cond_fmt_d('+i+');';
     }
 
     this.r4300i_C_LE_S = function(i) {
-        return 'inter_r4300i_C_cond_fmt_s('+i+');';
+        return 'window["emu"].inter_r4300i_C_cond_fmt_s('+i+');';
     }
 
     this.r4300i_C_LE_D = function(i) {
-        return 'inter_r4300i_C_cond_fmt_d('+i+');';
+        return 'window["emu"].inter_r4300i_C_cond_fmt_d('+i+');';
     }
 
     this.r4300i_COP1_bc1f = function(i) {
