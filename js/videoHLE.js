@@ -802,10 +802,10 @@ function drawScene() {
 
         mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
         mat4.identity(mvMatrix);
-        mat4.translate(mvMatrix, [0.0, 0.0, -2.0]);
+        mat4.translate(mvMatrix, [0.0, 0.0, -2.4]);
         
         mvPushMatrix();
-        mat4.translate(mvMatrix, [0.0, 0.0, -2.0]);
+        mat4.translate(mvMatrix, [0.0, 0.0, -1.0]);
         //mat4.rotate(mvMatrix, deg++*Math.PI/180, [1, 0, 0]);
         
         if (deg == 360)
