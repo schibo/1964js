@@ -91,16 +91,20 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
         shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
         shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+        shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNormalMatrix");
+
     }
 
     function setMatrixUniforms() {
         gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
         gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+        gl.uniformMatrix4fv(shaderProgram.nMatrixUniform, false, nMatrix);
     }
 
     var mvMatrix = mat4.create();
     var mvMatrixStack = [];
     var pMatrix = mat4.create();
+    var nMatrix = mat4.create();
 
     function mvPushMatrix() {
         var copy = mat4.create();

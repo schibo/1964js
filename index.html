@@ -8,20 +8,33 @@
 -->
 <script id="shader-fs" type="x-shader/x-fragment">
     precision mediump float;
+    varying float v_Dot;
+    vec4 color = vec4(0.1, 0.1, 0.1, 1.0);
     
     void main(void) {
-        gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+        color += vec4(0.1, 0.1, 0.1, 1.0);
+        gl_FragColor = vec4(color.xyz * v_Dot, color.a);
     }
 </script>
 
 <script id="shader-vs" type="x-shader/x-vertex">
-    attribute vec3 aVertexPosition;
     
     uniform mat4 uMVMatrix;
     uniform mat4 uPMatrix;
+    uniform mat4 uNormalMatrix;
+    
+    vec3 vNormal = vec3(-1.0, -1.0, 3.0);
+    attribute vec3 aVertexPosition;
+
+    
+    varying float v_Dot;
+    
+    vec3 lightDir = vec3(0.0, 0.0, 2.0);
     
     void main(void) {
         gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+        vec4 transNormal = uNormalMatrix * vec4(vNormal, 1);
+        v_Dot = max(dot(transNormal.xyz, lightDir), 0.0);
     }
 </script>
 

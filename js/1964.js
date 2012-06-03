@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  possible BUGS in original 1964cpp?:
  - JAL & JALR instr_index: upper 4 bits are from the pc's delay slot, not the current pc!
  write to si_status reg was clearing MI_INTR_SI unconditionally! this was
- causing sinus, plasma, hardcoded, mandembrot zoomer, lightforce, and other demos to not work in 1964js.
+ causing sinus, plasma, hardcoded, mandelbrot zoomer, lightforce, and other demos to not work in 1964js.
  - mtc0 index should be cp0[index] & 0x80000000 | r[n] & 0x3f?
  - aValue is not applicable in jalr (dynabranch.h)
  - shift amounts of 0 truncate 64bit registers to 32bit. This is a possible bug in the original 1964cpp.

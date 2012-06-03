@@ -805,6 +805,12 @@ function drawScene() {
         mat4.identity(mvMatrix);
         mat4.translate(mvMatrix, [0.0, 0.0, -2.4]);
         
+        //simple lighting. Get the normal matrix of the model-view matrix
+        mat4.set(mvMatrix, nMatrix);
+        mat4.inverse(nMatrix, nMatrix);
+        mat4.transpose(nMatrix);
+        
+        
         mvPushMatrix();
         mat4.translate(mvMatrix, [0.0, 0.0, -1.0]);
         //mat4.rotate(mvMatrix, deg++*Math.PI/180, [1, 0, 0]);
