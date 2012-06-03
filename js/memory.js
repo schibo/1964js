@@ -1,6 +1,6 @@
 /*
 1964js - JavaScript/HTML5 port of 1964 - N64 emulator
-Copyright (C) 2012 Joel Middendorf
+Copyright (C) 2012 JdummyReadWriteUint8Arrayoel Middendorf
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -142,7 +142,7 @@ function loadByte(addr)
         fatal( ': warning: reading from dummy memory at ' + dec2hex(addr));
         //stopEmulator();
         var off=a&0x0000fffc;
-        return dummyUint8Array[off];        
+        return dummyReadWriteUint8Array[off];        
 	}
 }
 
@@ -255,7 +255,7 @@ function loadHalf(addr)
         fatal( ': warning: reading from dummy memory at ' + dec2hex(addr));
         //stopEmulator();
         var off=a&0x0000fffc;
-        return dummyUint8Array[off]<<8 | dummyUint8Array[off+1];
+        return dummyReadWriteUint8Array[off]<<8 | dummyReadWriteUint8Array[off+1];
 	}
 }
 
@@ -371,7 +371,7 @@ function loadWord(addr)
         fatal( ': warning: reading from dummy memory at ' + dec2hex(addr));
         //stopEmulator();
         var off=a&0x0000fffc;
-        return dummyUint8Array[off]<<24 | dummyUint8Array[off+1]<<16 | dummyUint8Array[off+2]<<8 | dummyUint8Array[off+3];        
+        return dummyReadWriteUint8Array[off]<<24 | dummyReadWriteUint8Array[off+1]<<16 | dummyReadWriteUint8Array[off+2]<<8 | dummyReadWriteUint8Array[off+3];        
 	}
 }
 

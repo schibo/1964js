@@ -290,11 +290,9 @@ function processVertexData(addr, v0, num)
     vecProjected[i].z = vtxTransformed[i].z * vecProjected[i].w;
 
     //temp
-    vtxTransformed[i].x = vecProjected[i].x / 20.0;
-    vtxTransformed[i].y = vecProjected[i].y / 20.0;
-    //vtxTransformed[i].z = vecProjected[i].z / 20.0;
-
-    vtxTransformed[i].z = 3.9;     //hack for now
+    vtxTransformed[i].x = vecProjected[i].x;
+    vtxTransformed[i].y = vecProjected[i].y;
+    vtxTransformed[i].z = vecProjected[i].z;
     }
 }
 
@@ -584,7 +582,7 @@ function DLParser_TexRect(pc) {
     yl -= 120; yl /= -120;
     yh -= 120; yh /= -120;
     
-        gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
+      //  gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
 
 
 //             1.0,  1.0,  0.0,
@@ -743,7 +741,7 @@ function initVertex(dwV, vtxIndex, bTexture) {
     if( vtxTransformed[dwV].w < 0 )	vtxProjected5[vtxIndex][4] = 0;
 		vtxIndex[vtxIndex] = vtxIndex;
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
+        //gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
 
 
         var offset = 3*(triangleVertexPositionBuffer.numItems);
@@ -803,9 +801,7 @@ function drawScene() {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
-
         mat4.identity(mvMatrix);
-
         mat4.translate(mvMatrix, [0.0, 0.0, -2.0]);
         
         mvPushMatrix();
@@ -820,11 +816,16 @@ function drawScene() {
         gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
         setMatrixUniforms();
         //gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
+        
+ //       alert(triangleVertexPositionBuffer.numItems + ' :' + this.vertices.length);
         gl.drawArrays(gl.LINE_STRIP, 0, triangleVertexPositionBuffer.numItems);
 
         mvPopMatrix();
 
  //       mat4.translate(mvMatrix, [3.0, 0.0, 0.0]);
+
+        //alert(squareVertexPositionBuffer.numItems);
+
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.trivertices), gl.STATIC_DRAW);
         gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
         gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
