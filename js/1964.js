@@ -181,7 +181,7 @@ var request;
 
 _1964jsEmulator = function() {
 
-    cancelRequestAnimFrame(request);
+    cancelAnimFrame(request);
     this.runLoop = null;
     currentHack = 0;
     startTime = 0;
@@ -190,53 +190,52 @@ _1964jsEmulator = function() {
     magic_number = -625000;
     flushDynaCache();
 
-    this.regBuffer = new ArrayBuffer(35*4);
-    this.r = new Int32Array(this.regBuffer);
-
     this.log = function(message) {
     //  console.log(message);
     }
 
     this.init = function(buffer) {
+        var r = new Int32Array(35*4);
+
         showFB = true;
         this.endianTest();
         //runTest();
 
-        this.r[0] = 0;
-        this.r[1] = 0;
-        this.r[2] = 0xd1731be9;
-        this.r[3] = 0xd1731be9;
-        this.r[4] = 0x001be9;
-        this.r[5] = 0xf45231e5;
-        this.r[6] = 0xa4001f0c;
-        this.r[7] = 0xa4001f08;
-        this.r[8] = 0x070; //check
-        this.r[9] = 0;
-        this.r[10] = 0x040;
-        this.r[11] = 0xA4000040;
-        this.r[12] = 0xd1330bc3;
-        this.r[13] = 0xd1330bc3;
-        this.r[14] = 0x025613a26;
-        this.r[15] = 0x02ea04317;
-        this.r[16] = 0;
-        this.r[17] = 0;
-        this.r[18] = 0;
-        this.r[19] = 0;
-        this.r[20] = 0;//TV System
-        this.r[21] = 0;
-        this.r[22] = 0;//CIC
-        this.r[23] = 0x06;
-        this.r[24] = 0;
-        this.r[25] = 0xd73f2993;
-        this.r[26] = 0;
-        this.r[27] = 0;
-        this.r[28] = 0;
-        this.r[29] = 0xa4001ff0;
-        this.r[30] = 0;
-        this.r[31] = 0xa4001554;
-        this.r[32] = 0; //LO for mult
-        this.r[33] = 0; //HI for mult
-        this.r[34] = 0; //to protect r0, write here. (r[34])
+        r[0] = 0;
+        r[1] = 0;
+        r[2] = 0xd1731be9;
+        r[3] = 0xd1731be9;
+        r[4] = 0x001be9;
+        r[5] = 0xf45231e5;
+        r[6] = 0xa4001f0c;
+        r[7] = 0xa4001f08;
+        r[8] = 0x070; //check
+        r[9] = 0;
+        r[10] = 0x040;
+        r[11] = 0xA4000040;
+        r[12] = 0xd1330bc3;
+        r[13] = 0xd1330bc3;
+        r[14] = 0x025613a26;
+        r[15] = 0x02ea04317;
+        r[16] = 0;
+        r[17] = 0;
+        r[18] = 0;
+        r[19] = 0;
+        r[20] = 0;//TV System
+        r[21] = 0;
+        r[22] = 0;//CIC
+        r[23] = 0x06;
+        r[24] = 0;
+        r[25] = 0xd73f2993;
+        r[26] = 0;
+        r[27] = 0;
+        r[28] = 0;
+        r[29] = 0xa4001ff0;
+        r[30] = 0;
+        r[31] = 0xa4001554;
+        r[32] = 0; //LO for mult
+        r[33] = 0; //HI for mult
+        r[34] = 0; //to protect r0, write here. (r[34])
 
         rom = buffer;
         //rom = new Uint8Array(buffer);
@@ -272,8 +271,8 @@ _1964jsEmulator = function() {
             spMemUint8Array[k] = rom[k];
         }
 
-        this.r[20] = this.getTVSystem(romUint8Array[0x3D]);
-        this.r[22] = this.getCIC();
+        r[20] = this.getTVSystem(romUint8Array[0x3D]);
+        r[22] = this.getCIC();
 
         cp0[STATUS] = 0x70400004;
         cp0[RANDOM] = 0x0000001f;
@@ -297,9 +296,9 @@ _1964jsEmulator = function() {
         //set hi vals
         var i=0;
         for (i=0; i<35; i++)
-            h[i] = this.r[i]>>31;
+            h[i] = r[i]>>31;
 
-        this.startEmulator();
+        this.startEmulator(r);
     }
 
     this.trace2 = function(address, opcode) {
@@ -402,14 +401,13 @@ _1964jsEmulator = function() {
         speed = s;
     }
 
-    this.runLoop = function() {
-        var _this = window["emu"];
+    this.runLoop = function(r) {
         
         if (terminate === false)
-            request = requestAnimFrame(_this.runLoop);
+            request = requestAnimFrame(this.runLoop.bind(this, r));
+        
         keepRunning = speed;
         var pc, fnName, fn;
-        var lr=_this.r;
 
         pc = programCounter >>> 2;
         fnName = '_' + pc; 
@@ -417,12 +415,12 @@ _1964jsEmulator = function() {
 
         while (keepRunning-- > 0) {
             if (!fn)
-                fn = _this.decompileBlock(programCounter);    
+                fn = this.decompileBlock(programCounter);    
         
-            fn = fn(lr);
+            fn = fn(r);
         
             if (magic_number >= 0) {
-                _this.repaintWrapper();
+                this.repaintWrapper();
                 magic_number = -625000;
                 cp0[COUNT] += 625000;
                 if (cp0[COUNT] >= cp0[COMPARE]) {
@@ -449,7 +447,7 @@ _1964jsEmulator = function() {
         this.repaint(ctx, ImDat, getInt32(viUint8Array, viUint8Array, VI_ORIGIN_REG) & 0x00FFFFFF)
     }
 
-    this.startEmulator = function() {
+    this.startEmulator = function(r) {
         terminate = false;
         this.log('startEmulator');
         
@@ -459,7 +457,7 @@ _1964jsEmulator = function() {
             this.changeSpeed(speedScrubber.value);
             speedScrubber.style.opacity = 1.0;
         }
-        this.runLoop();
+        this.runLoop(r);
         //interval = setInterval(runLoop, 0);
     }
 
@@ -932,7 +930,7 @@ _1964jsEmulator = function() {
             delaySlot = "false";
         }
 
-        return 'window["emu"].inter_mtc0(r,'+fs(i)+','+rt(i)+','+delaySlot+','+pc+');';
+        return '_1964Helpers.prototype.inter_mtc0(r,'+fs(i)+','+rt(i)+','+delaySlot+','+pc+');';
     }
 
     this.r4300i_sll = function(i) {
@@ -1005,11 +1003,11 @@ _1964jsEmulator = function() {
     }
 
     this.r4300i_multu = function(i) {
-        return 'window["emu"].inter_multu(r,'+i+');';
+        return '_1964Helpers.prototype.inter_multu(r,'+i+');';
     }
 
     this.r4300i_mult = function(i) {
-        return 'window["emu"].inter_mult(r,'+i+');'; 
+        return '_1964Helpers.prototype.inter_mult(r,'+i+');'; 
     }
 
     this.r4300i_mflo = function(i) {
@@ -1147,7 +1145,7 @@ _1964jsEmulator = function() {
     }
 
     this.r4300i_dmultu = function(i) {
-        return 'window["emu"].inter_dmultu(r,'+i+');';
+        return '_1964Helpers.prototype.inter_dmultu(r,'+i+');';
     }
 
     this.r4300i_dsll32 = function(i) {
@@ -1159,13 +1157,13 @@ _1964jsEmulator = function() {
     }
 
     this.r4300i_ddivu = function(i) {
-        return 'window["emu"].inter_ddivu(r,'+i+');'
+        return '_1964Helpers.prototype.inter_ddivu(r,'+i+');'
     }
 
     this.r4300i_ddiv = function(i) {
         alert('ddiv');
 
-        return 'window["emu"].inter_ddiv(r,'+i+');'
+        return '_1964Helpers.prototype.inter_ddiv(r,'+i+');'
     }
 
     this.r4300i_dadd = function(i) {
@@ -1186,11 +1184,11 @@ _1964jsEmulator = function() {
     }
 
     this.r4300i_div = function(i) {
-        return 'window["emu"].inter_div(r,'+i+');'; 
+        return '_1964Helpers.prototype.inter_div(r,'+i+');'; 
     }
 
     this.r4300i_divu = function(i) {
-        return 'window["emu"].inter_divu(r,'+i+');'; 
+        return '_1964Helpers.prototype.inter_divu(r,'+i+');'; 
     }
 
     this.r4300i_sra = function(i) {
@@ -1423,7 +1421,7 @@ _1964jsEmulator = function() {
     }
 
     this.r4300i_daddi = function(i) {
-        return 'window["emu"].inter_daddi(r,'+i+');';
+        return '_1964Helpers.prototype.inter_daddi(r,'+i+');';
     }
 
     this.r4300i_teq = function(i) {
@@ -1453,35 +1451,35 @@ _1964jsEmulator = function() {
 
     //using same as daddi
     this.r4300i_daddiu = function(i) {
-        return 'window["emu"].inter_daddiu(r,'+i+');';
+        return '_1964Helpers.prototype.inter_daddiu(r,'+i+');';
     }
 
     this.r4300i_daddu = function(i) {
-        return 'window["emu"].inter_daddu(r,'+i+');';
+        return '_1964Helpers.prototype.inter_daddu(r,'+i+');';
     }
 
     this.r4300i_C_EQ_D = function(i) {
-        return 'window["emu"].inter_r4300i_C_cond_fmt_d('+i+');';
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+');';
     }
 
     this.r4300i_C_EQ_S = function(i) {
-        return 'window["emu"].inter_r4300i_C_cond_fmt_s('+i+');';
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+');';
     }
 
     this.r4300i_C_LT_S = function(i) {
-        return 'window["emu"].inter_r4300i_C_cond_fmt_s('+i+');';
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+');';
     }
 
     this.r4300i_C_LT_D = function(i) {
-        return 'window["emu"].inter_r4300i_C_cond_fmt_d('+i+');';
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+');';
     }
 
     this.r4300i_C_LE_S = function(i) {
-        return 'window["emu"].inter_r4300i_C_cond_fmt_s('+i+');';
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+');';
     }
 
     this.r4300i_C_LE_D = function(i) {
-        return 'window["emu"].inter_r4300i_C_cond_fmt_d('+i+');';
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+');';
     }
 
     this.r4300i_COP1_bc1f = function(i) {

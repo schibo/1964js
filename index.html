@@ -4,29 +4,6 @@
 
 <body onload="webGLStart()">
 
-<script src="js/lib/BigInt.js"></script>
-<script src="js/lib/closure/goog/base.js" type="text/javascript"></script>
-<script src="js/lib/Stats.js"></script>
-<script src="js/polyFills.js"></script>
-<script src="js/1964.js"></script>
-<script src="js/helpers.js"></script>
-<script src="js/opcodeMap.js"></script>
-<script src="js/boot.js"></script>
-<script src="js/lib/closure/goog/math/long.js"></script>
-<script src="js/constants.js"></script>
-<script src="js/pif.js"></script>
-<script src="js/memory.js"></script>
-<script src="js/dma.js"></script>
-<script src="js/interrupts.js"></script>
-<script src="js/lib/glMatrix-0.9.5.min.js"></script>
-<script src="js/lib/webgl-utils.js"></script>
-<script src="js/gfxHelpers.js"></script>
-<script src="js/tests.js"></script>
-<script src="js/videoHLE.js"></script>
-<script src="js/ui.js"></script>
-<script src="js/webGL.js"></script>
-
-
 <!--<script src="1964js-0.0.1.min.js"></script>
 -->
 <script id="shader-fs" type="x-shader/x-fragment">
@@ -102,7 +79,7 @@
 </tr>
 </div>
 
-<div id="speedScrubber" style="opacity: 0.0; z-index: 1000; position: fixed; top: 10 px; left: 10 px; background-color: #CC8822; border: 2px solid #aa6600; font-size: 13px; color: white; font-weight: bold; font-family:Arial,Helvetica,sans-serif;">Slower (less CPU)<input id="speed" name="Speed" width=640 type="range" min=0 max=131072 value=65535 step=100 onchange="emu.changeSpeed(this.value)"/>Faster (more CPU)
+<div id="speedScrubber" style="opacity: 0.0; z-index: 1000; position: fixed; top: 10 px; left: 10 px; background-color: #CC8822; border: 2px solid #aa6600; font-size: 13px; color: white; font-weight: bold; font-family:Arial,Helvetica,sans-serif;">Slower (less CPU)<input id="speed" name="Speed" width=640 type="range" min=0 max=131072 value=65535 step=100 onchange="_1964js.changeSpeed(this.value)"/>Faster (more CPU)
 </div>
 
 
@@ -156,7 +133,6 @@ function showValue(newValue)
 
 
 <script>
-    var gg = goog; //Google Closure API
     
   var reader;
   var progress = document.querySelector('.percent');
@@ -206,7 +182,7 @@ function showValue(newValue)
     }
   }
 
-var emu; 
+var _1964js; 
 
   function handleFileSelect(evt) {
     // Reset progress indicator on new file selection.
@@ -230,8 +206,8 @@ var emu;
       //todo: add zip support (from index.html)
       var buffer = new Uint8Array(reader.result);
       romLength = buffer.byteLength;
-      emu = new _1964jsEmulator("emu");
-      emu.init(buffer);
+      _1964js = new _1964jsEmulator();
+      _1964js.init(buffer);
     }
 
     // Read in the file as an array buffer.
@@ -239,6 +215,32 @@ var emu;
   }
 
   document.getElementById('files').addEventListener('change', handleFileSelect, false);
+</script>
+
+<script src="js/lib/BigInt.js"></script>
+<script src="js/lib/closure/goog/base.js" type="text/javascript">
+</script>
+<script src="js/lib/Stats.js"></script>
+<script src="js/1964.js"></script>
+<script src="js/helpers.js"></script>
+<script src="js/opcodeMap.js"></script>
+<script src="js/boot.js"></script>
+<script src="js/lib/closure/goog/math/long.js"></script>
+<script src="js/constants.js"></script>
+<script src="js/pif.js"></script>
+<script src="js/memory.js"></script>
+<script src="js/dma.js"></script>
+<script src="js/interrupts.js"></script>
+<script src="js/lib/glMatrix-0.9.5.min.js"></script>
+<script src="js/lib/webgl-utils.js"></script>
+<script src="js/gfxHelpers.js"></script>
+<script src="js/tests.js"></script>
+<script src="js/videoHLE.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/webGL.js"></script>
+
+<script>
+    var gg = goog; //Google Closure API
 </script>
 </body>
 

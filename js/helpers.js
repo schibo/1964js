@@ -309,8 +309,10 @@ function dLogic(i, n) {
 //Interpreted opcode helpers
 ////////////////////////////
 
+_1964Helpers = function(){}
+
     //called function, not compiled
-_1964jsEmulator.prototype.inter_mtc0 = function(r, f, rt, isDelaySlot, pc) {
+_1964Helpers.prototype.inter_mtc0 = function(r, f, rt, isDelaySlot, pc) {
         //incomplete:
         switch (f) {
             case CAUSE:
@@ -384,7 +386,7 @@ _1964jsEmulator.prototype.inter_mtc0 = function(r, f, rt, isDelaySlot, pc) {
     }
 
 
-_1964jsEmulator.prototype.inter_mult = function(r, i)
+_1964Helpers.prototype.inter_mult = function(r, i)
 {
     var rs32 = r[rs(i)];
     var rt32 = r[rt(i)];
@@ -400,7 +402,7 @@ _1964jsEmulator.prototype.inter_mult = function(r, i)
     h[33]=r[33]>>31;
 }
 
-_1964jsEmulator.prototype.inter_multu = function(r, i)
+_1964Helpers.prototype.inter_multu = function(r, i)
 {
     var rs32 = r[rs(i)];
     var rt32 = r[rt(i)];
@@ -418,7 +420,7 @@ _1964jsEmulator.prototype.inter_multu = function(r, i)
 //    alert('multu: '+r[rs(i)]+'*'+r[rt(i)]+'='+dec2hex(h[33]) +' '+dec2hex(r[33])+' '+dec2hex(h[32])+' '+dec2hex(r[32]));
 }
 
-_1964jsEmulator.prototype.inter_daddi = function(r, i)
+_1964Helpers.prototype.inter_daddi = function(r, i)
 {    
     var rs1 = gg.math.Long.fromBits(r[rs(i)], h[rs(i)]);
     var imm = gg.math.Long.fromBits(soffset_imm(i), soffset_imm(i)>>31);
@@ -429,7 +431,7 @@ _1964jsEmulator.prototype.inter_daddi = function(r, i)
     h[rt(i)]=rtres.getHighBits(); //hi
 }
 
-_1964jsEmulator.prototype.inter_daddiu = function(r, i)
+_1964Helpers.prototype.inter_daddiu = function(r, i)
 {    
     var rs1 = gg.math.Long.fromBits(r[rs(i)], h[rs(i)]);
     var imm = gg.math.Long.fromBits(soffset_imm(i), soffset_imm(i)>>31);
@@ -440,7 +442,7 @@ _1964jsEmulator.prototype.inter_daddiu = function(r, i)
     h[rt(i)]=rtres.getHighBits(); //hi
 }
 
-_1964jsEmulator.prototype.inter_dadd = function(r, i)
+_1964Helpers.prototype.inter_dadd = function(r, i)
 {    
     var rs1 = gg.math.Long.fromBits(r[rs(i)], h[rs(i)]);
     var rt1 = gg.math.Long.fromBits(r[rt(i)], h[rt(i)]);
@@ -451,7 +453,7 @@ _1964jsEmulator.prototype.inter_dadd = function(r, i)
     h[rd(i)]=rdres.getHighBits(); //hi
 }
 
-_1964jsEmulator.prototype.inter_daddu = function(r, i)
+_1964Helpers.prototype.inter_daddu = function(r, i)
 {    
     var rs1 = gg.math.Long.fromBits(r[rs(i)], h[rs(i)]);
     var rt1 = gg.math.Long.fromBits(r[rt(i)], h[rt(i)]);
@@ -462,7 +464,7 @@ _1964jsEmulator.prototype.inter_daddu = function(r, i)
     h[rd(i)]=rdres.getHighBits(); //hi
 }
 
-_1964jsEmulator.prototype.inter_div = function(r, i)
+_1964Helpers.prototype.inter_div = function(r, i)
 {
     if (r[rt(i)] === 0)
     {
@@ -482,7 +484,7 @@ _1964jsEmulator.prototype.inter_div = function(r, i)
 
 }
 
-_1964jsEmulator.prototype.inter_ddiv = function(r, i)
+_1964Helpers.prototype.inter_ddiv = function(r, i)
 {
     var rs32 = r[rs(i)];
     var rt32 = r[rt(i)];
@@ -511,7 +513,7 @@ _1964jsEmulator.prototype.inter_ddiv = function(r, i)
 }
 
 
-_1964jsEmulator.prototype.inter_divu = function(r, i)
+_1964Helpers.prototype.inter_divu = function(r, i)
 {
 
     if (r[rt(i)] === 0)
@@ -531,7 +533,7 @@ _1964jsEmulator.prototype.inter_divu = function(r, i)
 //    alert('divu: '+r[rs(i)]+'/'+r[rt(i)]+'='+dec2hex(h[33]) +' '+dec2hex(r[33])+' '+dec2hex(h[32])+' '+dec2hex(r[32]));
 }
 
-_1964jsEmulator.prototype.inter_dmult = function(r, i)
+_1964Helpers.prototype.inter_dmult = function(r, i)
 {
     //this is wrong..i think BigInt it will treat hex as unsigned? 
     var rs64 = '0x' + dec2hex(h[rs(i)]) + '' + dec2hex(r[rs(i)]);
@@ -582,7 +584,7 @@ _1964jsEmulator.prototype.inter_dmult = function(r, i)
 //    alert('dmult: '+rs64+'*'+rt64+'='+dec2hex(h[33]) +' '+dec2hex(r[33])+' '+dec2hex(h[32])+' '+dec2hex(r[32]));
 }
 
-_1964jsEmulator.prototype.inter_dmultu = function(r, i)
+_1964Helpers.prototype.inter_dmultu = function(r, i)
 {
 //Attax demo
     var rs64 = '0x0' + dec2hex(h[rs(i)]) + '' + dec2hex(r[rs(i)]);
@@ -634,7 +636,7 @@ _1964jsEmulator.prototype.inter_dmultu = function(r, i)
 }
 
 
-_1964jsEmulator.prototype.inter_ddivu = function(r, i)
+_1964Helpers.prototype.inter_ddivu = function(r, i)
 {
     var rs64 = '0x0' + dec2hex(h[rs(i)]) + '' + dec2hex(r[rs(i)]);
     var rt64 = '0x0' + dec2hex(h[rt(i)]) + '' + dec2hex(r[rt(i)]);
@@ -694,7 +696,7 @@ _1964jsEmulator.prototype.inter_ddivu = function(r, i)
 
 }
 
-_1964jsEmulator.prototype.inter_r4300i_C_cond_fmt_s = function(instruction)
+_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s = function(instruction)
 {
 	var	fcFS32, fcFT32;
 	var	less, equal, unordered, cond, cond0, cond1, cond2, cond3;
@@ -735,7 +737,7 @@ _1964jsEmulator.prototype.inter_r4300i_C_cond_fmt_s = function(instruction)
 		cp1Con[31] |= COP1_CONDITION_BIT;
 }
 
-_1964jsEmulator.prototype.inter_r4300i_C_cond_fmt_d = function(instruction)
+_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d = function(instruction)
 {
 	var	fcFS64, fcFT64;
 	var	less, equal, unordered, cond, cond0, cond1, cond2, cond3;
