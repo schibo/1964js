@@ -31,6 +31,13 @@ var gRSPworldProject = mat4.create();
 
 gRSP.projectionMtxs = new Array(RICE_MATRIX_STACK);
 gRSP.modelviewMtxs = new Array(RICE_MATRIX_STACK);
+//todo: allocate on-demand
+for (var i=0; i<RICE_MATRIX_STACK; i++)
+{
+    gRSP.projectionMtxs[i] = mat4.create();
+    gRSP.modelviewMtxs[i] = mat4.create();
+}
+
 gRSP.vertexMult = 10;
 
 
