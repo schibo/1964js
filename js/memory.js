@@ -475,7 +475,7 @@ function storeWord(val, addr, pc, isDelaySlot)
         return;
     }
     else if (a >= MEMORY_START_ROM_IMAGE && a < MEMORY_START_ROM_IMAGE + romLength) {
-        alert('warning: attempt to overwrite rom!');
+        alert('attempt to overwrite rom!');
         var off=a-MEMORY_START_ROM_IMAGE;
         romUint8Array[off] = val>>24;romUint8Array[off+1] = val>>16;romUint8Array[off+2] = val>>8;romUint8Array[off+3] = val;
         return;
@@ -496,7 +496,7 @@ function storeWord(val, addr, pc, isDelaySlot)
         return;
 	}
 	else {
-        throw( dec2hex(pc) + ': warning: writing to invalid memory at ' + dec2hex(addr));
+        throw('writing to invalid memory at ' + dec2hex(addr));
         //stopEmulator();
         var off=a&0x0000fffc;
         rdramUint8Array[off] = val>>24;rdramUint8Array[off+1] = val>>16;rdramUint8Array[off+2] = val>>8;rdramUint8Array[off+3] = val;
@@ -605,7 +605,7 @@ function storeByte(val, addr, pc, isDelaySlot)
         return;
     }
     else if (a >= MEMORY_START_ROM_IMAGE && a < MEMORY_START_ROM_IMAGE + romLength) {
-        alert('warning: attempt to overwrite rom!');
+        alert('attempt to overwrite rom!');
         var off=a-MEMORY_START_ROM_IMAGE;
         romUint8Array[off] = val;
         return;
@@ -626,7 +626,7 @@ function storeByte(val, addr, pc, isDelaySlot)
         return;
 	}
 	else {
-        throw( dec2hex(pc) + ': warning: writing to invalid memory at ' + dec2hex(addr));
+        throw('writing to invalid memory at ' + dec2hex(addr));
         //stopEmulator();
         var off=a&0x0000fffc;
         rdramUint8Array[off] = val;
@@ -734,7 +734,7 @@ function storeHalf(val, addr, pc, isDelaySlot)
         return;
     }
     else if (a >= MEMORY_START_ROM_IMAGE && a < MEMORY_START_ROM_IMAGE + romLength) {
-        alert('warning: attempt to overwrite rom!');
+        alert('attempt to overwrite rom!');
         var off=a-MEMORY_START_ROM_IMAGE;
         romUint8Array[off] = val>>8;romUint8Array[off+1] = val;
         return;
@@ -755,7 +755,7 @@ function storeHalf(val, addr, pc, isDelaySlot)
         return;
 	}
 	else {
-        throw( dec2hex(pc) + ': warning: writing to invalid memory at ' + dec2hex(addr));
+        throw('writing to invalid memory at ' + dec2hex(addr));
         //stopEmulator();
         var off=a&0x0000fffc;
         rdramUint8Array[off] = val>>8;rdramUint8Array[off+1] = val;

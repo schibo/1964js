@@ -796,7 +796,6 @@ return true;
         squareVertexPositionBuffer.numItems = this.vertices.length/3;
     }
 
-var deg = 0;
 function drawScene() {
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -809,35 +808,22 @@ function drawScene() {
         mat4.set(mvMatrix, nMatrix);
         mat4.inverse(nMatrix, nMatrix);
         mat4.transpose(nMatrix);
-        
-        
+                
         mvPushMatrix();
         mat4.translate(mvMatrix, [0.0, 0.0, -1.0]);
-        //mat4.rotate(mvMatrix, deg++*Math.PI/180, [1, 0, 0]);
-        
-        if (deg == 360)
-            deg = 0;
         
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.DYNAMIC_DRAW);
         gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
         gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
         setMatrixUniforms();
-        //gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
-        
- //       alert(triangleVertexPositionBuffer.numItems + ' :' + this.vertices.length);
         gl.drawArrays(gl.LINE_STRIP, 0, triangleVertexPositionBuffer.numItems);
 
         mvPopMatrix();
-
- //       mat4.translate(mvMatrix, [3.0, 0.0, 0.0]);
-
-        //alert(squareVertexPositionBuffer.numItems);
 
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.trivertices), gl.DYNAMIC_DRAW);
         gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
         gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
         setMatrixUniforms();
-       // gl.drawArrays(gl.TRIANGLE_STRIP, 0, squareVertexPositionBuffer.numItems);
        gl.drawArrays(gl.LINE_STRIP, 0, squareVertexPositionBuffer.numItems);
        
     }

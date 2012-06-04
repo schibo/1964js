@@ -68,78 +68,48 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     else
         code = new Object();
 
-    var hRegBuffer = new ArrayBuffer(35*4);
-    var vAddrBuffer = new ArrayBuffer(4);
-    var cp0Buffer = new ArrayBuffer(32*4) 
+    var h = new Int32Array(35*4); //r hi
+    var vAddr = new Int32Array(4);
+    var cp0 = new Int32Array(32*4);
     var cp1Buffer = new ArrayBuffer(32*8);
-    var cp1ConBuffer = new ArrayBuffer(32*4);
-    var RDRAM = new ArrayBuffer(0x400000);
-    var EXRDRAM = new ArrayBuffer(0x400000);
-    var C2A1 = new ArrayBuffer(0x10000);
-    var C1A1 = new ArrayBuffer(0x10000);
-    var C2A2 = new ArrayBuffer(0x10000);
-    var GIO_REG = new ArrayBuffer(0x10000);
-    var C1A3 = new ArrayBuffer(0x10000);
-    var PIF = new ArrayBuffer(0x10000);
-    var dummyNoAccess = new ArrayBuffer(0x10000);
-    var dummyReadWrite = new ArrayBuffer(0x10000);
-    var dummyAllZero = new ArrayBuffer(0x10000);
-    var ramRegs0 = new ArrayBuffer(0x10000);
-    var ramRegs4 = new ArrayBuffer(0x10000);
-    var ramRegs8 = new ArrayBuffer(0x10000);
-    var SP_MEM = new ArrayBuffer(0x10000);
-    var SP_REG_1 = new ArrayBuffer(0x10000);
-    var SP_REG_2 = new ArrayBuffer(0x10000);
-    var DPC = new ArrayBuffer(0x10000);
-    var DPS = new ArrayBuffer(0x10000);
-    var MI = new ArrayBuffer(0x10000);
-    var VI = new ArrayBuffer(0x10000);
-    var AI = new ArrayBuffer(0x10000);
-    var PI = new ArrayBuffer(0x10000);
-    var RI = new ArrayBuffer(0x10000);
-    var SI = new ArrayBuffer(0x10000);
-
-    var h = new Int32Array(hRegBuffer); //r hi
-    var vAddr = new Int32Array(vAddrBuffer);
-    var cp0 = new Int32Array(cp0Buffer);
     var cp1_i = new Int32Array(cp1Buffer);
     var cp1_f = new Float32Array(cp1Buffer);
     var cp1_f64 = new Float64Array(cp1Buffer);
     var rom; //will be assigned as new Uint8Array on init()
     var romUint8Array;
-    var cp1Con = new Int32Array(cp1ConBuffer);
+    var cp1Con = new Int32Array(32*4);
     var LLbit=0;
 
     var tlb = new Array(32);
     for (var i=0; i<32; i++)
         tlb[i] = new Object();
 
-    var rdramUint8Array = new Uint8Array(RDRAM);
-    var exRdramUint8Array = new Uint8Array(EXRDRAM);
-    var spMemUint8Array = new Uint8Array(SP_MEM);
-    var spReg1Uint8Array = new Uint8Array(SP_REG_1);
-    var spReg2Uint8Array = new Uint8Array(SP_REG_2);
-    var dpcUint8Array = new Uint8Array(DPC);
-    var dpsUint8Array = new Uint8Array(DPS);
-    var miUint8Array = new Uint8Array(MI);
-    var viUint8Array = new Uint8Array(VI);
-    var aiUint8Array = new Uint8Array(AI);
-    var piUint8Array = new Uint8Array(PI);
-    var siUint8Array = new Uint8Array(SI);
-    var c2a1Uint8Array = new Uint8Array(C2A1);
-    var c1a1Uint8Array = new Uint8Array(C1A1);
-    var c2a2Uint8Array = new Uint8Array(C2A2);
-    var c1a3Uint8Array = new Uint8Array(C1A3);
-    var riUint8Array = new Uint8Array(RI);
-    var pifUint8Array = new Uint8Array(PIF);
-    var gioUint8Array = new Uint8Array(GIO_REG);
-    var ramRegs0Uint8Array = new Uint8Array(ramRegs0);
-    var ramRegs4Uint8Array = new Uint8Array(ramRegs4);
-    var ramRegs8Uint8Array = new Uint8Array(ramRegs8);
-    var dummyReadWriteUint8Array = new Uint8Array(dummyReadWrite);
+    var rdramUint8Array = new Uint8Array(0x400000);
+    var exRdramUint8Array = new Uint8Array(0x400000);
+    var spMemUint8Array = new Uint8Array(0x10000);
+    var spReg1Uint8Array = new Uint8Array(0x10000);
+    var spReg2Uint8Array = new Uint8Array(0x10000);
+    var dpcUint8Array = new Uint8Array(0x10000);
+    var dpsUint8Array = new Uint8Array(0x10000);
+    var miUint8Array = new Uint8Array(0x10000);
+    var viUint8Array = new Uint8Array(0x10000);
+    var aiUint8Array = new Uint8Array(0x10000);
+    var piUint8Array = new Uint8Array(0x10000);
+    var siUint8Array = new Uint8Array(0x10000);
+    var c2a1Uint8Array = new Uint8Array(0x10000);
+    var c1a1Uint8Array = new Uint8Array(0x10000);
+    var c2a2Uint8Array = new Uint8Array(0x10000);
+    var c1a3Uint8Array = new Uint8Array(0x10000);
+    var riUint8Array = new Uint8Array(0x10000);
+    var pifUint8Array = new Uint8Array(0x10000);
+    var gioUint8Array = new Uint8Array(0x10000);
+    var ramRegs0Uint8Array = new Uint8Array(0x10000);
+    var ramRegs4Uint8Array = new Uint8Array(0x10000);
+    var ramRegs8Uint8Array = new Uint8Array(0x10000);
+    var dummyReadWriteUint8Array = new Uint8Array(0x10000);
     var docElement,errorElement,g,s,interval,keepRunning,offset,programCounter, romLength, redrawDebug=0;
     var terminate=false;
-    //window.onload = init;
+
     var c,ctx, ImDat,ImDat2, showFB;
     //todo: get from emulation
     var NUM_CHANNELS = 1;
@@ -155,10 +125,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     var forceRepaint = false; //presumably origin reg doesn't change because not double or triple-buffered (single-buffered)
     //main run loop
     var doOnce=0;
-    //#define NTSC_MAX_VI_LINE		525
-    //#define PAL_MAX_VI_LINE			625
-    //#define NTSC_VI_MAGIC_NUMBER	625000
-    //#define PAL_VI_MAGIC_NUMBER		777809				/* 750000 //777809 */
+
     var kk=0;
     var TV_SYSTEM_NTSC = 1;
     var TV_SYSTEM_PAL = 0;
@@ -181,15 +148,6 @@ var request;
 
 _1964jsEmulator = function() {
 
-    cancelAnimFrame(request);
-    this.runLoop = null;
-    currentHack = 0;
-    startTime = 0;
-    kfi=512;
-    doOnce = 0;
-    magic_number = -625000;
-    flushDynaCache();
-
     this.log = function(message) {
     //  console.log(message);
     }
@@ -197,6 +155,13 @@ _1964jsEmulator = function() {
     this.init = function(buffer) {
         var r = new Int32Array(35*4);
 
+        cancelAnimFrame(request);
+        currentHack = 0;
+        startTime = 0;
+        kfi=512;
+        doOnce = 0;
+        magic_number = -625000;
+        flushDynaCache();
         showFB = true;
         this.endianTest();
         //runTest();
@@ -285,7 +250,6 @@ _1964jsEmulator = function() {
 
         setInt32(miUint8Array, MI_VERSION_REG, 0x01010101);
         setInt32(riUint8Array, RI_CONFIG_REG, 0x00000001);
-        
         setInt32(viUint8Array, VI_INTR_REG, 0x000003FF);
         setInt32(viUint8Array, VI_V_SYNC_REG, 0x000000D1);
         setInt32(viUint8Array, VI_H_SYNC_REG, 0x000D2047);
@@ -310,7 +274,7 @@ _1964jsEmulator = function() {
     this.byteSwap = function(rom) {
         console.log('byte swapping...');
         
-        var fmt = getUint32(romUint8Array, 0);//rom[0] << 24 | rom[1]<<16 | rom[2]<<8 | rom[3];
+        var fmt = getUint32(rom, 0);
         switch(fmt>>>0) {
             case 0x37804012:
             if ((rom.byteLength % 2) != 0)

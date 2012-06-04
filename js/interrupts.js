@@ -101,7 +101,7 @@ function triggerVIInterrupt(pc, isFromDelaySlot)
 
 function triggerSIInterrupt(pc, isFromDelaySlot)
 {
-  //  setFlag(siUint8Array, SI_STATUS_REG, SI_STATUS_INTERRUPT);
+    //setFlag(siUint8Array, SI_STATUS_REG, SI_STATUS_INTERRUPT);
     
     setFlag(miUint8Array, MI_INTR_REG, MI_INTR_SI);
 

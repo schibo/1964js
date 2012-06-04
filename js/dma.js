@@ -18,7 +18,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 function log(message) {
-   // console.log(message);
+    //console.log(message);
 }
 
 function copyCartToDram(pc, isDelaySlot)
@@ -229,7 +229,6 @@ function copyDramToSi(pc, isDelaySlot)
     }
 
     processPif();
-
     triggerSIInterrupt(pc, isDelaySlot);
 }
 

@@ -24,8 +24,7 @@ controlsPresent[2] = false;
 controlsPresent[3] = false;
 var buttons = 0x00000000;
 
-function processPif()
-{
+function processPif() {
     var pifRamStart = MEMORY_START_PIF_RAM - MEMORY_START_PIF;
     var count = 0;
     var device = 0;
@@ -62,7 +61,7 @@ function processPif()
         {
             if (processController(count, device, pifRamStart) === false)
                 break;
-                
+
             device++;
             //size of Command-Bytes + size of Answer-Bytes + 2 for the 2 size Bytes (1 is in count++)
             count += cmd + (pifUint8Array[pifRamStart+count+1] & 0x3F) + 1;
@@ -74,37 +73,15 @@ function processPif()
         }
     }
     
-    pifUint8Array[pifRamStart+63] = 0; //Set the last bit to 0 (successful return)
+    //pifUint8Array[pifRamStart+63] = 0; //Set the last bit to 0 (successful return)
 }
-/*
-//Button masks
-var R_PAD = 0x00800000
-var L_PAD = 0x00400000
-var D_PAD = 0x00200000
-var U_PAD = 0x00100000
-var START_BUTTON = 0x00080000
-var Z_TRIG = 0x00040000
-var B_BUTTON = 0x00020000
-var A_BUTTON = 0x00010000
-var R_CBUTTON = 0x80000000
-var L_CBUTTON = 0x40000000
-var D_CBUTTON = 0x20000000
-var U_CBUTTON = 0x10000000
-var R_TRIG = 0x08000000
-var L_TRIG = 0x04000000
-var RESERVED1 = 0x02000000
-var RESERVED2 = 0x01000000
-var Y_AXIS = 0x000000FF
-var X_AXIS = 0x0000FF00
-*/
 
 //reordered
-
 var R_PAD = 0x00010000
 var L_PAD = 0x00020000
 var D_PAD = 0x00040000
 var U_PAD = 0x00080000
-var START_BUTTON = 0x00100000
+var START_BUTTON = 0x80000000
 var Z_TRIG = 0x00200000
 var B_BUTTON = 0x00400000
 var A_BUTTON = 0x00800000
@@ -114,21 +91,16 @@ var D_CBUTTON = 0x04000000
 var U_CBUTTON = 0x08000000
 var R_TRIG = 0x10000000
 var L_TRIG = 0x20000000
-var RESERVED1 = 0x40000000
-var RESERVED2 = 0x80000000
 var Y_AXIS = 0x000000FF
 var X_AXIS = 0x0000FF00
-
 
 var LEFT_MAX = 0x000008000
 var RIGHT_MAX = 0x00007F00
 var UP_MAX = 0x00000007F
 var DOWN_MAX = 0x00000080
 
-function processController(count, device, pifRamStart)
-{
-    if (controlsPresent[device] === false)
-    {
+function processController(count, device, pifRamStart) {
+    if (controlsPresent[device] === false) {
         pifUint8Array[pifRamStart+count+1] |= 0x80;
         pifUint8Array[pifRamStart+count+3] = 0;
         pifUint8Array[pifRamStart+count+4] = 0;
@@ -138,8 +110,7 @@ function processController(count, device, pifRamStart)
 
     var cmd = pifUint8Array[pifRamStart+count+2];
 
-    switch (cmd)
-    {
+    switch (cmd) {
         case 0xFF: //0xFF could be something like Reset Controller and return the status
         case 0: //0x00 return the status
             pifUint8Array[pifRamStart+count+3] = 5; //For Adaptoid
@@ -170,8 +141,7 @@ function processController(count, device, pifRamStart)
     return true;
 }
 
-function readControllerData()
-{
+function readControllerData() {
     return buttons;
 }
 
@@ -181,9 +151,8 @@ window.onkeyup = keyup;
 
 function keydown(e) {
     var keyCode;
-    
-    if (e)
-    {
+
+    if (e) {
         keyCode = e.which;
 
         if (keyCode === 40)
@@ -195,7 +164,7 @@ function keydown(e) {
         else if (keyCode === 37)
             buttons = (buttons & 0xffffff00) | LEFT_MAX;
         else if (keyCode === 13)
-            buttons |= 0xffffffff;
+            buttons |= START_BUTTON;
         else if (keyCode === 90) //z
             buttons |= A_BUTTON;
         else if (keyCode === 83) //s
@@ -225,12 +194,10 @@ function keydown(e) {
     }
 }
 
-function keyup(e)
-{
+function keyup(e) {
     var keyCode;
     
-    if (e)
-    {
+    if (e) {
         keyCode = e.which;
 
         if (keyCode === 40)
@@ -242,7 +209,7 @@ function keyup(e)
         else if (keyCode === 37)
             buttons &= ~LEFT_MAX;
         else if (keyCode === 13)
-            buttons = 0;
+            buttons &= ~START_BUTTON;
         else if (keyCode === 90) //z
             buttons &= ~A_BUTTON;
         else if (keyCode === 83) //s
