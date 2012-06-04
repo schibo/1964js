@@ -73,7 +73,7 @@ function processPif() {
         }
     }
     
-    //pifUint8Array[pifRamStart+63] = 0; //Set the last bit to 0 (successful return)
+    pifUint8Array[pifRamStart+63] = 0; //Set the last bit to 0 (successful return)
 }
 
 //reordered
