@@ -626,7 +626,6 @@ function runSPTask(spDmemTask)
     break;
     case SND_TASK:
         processAudioList();
-        setFlag(miUint8Array, MI_INTR_REG, MI_INTR_AI);
     break;
     case JPG_TASK:
         processJpegTask();
@@ -640,12 +639,24 @@ function runSPTask(spDmemTask)
     triggerRspBreak();
 }
 
+
+function setupForNextDlistNoDelayDma() {
+    
+    setFlag(spReg1Uint8Array, SP_STATUS_REG, 0x00000203);
+
+    clrFlag(spReg1Uint8Array, SP_STATUS_REG, SP_STATUS_HALT|SP_STATUS_DMA_BUSY|SP_STATUS_IO_FULL|SP_STATUS_DMA_FULL);
+
+    triggerSPInterrupt(0, false);
+}
+
+
 function processAudioList()
 {
     log('todo: process Audio List');
     //just clear flags now to get the gfx tasks :)
     //see UpdateFifoFlag in 1964cpp's AudioLLE main.cpp.
     clrFlag(aiUint8Array, AI_STATUS_REG, AI_STATUS_FIFO_FULL);
+    triggerAIInterrupt(0, false);
 }
 
 function processRDPList()

@@ -48,10 +48,6 @@ function loadByte(addr)
         var off=a-MEMORY_START_RAMREGS4;
         return ramRegsUint8Array[off];
     }
-    else if (a >= MEMORY_START_EXRDRAM && a < MEMORY_START_EXRDRAM + MEMORY_SIZE_EXRDRAM) {
-        var off=a-MEMORY_START_EXRDRAM;
-        return exRdramUint8Array[off];        
-    }
     else if (a >= MEMORY_START_SPMEM && a < MEMORY_START_SPMEM + MEMORY_SIZE_SPMEM) {
         var off=a-MEMORY_START_SPMEM;
         return spMemUint8Array[off];        
@@ -160,10 +156,6 @@ function loadHalf(addr)
     else if (a >= MEMORY_START_RAMREGS4 && a < MEMORY_START_RAMREGS4 + MEMORY_SIZE_RAMREGS4) {
         var off=a-MEMORY_START_RAMREGS4;
         return ramRegsUint8Array[off]<<8 | ramRegsUint8Array[off+1];
-    }
-    else if (a >= MEMORY_START_EXRDRAM && a < MEMORY_START_EXRDRAM + MEMORY_SIZE_EXRDRAM) {
-        var off=a-MEMORY_START_EXRDRAM;
-        return exRdramUint8Array[off]<<8 | exRdramUint8Array[off+1];        
     }
     else if (a >= MEMORY_START_SPMEM && a < MEMORY_START_SPMEM + MEMORY_SIZE_SPMEM) {
         var off=a-MEMORY_START_SPMEM;
@@ -274,10 +266,6 @@ function loadWord(addr)
     else if (a >= MEMORY_START_RAMREGS4 && a < MEMORY_START_RAMREGS4 + MEMORY_SIZE_RAMREGS4) {
         var off=a-MEMORY_START_RAMREGS4;
         return ramRegsUint8Array[off]<<24 | ramRegsUint8Array[off+1]<<16 | ramRegsUint8Array[off+2]<<8 | ramRegsUint8Array[off+3];
-    }
-    else if (a >= MEMORY_START_EXRDRAM && a < MEMORY_START_EXRDRAM + MEMORY_SIZE_EXRDRAM) {
-        var off=a-MEMORY_START_EXRDRAM;
-        return exRdramUint8Array[off]<<24 | exRdramUint8Array[off+1]<<16 | exRdramUint8Array[off+2]<<8 | exRdramUint8Array[off+3];        
     }
     else if (a >= MEMORY_START_SPMEM && a < MEMORY_START_SPMEM + MEMORY_SIZE_SPMEM) {
         var off=a-MEMORY_START_SPMEM;
@@ -439,11 +427,6 @@ function storeWord(val, addr, pc, isDelaySlot)
         writeVI(off, val, pc, isDelaySlot);
         return;
     }
-    else if (a >= MEMORY_START_EXRDRAM && a < MEMORY_START_EXRDRAM + MEMORY_SIZE_EXRDRAM) {
-        var off=a-MEMORY_START_EXRDRAM;
-        exRdramUint8Array[off] = val>>24;exRdramUint8Array[off+1] = val>>16;exRdramUint8Array[off+2] = val>>8;exRdramUint8Array[off+3] = val;
-        return;
-    }
     else if (a >= MEMORY_START_SPREG_2 && a < MEMORY_START_SPREG_2 + MEMORY_SIZE_SPREG_2) {
         var off=a-MEMORY_START_SPREG_2;
         writeSPReg2(off, val, pc, isDelaySlot);
@@ -569,11 +552,6 @@ function storeByte(val, addr, pc, isDelaySlot)
         writeVI(off, val, pc, isDelaySlot);
         return;
     }
-    else if (a >= MEMORY_START_EXRDRAM && a < MEMORY_START_EXRDRAM + MEMORY_SIZE_EXRDRAM) {
-        var off=a-MEMORY_START_EXRDRAM;
-        exRdramUint8Array[off] = val;
-        return;
-    }
     else if (a >= MEMORY_START_SPREG_2 && a < MEMORY_START_SPREG_2 + MEMORY_SIZE_SPREG_2) {
         var off=a-MEMORY_START_SPREG_2;
         writeSPReg2(off, val, pc, isDelaySlot);
@@ -696,11 +674,6 @@ function storeHalf(val, addr, pc, isDelaySlot)
     else if (a >= MEMORY_START_VI && a < MEMORY_START_VI + MEMORY_SIZE_VI) {
         var off=a-MEMORY_START_VI;
         writeVI(off, val, pc, isDelaySlot);
-        return;
-    }
-    else if (a >= MEMORY_START_EXRDRAM && a < MEMORY_START_EXRDRAM + MEMORY_SIZE_EXRDRAM) {
-        var off=a-MEMORY_START_EXRDRAM;
-        exRdramUint8Array[off] = val>>8;exRdramUint8Array[off+1] = val;
         return;
     }
     else if (a >= MEMORY_START_SPREG_2 && a < MEMORY_START_SPREG_2 + MEMORY_SIZE_SPREG_2) {

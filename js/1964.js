@@ -84,8 +84,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     for (var i=0; i<32; i++)
         tlb[i] = new Object();
 
-    var rdramUint8Array = new Uint8Array(0x400000);
-    var exRdramUint8Array = new Uint8Array(0x400000);
+    var rdramUint8Array = new Uint8Array(0x800000);
     var spMemUint8Array = new Uint8Array(0x10000);
     var spReg1Uint8Array = new Uint8Array(0x10000);
     var spReg2Uint8Array = new Uint8Array(0x10000);
@@ -149,7 +148,7 @@ var request;
 _1964jsEmulator = function() {
 
     this.log = function(message) {
-    //  console.log(message);
+      console.log(message);
     }
 
     this.init = function(buffer) {
@@ -532,271 +531,175 @@ _1964jsEmulator = function() {
 
         return string;
     }
+    
+    this.delaySlot = function(i, likely) {
+        //delay slot
+        var pc = (programCounter+offset+4 + (soffset_imm(i)<< 2))|0;
+        var instruction = loadWord((programCounter+offset+4)|0);
+        var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
+        var string = opcode;
+
+        string += 'magic_number+=1.5;programCounter='+pc+';return code["'+getFnName(pc)+'"];}';
+
+        //if likely and if branch not taken, skip delay slot
+        if (likely === false) {
+            string += opcode;
+            string += 'magic_number+=1.5;';
+        }
+
+        offset+=4;
+        return string;
+    }
 
     this.r4300i_bne = function(i) {
         stopCompiling = true;
-
         var string= 'if (('+RS(i)+'!=='+RT(i)+')||('+RSH(i)+'!=='+RTH(i)+')){';
-        var pc = (programCounter+offset+4 + (soffset_imm(i)<< 2))|0;
-
-        //delay slot
-        var instruction = loadWord((programCounter+offset+4)|0);
-        var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
-        string += opcode;
-        string += 'magic_number+=1.5;';
-
-        string += 'programCounter='+pc+';return code["'+getFnName(pc)+'"];}';
-
-        //delay slot
-        string += opcode;
-        string += 'magic_number+=1.5;';
-        offset+=4;
-
+        
+        string += this.delaySlot(i, false);
         return string;
     }
 
     this.r4300i_beq = function(i) {
         stopCompiling = true;
-
         var string= 'if (('+RS(i)+'==='+RT(i)+')&&('+RSH(i)+'==='+RTH(i)+')){';
-        var pc = (programCounter+offset+4 + (soffset_imm(i)<< 2))|0;
-        
-        //delay slot
-        var instruction = loadWord((programCounter+offset+4)|0);
-        var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
-        string += opcode;
-        string += 'magic_number+=1.5;';
-        string += 'programCounter='+pc+';return code["'+getFnName(pc)+'"];}';
 
-        //delay slot
-        string += 'magic_number+=1.5;';
-        string+=opcode;offset+=4;
-
+        string += this.delaySlot(i, false);
         return string;
     }
 
     this.r4300i_bnel = function(i) {
         stopCompiling = true;
-
         var string= 'if (('+RS(i)+'!=='+RT(i)+')||(' +RSH(i)+'!=='+RTH(i)+')){';
-        var pc = (programCounter+offset+4 + (soffset_imm(i)<< 2))|0;
         
-        //delay slot
-        var instruction = loadWord((programCounter+offset+4)|0);
-        var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
-        string += opcode;
-        string += 'magic_number+=1.5;';
-        string += 'programCounter='+pc+';return code["'+getFnName(pc)+'"];}';
-
-        offset+=4; //skip delay slot if branch is not taken
+        string += this.delaySlot(i, true);
         return string;
     }
 
     this.r4300i_blez = function(i) {
         stopCompiling = true;
-
         var string= 'if (('+RSH(i)+'<0)||(('+RSH(i)+'===0)&&('+RS(i)+'===0))){';
-        var pc = (programCounter+offset+4 + (soffset_imm(i)<< 2))|0;
-        
-        //delay slot
-        var instruction = loadWord((programCounter+offset+4)|0);
-        var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
-        string += opcode;
-        string += 'magic_number+=1.5;';
-        string += 'programCounter='+pc+';return code["'+getFnName(pc)+'"];}';
 
-        //delay slot
-        string += 'magic_number+=1.5;';
-        string+=opcode;offset+=4;
-
+        string += this.delaySlot(i, false);
         return string;
     }
 
     this.r4300i_blezl = function(i) {
         stopCompiling = true;
-
         var string= 'if (('+RSH(i)+'<0)||(('+RSH(i)+'===0)&&('+RS(i)+'===0))){';
-        var pc = (programCounter+offset+4 + (soffset_imm(i)<< 2))|0;
-        
-        //delay slot
-        var instruction = loadWord((programCounter+offset+4)|0);
-        var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
-        string += opcode;
-        string += 'magic_number+=1.5;';
-        string += 'programCounter='+pc+';return code["'+getFnName(pc)+'"];}';
 
-        offset+=4; //skip delay slot if branch is not taken
+        string += this.delaySlot(i, true);
         return string;
     }
 
     this.r4300i_bgez = function(i) {
         stopCompiling = true;
-
         var string= 'if ('+RSH(i)+'>=0){';
-        var pc = (programCounter+offset+4 + (soffset_imm(i)<< 2))|0;
-        
-        //delay slot
-        var instruction = loadWord((programCounter+offset+4)|0);
-        var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
-        string += opcode;
-        string += 'magic_number+=1.5;';
-        string += 'programCounter='+pc+';return code["'+getFnName(pc)+'"];}';
 
-        string += 'magic_number+=1.5;';
-        string+=opcode;offset+=4; //delay slot
-
+        string += this.delaySlot(i, false);
         return string;
     }
 
     this.r4300i_bgezl = function(i) {
         stopCompiling = true;
-
         var string= 'if ('+RSH(i)+'>=0){';
-        var pc = (programCounter+offset+4 + (soffset_imm(i)<< 2))|0;
-        
-        //delay slot
-        var instruction = loadWord((programCounter+offset+4)|0);
-        var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
-        string += opcode;
-        string += 'magic_number+=1.5;';
-        string += 'programCounter='+pc+';return code["'+getFnName(pc)+'"];}';
 
-        offset+=4; //skip delay slot if branch is not taken
+        string += this.delaySlot(i, true);
         return string;
     }
 
     this.r4300i_bgtzl = function(i) {
         stopCompiling = true;
-
         var string= 'if (('+RSH(i)+'>0)||(('+RSH(i)+'===0)&&('+RS(i)+'!==0))){';
 
-        var pc = (programCounter+offset+4 + (soffset_imm(i)<< 2))|0;
-        
-        //delay slot
-        var instruction = loadWord((programCounter+offset+4)|0);
-        var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
-        string += opcode;
-        string += 'magic_number+=1.5;';
-        string += 'programCounter='+pc+';return code["'+getFnName(pc)+'"];}';
-
-        offset+=4; //skip delay slot if branch is not taken
+        string += this.delaySlot(i, true);
         return string;
     }
 
     this.r4300i_bltzl = function(i) {
         stopCompiling = true;
-
         var string= 'if ('+RSH(i)+'<0){';
-        var pc = (programCounter+offset+4 + (soffset_imm(i)<< 2))|0;
-        
-        //delay slot
-        var instruction = loadWord((programCounter+offset+4)|0);
-        var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
-        string += opcode;
-        string += 'magic_number+=1.5;';
-        string += 'programCounter='+pc+';return code["'+getFnName(pc)+'"];}';
 
-        offset+=4; //skip delay slot if branch is not taken
+        string += this.delaySlot(i, true);
         return string;
     }
 
     this.r4300i_bgezal = function(i) {
         stopCompiling = true;    
-
         var string= 'if ('+RSH(i)+'>=0){';
-        var pc = (programCounter+offset+4 + (soffset_imm(i)<< 2))|0;
 
         var link = (programCounter+offset+8)>>0;
         string += 'r[31]=' + link + ';';
         string += 'h[31]=' + (link>>31) + ';';
-        //delay slot
-        var instruction = loadWord((programCounter+offset+4)|0);
-        var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
-        string += opcode;
-        string += 'magic_number+=1.5;';
-        string += 'programCounter='+pc+';return code["'+getFnName(pc)+'"];}';
 
-        //delay slot
-        string += 'magic_number+=1.5;';
-        string+=opcode;offset+=4;
-
+        string += this.delaySlot(i, false);
         return string;
     }
 
     this.r4300i_bgezall = function(i) {
         stopCompiling = true;    
-
         var string= 'if ('+RSH(i)+'>=0){';
-        var pc = (programCounter+offset+4 + (soffset_imm(i)<< 2))|0;
 
         var link = (programCounter+offset+8)>>0;
         string += 'r[31]=' + link + ';';
         string += 'h[31]=' + (link>>31) + ';';
-        //delay slot
-        var instruction = loadWord((programCounter+offset+4)|0);
-        var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
-        string += opcode;
-        string += 'magic_number+=1.5;';
-        string += 'programCounter='+pc+';return code["'+getFnName(pc)+'"];}';
 
-        offset+=4; //skip delay slot if branch is not taken
+        string += this.delaySlot(i, true);
         return string;
     }
 
     this.r4300i_bltz = function(i) {
         stopCompiling = true;
-
         var string= 'if ('+RSH(i)+'<0){';
-        var pc = (programCounter+offset+4 + (soffset_imm(i)<< 2))|0;
 
-        //delay slot
-        var instruction = loadWord((programCounter+offset+4)|0);
-        var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
-        string += opcode;
-        string += 'magic_number+=1.5;';
-        string += 'programCounter='+pc+';return code["'+getFnName(pc)+'"];}';
-
-        //delay slot
-        string += 'magic_number+=1.5;';
-        string+=opcode;offset+=4;
-
+        string += this.delaySlot(i, false);
         return string;
     }
 
     this.r4300i_bgtz = function(i) {
         stopCompiling = true;
-
         var string= 'if (('+RSH(i)+'>0)||(('+RSH(i)+'===0)&&('+RS(i)+'!==0))){';
-        var pc = (programCounter+offset+4 + (soffset_imm(i)<< 2))|0;
 
-        //delay slot
-        var instruction = loadWord((programCounter+offset+4)|0);
-        var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
-        string += opcode;
-        string += 'magic_number+=1.5;';
-        string += 'programCounter='+pc+';return code["'+getFnName(pc)+'"];}';
-
-        //delay slot
-        string += 'magic_number+=1.5;';
-        string+=opcode;offset+=4;
-
+        string += this.delaySlot(i, false);
         return string;
     }
 
     this.r4300i_beql = function(i) {
         stopCompiling = true;
-
         var string= 'if (('+RS(i)+'==='+RT(i)+')&&('+RSH(i)+'==='+RTH(i)+')){';
-        var pc = (programCounter+offset+4 + (soffset_imm(i)<< 2))|0;
 
-        //delay slot
-        var instruction = loadWord((programCounter+offset+4)|0);
-        var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
-        string += opcode;
-        string += 'magic_number+=1.5;';
-        string += 'programCounter='+pc+';return code["'+getFnName(pc)+'"];}';
+        string += this.delaySlot(i, true);
+        return string;
+    }
 
-        offset+=4; //skip delay slot if branch is not taken
+    this.r4300i_COP1_bc1f = function(i) {
+        stopCompiling = true;
+        var string = 'if((cp1Con[31]&0x00800000)===0){';        
+
+        string += this.delaySlot(i, false);
+        return string;
+    }
+
+    this.r4300i_COP1_bc1t = function(i) {
+        stopCompiling = true;
+        var string = 'if((cp1Con[31]&0x00800000)!==0){';
+        
+        string += this.delaySlot(i, false);
+        return string;
+    }
+
+    this.r4300i_COP1_bc1tl = function(i) {
+        stopCompiling = true;
+        var string = 'if((cp1Con[31]&0x00800000)!==0){';
+        
+        string += this.delaySlot(i, true);
+        return string;
+    }
+
+    this.r4300i_COP1_bc1fl = function(i) {
+        stopCompiling = true;
+        var string = 'if((cp1Con[31]&0x00800000)===0){';
+
+        string += this.delaySlot(i, true);
         return string;
     }
 
@@ -1379,10 +1282,31 @@ _1964jsEmulator = function() {
         return('');
     }
 
-    this.r4300i_ldl = function(i) {
-        this.log('todo: sdr');
+    this.r4300i_ldr = function(i) {
+        this.log('todo: ldr');
         return('');
     }
+    
+    this.r4300i_sdl = function(i) {
+        this.log('todo: sdl');
+        return('');
+    }
+
+    this.r4300i_ldl = function(i) {
+        this.log('todo: ldl');
+        return('');
+    }
+
+    this.r4300i_sc = function(i) {
+        this.log('todo: sc');
+        return('');
+    }
+    
+    this.r4300i_scd = function(i) {
+        this.log('todo: scd');
+        return('');
+    }
+    
 
     this.r4300i_daddi = function(i) {
         return '_1964Helpers.prototype.inter_daddi(r,'+i+');';
@@ -1444,87 +1368,5 @@ _1964jsEmulator = function() {
 
     this.r4300i_C_LE_D = function(i) {
         return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+');';
-    }
-
-    this.r4300i_COP1_bc1f = function(i) {
-        stopCompiling = true;
-
-        var string = 'if((cp1Con[31]&0x00800000)===0)';
-        
-        var pc = (programCounter+offset+4 + (soffset_imm(i)<< 2))|0;
-        string += '{programCounter=' + pc + ';';
-        
-        //delay slot
-        var instruction = loadWord((programCounter+offset+4)|0);
-        var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
-        string += opcode;
-        string += 'magic_number+=1.5;';
-        string += 'return code["'+getFnName(pc)+'"];}';
-
-        //delay slot
-        string += 'magic_number+=1.5;';
-        string+=opcode;offset+=4;
-
-        return string;
-    }
-
-    this.r4300i_COP1_bc1t = function(i) {
-        stopCompiling = true;
-
-        var string = 'if((cp1Con[31]&0x00800000)!==0)';
-        
-        var pc = (programCounter+offset+4 + (soffset_imm(i)<< 2))|0;
-        string += '{programCounter=' + pc + ';';
-        
-        //delay slot
-        var instruction = loadWord((programCounter+offset+4)|0);
-        var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
-        string += opcode;
-        string += 'magic_number+=1.5;';
-        string += 'return code["'+getFnName(pc)+'"];}';
-
-        //delay slot
-        string += 'magic_number+=1.5;';
-        string+=opcode;offset+=4;
-
-        return string;
-    }
-
-    this.r4300i_COP1_bc1tl = function(i) {
-        stopCompiling = true;
-
-        var string = 'if((cp1Con[31]&0x00800000)!==0)';
-        
-        var pc = (programCounter+offset+4 + (soffset_imm(i)<< 2))|0;
-        string += '{programCounter=' + pc + ';';
-
-        //delay slot
-        var instruction = loadWord((programCounter+offset+4)|0);
-        var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
-        string += opcode;
-        string += 'magic_number+=1.5;';
-        string += 'return code["'+getFnName(pc)+'"];}';
-
-        offset+=4; //skip delay slot if branch is not taken
-        return string;
-    }
-
-    this.r4300i_COP1_bc1fl = function(i) {
-        stopCompiling = true;
-
-        var string = 'if((cp1Con[31]&0x00800000)===0)';
-        
-        var pc = (programCounter+offset+4 + (soffset_imm(i)<< 2))|0;
-        string += '{programCounter=' + pc + ';';
-        
-        //delay slot
-        var instruction = loadWord((programCounter+offset+4)|0);
-        var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
-        string += opcode;
-        string += 'magic_number+=1.5;';
-        string += 'return code["'+getFnName(pc)+'"];}';
-
-        offset+=4; //skip delay slot if branch is not taken
-        return string;
     }
 }

@@ -635,9 +635,7 @@ function DLParser_RDPTileSync(pc) {
 function DLParser_RDPFullSync(pc) {
     log('TODO: DLParser_RDPFullSync');
     triggerDPInterrupt(0, false);
-        drawScene();
-
-
+    drawScene();
 }
 
 function DLParser_SetKeyGB(pc) {
