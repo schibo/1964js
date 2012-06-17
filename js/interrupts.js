@@ -656,15 +656,11 @@ function processAudioList()
     //just clear flags now to get the gfx tasks :)
     //see UpdateFifoFlag in 1964cpp's AudioLLE main.cpp.
     clrFlag(aiUint8Array, AI_STATUS_REG, AI_STATUS_FIFO_FULL);
-    triggerAIInterrupt(0, false);
 }
 
 function processRDPList()
 {
     log('todo: process rdp list');
-    
-//    triggerDPInterrupt();
-//    triggerSPInterrupt();
 }
 
 function checkInterrupts()
@@ -681,7 +677,6 @@ function checkInterrupts()
     if ((getUint32(miUint8Array, MI_INTR_REG) & MI_INTR_SI) !== 0)
         triggerSIInterrupt(0, false);
 
-        
     //if ((getUint32(miUint8Array, MI_INTR_REG) & MI_INTR_VI) !== 0)
     //    triggerVIInterrupt(0, false);
         

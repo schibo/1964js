@@ -55,7 +55,7 @@ function processPif() {
         }
 
         else if (device === 4) //EEprom
-            throw 'todo: handle eeprom command';
+            processEeprom(pifRamStart, count);
 
         else if (device < 4) //Controllers 0-3
         {
@@ -74,6 +74,29 @@ function processPif() {
     }
     
     pifUint8Array[pifRamStart+63] = 0; //Set the last bit to 0 (successful return)
+}
+
+var EEProm_Status_Byte = 0;
+function processEeprom(pifRamStart, count) {
+	switch(pifUint8Array[pifRamStart+count+2]) {
+	case 0xFF:
+	case 0x00:
+		pifUint8Array[pifRamStart+count+3] = 0x00;
+		pifUint8Array[pifRamStart+count+4] = EEProm_Status_Byte;
+		pifUint8Array[pifRamStart+count+5] = 0x00;
+		break;
+	case 0x04: //Read from Eeprom 
+		//readEEprom(&cmd[4], cmd[3] * 8);
+		break;
+	case 0x05: 	//Write to Eeprom
+		//writeEEprom((char*)&cmd[4], cmd[3] * 8);
+		break;
+
+	default:
+		break;
+	}
+
+	return false;
 }
 
 //reordered
