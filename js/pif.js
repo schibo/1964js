@@ -37,7 +37,7 @@ function processPif() {
     && (pifUint8Array[pifRamStart+3] === 0xff))
         throw 'todo: decrypt'; //see iPif.cpp. the first 4 dwords will be -1, not just the first 4 bytes. Make pifUint32Array and use it 4 times.
 
-    while (count++ < 64)
+    for (count=0; count<64; count++)
     {
         var cmd = pifUint8Array[pifRamStart+count];
         
