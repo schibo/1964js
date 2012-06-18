@@ -171,7 +171,6 @@ window.onkeyup = keyup;
 
 function keydown(e) {
     var keyCode;
-    buttons = 0;
 
     if (e) {
         keyCode = e.which;
