@@ -101,7 +101,7 @@ var R_PAD = 0x00010000
 var L_PAD = 0x00020000
 var D_PAD = 0x00040000
 var U_PAD = 0x00080000
-var START_BUTTON = 0x80000000
+var START_BUTTON = 0x10000000
 var Z_TRIG = 0x00200000
 var B_BUTTON = 0x00400000
 var A_BUTTON = 0x00800000
@@ -109,7 +109,7 @@ var R_CBUTTON = 0x01000000
 var L_CBUTTON = 0x02000000
 var D_CBUTTON = 0x04000000
 var U_CBUTTON = 0x08000000
-var R_TRIG = 0x10000000
+var R_TRIG = 0x80000000
 var L_TRIG = 0x20000000
 var Y_AXIS = 0x000000FF
 var X_AXIS = 0x0000FF00
@@ -210,7 +210,7 @@ function keydown(e) {
             buttons |= Z_TRIG;
         else if (keyCode === 49) //1
             buttons |= L_TRIG;
-        else if (keyCode === 48) //2
+        else if (keyCode === 48) //0
             buttons |= R_TRIG;
     }
 }

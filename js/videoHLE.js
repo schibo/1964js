@@ -825,7 +825,7 @@ function drawScene() {
         gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
         gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
         setMatrixUniforms();
-        gl.drawArrays(gl.LINE_STRIP, 0, triangleVertexPositionBuffer.numItems);
+        gl.drawArrays(gl.LINES, 0, triangleVertexPositionBuffer.numItems);
 
         mvPopMatrix();
 
