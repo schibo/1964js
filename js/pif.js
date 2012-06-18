@@ -47,36 +47,31 @@ function processPif() {
         else if (cmd === 0xFF || cmd === 0xFD //no-op commands (0xFD is from Command & Conquer)
             || cmd === 0xB4 || cmd === 0x56 || cmd === 0xB8) //Unknown
             continue;
-
-        else if (cmd === 0) //Next device
-        {
+        else if (cmd === 0) { //Next device
             device++;
             continue;
         }
-
-        else if (device === 4) //EEprom
+        else if (device === 4) { //EEprom
             processEeprom(pifRamStart, count);
-
-        else if (device < 4) //Controllers 0-3
-        {
+            break;
+        }
+        else if (device < 4) { //Controllers 0-3
             if (processController(count, device, pifRamStart) === false)
                 break;
 
             device++;
             //size of Command-Bytes + size of Answer-Bytes + 2 for the 2 size Bytes (1 is in count++)
             count += cmd + (pifUint8Array[pifRamStart+count+1] & 0x3F) + 1;
-        }
-        else
-        {
+        } else {
             log('Device > 4. Device = ' + device);
             break;
         }
     }
-    
+
     pifUint8Array[pifRamStart+63] = 0; //Set the last bit to 0 (successful return)
 }
 
-var EEProm_Status_Byte = 0;
+var EEProm_Status_Byte = 0x80;
 function processEeprom(pifRamStart, count) {
 	switch(pifUint8Array[pifRamStart+count+2]) {
 	case 0xFF:
@@ -86,9 +81,11 @@ function processEeprom(pifRamStart, count) {
 		pifUint8Array[pifRamStart+count+5] = 0x00;
 		break;
 	case 0x04: //Read from Eeprom 
+        alert('read eeprom');
 		//readEEprom(&cmd[4], cmd[3] * 8);
 		break;
 	case 0x05: 	//Write to Eeprom
+        alert('write eeprom');
 		//writeEEprom((char*)&cmd[4], cmd[3] * 8);
 		break;
 

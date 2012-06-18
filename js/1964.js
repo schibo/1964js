@@ -210,24 +210,20 @@ _1964jsEmulator = function() {
         //canvas
         c = document.getElementById("Canvas");
         ctx = c.getContext("2d");
-        var c2 = document.getElementById("DebugCanvas");
-        var ctx2 = c2.getContext("2d");
 
         ImDat=ctx.createImageData(320,240);
-        ImDat2=ctx2.createImageData(320,240);
 
         //fill alpha
         var i=3;
         for (var y = 0; y < 240; y++) {
             for (var x = 0; x < 320; x++) {
                 ImDat.data[i] = 255;
-                ImDat2.data[i] = 255;
                 i+=4;
             }
         }
 
         stopCompiling = false;
-        keepRunning = 0x1000;
+        keepRunning = 65535;
 
         this.byteSwap(rom);
         //copy first 4096 bytes to sp_dmem and run from there.
@@ -369,8 +365,23 @@ _1964jsEmulator = function() {
         if (terminate === false)
             request = requestAnimFrame(this.runLoop.bind(this, r));
         
-        keepRunning = speed;
+        keepRunning = 65535;
         var pc, fnName, fn;
+
+        checkInterrupts();
+        if (magic_number >= 0) {
+            this.repaintWrapper();
+            magic_number = -625000;
+            cp0[COUNT] += 625000;
+            triggerCompareInterrupt(0, false);
+            cp0[COUNT] += 625000;
+            triggerVIInterrupt(0, false);
+            processException(programCounter);
+        }
+        else if((cp0[CAUSE] & cp0[STATUS] & 0x0000FF00) !== 0) {
+            setException(EXC_INT, 0, programCounter, false);
+            processException(programCounter);
+        }
 
         pc = programCounter >>> 2;
         fnName = '_' + pc; 
@@ -381,26 +392,6 @@ _1964jsEmulator = function() {
                 fn = this.decompileBlock(programCounter);    
         
             fn = fn(r);
-        
-            if (magic_number >= 0) {
-                this.repaintWrapper();
-                magic_number = -625000;
-                cp0[COUNT] += 625000;
-                if (cp0[COUNT] >= cp0[COMPARE]) {
-                    triggerCompareInterrupt(0, false);
-                    if (processException(programCounter)) {
-    //                  return;
-                    }
-                    cp0[COUNT] = 0;
-                    cp0[COMPARE] = 625000*99;
-                }
-                triggerVIInterrupt(0, false);
-                checkInterrupts();
-                if((cp0[CAUSE] & cp0[STATUS] & 0x0000FF00) !== 0) {
-                    setException(EXC_INT, 0, programCounter, false);
-                    if (processException(programCounter));
-                }
-            }
         }
         
         return this;

@@ -51,6 +51,10 @@ function processDisplayList()
     triggerSPInterrupt(0, false);
 }
 
+function videoLog()
+{
+}
+
 var dlistStackPointer = 0;
 var dlistStack = new Array(MAX_DL_STACK_SIZE);
 for (var i=0; i<MAX_DL_STACK_SIZE; i++)
@@ -102,7 +106,7 @@ function dlParserProcess()
             dlistStackPointer--;
     }
     
-    log('finished dlist');
+    videoLog('finished dlist');
     
     triggerSPInterrupt(0, false);
     
@@ -116,7 +120,7 @@ function RDP_GFX_PopDL()
 
 function RSP_RDP_Nothing(pc)
 {
-    log('RSP RDP NOTHING');
+    videoLog('RSP RDP NOTHING');
     dlistStackPointer--;
 }
 
@@ -126,17 +130,17 @@ function RSP_GBI1_MoveMem(pc)
     var length = getGbi1Length(pc);
     var addr = getGbi1RspSegmentAddr(pc);
     
-    log('movemem type=' + type + ', length=' + length + ' addr=' + addr);
+    videoLog('movemem type=' + type + ', length=' + length + ' addr=' + addr);
 }
 
 function RSP_GBI1_SpNoop(pc)
 {
-    log('RSP_GBI1_SpNoop');
+    videoLog('RSP_GBI1_SpNoop');
 }
 
 function RSP_GBI1_Reserved(pc)
 {
-    log('RSP_GBI1_Reserved');
+    videoLog('RSP_GBI1_Reserved');
 }
 
 function setProjection(mat, bPush, bReplace) 
@@ -197,7 +201,7 @@ function RSP_GBI0_Mtx(pc)
 {
     var seg = getGbi0DlistAddr(pc);
     var addr = getRspSegmentAddr(seg);
-    log('RSP_GBI0_Mtx addr: ' + dec2hex(addr));
+    videoLog('RSP_GBI0_Mtx addr: ' + dec2hex(addr));
     loadMatrix(addr);
 
     if (gbi0isProjectionMatrix(pc))
@@ -235,8 +239,8 @@ function DLParser_SetTImg(pc)
     texImg.addr = getRspSegmentAddr(pc);
     texImg.bpl = texImg.width << texImg.size >> 1;
 
-    log('TODO: DLParser_SetTImg');
-    //log('Texture: format=' + texImg.format + ' size=' + texImg.size + ' ' + 'width=' + texImg.width + ' addr=' + texImg.addr + ' bpl=' + texImg.bpl);
+    videoLog('TODO: DLParser_SetTImg');
+    //videoLog('Texture: format=' + texImg.format + ' size=' + texImg.size + ' ' + 'width=' + texImg.width + ' addr=' + texImg.addr + ' bpl=' + texImg.bpl);
 }
 
 function RSP_GBI0_Vtx(pc)
@@ -304,7 +308,7 @@ function processVertexData(addr, v0, num)
 
 function DLParser_SetCImg(pc)
 {
-    log('TODO: DLParser_SetCImg');
+    videoLog('TODO: DLParser_SetCImg');
 }
 
 //Gets new display list address
@@ -312,7 +316,7 @@ function RSP_GBI0_DL(pc)
 {
     var seg = getGbi0DlistAddr(pc);
     var addr = getRspSegmentAddr(seg);
-    log('dlist address = ' + dec2hex(addr));
+    videoLog('dlist address = ' + dec2hex(addr));
     
     //TODO: address adjust
     
@@ -327,12 +331,12 @@ function RSP_GBI0_DL(pc)
 
 function DLParser_SetCombine(pc)
 {
-    log('TODO: DLParser_SetCombine');
+    videoLog('TODO: DLParser_SetCombine');
 }
 
 function RSP_GBI1_MoveWord(pc)
 {
-    log('RSP_GBI1_MoveWord');
+    videoLog('RSP_GBI1_MoveWord');
     
     switch (getGbi0MoveWordType(pc))
 	{
@@ -465,64 +469,64 @@ function RSP_RDP_InsertMatrix() {
 }
 
 function DLParser_SetScissor(pc) {
-    log('TODO: DLParser_SetScissor');
+    videoLog('TODO: DLParser_SetScissor');
 }
 
 function RSP_GBI1_SetOtherModeH(pc) {
-    log('TODO: DLParser_GBI1_SetOtherModeH');
+    videoLog('TODO: DLParser_GBI1_SetOtherModeH');
 }
 
 function RSP_GBI1_SetOtherModeL(pc) {
-    log('TODO: DLParser_GBI1_SetOtherModeL');
+    videoLog('TODO: DLParser_GBI1_SetOtherModeL');
 }
 
 function RSP_GBI0_Sprite2DBase(pc) {
-    log('TODO: RSP_GBI0_Sprite2DBase');
+    videoLog('TODO: RSP_GBI0_Sprite2DBase');
 }
 
 function RSP_GBI0_Tri4(pc) {
-    log('TODO: RSP_GBI0_Tri4');
+    videoLog('TODO: RSP_GBI0_Tri4');
 }
 
 function RSP_GBI1_RDPHalf_Cont(pc) {
-    log('TODO: RSP_GBI1_RDPHalf_Cont');
+    videoLog('TODO: RSP_GBI1_RDPHalf_Cont');
 }
 
 function RSP_GBI1_RDPHalf_2(pc) {
-    log('TODO: RSP_GBI1_RDPHalf_2');
+    videoLog('TODO: RSP_GBI1_RDPHalf_2');
 }
 
 function RSP_GBI1_RDPHalf_1(pc) {
-    log('TODO: RSP_GBI1_RDPHalf_1');
+    videoLog('TODO: RSP_GBI1_RDPHalf_1');
 }
 
 function RSP_GBI1_Line3D(pc) {
-    log('TODO: RSP_GBI1_Line3D');
+    videoLog('TODO: RSP_GBI1_Line3D');
 }
 
 function RSP_GBI1_ClearGeometryMode(pc) {
-    log('TODO: RSP_GBI1_ClearGeometryMode');
+    videoLog('TODO: RSP_GBI1_ClearGeometryMode');
 }
 
 function RSP_GBI1_SetGeometryMode(pc) {
-    log('TODO: RSP_GBI1_SetGeometryMode');
+    videoLog('TODO: RSP_GBI1_SetGeometryMode');
 }
 
 function RSP_GBI1_EndDL(pc) {
-    log('RSP_GBI1_EndDL');
+    videoLog('RSP_GBI1_EndDL');
     RDP_GFX_PopDL();
 }
 
 function RSP_GBI1_Texture(pc) {
-    log('TODO: RSP_GBI1_Texture');
+    videoLog('TODO: RSP_GBI1_Texture');
 }
 
 function RSP_GBI1_PopMtx(pc) {
-    log('TODO: RSP_GBI1_PopMtx');
+    videoLog('TODO: RSP_GBI1_PopMtx');
 }
 
 function RSP_GBI1_CullDL(pc) {
-    log('TODO: RSP_GBI1_CullDL');
+    videoLog('TODO: RSP_GBI1_CullDL');
 }
 
 function RSP_GBI1_Tri1(pc) {
@@ -534,43 +538,43 @@ function RSP_GBI1_Tri1(pc) {
 }
 
 function RSP_GBI1_Noop(pc) {
-    log('TODO: RSP_GBI1_Noop');
+    videoLog('TODO: RSP_GBI1_Noop');
 }
 
 function RDP_TriFill(pc) {
-    log('TODO: RDP_TriFill');
+    videoLog('TODO: RDP_TriFill');
 }
 
 function RDP_TriFillZ(pc) {
-    log('RDP_TriFillZ');
+    videoLog('RDP_TriFillZ');
 }
 
 function RDP_TriTxtr(pc) {
-    log('TODO: RDP_TriTxtr');
+    videoLog('TODO: RDP_TriTxtr');
 }
 
 function RDP_TriTxtrZ(pc) {
-    log('TODO: RDP_TriTxtrZ');
+    videoLog('TODO: RDP_TriTxtrZ');
 }
 
 function RDP_TriShade(pc) {
-    log('TODO: RDP_TriShade');
+    videoLog('TODO: RDP_TriShade');
 }
 
 function RDP_TriShadeZ(pc) {
-    log('TODO: RDP_TriShadeZ');
+    videoLog('TODO: RDP_TriShadeZ');
 }
 
 function RDP_TriShadeTxtr(pc) {
-    log('TODO: RDP_TriShadeTxtr');
+    videoLog('TODO: RDP_TriShadeTxtr');
 }
 
 function RDP_TriShadeTxtrZ(pc) {
-    log('TODO: RDP_TriShadeTxtrZ');
+    videoLog('TODO: RDP_TriShadeTxtrZ');
 }
 
 function DLParser_TexRect(pc) {
-    log('TODO: DLParser_TexRect');
+    videoLog('TODO: DLParser_TexRect');
     
 	var xh = getTexRectXh(pc);
 	var yh = getTexRectYh(pc);
@@ -617,93 +621,93 @@ function DLParser_TexRect(pc) {
 }
 
 function DLParser_TexRectFlip(pc) {
-    log('TODO: DLParser_TexRectFlip');
+    videoLog('TODO: DLParser_TexRectFlip');
 }
 
 function DLParser_RDPLoadSync(pc) {
-    log('TODO: DLParser_RDPLoadSync');
+    videoLog('TODO: DLParser_RDPLoadSync');
 }
 
 function DLParser_RDPPipeSync(pc) {
-    log('TODO: DLParser_RDPPipeSync');
+    videoLog('TODO: DLParser_RDPPipeSync');
 }
 
 function DLParser_RDPTileSync(pc) {
-    log('TODO: DLParser_RDPTileSync');
+    videoLog('TODO: DLParser_RDPTileSync');
 }
 
 function DLParser_RDPFullSync(pc) {
-    log('TODO: DLParser_RDPFullSync');
+    videoLog('TODO: DLParser_RDPFullSync');
     triggerDPInterrupt(0, false);
     drawScene();
 }
 
 function DLParser_SetKeyGB(pc) {
-    log('TODO: DLParser_SetKeyGB');
+    videoLog('TODO: DLParser_SetKeyGB');
 }
 
 function DLParser_SetKeyR(pc) {
-    log('TODO: DLParser_SetKeyR');
+    videoLog('TODO: DLParser_SetKeyR');
 }
 
 function DLParser_SetConvert(pc) {
-    log('TODO: DLParser_SetConvert');
+    videoLog('TODO: DLParser_SetConvert');
 }
 
 function DLParser_SetPrimDepth(pc) {
-    log('TODO: DLParser_SetPrimDepth');
+    videoLog('TODO: DLParser_SetPrimDepth');
 }
 
 function DLParser_RDPSetOtherMode(pc) {
-    log('TODO: DLParser_RDPSetOtherMode');
+    videoLog('TODO: DLParser_RDPSetOtherMode');
 }
 
 function DLParser_LoadTLut(pc) {
-    log('TODO: DLParser_LoadTLut');
+    videoLog('TODO: DLParser_LoadTLut');
 }
 
 function DLParser_SetTileSize(pc) {
-    log('TODO: DLParser_SetTileSize');
+    videoLog('TODO: DLParser_SetTileSize');
 }
 
 function DLParser_LoadBlock(pc) {
-    log('TODO: DLParser_LoadBlock');
+    videoLog('TODO: DLParser_LoadBlock');
 }
 
 function DLParser_LoadTile(pc) {
-    log('TODO: DLParser_LoadTile');
+    videoLog('TODO: DLParser_LoadTile');
 }
 
 function DLParser_SetTile(pc) {
-    log('TODO: DLParser_SetTile');
+    videoLog('TODO: DLParser_SetTile');
 }
 
 function DLParser_FillRect(pc) {
-    log('TODO: DLParser_FillRect');
+    videoLog('TODO: DLParser_FillRect');
 }
 
 function DLParser_SetFillColor(pc) {
-    log('TODO: DLParser_SetFillColor');
+    videoLog('TODO: DLParser_SetFillColor');
 }
 
 function DLParser_SetFogColor(pc) {
-    log('TODO: DLParser_SetFogColor');
+    videoLog('TODO: DLParser_SetFogColor');
 }
 
 function DLParser_SetBlendColor(pc) {
-    log('TODO: DLParser_SetBlendColor');
+    videoLog('TODO: DLParser_SetBlendColor');
 }
 
 function DLParser_SetPrimColor(pc) {
-    log('TODO: DLParser_SetPrimColor');
+    videoLog('TODO: DLParser_SetPrimColor');
 }
 
 function DLParser_SetEnvColor(pc) {
-    log('TODO: DLParser_SetEnvColor');
+    videoLog('TODO: DLParser_SetEnvColor');
 }
 
 function DLParser_SetZImg(pc) {
-    log('TODO: DLParser_SetZImg');
+    videoLog('TODO: DLParser_SetZImg');
 }
 
 ////////////////////////////

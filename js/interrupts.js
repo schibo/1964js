@@ -61,7 +61,6 @@ function processException(pc, isFromDelaySlot)
         doOnce = 1;
 
         programCounter = 0x80000180;
-        keepRunning = 0;
     }
     
     return true;
@@ -130,13 +129,11 @@ function triggerDPInterrupt(pc, isFromDelaySlot)
 
 function triggerRspBreak()
 {
-    setFlag(spReg1Uint8Array, SP_STATUS_REG, 0x00000203);
+    setFlag(spReg1Uint8Array, SP_STATUS_REG, SP_STATUS_TASKDONE |SP_STATUS_BROKE | SP_STATUS_HALT);
 
     var value = spReg1Uint8Array[SP_STATUS_REG]<<24 | spReg1Uint8Array[SP_STATUS_REG+1]<<16 | spReg1Uint8Array[SP_STATUS_REG+2]<<8 | spReg1Uint8Array[SP_STATUS_REG+3];
     if ((value & SP_STATUS_INTR_BREAK) !== 0)
         triggerSPInterrupt(0, false);
-
-    setFlag(spReg1Uint8Array, SP_STATUS_REG, SP_STATUS_HALT);
 }
 
 function clearMIInterrupt(flag)
@@ -472,8 +469,7 @@ function writeMIIntrMaskReg(value, pc, isFromDelaySlot) {
     else if (value & MI_INTR_MASK_DP_CLR) clrFlag(miUint8Array, MI_INTR_MASK_REG, MI_INTR_DP);
 
 	//Check MI interrupt again. This is important, otherwise we will lose interrupts.
-	if (getUint32(miUint8Array, MI_INTR_MASK_REG) & 0x0000003F & getUint32(miUint8Array, MI_INTR_REG)) 
-    {
+	if ((getUint32(miUint8Array, MI_INTR_MASK_REG) & 0x0000003F & getUint32(miUint8Array, MI_INTR_REG)) !== 0) {
 		//Trigger an MI interrupt since we don't know what it is.
 		setException(EXC_INT, CAUSE_IP3, pc, isFromDelaySlot);
 	}
@@ -639,17 +635,6 @@ function runSPTask(spDmemTask)
     triggerRspBreak();
 }
 
-
-function setupForNextDlistNoDelayDma() {
-    
-    setFlag(spReg1Uint8Array, SP_STATUS_REG, 0x00000203);
-
-    clrFlag(spReg1Uint8Array, SP_STATUS_REG, SP_STATUS_HALT|SP_STATUS_DMA_BUSY|SP_STATUS_IO_FULL|SP_STATUS_DMA_FULL);
-
-    triggerSPInterrupt(0, false);
-}
-
-
 function processAudioList()
 {
     log('todo: process Audio List');
@@ -664,10 +649,7 @@ function processRDPList()
 }
 
 function checkInterrupts()
-{
-    if ((getUint32(miUint8Array, MI_INTR_REG) & MI_INTR_SP) !== 0)
-        triggerRspBreak(0, false);
-    
+{    
     if ((getUint32(miUint8Array, MI_INTR_REG) & MI_INTR_DP) !== 0)
         triggerDPInterrupt(0, false);
 
@@ -680,8 +662,7 @@ function checkInterrupts()
     //if ((getUint32(miUint8Array, MI_INTR_REG) & MI_INTR_VI) !== 0)
     //    triggerVIInterrupt(0, false);
         
-    if((cp0[CAUSE] & cp0[STATUS] & 0x0000FF00) !== 0)
-    {
+    if((cp0[CAUSE] & cp0[STATUS] & 0x0000FF00) !== 0) {
         setException(EXC_INT, 0, programCounter, false);
         //do not process interrupts here as we don't have support for
         //interrupts in delay slots. processs them in the main runLoop.

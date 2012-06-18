@@ -258,7 +258,7 @@ function copyDramToSp(pc, isDelaySlot)
 
     setInt32(spReg1Uint8Array, SP_DMA_BUSY_REG, 0);
     if (getInt32(spReg1Uint8Array, spReg1Uint8Array, SP_STATUS_REG) & (SP_STATUS_DMA_BUSY|SP_STATUS_IO_FULL|SP_STATUS_DMA_FULL))
-        alert('hmm..todo: an sp fp status flag is blockinging from continuing');
+        alert('hmm..todo: an sp fp status flag is blocking from continuing');
     clrFlag(spReg1Uint8Array, SP_STATUS_REG, SP_STATUS_DMA_BUSY);
     setFlag(spReg1Uint8Array, SP_STATUS_REG, SP_STATUS_HALT);
     

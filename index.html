@@ -38,24 +38,8 @@
     }
 </script>
 
-
-<style>
-  #byte_content {
-    margin: 5px 0;
-    max-height: 100px;
-    overflow-y: auto;
-    overflow-x: hidden;
-  }
-  #byte_range { margin-top: 5px; }
-</style>
-
 <style>
 
-#originScrubber {
-    -webkit-appearance: slider-vertical;
-    width: 20px;
-    height: 240;
-}
   #progress_bar {
     margin: 10px 0;
     padding: 3px;
@@ -75,16 +59,25 @@
     height: auto;
     width: 0;
   }
+  #user_panel {
+    opacity: 0;
+    background-color:#6677FF;
+    text-align:center;
+    -webkit-transition: opacity 0.5s linear;  
+  }
+  
+  #user_panel.show {
+    opacity: 0.6;
+  }
 </style>
 
 <canvas id="Canvas" style="width: 100%; height: 100%; position: fixed; z-index: -1000; top: 0; left: 0; background-color: #000000; margin: 0;" width=320 height=240>I'm sorry your browser does not support the HTML5 canvas element.</canvas>
 
-
-<div style=" margin: 50 px 10 px;">
-<table style="opacity:0.6; z-index:-10" border="0">
+<div >
+<table border="0">
 <tr>
-<td colspan="3" style="background-color:#FFA500;text-align:center;">
-<h2>1964js Debugger</h2>
+<td id="user_panel" colspan="3" >
+<h2>1964js</h2>
 <input type="file" id="files" name="file" />
 <button onclick="abortRead();">Cancel read</button>
 <div id="progress_bar"><div class="percent">0%</div></div>
@@ -92,61 +85,17 @@
 </tr>
 </div>
 
-<div id="speedScrubber" style="opacity: 0.0; z-index: 1000; position: fixed; top: 10 px; left: 10 px; background-color: #CC8822; border: 2px solid #aa6600; font-size: 13px; color: white; font-weight: bold; font-family:Arial,Helvetica,sans-serif;">Slower (less CPU)<input id="speed" name="Speed" width=640 type="range" min=0 max=131072 value=65535 step=100 onchange="_1964js.changeSpeed(this.value)"/>Faster (more CPU)
-</div>
-
-
 <tr valign="top">
-
-<td style="background-color:#EEEEEE;text-align:top;">
-<span id="screen"></span>
-
-<!-- note: canvas textures need to be powers of 2 for WebGL -->
-</td>
 
 <td>
 <canvas id="Canvas3D" style="width: 100%; height: 100%; position: fixed; z-index: -999; top: 0; left: 0; margin: 0;" width="800" height="600">I'm sorry your browser does not support the HTML5 canvas element.</canvas>
 </td>
-
-
-<td>
-<canvas id="DebugCanvas" style="display: block;" width="320" height="240">I'm sorry your browser does not support the HTML5 canvas element.</canvas>
-</td>
-<td>
-<input id="originScrubber" width=640 type="range" min=0 max=3000000 value=25 step=100 onchange="showValue(this.value)" />
-</td>
-
-</tr>
-
-<tr>
-<td colspan="3" style="background-color:#FFA500;text-align:center;">
-</td>
-</tr>
-<tr>
-<td colspan="3" style="background-color:#FFD700;height:240px;text-align:top;">
-<div id="error" style="height:240px;overflow-x: scroll;overflow-y: scroll;width:400px;"></div>
-</td>
-
-
 </tr>
 </table>
 
-<span id="range">0</span>
-<script type="text/javascript">
-function showValue(newValue)
-{
-	document.getElementById("range").innerHTML=newValue;
-    var c = document.getElementById("DebugCanvas");
-    var ctx = c.getContext("2d");
-  
-    if (ImDat2)  
-    repaint(ctx,ImDat2,newValue|0);
-}
-</script>
-
-
 <script>
-    
+    document.getElementById('user_panel').className = 'show';
+
   var reader;
   var progress = document.querySelector('.percent');
   var alertMessage = "";
@@ -167,6 +116,18 @@ function showValue(newValue)
   function abortRead() {
     reader.abort();
   }
+  
+  var intervalVariable;
+  
+  document.getElementById("user_panel").onmousemove = function() {
+    document.getElementById("user_panel").className = 'show';
+    clearTimeout(intervalVariable);
+  }
+
+  document.getElementById("user_panel").onmouseout = function() {
+    intervalVariable = setTimeout(function(){document.getElementById('user_panel').className='';}, 1000);  
+  }
+
 
   function errorHandler(evt) {
     switch(evt.target.error.code) {
@@ -195,7 +156,7 @@ function showValue(newValue)
     }
   }
 
-var _1964js; 
+  var _1964js; 
 
   function handleFileSelect(evt) {
     // Reset progress indicator on new file selection.
@@ -215,7 +176,7 @@ var _1964js;
       // Ensure that the progress bar displays 100% at the end.
       progress.style.width = '100%';
       progress.textContent = '100%';
-      setTimeout("document.getElementById('progress_bar').className='';", 2000);
+      setTimeout("document.getElementById('progress_bar').className='';document.getElementById('user_panel').className='';", 1000);
       //todo: add zip support (from index.html)
       var buffer = new Uint8Array(reader.result);
       romLength = buffer.byteLength;
