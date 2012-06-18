@@ -71,7 +71,7 @@ function processPif() {
     pifUint8Array[pifRamStart+63] = 0; //Set the last bit to 0 (successful return)
 }
 
-var EEProm_Status_Byte = 0x80;
+var EEProm_Status_Byte = 0;
 function processEeprom(pifRamStart, count) {
 	switch(pifUint8Array[pifRamStart+count+2]) {
 	case 0xFF:
@@ -171,6 +171,7 @@ window.onkeyup = keyup;
 
 function keydown(e) {
     var keyCode;
+    buttons = 0;
 
     if (e) {
         keyCode = e.which;

@@ -18,7 +18,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 function log(message) {
-    //console.log(message);
+   // console.log(message);
 }
 
 function copyCartToDram(pc, isDelaySlot)
@@ -124,7 +124,7 @@ function copySiToDram(pc, isDelaySlot)
 {
     var end = 63; //read 64 bytes. Is there an si_wr_len_reg?
     var to = getInt32(siUint8Array, siUint8Array, SI_DRAM_ADDR_REG);
-    var from = getInt32(siUint8Array, siUint8Array, SI_DRAM_ADDR_RD64B_REG);
+    var from = getInt32(siUint8Array, siUint8Array, SI_PIF_ADDR_RD64B_REG);
     
 	if (from !== 0x1FC007C0 )
 		throw 'Unhandled: SI_DRAM_ADDR_RD64B_REG = ' + from;
@@ -135,6 +135,7 @@ function copySiToDram(pc, isDelaySlot)
     to &= 0x0fffffff;
     from &= 0x0000ffff;
 
+    processPif();
 
     for (; end>=0; --end)
     {
@@ -143,6 +144,7 @@ function copySiToDram(pc, isDelaySlot)
         from++;
     }
 
+    setFlag(siUint8Array, SI_STATUS_REG, SI_STATUS_INTERRUPT);
     triggerSIInterrupt(pc, isDelaySlot);
 }
 
@@ -229,6 +231,7 @@ function copyDramToSi(pc, isDelaySlot)
     }
 
     processPif();
+    setFlag(siUint8Array, SI_STATUS_REG, SI_STATUS_INTERRUPT);
     triggerSIInterrupt(pc, isDelaySlot);
 }
 

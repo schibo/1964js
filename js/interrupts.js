@@ -100,7 +100,6 @@ function triggerVIInterrupt(pc, isFromDelaySlot)
 
 function triggerSIInterrupt(pc, isFromDelaySlot)
 {
-    //setFlag(siUint8Array, SI_STATUS_REG, SI_STATUS_INTERRUPT);
     
     setFlag(miUint8Array, MI_INTR_REG, MI_INTR_SI);
 
@@ -236,9 +235,6 @@ function writeSI(offset, value, pc, isFromDelaySlot)
         break;
         case SI_STATUS_REG:
             writeSIStatusReg(value, pc, isFromDelaySlot);
-        break;
-        case 4: //unknown
-            setInt32(siUint8Array, offset, value);
         break;
         case SI_PIF_ADDR_RD64B_REG:
             setInt32(siUint8Array, offset, value);
