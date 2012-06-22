@@ -646,9 +646,7 @@ _1964Helpers.prototype.inter_ddivu = function(r, i)
 
     var z = bigint_div(x, y);
     
-    if (!z)
-    {
-        alert('zero!!');
+    if (!z) {
         r[32] = 0;
         h[32] = 0;
     }
@@ -774,7 +772,7 @@ _1964Helpers.prototype.inter_r4300i_C_cond_fmt_d = function(instruction)
 
     cp1Con[31] &= ~COP1_CONDITION_BIT;
 
-	if(cond === true)
+	if (cond)
 		cp1Con[31] |= COP1_CONDITION_BIT;
 }
 

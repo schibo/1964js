@@ -71,7 +71,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     var h = new Int32Array(35*4); //r hi
     var vAddr = new Int32Array(4);
     var cp0 = new Int32Array(32*4);
-    var cp1Buffer = new ArrayBuffer(32*8);
+    var cp1Buffer = new ArrayBuffer(32*4);
     var cp1_i = new Int32Array(cp1Buffer);
     var cp1_f = new Float32Array(cp1Buffer);
     var cp1_f64 = new Float64Array(cp1Buffer);
@@ -365,7 +365,7 @@ _1964jsEmulator = function() {
         if (terminate === false)
             request = requestAnimFrame(this.runLoop.bind(this, r));
         
-        keepRunning = 200000;
+        keepRunning = 180000;
         var pc, fnName, fn;
 
         checkInterrupts();
@@ -440,7 +440,7 @@ _1964jsEmulator = function() {
             var instruction = loadWord(pc+offset);
             var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction);
 
-            string += 'magic_number+=1.6;';
+            string += 'magic_number+=1.0;';
             string += opcode;
             offset+=4;
             if (offset > 10000) {
@@ -532,12 +532,12 @@ _1964jsEmulator = function() {
         var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
         var string = opcode;
 
-        string += 'magic_number+=1.6;programCounter='+pc+';return code["'+getFnName(pc)+'"];}';
+        string += 'magic_number+=1.0;programCounter='+pc+';return code["'+getFnName(pc)+'"];}';
 
         //if likely and if branch not taken, skip delay slot
         if (likely === false) {
             string += opcode;
-            string += 'magic_number+=1.6;';
+            string += 'magic_number+=1.0;';
         }
 
         offset+=4;
@@ -705,7 +705,7 @@ _1964jsEmulator = function() {
         //delay slot
         var instruction = loadWord((programCounter+offset+4)|0);
 
-        string += 'magic_number+=1.6;';
+        string += 'magic_number+=1.0;';
         if (((instr_index>>0) === (programCounter+offset)>>0) && (instruction === 0)) {
             string+= 'magic_number=0;keepRunning=0;'
         }
@@ -727,7 +727,7 @@ _1964jsEmulator = function() {
         var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
         string += opcode;
         var pc = (programCounter+offset+8)|0;
-        string += 'magic_number+=1.6;';
+        string += 'magic_number+=1.0;';
         string += 'programCounter='+instr_index+';r[31]='+pc+';h[31]='+(pc>>31)+';return code["'+getFnName(instr_index)+'"];}';
 
         return string;
@@ -745,7 +745,7 @@ _1964jsEmulator = function() {
         var instruction = loadWord((programCounter+offset+4)|0);
         var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
         string += opcode;
-        string += 'magic_number+=1.6;';
+        string += 'magic_number+=1.0;';
         string += 'programCounter=temp;return code[getFnName(temp)];}';
         
         return string;
@@ -759,7 +759,7 @@ _1964jsEmulator = function() {
         var instruction = loadWord((programCounter+offset+4)|0);
         var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
         string += opcode;
-        string += 'magic_number+=1.6;';
+        string += 'magic_number+=1.0;';
         string += 'programCounter=temp;return code[getFnName(temp)];}';
         
         return string;
@@ -1021,8 +1021,6 @@ _1964jsEmulator = function() {
     }
 
     this.r4300i_ddiv = function(i) {
-        alert('ddiv');
-
         return '_1964Helpers.prototype.inter_ddiv(r,'+i+');'
     }
 
@@ -1264,6 +1262,11 @@ _1964jsEmulator = function() {
     this.r4300i_COP1_sqrt_s = function(i) {
         return 'cp1_f['+FD32ArrayView(i)+']=Math.sqrt(cp1_f['+FS32ArrayView(i)+']);';
     }
+
+    this.r4300i_COP1_sqrt_d = function(i) {
+        return 'cp1_f64['+FD64ArrayView(i)+']=Math.sqrt(cp1_f64['+FS64ArrayView(i)+']);';
+    }
+    
 
     this.r4300i_sync = function(i) {
         this.log('todo: sync');
