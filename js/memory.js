@@ -61,7 +61,6 @@ function loadByte(addr)
         return spReg2Uint8Array[off];        
     }
     else if (a >= MEMORY_START_DPC && a < MEMORY_START_DPC + MEMORY_SIZE_DPC) {
-        alert('get dpc');
         var off=a-MEMORY_START_DPC;
         return dpcUint8Array[off];        
     }
@@ -170,7 +169,6 @@ function loadHalf(addr)
         return spReg2Uint8Array[off]<<8 | spReg2Uint8Array[off+1];        
     }
     else if (a >= MEMORY_START_DPC && a < MEMORY_START_DPC + MEMORY_SIZE_DPC) {
-        alert('get dpc');
         var off=a-MEMORY_START_DPC;
         return dpcUint8Array[off]<<8 | dpcUint8Array[off+1];        
     }
@@ -280,7 +278,6 @@ function loadWord(addr)
         return spReg2Uint8Array[off]<<24 | spReg2Uint8Array[off+1]<<16 | spReg2Uint8Array[off+2]<<8 | spReg2Uint8Array[off+3];        
     }
     else if (a >= MEMORY_START_DPC && a < MEMORY_START_DPC + MEMORY_SIZE_DPC) {
-        alert('get dpc');
         var off=a-MEMORY_START_DPC;
         return dpcUint8Array[off]<<24 | dpcUint8Array[off+1]<<16 | dpcUint8Array[off+2]<<8 | dpcUint8Array[off+3];        
     }
