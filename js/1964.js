@@ -1351,27 +1351,132 @@ _1964jsEmulator = function() {
         return '_1964Helpers.prototype.inter_daddu(r,'+i+');';
     }
 
-    this.r4300i_C_EQ_D = function(i) {
+
+	this.r4300i_C_F_S = function(i) {
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+');';
+    }
+
+	this.r4300i_C_UN_S = function(i) {
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+');';
+    }
+
+	this.r4300i_C_EQ_S = function(i) {
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+');';
+    }
+
+	this.r4300i_C_UEQ_S = function(i) {
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+');';
+    }
+
+	this.r4300i_C_OLT_S = function(i) {
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+');';
+    }
+
+	this.r4300i_C_ULT_S = function(i) {
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+');';
+    }
+
+	this.r4300i_C_OLE_S = function(i) {
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+');';
+    }
+
+	this.r4300i_C_ULE_S = function(i) {
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+');';
+    }
+
+	this.r4300i_C_SF_S = function(i) {
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+');';
+    }
+
+	this.r4300i_C_NGLE_S = function(i) {
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+');';
+    }
+
+	this.r4300i_C_SEQ_S = function(i) {
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+');';
+    }
+
+	this.r4300i_C_NGL_S = function(i) {
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+');';
+    }
+
+	this.r4300i_C_LT_S = function(i) {
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+');';
+    }
+
+	this.r4300i_C_NGE_S = function(i) {
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+');';
+    }
+
+	this.r4300i_C_LE_S = function(i) {
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+');';
+    }
+
+	this.r4300i_C_NGT_S = function(i) {
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+');';
+    }
+    
+	this.r4300i_C_F_D = function(i) {
         return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+');';
     }
 
-    this.r4300i_C_EQ_S = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+');';
-    }
-
-    this.r4300i_C_LT_S = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+');';
-    }
-
-    this.r4300i_C_LT_D = function(i) {
+	this.r4300i_C_UN_D = function(i) {
         return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+');';
     }
 
-    this.r4300i_C_LE_S = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+');';
+	this.r4300i_C_EQ_D = function(i) {
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+');';
     }
 
-    this.r4300i_C_LE_D = function(i) {
+	this.r4300i_C_UEQ_D = function(i) {
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+');';
+    }
+
+	this.r4300i_C_OLT_D = function(i) {
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+');';
+    }
+
+	this.r4300i_C_ULT_D = function(i) {
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+');';
+    }
+
+	this.r4300i_C_OLE_D = function(i) {
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+');';
+    }
+
+	this.r4300i_C_ULE_D = function(i) {
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+');';
+    }
+
+	this.r4300i_C_SF_D = function(i) {
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+');';
+    }
+
+	this.r4300i_C_NGLE_D = function(i) {
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+');';
+    }
+
+	this.r4300i_C_SEQ_D = function(i) {
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+');';
+    }
+
+	this.r4300i_C_NGL_D = function(i) {
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+');';
+    }
+
+	this.r4300i_C_LT_D = function(i) {
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+');';
+    }
+
+	this.r4300i_C_NGE_D = function(i) {
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+');';
+    }
+
+	this.r4300i_C_LE_D = function(i) {
+        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+');';
+    }
+
+	this.r4300i_C_NGT_D = function(i) {
         return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+');';
     }
 }
