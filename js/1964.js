@@ -1259,6 +1259,15 @@ _1964jsEmulator = function() {
         return 'cp1_i['+FD32HIArrayView(i)+']=cp1_i['+FS32HIArrayView(i)+']^0x80000000;';
     }
 
+    this.r4300i_COP1_abs_s = function(i) {
+        return 'cp1_i['+FD32ArrayView(i)+']=cp1_i['+FS32ArrayView(i)+']&0x7fffffff;';
+    }
+
+    this.r4300i_COP1_abs_d = function(i) {
+        return 'cp1_i['+FD32HIArrayView(i)+']=cp1_i['+FS32HIArrayView(i)+']&0x7fffffff;';
+    }
+
+
     this.r4300i_COP1_sqrt_s = function(i) {
         return 'cp1_f['+FD32ArrayView(i)+']=Math.sqrt(cp1_f['+FS32ArrayView(i)+']);';
     }
