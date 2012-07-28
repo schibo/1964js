@@ -47,17 +47,23 @@ function getUrlVars()
 
 function loadRom(emu)
 {
+    if (emu == null || emu == undefined)
+        emu = new _1964jsEmulator();
+        
     vars = getUrlVars();
     var romPath;
     for (var i=0; i<vars.length; i++)
         if (vars[i] === "rom")
             romPath = vars[vars[i]];
 
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', romPath, true);
-    xhr.responseType = 'arraybuffer';
-    xhr.send();
+    if (romPath != undefined && romPath != null) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', romPath, true);
+        xhr.responseType = 'arraybuffer';
+        xhr.send();
+    }
 
+    if (xhr != undefined)
     xhr.onload = function(e) {
        
        //This zip library seems to only work if there is one file in the root of the zip's filesystem.

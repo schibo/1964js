@@ -2,10 +2,8 @@
 <head>
 </head>
 
-<body onload="webGLStart()">
+<body onload="webGLStart(); loadRom(_1964js)">
 
-<!--<script src="1964js-0.0.1.min.js"></script>
--->
 <script id="shader-fs" type="x-shader/x-fragment">
     precision mediump float;
     varying float v_Dot;
@@ -191,9 +189,10 @@
   document.getElementById('files').addEventListener('change', handleFileSelect, false);
 </script>
 
+<script src="js/lib/bitjs/io.js"></script>
+<script src="js/lib/bitjs/archive.js"></script>
 <script src="js/lib/BigInt.js"></script>
-<script src="js/lib/closure/goog/base.js" type="text/javascript">
-</script>
+<script src="js/lib/closure/goog/base.js" type="text/javascript"></script>
 <script src="js/lib/Stats.js"></script>
 <script src="js/1964.js"></script>
 <script src="js/helpers.js"></script>
