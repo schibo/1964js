@@ -1,8 +1,9 @@
 <html>
 <head>
+<LINK href="css/style.css" rel="stylesheet" type="text/css">
 </head>
 
-<body onload="webGLStart(); loadRom(_1964js)">
+<body onload="start1964()">
 
 <script id="shader-fs" type="x-shader/x-fragment">
     precision mediump float;
@@ -16,17 +17,12 @@
 </script>
 
 <script id="shader-vs" type="x-shader/x-vertex">
-    
     uniform mat4 uMVMatrix;
     uniform mat4 uPMatrix;
     uniform mat4 uNormalMatrix;
-    
     vec3 vNormal = vec3(-1.0, -1.0, 3.0);
     attribute vec3 aVertexPosition;
-
-    
     varying float v_Dot;
-    
     vec3 lightDir = vec3(0.0, 0.0, 2.0);
     
     void main(void) {
@@ -38,35 +34,6 @@
 
 <style>
 
-  #progress_bar {
-    margin: 10px 0;
-    padding: 3px;
-    border: 1px solid #000;
-    font-size: 14px;
-    clear: both;
-    opacity: 0;
-    -moz-transition: opacity 1s linear;
-    -o-transition: opacity 1s linear;
-    -webkit-transition: opacity 1s linear;
-  }
-  #progress_bar.loading {
-    opacity: 1.0;
-  }
-  #progress_bar .percent {
-    background-color: #99ccff;
-    height: auto;
-    width: 0;
-  }
-  #user_panel {
-    opacity: 0;
-    background-color:#6677FF;
-    text-align:center;
-    -webkit-transition: opacity 0.5s linear;  
-  }
-  
-  #user_panel.show {
-    opacity: 0.6;
-  }
 </style>
 
 <canvas id="Canvas" style="width: 100%; height: 100%; position: fixed; z-index: -1000; top: 0; left: 0; background-color: #000000; margin: 0;" width=320 height=240>I'm sorry your browser does not support the HTML5 canvas element.</canvas>
@@ -91,106 +58,10 @@
 </tr>
 </table>
 
-<script>
-    document.getElementById('user_panel').className = 'show';
-
-  var reader;
-  var progress = document.querySelector('.percent');
-  var alertMessage = "";
-    // Check for the various File API support.
-
-    if (!window.File)
-         alertMessage += ' window.File';
-    else if (!window.FileReader)
-         alertMessage += ' window.FileReader';
-    else if (!window.FileList)
-         alertMessage += ' window.FileList';
-    else if (!window.Blob)
-        alertMessge += ' window.Blob';
-
-    if (alertMessage.length > 0)
-        log('Unsupported in this browser: ' + alertMessage);
-
-  function abortRead() {
-    reader.abort();
-  }
-  
-  var intervalVariable;
-  
-  document.getElementById("user_panel").onmousemove = function() {
-    document.getElementById("user_panel").className = 'show';
-    clearTimeout(intervalVariable);
-  }
-
-  document.getElementById("user_panel").onmouseout = function() {
-    intervalVariable = setTimeout(function(){document.getElementById('user_panel').className='';}, 1000);  
-  }
-
-
-  function errorHandler(evt) {
-    switch(evt.target.error.code) {
-      case evt.target.error.NOT_FOUND_ERR:
-        alert('File Not Found!');
-        break;
-      case evt.target.error.NOT_READABLE_ERR:
-        alert('File is not readable');
-        break;
-      case evt.target.error.ABORT_ERR:
-        break; // noop
-      default:
-        alert('An error occurred reading this file.');
-    };
-  }
-
-  function updateProgress(evt) {
-    // evt is a ProgressEvent.
-    if (evt.lengthComputable) {
-      var percentLoaded = Math.round((evt.loaded / evt.total) * 100);
-      // Increase the progress bar length.
-      if (percentLoaded < 100) {
-        progress.style.width = percentLoaded + '%';
-        progress.textContent = percentLoaded + '%';
-      }
-    }
-  }
-
-  var _1964js; 
-
-  function handleFileSelect(evt) {
-    // Reset progress indicator on new file selection.
-    progress.style.width = '0%';
-    progress.textContent = '0%';
-
-    reader = new FileReader();
-    reader.onerror = errorHandler;
-    reader.onprogress = updateProgress;
-    reader.onabort = function(e) {
-      alert('File read cancelled');
-    };
-    reader.onloadstart = function(e) {
-      document.getElementById('progress_bar').className = 'loading';
-    };
-    reader.onload = function(e) {
-      // Ensure that the progress bar displays 100% at the end.
-      progress.style.width = '100%';
-      progress.textContent = '100%';
-      setTimeout("document.getElementById('progress_bar').className='';document.getElementById('user_panel').className='';", 1000);
-      //todo: add zip support (from index.html)
-      var buffer = new Uint8Array(reader.result);
-      romLength = buffer.byteLength;
-      _1964js = new _1964jsEmulator();
-      _1964js.init(buffer);
-    }
-
-    // Read in the file as an array buffer.
-    reader.readAsArrayBuffer(evt.target.files[0]);
-  }
-
-  document.getElementById('files').addEventListener('change', handleFileSelect, false);
-</script>
-
 <script src="js/lib/bitjs/io.js"></script>
 <script src="js/lib/bitjs/archive.js"></script>
+
+<!-- when deploying, the below scripts are replaced by the 1964js-x.x.x.min.js-->
 <script src="js/lib/BigInt.js"></script>
 <script src="js/lib/closure/goog/base.js" type="text/javascript"></script>
 <script src="js/lib/Stats.js"></script>

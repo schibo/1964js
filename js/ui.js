@@ -45,10 +45,65 @@ function getUrlVars()
 
     var gg = goog; //Google Closure API
 
-function loadRom(emu)
-{
-    if (emu == null || emu == undefined)
-        emu = new _1964jsEmulator();
+function simulateOpenFileClick() {
+  var evt = document.createEvent("Event");
+  evt.files[0].name = 
+  evt.initEvent('change', true, false);
+  var cb = document.getElementById("files"); 
+  var canceled = !cb.dispatchEvent(evt);
+  if(canceled) {
+    // A handler called preventDefault
+    alert("canceled");
+  } else {
+    // None of the handlers called preventDefault
+    alert("not canceled");
+  }
+}
+
+function uncompressAndRun(romPath, response, emu) {
+    if (romPath.split('.').pop().toLowerCase() !== "zip") {
+       var buffer = new Uint8Array(response);
+        romLength = buffer.byteLength;
+        emu.init(buffer);
+    } else {
+        //This zip library seems to only work if there is one file in the root of the zip's filesystem.
+        //Compressing with MacOS causes problems.
+        var unzipper = new bitjs.archive.Unzipper(response, 'js/lib/bitjs/');
+        unzipper.addEventListener(bitjs.archive.UnarchiveEvent.Type.EXTRACT, function(e) {
+            if (e.unarchivedFile) {
+                console.log("extracted: " + e.unarchivedFile.filename);
+                var buffer = new Uint8Array(e.unarchivedFile.fileData);
+                romLength = buffer.byteLength;
+                emu.init(buffer);
+            }   
+        });
+
+        unzipper.addEventListener(bitjs.archive.UnarchiveEvent.Type.INFO, function(e) {
+            console.log("zip info: " + e.msg);
+        });
+
+        unzipper.addEventListener(bitjs.archive.UnarchiveEvent.Type.PROGRESS, function(e) {
+            //for (var i in e)
+            //    console.log(i +': '+ e[i]);
+        });
+
+        unzipper.addEventListener(bitjs.archive.UnarchiveEvent.Type.FINISH, function(e) {
+            console.log("finish: " + e.msg);
+        });
+
+        unzipper.addEventListener(bitjs.archive.UnarchiveEvent.Type.ERROR, function(e) {
+            console.log("ERROR: " + e.msg);
+        });
+
+        unzipper.start();
+    }
+}
+
+function start1964() {
+    webGLStart();
+
+    if (_1964js == null || _1964js == undefined)
+        _1964js = new _1964jsEmulator();
         
     vars = getUrlVars();
     var romPath;
@@ -61,37 +116,105 @@ function loadRom(emu)
         xhr.open('GET', romPath, true);
         xhr.responseType = 'arraybuffer';
         xhr.send();
+
+        xhr.onload = function(e) {
+            uncompressAndRun(romPath, e.target.response, _1964js);
+        };
+    }
+}
+
+    document.getElementById('user_panel').className = 'show';
+
+  var reader;
+  var progress = document.querySelector('.percent');
+  var alertMessage = "";
+    // Check for the various File API support.
+
+    if (!window.File)
+         alertMessage += ' window.File';
+    else if (!window.FileReader)
+         alertMessage += ' window.FileReader';
+    else if (!window.FileList)
+         alertMessage += ' window.FileList';
+    else if (!window.Blob)
+        alertMessge += ' window.Blob';
+
+    if (alertMessage.length > 0)
+        log('Unsupported in this browser: ' + alertMessage);
+
+  function abortRead() {
+    reader.abort();
+  }
+  
+  var intervalVariable;
+  
+  document.getElementById("user_panel").onmousemove = function() {
+    document.getElementById("user_panel").className = 'show';
+    clearTimeout(intervalVariable);
+  }
+
+  document.getElementById("user_panel").onmouseout = function() {
+    intervalVariable = setTimeout(function(){document.getElementById('user_panel').className='';}, 1000);  
+  }
+
+
+  function errorHandler(evt) {
+    switch(evt.target.error.code) {
+      case evt.target.error.NOT_FOUND_ERR:
+        alert('File Not Found!');
+        break;
+      case evt.target.error.NOT_READABLE_ERR:
+        alert('File is not readable');
+        break;
+      case evt.target.error.ABORT_ERR:
+        break; // noop
+      default:
+        alert('An error occurred reading this file.');
+    };
+  }
+
+  function updateProgress(evt) {
+    // evt is a ProgressEvent.
+    if (evt.lengthComputable) {
+      var percentLoaded = Math.round((evt.loaded / evt.total) * 100);
+      // Increase the progress bar length.
+      if (percentLoaded < 100) {
+        progress.style.width = percentLoaded + '%';
+        progress.textContent = percentLoaded + '%';
+      }
+    }
+  }
+
+  var _1964js; 
+
+function handleFileSelect(evt) {
+   var fileName = evt.target.files[0].name;    
+    
+    // Reset progress indicator on new file selection.
+    progress.style.width = '0%';
+    progress.textContent = '0%';
+
+    reader = new FileReader();
+    reader.onerror = errorHandler;
+    reader.onprogress = updateProgress;
+    reader.onabort = function(e) {
+      alert('File read cancelled');
+    };
+    reader.onloadstart = function(e) {
+      document.getElementById('progress_bar').className = 'loading';
+    };
+    reader.onload = function(e) {
+      // Ensure that the progress bar displays 100% at the end.
+      progress.style.width = '100%';
+      progress.textContent = '100%';
+      setTimeout("document.getElementById('progress_bar').className='';document.getElementById('user_panel').className='';", 1000);
+      //todo: add zip support (from index.html)
+      
+      uncompressAndRun(fileName, reader.result, _1964js);
     }
 
-    if (xhr != undefined)
-    xhr.onload = function(e) {
-       
-       //This zip library seems to only work if there is one file in the root of the zip's filesystem.
-       //Compressing with MacOS causes problems.
-        var unzipper = new bitjs.archive.Unzipper(this.response, 'js/lib/bitjs/');
-        unzipper.addEventListener(bitjs.archive.UnarchiveEvent.Type.EXTRACT, function(e) {
-                if (e.unarchivedFile)
-                {
-                    console.log("extracted: " + e.unarchivedFile.filename);
-                    var buffer = new Uint8Array(e.unarchivedFile.fileData);
-                    romLength = buffer.byteLength;
-                    emu.init(buffer);
-                }   
-                });
-        unzipper.addEventListener(bitjs.archive.UnarchiveEvent.Type.INFO, function(e) {
-                console.log("zip info: " + e.msg);
-                });
-        unzipper.addEventListener(bitjs.archive.UnarchiveEvent.Type.PROGRESS, function(e) {
-              //  for (var i in e)
-                //    console.log(i +': '+ e[i]);
-                });
-        unzipper.addEventListener(bitjs.archive.UnarchiveEvent.Type.FINISH, function(e) {
-                console.log("finish: " + e.msg);
-                });
-        unzipper.addEventListener(bitjs.archive.UnarchiveEvent.Type.ERROR, function(e) {
-                console.log("ERROR: " + e.msg);
-                });
-        
-        unzipper.start();
-    };
-}
+    // Read in the file as an array buffer.
+    reader.readAsArrayBuffer(evt.target.files[0]);
+  }
+
+  document.getElementById('files').addEventListener('change', handleFileSelect, false);
