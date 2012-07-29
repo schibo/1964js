@@ -43,7 +43,10 @@ gRSP.vertexMult = 10;
 
 function processDisplayList()
 {
-    showFB = false;
+    if (showFB === true) {
+        show3D();
+        showFB = false;
+    }
 
     dlParserProcess();
 

@@ -162,6 +162,7 @@ _1964jsEmulator = function() {
         magic_number = -625000;
         flushDynaCache();
         showFB = true;
+        hide3D();
         this.endianTest();
         //runTest();
 

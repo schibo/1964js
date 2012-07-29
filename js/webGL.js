@@ -17,6 +17,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+//TODO: parameterize "Canvas3D" so this dom id can be arbitrary.
+
    var gl;
     function initGL(canvas) {
         try {
@@ -122,13 +124,27 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     function webGLStart() {
 
         var canvas = document.getElementById("Canvas3D");
+
         initGL(canvas);
-        if (gl)
-        {
+        if (gl) {
             initShaders();
             initBuffers();
 
             gl.clearColor(0.0, 0.0, 0.0, 1.0);
             gl.enable(gl.DEPTH_TEST);
         }
+        
+        canvas.style.visibility = "hidden";
+    }
+
+    function show3D() {
+        var canvas3D = document.getElementById("Canvas3D");
+
+        canvas3D.style.visibility = "visible";    
+    }
+
+    function hide3D() {
+        var canvas3D = document.getElementById("Canvas3D");
+
+        canvas3D.style.visibility = "hidden";    
     }
