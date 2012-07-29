@@ -22,13 +22,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
    var gl;
     function initGL(canvas) {
         try {
-            gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+            log("canvas = " + canvas);
+            log("canvas.getContext = " + canvas.getContext);
+            gl = canvas.getContext("webgl") || canvas.getContext("moz-webgl") || canvas.getContext("webkit-3d") || canvas.getContext("experimental-webgl");
+            log("gl = " + gl);
             gl.viewportWidth = canvas.width;
+            log("gl.viewportWidth = " + gl.viewportWidth);
             gl.viewportHeight = canvas.height;
+            log("gl.viewportHeight = " + gl.viewportHeight);
+            
         } catch (e) {
         }
         if (!gl) {
-            fatal("Could not initialise WebGL. Your browser may not support it.");
+            log("Could not initialise WebGL. Your browser may not support it.");
         }
     }
 

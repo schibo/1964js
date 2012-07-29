@@ -45,11 +45,11 @@ function getUrlVars()
 
     var gg = goog; //Google Closure API
 
-function uncompressAndRun(romPath, response, emu) {
+function uncompressAndRun(romPath, response) {
     if (romPath.split('.').pop().toLowerCase() !== "zip") {
        var buffer = new Uint8Array(response);
         romLength = buffer.byteLength;
-        emu.init(buffer);
+        _1964js.init(buffer);
     } else {
         //This zip library seems to only work if there is one file in the root of the zip's filesystem.
         //Compressing with MacOS causes problems.
@@ -59,7 +59,7 @@ function uncompressAndRun(romPath, response, emu) {
                 console.log("extracted: " + e.unarchivedFile.filename);
                 var buffer = new Uint8Array(e.unarchivedFile.fileData);
                 romLength = buffer.byteLength;
-                emu.init(buffer);
+                _1964js.init(buffer);
             }   
         });
 
