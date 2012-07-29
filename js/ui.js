@@ -45,21 +45,6 @@ function getUrlVars()
 
     var gg = goog; //Google Closure API
 
-function simulateOpenFileClick() {
-  var evt = document.createEvent("Event");
-  evt.files[0].name = 
-  evt.initEvent('change', true, false);
-  var cb = document.getElementById("files"); 
-  var canceled = !cb.dispatchEvent(evt);
-  if(canceled) {
-    // A handler called preventDefault
-    alert("canceled");
-  } else {
-    // None of the handlers called preventDefault
-    alert("not canceled");
-  }
-}
-
 function uncompressAndRun(romPath, response, emu) {
     if (romPath.split('.').pop().toLowerCase() !== "zip") {
        var buffer = new Uint8Array(response);

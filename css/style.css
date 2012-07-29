@@ -23,10 +23,32 @@
 #user_panel {
     opacity: 0;
     background-color:#6677FF;
-    text-align:center;
-    -webkit-transition: opacity 0.5s linear;  
+    text-align: center;
+    -webkit-transition: opacity 0.5s linear;
+    width: 380px;
 }
-  
+
 #user_panel.show {
     opacity: 0.6;
+}
+
+#Canvas {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    z-index: -1000;
+    top: 0;
+    left: 0;
+    background-color: #000000;
+    margin: 0;
+}
+
+#Canvas3D {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    z-index: -999;
+    top: 0;
+    left: 0;
+    margin: 0;
 }

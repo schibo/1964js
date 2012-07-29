@@ -1,6 +1,6 @@
 <html>
 <head>
-<LINK href="css/style.css" rel="stylesheet" type="text/css">
+  <LINK href="css/style.css" rel="stylesheet" type="text/css">
 </head>
 
 <body onload="start1964()">
@@ -32,31 +32,17 @@
     }
 </script>
 
-<style>
+<canvas id="Canvas" width=320 height=240>I'm sorry your browser does not support the HTML5 canvas element.</canvas>
+<canvas id="Canvas3D" width="800" height="600">I'm sorry your browser does not support the HTML5 canvas element.</canvas>
 
-</style>
-
-<canvas id="Canvas" style="width: 100%; height: 100%; position: fixed; z-index: -1000; top: 0; left: 0; background-color: #000000; margin: 0;" width=320 height=240>I'm sorry your browser does not support the HTML5 canvas element.</canvas>
-
-<div >
-<table border="0">
-<tr>
-<td id="user_panel" colspan="3" >
-<h2>1964js</h2>
-<input type="file" id="files" name="file" />
-<button onclick="abortRead();">Cancel read</button>
-<div id="progress_bar"><div class="percent">0%</div></div>
-</td>
-</tr>
+<div id="user_panel" colspan="3" >
+  <h2>1964js</h2>
+  <input type="file" id="files" name="file" />
+  <button onclick="abortRead();">Cancel read</button>
+  <div id="progress_bar">
+    <div class="percent">0%</div>
+  </div>
 </div>
-
-<tr valign="top">
-
-<td>
-<canvas id="Canvas3D" style="width: 100%; height: 100%; position: fixed; z-index: -999; top: 0; left: 0; margin: 0;" width="800" height="600">I'm sorry your browser does not support the HTML5 canvas element.</canvas>
-</td>
-</tr>
-</table>
 
 <script src="js/lib/bitjs/io.js"></script>
 <script src="js/lib/bitjs/archive.js"></script>
