@@ -43,13 +43,24 @@ function getUrlVars()
     return vars;
 }
 
-    var gg = goog; //Google Closure API
+  var gg = goog; //Google Closure API
+
+function initTryCatch(buffer) {
+  try {
+    _1964js.init(buffer);
+  } catch(e) {
+    if (_1964js != undefined && _1964js != null) {
+      _1964js.terminate = true;
+      throw e;
+    }
+  }
+}
 
 function uncompressAndRun(romPath, response) {
     if (romPath.split('.').pop().toLowerCase() !== "zip") {
        var buffer = new Uint8Array(response);
         romLength = buffer.byteLength;
-        _1964js.init(buffer);
+        initTryCatch(buffer);
     } else {
         //This zip library seems to only work if there is one file in the root of the zip's filesystem.
         //Compressing with MacOS causes problems.
@@ -59,7 +70,7 @@ function uncompressAndRun(romPath, response) {
                 console.log("extracted: " + e.unarchivedFile.filename);
                 var buffer = new Uint8Array(e.unarchivedFile.fileData);
                 romLength = buffer.byteLength;
-                _1964js.init(buffer);
+                initTryCatch(buffer);
             }   
         });
 
@@ -85,7 +96,6 @@ function uncompressAndRun(romPath, response) {
 }
 
 function start1964() {
-    webGLStart();
 
     if (_1964js == null || _1964js == undefined)
         _1964js = new _1964jsEmulator();

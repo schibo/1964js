@@ -127,14 +127,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         mvMatrix = mvMatrixStack.pop();
     }
 
-    function webGLStart() {
+    function webGLStart(videoHLE) {
 
         var canvas = document.getElementById("Canvas3D");
 
         initGL(canvas);
         if (gl) {
             initShaders();
-            initBuffers();
+            videoHLE.initBuffers();
 
             gl.clearColor(0.0, 0.0, 0.0, 1.0);
             gl.enable(gl.DEPTH_TEST);

@@ -259,7 +259,7 @@ function soffset_imm(i)
 
 function setVAddr(i)
 {
-    return 'vAddr='+se(RS(i)+'+'+soffset_imm(i));
+    return 't.vAddr='+se(RS(i)+'+'+soffset_imm(i));
 }
 
 function fn(i)
@@ -312,7 +312,7 @@ function dLogic(i, n) {
 _1964Helpers = function(){}
 
     //called function, not compiled
-_1964Helpers.prototype.inter_mtc0 = function(r, f, rt, isDelaySlot, pc) {
+_1964Helpers.prototype.inter_mtc0 = function(r, f, rt, isDelaySlot, pc, cp0, interrupts) {
         //incomplete:
         switch (f) {
             case CAUSE:
@@ -321,8 +321,8 @@ _1964Helpers.prototype.inter_mtc0 = function(r, f, rt, isDelaySlot, pc) {
                 if(r[rt] & 0x300) {
               //      if (((r[rt] & 1)===1) && (cp0[f] & 1)===0) //possible fix over 1964cpp?
                     if((cp0[CAUSE] & cp0[STATUS] & 0x0000FF00) !== 0) {
-                        setException(EXC_INT, 0, pc, isDelaySlot);
-                        //processException(pc, isDelaySlot);
+                        interrupts.setException(EXC_INT, 0, pc, isDelaySlot);
+                        //interrupts.processException(pc, isDelaySlot);
                     }
                 }
             break;
@@ -338,8 +338,8 @@ _1964Helpers.prototype.inter_mtc0 = function(r, f, rt, isDelaySlot, pc) {
                 if (((r[rt] & EXL)===0) && ((cp0[f] & EXL)===1)) {
                     if((cp0[CAUSE] & cp0[STATUS] & 0x0000FF00) !== 0) {
                         cp0[f] = r[rt];
-                        setException(EXC_INT, 0, pc, isDelaySlot);
-                        //processException(pc, isDelaySlot);
+                        interrupts.setException(EXC_INT, 0, pc, isDelaySlot);
+                        //interrupts.processException(pc, isDelaySlot);
                         return;
                     }
                 }
@@ -347,8 +347,8 @@ _1964Helpers.prototype.inter_mtc0 = function(r, f, rt, isDelaySlot, pc) {
                 if (((r[rt] & IE)===1) && ((cp0[f] & IE)===0)) {
                     if((cp0[CAUSE] & cp0[STATUS] & 0x0000FF00) !== 0) {
                         cp0[f] = r[rt];
-                        setException(EXC_INT, 0, pc, isDelaySlot);
-                        //processException(pc, isDelaySlot);
+                        interrupts.setException(EXC_INT, 0, pc, isDelaySlot);
+                        //interrupts.processException(pc, isDelaySlot);
                         return;
                     }
                 }
@@ -694,7 +694,7 @@ _1964Helpers.prototype.inter_ddivu = function(r, h, i)
 
 }
 
-_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s = function(instruction)
+_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s = function(instruction, cp1Con, cp1_f)
 {
 	var	fcFS32, fcFT32;
 	var	less, equal, unordered, cond, cond0, cond1, cond2, cond3;
@@ -735,7 +735,7 @@ _1964Helpers.prototype.inter_r4300i_C_cond_fmt_s = function(instruction)
 		cp1Con[31] |= COP1_CONDITION_BIT;
 }
 
-_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d = function(instruction)
+_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d = function(instruction, cp1Con, cp1_f64)
 {
 	var	fcFS64, fcFT64;
 	var	less, equal, unordered, cond, cond0, cond1, cond2, cond3;

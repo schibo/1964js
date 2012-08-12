@@ -23,52 +23,52 @@ _1964jsEmulator.prototype.getTVSystem = function(countryCode)
 	switch(countryCode)
 	{
 	case 0: // Demo
-		system = TV_SYSTEM_NTSC;
+		system = this.TV_SYSTEM_NTSC;
 		break;
 	case 0x37: // '7'
-		system = TV_SYSTEM_NTSC;
+		system = this.TV_SYSTEM_NTSC;
 		break;
 	case 0x41:
-		system = TV_SYSTEM_NTSC;
+		system = this.TV_SYSTEM_NTSC;
 		break;
 	case 0x44: // 'D' Germany
-		system = TV_SYSTEM_PAL;
+		system = this.TV_SYSTEM_PAL;
 		break;
 	case 0x45: //'E' United States
-		system = TV_SYSTEM_NTSC;
+		system = this.TV_SYSTEM_NTSC;
 		break;
 	case 0x46: // 'F' France
-		system = TV_SYSTEM_PAL;
+		system = this.TV_SYSTEM_PAL;
 		break;
 	case 'I': // 'I' Italy
-		system = TV_SYSTEM_PAL;
+		system = this.TV_SYSTEM_PAL;
 		break;
 	case 0x4A: // 'J' Japan
-		system = TV_SYSTEM_NTSC;
+		system = this.TV_SYSTEM_NTSC;
 		break;
 	case 0x50: // 'P' Europe
-		system = TV_SYSTEM_PAL;
+		system = this.TV_SYSTEM_PAL;
 		break;
 	case 0x53: //'S' Spain
-		system = TV_SYSTEM_PAL;
+		system = this.TV_SYSTEM_PAL;
 		break;
 	case 0x55: // 'U' Australia
-		system = TV_SYSTEM_PAL;
+		system = this.TV_SYSTEM_PAL;
 		break;
 	case 0x58: // 'X'
-		system = TV_SYSTEM_PAL;
+		system = this.TV_SYSTEM_PAL;
 		break;
 	case 0x59: // 'Y' Australia
-		system = TV_SYSTEM_PAL;
+		system = this.TV_SYSTEM_PAL;
 		break;
 	case 0x20:
 	case 0x21:
 	case 0x38:
 	case 0x70:
-		system = TV_SYSTEM_PAL;
+		system = this.TV_SYSTEM_PAL;
 		break;
 	default:
-		system = TV_SYSTEM_PAL;
+		system = this.TV_SYSTEM_PAL;
 		break;
 	}
 
@@ -81,7 +81,7 @@ _1964jsEmulator.prototype.getCIC = function() {
 	var i;
 
 	for(i = 0; i < 0xFC0; i++)
-		CIC_CRC = CIC_CRC + romUint8Array[0x40 + i];
+		CIC_CRC = CIC_CRC + this.memory.romUint8Array[0x40 + i];
 
 	switch(CIC_CRC)
 	{
