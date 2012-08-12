@@ -48,10 +48,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
   - sdr, sdl, etc..
  AI_LEN_REG so SP Goldeneye Crap demo can work.
  dmult, and ddiv don't handle negative correctly. BigInt.js
+ - Where are dadd and dmult?
 
  - Should handle exceptions in delay slots by catching thrown exceptions. 
 
- when loading/storing registers back into n64 memory,
+Convention:
+ When loading/storing registers back into n64 memory,
  do so byte-by-byte since typed-arrays aren't endian-safe.
  It's easier to get your head around and it's plenty fast.
  The hope is that the compiler will optimimize the pattern
@@ -68,7 +70,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     else
         code = new Object();
 
-    var h = new Int32Array(35*4); //r hi
     var vAddr = new Int32Array(4);
     var cp0 = new Int32Array(32*4);
     var cp1Buffer = new ArrayBuffer(32*4);
@@ -153,6 +154,7 @@ _1964jsEmulator = function() {
 
     this.init = function(buffer) {
         var r = new Int32Array(35*4);
+        var h = new Int32Array(35*4); //r hi
 
         cancelAnimFrame(request);
         currentHack = 0;
@@ -258,7 +260,7 @@ _1964jsEmulator = function() {
         for (i=0; i<35; i++)
             h[i] = r[i]>>31;
 
-        this.startEmulator(r);
+        this.startEmulator(r, h);
     }
 
     this.trace2 = function(address, opcode) {
@@ -352,19 +354,10 @@ _1964jsEmulator = function() {
         }
     }
 
-    this.changeSpeed = function(s) {
-        if (s > 131072)
-            s = 131072;
-        if (s < 0)
-            s = 0;
-
-        speed = s;
-    }
-
-    this.runLoop = function(r) {
+    this.runLoop = function(r, h) {
         
         if (terminate === false)
-            request = requestAnimFrame(this.runLoop.bind(this, r));
+            request = requestAnimFrame(this.runLoop.bind(this, r, h));
         
         keepRunning = 180000;
         var pc, fnName, fn;
@@ -391,7 +384,7 @@ _1964jsEmulator = function() {
             if (!fn)
                 fn = this.decompileBlock(programCounter);    
         
-            fn = fn(r);
+            fn = fn(r, h);
             
             if (magic_number >= 0)
                 break;
@@ -404,18 +397,10 @@ _1964jsEmulator = function() {
         this.repaint(ctx, ImDat, getInt32(viUint8Array, viUint8Array, VI_ORIGIN_REG) & 0x00FFFFFF)
     }
 
-    this.startEmulator = function(r) {
+    this.startEmulator = function(r, h) {
         terminate = false;
-        this.log('startEmulator');
-        
-        var speedScrubber = document.getElementById("speedScrubber");
-        if (speedScrubber != undefined) {
-            speedScrubber.value = 65535;
-            this.changeSpeed(speedScrubber.value);
-            speedScrubber.style.opacity = 1.0;
-        }
-        this.runLoop(r);
-        //interval = setInterval(runLoop, 0);
+        this.log('startEmulator');        
+        this.runLoop(r, h);
     }
 
     this.stopEmulator = function() {
@@ -433,9 +418,9 @@ _1964jsEmulator = function() {
         fnName = '_' + (pc>>>2); 
 
         if (writeToDom === true)
-            string = 'function ' + fnName + '(r){';
+            string = 'function ' + fnName + '(r, h){';
         else
-            string = 'code.' + fnName + '=function(r){';
+            string = 'code.' + fnName + '=function(r, h){';
 
         while (!stopCompiling) {
             var instruction = loadWord(pc+offset);
@@ -864,11 +849,11 @@ _1964jsEmulator = function() {
     }
 
     this.r4300i_multu = function(i) {
-        return '_1964Helpers.prototype.inter_multu(r,'+i+');';
+        return '_1964Helpers.prototype.inter_multu(r,h,'+i+');';
     }
 
     this.r4300i_mult = function(i) {
-        return '_1964Helpers.prototype.inter_mult(r,'+i+');'; 
+        return '_1964Helpers.prototype.inter_mult(r,h,'+i+');'; 
     }
 
     this.r4300i_mflo = function(i) {
@@ -1006,7 +991,7 @@ _1964jsEmulator = function() {
     }
 
     this.r4300i_dmultu = function(i) {
-        return '_1964Helpers.prototype.inter_dmultu(r,'+i+');';
+        return '_1964Helpers.prototype.inter_dmultu(r,h,'+i+');';
     }
 
     this.r4300i_dsll32 = function(i) {
@@ -1018,11 +1003,11 @@ _1964jsEmulator = function() {
     }
 
     this.r4300i_ddivu = function(i) {
-        return '_1964Helpers.prototype.inter_ddivu(r,'+i+');'
+        return '_1964Helpers.prototype.inter_ddivu(r,h,'+i+');'
     }
 
     this.r4300i_ddiv = function(i) {
-        return '_1964Helpers.prototype.inter_ddiv(r,'+i+');'
+        return '_1964Helpers.prototype.inter_ddiv(r,h,'+i+');'
     }
 
     this.r4300i_dadd = function(i) {
@@ -1043,11 +1028,11 @@ _1964jsEmulator = function() {
     }
 
     this.r4300i_div = function(i) {
-        return '_1964Helpers.prototype.inter_div(r,'+i+');'; 
+        return '_1964Helpers.prototype.inter_div(r,h,'+i+');'; 
     }
 
     this.r4300i_divu = function(i) {
-        return '_1964Helpers.prototype.inter_divu(r,'+i+');'; 
+        return '_1964Helpers.prototype.inter_divu(r,h,'+i+');'; 
     }
 
     this.r4300i_sra = function(i) {
@@ -1315,7 +1300,7 @@ _1964jsEmulator = function() {
     
 
     this.r4300i_daddi = function(i) {
-        return '_1964Helpers.prototype.inter_daddi(r,'+i+');';
+        return '_1964Helpers.prototype.inter_daddi(r,h,'+i+');';
     }
 
     this.r4300i_teq = function(i) {
@@ -1345,11 +1330,11 @@ _1964jsEmulator = function() {
 
     //using same as daddi
     this.r4300i_daddiu = function(i) {
-        return '_1964Helpers.prototype.inter_daddiu(r,'+i+');';
+        return '_1964Helpers.prototype.inter_daddiu(r,h,'+i+');';
     }
 
     this.r4300i_daddu = function(i) {
-        return '_1964Helpers.prototype.inter_daddu(r,'+i+');';
+        return '_1964Helpers.prototype.inter_daddu(r,h,'+i+');';
     }
 
 
