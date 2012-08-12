@@ -523,12 +523,7 @@ _1964jsInterrupts = function(core, cp0) {
             break;
             case DPC_END_REG:
                 core.memory.setInt32(core.memory.dpcUint8Array, offset, value);
-                
-                if (core.videoHLE == null || core.videoHLE == undefined) {
-                    core.videoHLE = new _1964jsVideoHLE(core);
-                }
-
-                core.videoHLE.processRDPList();
+                this.processRDPList();
             break;
             case DPC_CLOCK_REG:
             case DPC_BUFBUSY_REG:
