@@ -18,8 +18,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 var _1964jsMemory = function(core) {
 
-    this.romUint8Array; // set after rom is loaded.
-    this.rom; // set after rom is loaded.
+    this.romUint8Array = undefined; // set after rom is loaded.
+    this.rom = undefined; // set after rom is loaded.
     this.rdramUint8Array = new Uint8Array(0x800000);
     this.spMemUint8Array = new Uint8Array(0x10000);
     this.spReg1Uint8Array = new Uint8Array(0x10000);
@@ -235,7 +235,7 @@ var _1964jsMemory = function(core) {
         if (a >= MEMORY_START_RDRAM && a < MEMORY_START_RDRAM + MEMORY_SIZE_RDRAM) {
             var off=a-MEMORY_START_RDRAM;
             return this.rdramUint8Array[off]<<24 | this.rdramUint8Array[off+1]<<16 | this.rdramUint8Array[off+2]<<8 | this.rdramUint8Array[off+3];
-            return //getInt32(rdramUint8Array, rdramUint8Array, a-MEMORY_START_RDRAM);
+            //return getInt32(rdramUint8Array, rdramUint8Array, a-MEMORY_START_RDRAM);
         } else if (a >= MEMORY_START_RAMREGS4 && a < MEMORY_START_RAMREGS4 + MEMORY_SIZE_RAMREGS4) {
             var off=a-MEMORY_START_RAMREGS4;
             return this.ramRegs4Uint8Array[off]<<24 | this.ramRegs4Uint8Array[off+1]<<16 | this.ramRegs4Uint8Array[off+2]<<8 | this.ramRegs4Uint8Array[off+3];

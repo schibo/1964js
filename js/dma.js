@@ -228,7 +228,7 @@ var _1964jsDMA = function(memory, interrupts, pif) {
         this.interrupts.triggerSIInterrupt(pc, isDelaySlot);
     }
 
-    this.copySpToDram - function(pc, isDelaySlot) {
+    this.copySpToDram = function(pc, isDelaySlot) {
         alert('todo: copySpToDram');
     }
 
