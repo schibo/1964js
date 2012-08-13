@@ -67,7 +67,7 @@ var _1964jsMemory = function(core) {
             return this.rdramUint8Array[off];
         } else if (a >= MEMORY_START_RAMREGS4 && a < MEMORY_START_RAMREGS4 + MEMORY_SIZE_RAMREGS4) {
             var off=a-MEMORY_START_RAMREGS4;
-            return this.ramRegsUint8Array[off];
+            return this.ramRegs4Uint8Array[off];
         } else if (a >= MEMORY_START_SPMEM && a < MEMORY_START_SPMEM + MEMORY_SIZE_SPMEM) {
             var off=a-MEMORY_START_SPMEM;
             return this.spMemUint8Array[off];        
@@ -152,7 +152,7 @@ var _1964jsMemory = function(core) {
             return this.rdramUint8Array[off]<<8 | this.rdramUint8Array[off+1];
         } else if (a >= MEMORY_START_RAMREGS4 && a < MEMORY_START_RAMREGS4 + MEMORY_SIZE_RAMREGS4) {
             var off=a-MEMORY_START_RAMREGS4;
-            return this.ramRegsUint8Array[off]<<8 | this.ramRegsUint8Array[off+1];
+            return this.ramRegs4Uint8Array[off]<<8 | this.ramRegs4Uint8Array[off+1];
         } else if (a >= MEMORY_START_SPMEM && a < MEMORY_START_SPMEM + MEMORY_SIZE_SPMEM) {
             var off=a-MEMORY_START_SPMEM;
             return this.spMemUint8Array[off]<<8 | this.spMemUint8Array[off+1];        
@@ -238,7 +238,7 @@ var _1964jsMemory = function(core) {
             return //getInt32(rdramUint8Array, rdramUint8Array, a-MEMORY_START_RDRAM);
         } else if (a >= MEMORY_START_RAMREGS4 && a < MEMORY_START_RAMREGS4 + MEMORY_SIZE_RAMREGS4) {
             var off=a-MEMORY_START_RAMREGS4;
-            return this.ramRegsUint8Array[off]<<24 | this.ramRegsUint8Array[off+1]<<16 | this.ramRegsUint8Array[off+2]<<8 | this.ramRegsUint8Array[off+3];
+            return this.ramRegs4Uint8Array[off]<<24 | this.ramRegs4Uint8Array[off+1]<<16 | this.ramRegs4Uint8Array[off+2]<<8 | this.ramRegs4Uint8Array[off+3];
         } else if (a >= MEMORY_START_SPMEM && a < MEMORY_START_SPMEM + MEMORY_SIZE_SPMEM) {
             var off=a-MEMORY_START_SPMEM;
             return this.spMemUint8Array[off]<<24 | this.spMemUint8Array[off+1]<<16 | this.spMemUint8Array[off+2]<<8 | this.spMemUint8Array[off+3];        
