@@ -391,8 +391,8 @@ _1964Helpers.prototype.inter_mult = function(r, h, i)
     var rs32 = r[rs(i)];
     var rt32 = r[rt(i)];
     
-    var r1 = gg.math.Long.fromBits(rs32, rs32>>31);
-    var r2 = gg.math.Long.fromBits(rt32, rt32>>31);
+    var r1 = goog.math.Long.fromBits(rs32, rs32>>31);
+    var r2 = goog.math.Long.fromBits(rt32, rt32>>31);
     
     var res = r1.multiply(r2);
     
@@ -407,8 +407,8 @@ _1964Helpers.prototype.inter_multu = function(r, h, i)
     var rs32 = r[rs(i)];
     var rt32 = r[rt(i)];
 
-    var r1 = gg.math.Long.fromBits(rs32, 0);
-    var r2 = gg.math.Long.fromBits(rt32, 0);
+    var r1 = goog.math.Long.fromBits(rs32, 0);
+    var r2 = goog.math.Long.fromBits(rt32, 0);
     
     var res = r1.multiply(r2);
     
@@ -422,8 +422,8 @@ _1964Helpers.prototype.inter_multu = function(r, h, i)
 
 _1964Helpers.prototype.inter_daddi = function(r, h, i)
 {    
-    var rs1 = gg.math.Long.fromBits(r[rs(i)], h[rs(i)]);
-    var imm = gg.math.Long.fromBits(soffset_imm(i), soffset_imm(i)>>31);
+    var rs1 = goog.math.Long.fromBits(r[rs(i)], h[rs(i)]);
+    var imm = goog.math.Long.fromBits(soffset_imm(i), soffset_imm(i)>>31);
 
     var rtres = rs1.add(imm);
     
@@ -433,8 +433,8 @@ _1964Helpers.prototype.inter_daddi = function(r, h, i)
 
 _1964Helpers.prototype.inter_daddiu = function(r, h, i)
 {    
-    var rs1 = gg.math.Long.fromBits(r[rs(i)], h[rs(i)]);
-    var imm = gg.math.Long.fromBits(soffset_imm(i), soffset_imm(i)>>31);
+    var rs1 = goog.math.Long.fromBits(r[rs(i)], h[rs(i)]);
+    var imm = goog.math.Long.fromBits(soffset_imm(i), soffset_imm(i)>>31);
 
     var rtres = rs1.add(imm);
     
@@ -444,8 +444,8 @@ _1964Helpers.prototype.inter_daddiu = function(r, h, i)
 
 _1964Helpers.prototype.inter_dadd = function(r, h, i)
 {    
-    var rs1 = gg.math.Long.fromBits(r[rs(i)], h[rs(i)]);
-    var rt1 = gg.math.Long.fromBits(r[rt(i)], h[rt(i)]);
+    var rs1 = goog.math.Long.fromBits(r[rs(i)], h[rs(i)]);
+    var rt1 = goog.math.Long.fromBits(r[rt(i)], h[rt(i)]);
 
     var rdres = rs1.add(rt1);
     
@@ -455,8 +455,8 @@ _1964Helpers.prototype.inter_dadd = function(r, h, i)
 
 _1964Helpers.prototype.inter_daddu = function(r, h, i)
 {    
-    var rs1 = gg.math.Long.fromBits(r[rs(i)], h[rs(i)]);
-    var rt1 = gg.math.Long.fromBits(r[rt(i)], h[rt(i)]);
+    var rs1 = goog.math.Long.fromBits(r[rs(i)], h[rs(i)]);
+    var rt1 = goog.math.Long.fromBits(r[rt(i)], h[rt(i)]);
 
     var rdres = rs1.add(rt1);
     
@@ -491,8 +491,8 @@ _1964Helpers.prototype.inter_ddiv = function(r, h, i)
     var rsh32 = h[rs(i)];
     var rth32 = h[rt(i)];
 
-    var r1 = gg.math.Long.fromBits(rs32, rsh32);
-    var r2 = gg.math.Long.fromBits(rt32, rth32);
+    var r1 = goog.math.Long.fromBits(rs32, rsh32);
+    var r2 = goog.math.Long.fromBits(rt32, rth32);
 
     if (r2 === 0)
     {

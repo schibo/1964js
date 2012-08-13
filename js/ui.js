@@ -43,8 +43,6 @@ function getUrlVars()
     return vars;
 }
 
-  var gg = goog; //Google Closure API
-
 function initTryCatch(buffer) {
   try {
     _1964js.init(buffer);
