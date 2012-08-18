@@ -32,9 +32,9 @@ var _1964jsVideoHLE = function(core) {
     var matToLoad = mat4.create();
     var gRSPworldProject = mat4.create();
     var triangleVertexPositionBuffer;
-    var squareVertexPositionBuffer;
     var dlistStackPointer = 0;
     var dlistStack = new Array(MAX_DL_STACK_SIZE);
+    var renderer = new _1964jsRenderer();
     var texImg = new Object();
     this.segments = new Array(16);
     //todo: different microcodes support
@@ -64,13 +64,21 @@ var _1964jsVideoHLE = function(core) {
             core.showFB = false;
         }
 
+        gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
+        mat4.identity(mvMatrix);
+        mat4.translate(mvMatrix, [0.0, 0.0, -2.4]);
+
         this.dlParserProcess();
 
         //core.interrupts.triggerDPInterrupt(0, false);
         core.interrupts.triggerSPInterrupt(0, false);
     }
 
-    this.videoLog = function() {
+    this.videoLog = function(msg) {
+        //alert(msg);
     }
 
     this.dlParserProcess = function() {
@@ -80,7 +88,6 @@ var _1964jsVideoHLE = function(core) {
 
         this.vertices = [];
         this.trivertices = [];
-        squareVertexPositionBuffer.numItems = 0;
         triangleVertexPositionBuffer.numItems = 0;
         gRSP.numVertices = 0;
 
@@ -227,11 +234,13 @@ var _1964jsVideoHLE = function(core) {
     }
 
     this.DLParser_SetTImg = function(pc) {
-        texImg.format = this.getTexImgFormat(pc);
-        texImg.size = this.getTexImgSize(pc);
-        texImg.width = this.getTexImgWidth(pc);
-        texImg.addr = this.getRspSegmentAddr(pc);
+        texImg.format = this.getTImgFormat(pc);
+        texImg.size = this.getTImgSize(pc);
+        texImg.width = this.getTImgWidth(pc);
+        texImg.addr = this.getTImgAddr(pc);
         texImg.bpl = texImg.width << texImg.size >> 1;
+
+        texImg.changed = true;
 
         this.videoLog('TODO: DLParser_SetTImg');
         //this.videoLog('Texture: format=' + texImg.format + ' size=' + texImg.size + ' ' + 'width=' + texImg.width + ' addr=' + texImg.addr + ' bpl=' + texImg.bpl);
@@ -582,32 +591,9 @@ var _1964jsVideoHLE = function(core) {
         xl -= 160; xl /= 160;
         yl -= 120; yl /= -120;
         yh -= 120; yh /= -120;
-        
-          //  gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
 
+        renderer.texRect(xl, yl, xh, yh, s, t, dsdx, dtdy, tileno, core.memory.rdramUint8Array, texImg);
 
-    //             1.0,  1.0,  0.0,
-    //             1.0, -1.0,  0.0,
-    //            -1.0, -1.0,  0.0,
-    //            -1.0,  1.0,  0.0,
-            
-            var offset = 12*(squareVertexPositionBuffer.numItems/4);
-            this.vertices[offset] = xh;
-            this.vertices[offset+1] = yh;
-            this.vertices[offset+2] = 0.0;
-            this.vertices[offset+3] = xh;
-            this.vertices[offset+4] = yl;
-            this.vertices[offset+5] = 0.0;
-            this.vertices[offset+6] = xl;
-            this.vertices[offset+7] = yl;
-            this.vertices[offset+8] = 0.0;
-            this.vertices[offset+9] = xl;
-            this.vertices[offset+10] = yh;
-            this.vertices[offset+11] = 0.0;
-
-            squareVertexPositionBuffer.itemSize = 3;
-            squareVertexPositionBuffer.numItems += 4;
-            
         dlistStack[dlistStackPointer].pc += 16;
     }
 
@@ -671,6 +657,7 @@ var _1964jsVideoHLE = function(core) {
 
     this.DLParser_SetTile = function(pc) {
         this.videoLog('TODO: DLParser_SetTile');
+
     }
 
     this.DLParser_FillRect = function(pc) {
@@ -749,12 +736,6 @@ var _1964jsVideoHLE = function(core) {
         triangleVertexPositionBuffer.itemSize = 3;
         triangleVertexPositionBuffer.numItems += 1;
 
-    //        this.vertices = [
-    //             0.0,  1.0,  0.0,
-    //            -1.0, -1.0,  0.0,
-    //             1.0, -1.0,  0.0
-    //        ];
-
         return true;
     }
 
@@ -767,31 +748,13 @@ var _1964jsVideoHLE = function(core) {
             -1.0, -1.0,  0.0,
              1.0, -1.0,  0.0
         ];
-        //gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.trivertices), gl.STATIC_DRAW);
         triangleVertexPositionBuffer.itemSize = 3;
         triangleVertexPositionBuffer.numItems = this.trivertices.length/3;
-
-        squareVertexPositionBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
-        this.vertices = [
-             1.0,  1.0,  0.0,
-             1.0, -1.0,  0.0,
-            -1.0, -1.0,  0.0,
-            -1.0,  1.0,  0.0
-        ];
-     //   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
-        squareVertexPositionBuffer.itemSize = 3;
-        squareVertexPositionBuffer.numItems = this.vertices.length/3;
     }
 
     this.drawScene = function() {
-        gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
-        mat4.identity(mvMatrix);
-        mat4.translate(mvMatrix, [0.0, 0.0, -2.4]);
-        
+        gl.useProgram(triangleShaderProgram);
         //simple lighting. Get the normal matrix of the model-view matrix
         mat4.set(mvMatrix, nMatrix);
         mat4.inverse(nMatrix, nMatrix);
@@ -800,19 +763,13 @@ var _1964jsVideoHLE = function(core) {
         mvPushMatrix();
         mat4.translate(mvMatrix, [0.0, 0.0, -1.0]);
         
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.DYNAMIC_DRAW);
         gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
-        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-        setMatrixUniforms();
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.trivertices), gl.DYNAMIC_DRAW);
+        gl.vertexAttribPointer(triangleShaderProgram.vertexPositionAttribute, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+        setMatrixUniforms(triangleShaderProgram);
+
         gl.drawArrays(gl.LINES, 0, triangleVertexPositionBuffer.numItems);
 
         mvPopMatrix();
-
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.trivertices), gl.DYNAMIC_DRAW);
-        gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
-        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-        setMatrixUniforms();
-       gl.drawArrays(gl.LINE_STRIP, 0, squareVertexPositionBuffer.numItems);
-       
     }
 }

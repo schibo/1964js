@@ -76,12 +76,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     }
 
 
-    var shaderProgram;
+    var tileShaderProgram;
+    var triangleShaderProgram;
 
-    function initShaders() {
+    function initShaders(fs, vs) {
         
-        var fragmentShader = getShader(gl, "shader-fs");
-        var vertexShader = getShader(gl, "shader-vs");
+        var fragmentShader = getShader(gl, fs);
+        var vertexShader = getShader(gl, vs);
 
         shaderProgram = gl.createProgram();
         gl.attachShader(shaderProgram, vertexShader);
@@ -97,13 +98,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
         gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
 
+        shaderProgram.textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
+        gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
+
         shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
         shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
         shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNormalMatrix");
+        shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
+
+        return shaderProgram;
 
     }
 
-    function setMatrixUniforms() {
+    function setMatrixUniforms(shaderProgram) {
         gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
         gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
         gl.uniformMatrix4fv(shaderProgram.nMatrixUniform, false, nMatrix);
@@ -133,11 +140,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
         initGL(canvas);
         if (gl) {
-            initShaders();
+            tileShaderProgram = initShaders("tile-fragment-shader", "tile-vertex-shader");
+            triangleShaderProgram = initShaders("triangle-fragment-shader", "triangle-vertex-shader");
             videoHLE.initBuffers();
 
             gl.clearColor(0.0, 0.0, 0.0, 1.0);
-            gl.enable(gl.DEPTH_TEST);
         }
         
         canvas.style.visibility = "hidden";

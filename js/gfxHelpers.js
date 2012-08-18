@@ -17,7 +17,15 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-//GBI0 MoveWord struct
+/*
+GBI0 MoveWord struct:
+typedef struct {
+    unsigned int    type:8;
+    unsigned int    offset:16;
+    unsigned int    cmd:8;
+    unsigned int    value;
+} GGBI0_MoveWord;
+*/
 _1964jsVideoHLE.prototype.getGbi0MoveWordType = function(pc) {
     return this.core.memory.getInt32(this.core.memory.rdramUint8Array, this.core.memory.rdramUint8Array, pc) & 0x00ff;
 }
@@ -102,7 +110,7 @@ _1964jsVideoHLE.prototype.getTexRectYh = function(pc) {
     return (this.core.memory.getInt32(this.core.memory.rdramUint8Array, this.core.memory.rdramUint8Array, pc)&0x0FFF)/4;
 }
 _1964jsVideoHLE.prototype.getTexRectTileNo = function(pc) {
-    return 0;
+    return (this.core.memory.getInt32(this.core.memory.rdramUint8Array, this.core.memory.rdramUint8Array, pc+4)>>>24&0x07);
 }
 //X coordinate of lower right
 _1964jsVideoHLE.prototype.getTexRectXl = function(pc) {
@@ -142,14 +150,29 @@ _1964jsVideoHLE.prototype.getRspSegmentAddr = function(seg) {
     return this.segments[seg>>24&0x0F] + (seg&0x00FFFFFF);
 }
 
-_1964jsVideoHLE.prototype.getTexImgWidth = function(pc) {
-    return this.core.memory.getInt32(this.core.memory.rdramUint8Array, this.core.memory.rdramUint8Array, pc) >>> 20 & 0x0FFF;
+/*
+typedef struct {
+    unsigned int    width:12;
+    unsigned int    :7;
+    unsigned int    siz:2;
+    unsigned int    fmt:3;
+    unsigned int    cmd:8;
+    unsigned int    addr;
+} GSetImg;
+*/
+_1964jsVideoHLE.prototype.getTImgWidth = function(pc) {
+    return this.core.memory.getInt32(this.core.memory.rdramUint8Array, this.core.memory.rdramUint8Array, pc) & 0x0FFF;
 }
 
-_1964jsVideoHLE.prototype.getTexImgSize = function(pc) {
-    return this.core.memory.getInt32(this.core.memory.rdramUint8Array, this.core.memory.rdramUint8Array, pc) >>> 11 & 3;
+_1964jsVideoHLE.prototype.getTImgSize = function(pc) {
+    return this.core.memory.getInt32(this.core.memory.rdramUint8Array, this.core.memory.rdramUint8Array, pc) >>> 19 & 3;
 }
 
-_1964jsVideoHLE.prototype.getTexImgFormat = function(pc) {
-    return this.core.memory.getInt32(this.core.memory.rdramUint8Array, this.core.memory.rdramUint8Array, pc) >>> 8 & 0x7;
+_1964jsVideoHLE.prototype.getTImgFormat = function(pc) {
+    return this.core.memory.getInt32(this.core.memory.rdramUint8Array, this.core.memory.rdramUint8Array, pc) >>> 21 & 0x7;
+}
+
+_1964jsVideoHLE.prototype.getTImgAddr = function(pc) {
+    var tImgAddr = this.core.memory.getInt32(this.core.memory.rdramUint8Array, this.core.memory.rdramUint8Array, pc+4);
+    return this.getRspSegmentAddr(tImgAddr);
 }

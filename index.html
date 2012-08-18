@@ -5,7 +5,9 @@
 
 <body onload="start1964()">
 
-<script id="shader-fs" type="x-shader/x-fragment">
+
+<!-- shaders for wireframe triangles -->
+<script id="triangle-fragment-shader" type="x-shader/x-fragment">
     precision mediump float;
     varying float v_Dot;
     vec4 color = vec4(0.1, 0.1, 0.1, 1.0);
@@ -16,7 +18,7 @@
     }
 </script>
 
-<script id="shader-vs" type="x-shader/x-vertex">
+<script id="triangle-vertex-shader" type="x-shader/x-vertex">
     uniform mat4 uMVMatrix;
     uniform mat4 uPMatrix;
     uniform mat4 uNormalMatrix;
@@ -24,7 +26,7 @@
     attribute vec3 aVertexPosition;
     varying float v_Dot;
     vec3 lightDir = vec3(0.0, 0.0, 2.0);
-    
+
     void main(void) {
         gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
         vec4 transNormal = uNormalMatrix * vec4(vNormal, 1);
@@ -32,8 +34,68 @@
     }
 </script>
 
+<!-- shaders for tiles -->
+<script id="tile-fragment-shader" type="x-shader/x-fragment">
+    precision mediump float;
+    varying vec2 vTextureCoord;
+    uniform sampler2D uSampler;
+
+    void main(void) {
+        gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+    }
+</script>
+
+<script id="tile-vertex-shader" type="x-shader/x-vertex">
+    attribute vec3 aVertexPosition;
+    attribute vec2 aTextureCoord;
+    uniform mat4 uMVMatrix;
+    uniform mat4 uPMatrix;
+    varying vec2 vTextureCoord;
+
+    void main(void) {
+        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+        vTextureCoord = aTextureCoord;
+    }
+</script>
+
 <canvas id="Canvas" width=320 height=240>I'm sorry your browser does not support the HTML5 canvas element.</canvas>
 <canvas id="Canvas3D" width="800" height="600">I'm sorry your browser does not support the HTML5 canvas element.</canvas>
+<canvas id="pow2Texture0" width="32" height="32">I'm sorry your browser does not support the HTML5 canvas element.</canvas>
+<canvas id="pow2Texture1" width="32" height="32">I'm sorry your browser does not support the HTML5 canvas element.</canvas>
+<canvas id="pow2Texture2" width="32" height="32">I'm sorry your browser does not support the HTML5 canvas element.</canvas>
+<canvas id="pow2Texture3" width="32" height="32">I'm sorry your browser does not support the HTML5 canvas element.</canvas>
+<canvas id="pow2Texture4" width="32" height="32">I'm sorry your browser does not support the HTML5 canvas element.</canvas>
+<canvas id="pow2Texture5" width="32" height="32">I'm sorry your browser does not support the HTML5 canvas element.</canvas>
+<canvas id="pow2Texture6" width="32" height="32">I'm sorry your browser does not support the HTML5 canvas element.</canvas>
+<canvas id="pow2Texture7" width="32" height="32">I'm sorry your browser does not support the HTML5 canvas element.</canvas>
+
+
+
+<script>
+var k = 0;
+  function blitTexture(ram, offset, idx) {
+    //test dummy textures
+    var cc = document.getElementById("pow2Texture"+idx);
+    var cctx = cc.getContext("2d");
+
+    var ImDat=cctx.createImageData(32,32);
+    var out = ImDat.data;
+
+    var iii=0;
+    var k=offset;
+    for (var y = -32*32; y !== 0; y++) {
+        var hi = ram[k]; 
+        var lo = ram[k+1];
+            out[iii+3] = 255; //alpha
+            out[iii] = (hi & 0xF8);
+            k+=2;
+            out[iii+1] = (((hi<<5) | (lo>>>3)) & 0xF8);
+            out[iii+2] = (lo << 2 & 0xF8);
+            iii+=4;
+    }
+    cctx.putImageData(ImDat,0,0);
+}
+</script>
 
 <div id="user_panel" colspan="3" >
   <h2>1964js</h2>
@@ -63,6 +125,7 @@
 <script src="js/interrupts.js"></script>
 <script src="js/lib/glMatrix-0.9.5.min.js"></script>
 <script src="js/lib/webgl-utils.js"></script>
+<script src="js/renderer.js"></script>
 <script src="js/videoHLE.js"></script>
 <script src="js/gfxHelpers.js"></script>
 <script src="js/ui.js"></script>
