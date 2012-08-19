@@ -65,7 +65,7 @@ var _1964jsVideoHLE = function(core) {
         }
 
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+//        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
         mat4.identity(mvMatrix);
@@ -233,6 +233,7 @@ var _1964jsVideoHLE = function(core) {
     	}
     }
 
+    //tile info.
     this.DLParser_SetTImg = function(pc) {
         texImg.format = this.getTImgFormat(pc);
         texImg.size = this.getTImgSize(pc);
@@ -768,7 +769,7 @@ var _1964jsVideoHLE = function(core) {
         gl.vertexAttribPointer(triangleShaderProgram.vertexPositionAttribute, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
         setMatrixUniforms(triangleShaderProgram);
 
-        gl.drawArrays(gl.LINES, 0, triangleVertexPositionBuffer.numItems);
+        gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
 
         mvPopMatrix();
     }

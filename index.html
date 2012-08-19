@@ -69,34 +69,6 @@
 <canvas id="pow2Texture6" width="32" height="32">I'm sorry your browser does not support the HTML5 canvas element.</canvas>
 <canvas id="pow2Texture7" width="32" height="32">I'm sorry your browser does not support the HTML5 canvas element.</canvas>
 
-
-
-<script>
-var k = 0;
-  function blitTexture(ram, offset, idx) {
-    //test dummy textures
-    var cc = document.getElementById("pow2Texture"+idx);
-    var cctx = cc.getContext("2d");
-
-    var ImDat=cctx.createImageData(32,32);
-    var out = ImDat.data;
-
-    var iii=0;
-    var k=offset;
-    for (var y = -32*32; y !== 0; y++) {
-        var hi = ram[k]; 
-        var lo = ram[k+1];
-            out[iii+3] = 255; //alpha
-            out[iii] = (hi & 0xF8);
-            k+=2;
-            out[iii+1] = (((hi<<5) | (lo>>>3)) & 0xF8);
-            out[iii+2] = (lo << 2 & 0xF8);
-            iii+=4;
-    }
-    cctx.putImageData(ImDat,0,0);
-}
-</script>
-
 <div id="user_panel" colspan="3" >
   <h2>1964js</h2>
   <input type="file" id="files" name="file" />
