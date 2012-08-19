@@ -65,7 +65,7 @@ var _1964jsVideoHLE = function(core) {
         }
 
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-//        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
         mat4.identity(mvMatrix);
@@ -755,13 +755,13 @@ var _1964jsVideoHLE = function(core) {
 
     this.drawScene = function() {
 
-        gl.useProgram(triangleShaderProgram);
+        switchShader(triangleShaderProgram);
         //simple lighting. Get the normal matrix of the model-view matrix
         mat4.set(mvMatrix, nMatrix);
         mat4.inverse(nMatrix, nMatrix);
         mat4.transpose(nMatrix);
                 
-        mvPushMatrix();
+       // mvPushMatrix();
         mat4.translate(mvMatrix, [0.0, 0.0, -1.0]);
         
         gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
@@ -769,8 +769,8 @@ var _1964jsVideoHLE = function(core) {
         gl.vertexAttribPointer(triangleShaderProgram.vertexPositionAttribute, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
         setMatrixUniforms(triangleShaderProgram);
 
-        gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
+        gl.drawArrays(gl.LINES, 0, triangleVertexPositionBuffer.numItems);
 
-        mvPopMatrix();
+      //  mvPopMatrix();
     }
 }

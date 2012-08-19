@@ -37,24 +37,24 @@
 <!-- shaders for tiles -->
 <script id="tile-fragment-shader" type="x-shader/x-fragment">
     precision mediump float;
-    varying vec2 vTextureCoord;
-    uniform sampler2D uSampler;
+    varying vec2 vTextureCoord2;
+    uniform sampler2D uSampler2;
 
     void main(void) {
-        gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+        gl_FragColor = texture2D(uSampler2, vec2(vTextureCoord2.s, vTextureCoord2.t));
     }
 </script>
 
 <script id="tile-vertex-shader" type="x-shader/x-vertex">
-    attribute vec3 aVertexPosition;
-    attribute vec2 aTextureCoord;
-    uniform mat4 uMVMatrix;
-    uniform mat4 uPMatrix;
-    varying vec2 vTextureCoord;
+    attribute vec3 aVertexPosition2;
+    attribute vec2 aTextureCoord2;
+    uniform mat4 uMVMatrix2;
+    uniform mat4 uPMatrix2;
+    varying vec2 vTextureCoord2;
 
     void main(void) {
-        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-        vTextureCoord = aTextureCoord;
+        gl_Position = uPMatrix2 * uMVMatrix2 * vec4(aVertexPosition2, 1.0);
+        vTextureCoord2 = aTextureCoord2;
     }
 </script>
 
