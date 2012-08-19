@@ -546,8 +546,12 @@ var _1964jsVideoHLE = function(core) {
         this.prepareTriangle(v2, v1, v0);
 
         this.drawScene();
-        triangleVertexPositionBuffer.numItems = 0;
+
+        //clear vertices for another shape
+        this.vertices = [];
         this.trivertices = [];
+        triangleVertexPositionBuffer.numItems = 0;
+        gRSP.numVertices = 0;
     }
 
     this.RSP_GBI1_Noop = function(pc) {
@@ -779,7 +783,7 @@ var _1964jsVideoHLE = function(core) {
         setMatrixUniforms(triangleShaderProgram);
 
         gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
-        gl.drawArrays(gl.LINES, 0, triangleVertexPositionBuffer.numItems);
+       // gl.drawArrays(gl.LINE_LOOP, 0, triangleVertexPositionBuffer.numItems);
 
       //  mvPopMatrix();
     }
