@@ -543,7 +543,7 @@ var _1964jsVideoHLE = function(core) {
         var v1 = this.getGbi0Tri1V1(pc) / gRSP.vertexMult;
         var v2 = this.getGbi0Tri1V2(pc) / gRSP.vertexMult;
 
-        this.prepareTriangle(v0, v1, v2);
+        this.prepareTriangle(v2, v1, v0);
 
         this.drawScene();
         triangleVertexPositionBuffer.numItems = 0;
@@ -778,7 +778,7 @@ var _1964jsVideoHLE = function(core) {
         gl.vertexAttribPointer(triangleShaderProgram.vertexPositionAttribute, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
         setMatrixUniforms(triangleShaderProgram);
 
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, triangleVertexPositionBuffer.numItems);
+        gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
         gl.drawArrays(gl.LINES, 0, triangleVertexPositionBuffer.numItems);
 
       //  mvPopMatrix();

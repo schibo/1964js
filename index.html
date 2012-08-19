@@ -10,11 +10,11 @@
 <script id="triangle-fragment-shader" type="x-shader/x-fragment">
     precision mediump float;
     varying float v_Dot;
-    vec4 color = vec4(0.1, 0.1, 0.1, 1.0);
+    vec4 color = vec4(1.0, 1.0, 1.0, 1.0);
     
     void main(void) {
-        color += vec4(0.1, 0.1, 0.1, 1.0);
-        gl_FragColor = vec4(color.xyz * v_Dot, color.a);
+        //color += vec4(0.1, 0.1, 0.1, 1.0);
+        gl_FragColor = vec4(color.xyz, color.a);
     }
 </script>
 
