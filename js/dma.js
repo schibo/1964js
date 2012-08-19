@@ -18,7 +18,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 function log(message) {
-   // console.log(message);
+    //console.log(message);
 }
 
 _1964jsEmulator.prototype.flushDynaCache = function()
@@ -36,32 +36,33 @@ _1964jsEmulator.prototype.flushDynaCache = function()
         code = new Object;
     }
     else while (this.kk)
-    {
-        //log('cleanup');
-        s = document.getElementsByTagName('script')[--this.kk];
-        
-        var splitResult = s.text.split('_');
-        splitResult = splitResult[1].split('(');
+        this.deleteFunction(--this.kk);
+}
 
-        var pc = '_' + splitResult[0];
-       // s.text = '';
+_1964jsEmulator.prototype.deleteFunction = function(k) {
+    //log('cleanup');
+    var s = document.getElementsByTagName('script')[k];
+    var splitResult = s.text.split('_');
+    splitResult = splitResult[1].split('(');
 
-        s.parentNode.removeChild(s);
- 
-        var splitResult = s.text.split('_');
-       
-        //allow deletion of this function
-        eval(pc + '= function(r){}; delete ' + pc + ';');
-        
-       // log('now it is:' + s.text + '.');
-        
-        fnName = pc; 
-        window[fnName] = null;
-        //log(s.text);
+    var pc = '_' + splitResult[0];
+   // s.text = '';
 
-        if (window[fnName])
-            alert('blah');
-    }
+    s.parentNode.removeChild(s);
+
+    var splitResult = s.text.split('_');
+   
+    //allow deletion of this function
+    eval(pc + '= function(r){}; delete ' + pc + ';');
+    
+   // log('now it is:' + s.text + '.');
+    
+    fnName = pc; 
+    window[fnName] = null;
+    //log(s.text);
+
+    if (window[fnName])
+        alert('blah');
 }
 
 var _1964jsDMA = function(memory, interrupts, pif) {

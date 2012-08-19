@@ -70,6 +70,13 @@ var _1964jsVideoHLE = function(core) {
         mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
         mat4.identity(mvMatrix);
         mat4.translate(mvMatrix, [0.0, 0.0, -2.4]);
+        mat4.set(mvMatrix, nMatrix);
+        mat4.inverse(nMatrix, nMatrix);
+        mat4.transpose(nMatrix);
+                
+       // mvPushMatrix();
+        mat4.translate(mvMatrix, [0.0, 0.0, -1.0]);
+
 
         this.dlParserProcess();
 
@@ -241,7 +248,8 @@ var _1964jsVideoHLE = function(core) {
         texImg.addr = this.getTImgAddr(pc);
         texImg.bpl = texImg.width << texImg.size >> 1;
 
-        texImg.changed = true;
+        texImg.changed = true; //no texture cache
+
 
         this.videoLog('TODO: DLParser_SetTImg');
         //this.videoLog('Texture: format=' + texImg.format + ' size=' + texImg.size + ' ' + 'width=' + texImg.width + ' addr=' + texImg.addr + ' bpl=' + texImg.bpl);
@@ -535,7 +543,11 @@ var _1964jsVideoHLE = function(core) {
         var v1 = this.getGbi0Tri1V1(pc) / gRSP.vertexMult;
         var v2 = this.getGbi0Tri1V2(pc) / gRSP.vertexMult;
 
-        this.prepareTriangle(v0, v2, v1);
+        this.prepareTriangle(v0, v1, v2);
+
+        this.drawScene();
+        triangleVertexPositionBuffer.numItems = 0;
+        this.trivertices = [];
     }
 
     this.RSP_GBI1_Noop = function(pc) {
@@ -617,7 +629,6 @@ var _1964jsVideoHLE = function(core) {
     this.DLParser_RDPFullSync = function(pc) {
         this.videoLog('TODO: DLParser_RDPFullSync');
         core.interrupts.triggerDPInterrupt(0, false);
-        this.drawScene();
     }
 
     this.DLParser_SetKeyGB = function(pc) {
@@ -648,11 +659,15 @@ var _1964jsVideoHLE = function(core) {
         this.videoLog('TODO: DLParser_SetTileSize');
     }
 
+    var map = new Object();
     this.DLParser_LoadBlock = function(pc) {
+       // texImg.changed = true;
+            
         this.videoLog('TODO: DLParser_LoadBlock');
     }
 
     this.DLParser_LoadTile = function(pc) {
+
         this.videoLog('TODO: DLParser_LoadTile');
     }
 
@@ -757,18 +772,13 @@ var _1964jsVideoHLE = function(core) {
 
         switchShader(triangleShaderProgram);
         //simple lighting. Get the normal matrix of the model-view matrix
-        mat4.set(mvMatrix, nMatrix);
-        mat4.inverse(nMatrix, nMatrix);
-        mat4.transpose(nMatrix);
-                
-       // mvPushMatrix();
-        mat4.translate(mvMatrix, [0.0, 0.0, -1.0]);
         
         gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.trivertices), gl.DYNAMIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.trivertices), gl.STATIC_DRAW);
         gl.vertexAttribPointer(triangleShaderProgram.vertexPositionAttribute, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
         setMatrixUniforms(triangleShaderProgram);
 
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, triangleVertexPositionBuffer.numItems);
         gl.drawArrays(gl.LINES, 0, triangleVertexPositionBuffer.numItems);
 
       //  mvPopMatrix();

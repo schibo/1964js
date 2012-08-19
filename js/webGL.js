@@ -79,7 +79,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     var tileShaderProgram;
     var triangleShaderProgram;
 
-    function initShaders(fs, vs, idx) {
+    function initShaders(fs, vs) {
         
         var fragmentShader = getShader(gl, fs);
         var vertexShader = getShader(gl, vs);
@@ -95,13 +95,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
         gl.useProgram(shaderProgram);
 
-        shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition"+idx);
+        shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
         
-        shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix"+idx);
-        shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix"+idx);
-        shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNormalMatrix"+idx);
-        shaderProgram.textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord"+idx);
-        shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler"+idx);
+        shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
+        shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+        shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNormalMatrix");
+        shaderProgram.textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
+        shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
 
         return shaderProgram;
     }
@@ -110,8 +110,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         
         gl.useProgram(shaderProgram);
 
-        gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
-        gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
+        //if (shaderProgram.vertexPositionAttribute !== -1)
+            gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+        
+        if (shaderProgram === tileShaderProgram)
+        //if (shaderProgram.textureCoordAttribute !== -1)
+            gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
     }
 
     function setMatrixUniforms(shaderProgram) {
@@ -144,9 +148,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
         initGL(canvas);
         if (gl) {
-            tileShaderProgram = initShaders("tile-fragment-shader", "tile-vertex-shader", "2");
+            tileShaderProgram = initShaders("tile-fragment-shader", "tile-vertex-shader");
             initQuad(-1,-1,1,1);
-            triangleShaderProgram = initShaders("triangle-fragment-shader", "triangle-vertex-shader", "");
+            triangleShaderProgram = initShaders("triangle-fragment-shader", "triangle-vertex-shader");
             videoHLE.initBuffers();
 
             gl.clearColor(0.0, 0.0, 0.0, 1.0);

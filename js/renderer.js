@@ -35,7 +35,7 @@ var _1964jsRenderer = function() {
 
             initQuad(xl, yl, xh, yh); //inits a quad. good for tiles
             draw(tileno, texImg.changed);
-            texImg.changed = false;
+            //texImg.changed = false;
         }
     }
 
@@ -71,12 +71,12 @@ function blitTexture(ram, offset, idx) {
     var cc = document.getElementById("pow2Texture"+idx);
     var cctx = cc.getContext("2d");
 
-    var ImDat=cctx.createImageData(32,32);
+    var ImDat=cctx.createImageData(16,16);
     var out = ImDat.data;
 
     var iii=0;
     var k=offset;
-    for (var y = -32*32; y !== 0; y++) {
+    for (var y = -16*16; y !== 0; y++) {
         var hi = ram[k]; 
         var lo = ram[k+1];
             out[iii+3] = 255; //alpha
@@ -94,8 +94,18 @@ function handleLoadedTexture(texture, imageSrc) {
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, imageSrc);
     //console.log('getError returns: ' + gl.getError());
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    
+
+    //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+
+
+    //no wrapping
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
     gl.generateMipmap(gl.TEXTURE_2D);
     gl.bindTexture(gl.TEXTURE_2D, null);
