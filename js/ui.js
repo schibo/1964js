@@ -93,10 +93,10 @@ function uncompressAndRun(romPath, response) {
     }
 }
 
-function start1964() {
+function start1964(settings) {
 
     if (_1964js == null || _1964js == undefined)
-        _1964js = new _1964jsEmulator();
+        _1964js = new _1964jsEmulator(settings);
         
     vars = getUrlVars();
     var romPath;

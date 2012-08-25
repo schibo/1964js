@@ -34,7 +34,7 @@ var _1964jsVideoHLE = function(core) {
     var triangleVertexPositionBuffer;
     var dlistStackPointer = 0;
     var dlistStack = new Array(MAX_DL_STACK_SIZE);
-    var renderer = new _1964jsRenderer();
+    var renderer = new _1964jsRenderer(core.settings);
     var texImg = new Object();
     this.segments = new Array(16);
     //todo: different microcodes support
@@ -782,8 +782,10 @@ var _1964jsVideoHLE = function(core) {
         gl.vertexAttribPointer(triangleShaderProgram.vertexPositionAttribute, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
         setMatrixUniforms(triangleShaderProgram);
 
-        gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
-       // gl.drawArrays(gl.LINE_LOOP, 0, triangleVertexPositionBuffer.numItems);
+        if (core.settings.wireframe === true)
+            gl.drawArrays(gl.LINE_LOOP, 0, triangleVertexPositionBuffer.numItems);
+        else
+            gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
 
       //  mvPopMatrix();
     }

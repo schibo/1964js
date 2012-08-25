@@ -60,12 +60,14 @@ Convention:
  with a swap or bswap.
 */
 
-_1964jsEmulator = function() {
+_1964jsEmulator = function(userSettings) {
 
 //private:
     var offset = 0;
-
+ 
 //public:
+    this.settings = userSettings;
+
     this.request = undefined;
     this.debug=false;
 
