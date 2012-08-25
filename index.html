@@ -10,7 +10,7 @@
   
 <script type="text/javascript">
 
-var deploy = false;
+var deploy = true;
 
 if (deploy === true) {
 
@@ -81,11 +81,21 @@ if (deploy === true) {
 <p><canvas id="Canvas" width="320" height="240">I'm sorry your browser does not support the HTML5 canvas element.</canvas> <canvas id="Canvas3D" width="800" height="600"></canvas> <canvas id="pow2Texture0" width="16" height="16"></canvas> <canvas id="pow2Texture1" width="16" height="16"></canvas> <canvas id="pow2Texture2" width="16" height="16"></canvas> <canvas id="pow2Texture3" width="16" height="16"></canvas> <canvas id="pow2Texture4" width="16" height="16"></canvas> <canvas id="pow2Texture5" width="16" height="16"></canvas> <canvas id="pow2Texture6" width="16" height="16"></canvas> <canvas id="pow2Texture7" width="16" height="16"></canvas></p>
 <div id="user_panel">
 <h1>1964js 0.0.4</h1>
-<input id="files" name="file" type="file" /> <!-- <button onclick="abortRead();">Cancel read</button> -->
+<input id="files" name="file" type="file" />*.v64; *.n64; *.z64<!-- <button onclick="abortRead();">Cancel read</button> -->
 <div id="progress_bar">
 <div class="percent">0%</div>
 </div>
-<div><input id="wireframe" name="wireframe" checked="checked" onchange="if (_1964js != undefined &amp;&amp; _1964js.settings != undefined) _1964js.settings.wireframe = this.checked;" type="checkbox" />wireframe<br /> <a href="http://1964js.com/blog">news</a></div>
+
+<select onchange="if (this.value !== 'Demos') window.open(this.value, '_self');">
+  <option value="Demos">Demos</option>
+  <option value="http://1964js.com?rom=unofficial_roms/rotate.zip">rotate</option>
+  <option value="http://1964js.com?rom=unofficial_roms/liner.zip">Liner (0 to start)</option>
+  <option value="http://1964js.com?rom=unofficial_roms/sp_crap.zip">Absolute Crap</option>
+  <option value="http://1964js.com?rom=unofficial_roms/rotate.zip">Rotate</option>
+  <option value="http://1964js.com?rom=unofficial_roms/DynamixReadme.zip">Dynamix</option>
+</select>
+<input id="wireframe" name="wireframe" checked="checked" onchange="if (_1964js != undefined &amp;&amp; _1964js.settings != undefined) _1964js.settings.wireframe = this.checked;" type="checkbox" />wireframe<br />
+ <center><a href="http://1964js.com/blog">news</a></center>
 </div>
 
 <script>
