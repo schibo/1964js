@@ -18,7 +18,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 var useExternalTextures = false; //for loading community texture packs
-var wireframe = false; //wireframe mode for debugging
 var neheTexture;
 
 var _1964jsRenderer = function(settings) {
@@ -26,43 +25,13 @@ var _1964jsRenderer = function(settings) {
     var squareVertexPositionBuffer;
     var tilesInitialized = true;
 
-    this.texRect = function(xl, yl, xh, yh, s, t, dsdx, dtdy, tileno, ram, texImg) {
-        if (wireframe == true)
-            this.drawWireframeQuad(xl, yl, xh, yh);
-        else { 
-            if (texImg.changed === true)
-                blitTexture(ram, texImg.addr, tileno);
+    this.texRect = function(xl, yl, xh, yh, s, t, dsdx, dtdy, tileno, ram, texImg) { 
+        if (texImg.changed === true)
+            blitTexture(ram, texImg.addr, tileno);
 
-            initQuad(xl, yl, xh, yh); //inits a quad. good for tiles
-            this.draw(tileno, texImg.changed);
-            //texImg.changed = false;
-        }
-    }
-
-    this.drawWireframeQuad = function(xl, yl, xh, yh) {
-        if (!squareVertexPositionBuffer) {
-
-            squareVertexPositionBuffer = gl.createBuffer()
-            gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
-        }
-
-        squareVertexPositionBuffer.numItems = 0;
-
-        var offset = 12*(squareVertexPositionBuffer.numItems/4);
-
-        var vertices = [
-         xh, yh, 0.0,
-         xh, yl, 0.0,
-         xl, yl, 0.0,
-         xl, yh, 0.0
-        ];
-
-        squareVertexPositionBuffer.itemSize = 3;
-        squareVertexPositionBuffer.numItems += vertices.length/3;
-
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-        gl.vertexAttribPointer(triangleShaderProgram.vertexPositionAttribute, squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-        gl.drawArrays(gl.LINE_LOOP, 0, squareVertexPositionBuffer.numItems);        
+        initQuad(xl, yl, xh, yh); //inits a quad. good for tiles
+        this.draw(tileno, texImg.changed);
+        //texImg.changed = false;
     }
 
     this.draw = function(tileno, changed) {
@@ -91,7 +60,7 @@ var _1964jsRenderer = function(settings) {
         if (settings.wireframe === false)
             gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
         else
-            gl.drawElements(gl.LINES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+            gl.drawElements(gl.LINE_STRIP, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
     }
 }
 
@@ -240,9 +209,3 @@ function initTexture(tileno, changed) {
             cubeVertexIndexBuffer.numItems = 6;
         }
     }
-
-
-   var xRot = 0;
-    var yRot = 0;
-    var zRot = 0;
-
