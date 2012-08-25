@@ -146,10 +146,18 @@ function start1964(settings) {
     clearTimeout(intervalVariable);
   }
 
+  document.getElementById("user_panel").ontouchstart=function(e) { 
+    document.getElementById("user_panel").className = 'show';
+    clearTimeout(intervalVariable);
+  }
+
   document.getElementById("user_panel").onmouseout = function() {
     intervalVariable = setTimeout(function(){document.getElementById('user_panel').className='';}, 1000);  
   }
 
+  document.getElementById("user_panel").ontouchend=function() { 
+    intervalVariable = setTimeout(function(){document.getElementById('user_panel').className='';}, 5000);  
+  }
 
   function errorHandler(evt) {
     switch(evt.target.error.code) {

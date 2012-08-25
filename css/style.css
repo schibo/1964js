@@ -23,6 +23,8 @@
 #user_panel {
     background-color:#6677FF;
     text-align: center;
+    font-family: "Meta";
+    color: #FFFFFF;
     width: 380px;
     opacity: 0;
     
