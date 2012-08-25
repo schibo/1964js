@@ -10,10 +10,6 @@
   
 <script type="text/javascript">
 
-var deploy = false;
-
-if (deploy === true) {
-
   var _gaq = _gaq || [];
   _gaq.push(['_setAccount', 'UA-31090418-4']);
   _gaq.push(['_trackPageview']);
@@ -23,7 +19,6 @@ if (deploy === true) {
     ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
   })();
-}
 
 </script>
 
@@ -106,41 +101,36 @@ function jsAppend(js_file)
   js_script.src = js_file;
   document.getElementsByTagName('body')[0].appendChild(js_script);
 }
-
-function startIt() {
-
-    jsAppend('js/lib/bitjs/io.js');
-    jsAppend('js/lib/bitjs/archive.js');
-
-if (deploy === true) {
-    jsAppend('js/1964js-0.0.4.min.js');
-} else {
-    jsAppend('js/lib/BigInt.js');
-    jsAppend('js/lib/closure/goog/base.js');
-    jsAppend('js/lib/Stats.js');
-    jsAppend('js/1964.js');
-    jsAppend('js/helpers.js');
-    jsAppend('js/opcodeMap.js');
-    jsAppend('js/boot.js');
-    jsAppend('js/lib/closure/goog/math/long.js');
-    jsAppend('js/constants.js');
-    jsAppend('js/pif.js');
-    jsAppend('js/memory.js');
-    jsAppend('js/dma.js');
-    jsAppend('js/interrupts.js');
-    jsAppend('js/lib/glMatrix-0.9.5.min.js');
-    jsAppend('js/lib/webgl-utils.js');
-    jsAppend('js/renderer.js');
-    jsAppend('js/videoHLE.js');
-    jsAppend('js/gfxHelpers.js');
-    jsAppend('js/ui.js');
-    jsAppend('js/webGL.js');
-}
-}
-
-startIt(); 
 </script>
-<p></p>
+
+<script src="js/lib/bitjs/io.js"</script>
+<script src="js/lib/bitjs/archive.js"></script>
+
+
+
+<script src="js/1964js-0.0.4.min.js"></script>
+<!--
+    <script src="js/lib/BigInt.js"></script>
+    <script src="js/lib/closure/goog/base.js"></script>
+    <script src="js/lib/Stats.js"></script>
+    <script src="js/1964.js"></script>
+    <script src="js/helpers.js"></script>
+    <script src="js/opcodeMap.js"></script>
+    <script src="js/boot.js"></script>
+    <script src="js/lib/closure/goog/math/long.js"></script>
+    <script src="js/constants.js"></script>
+    <script src="js/pif.js"></script>
+    <script src="js/memory.js"></script>
+    <script src="js/dma.js"></script>
+    <script src="js/interrupts.js"></script>
+    <script src="js/lib/glMatrix-0.9.5.min.js"></script>
+    <script src="js/lib/webgl-utils.js"></script>
+    <script src="js/renderer.js"></script>
+    <script src="js/videoHLE.js"></script>
+    <script src="js/gfxHelpers.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/webGL.js"></script>
+-->
 
 </body>
 
