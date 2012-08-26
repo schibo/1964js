@@ -22,6 +22,7 @@
 
 #user_panel {
     background-color:#6677FF;
+    border: 2px solid #89F;
     text-align: center;
     font-family: "Meta";
     color: #FFFFFF;
@@ -50,7 +51,7 @@
 }
 
 #user_panel.show {
-    opacity: 0.6;
+    opacity: 0.95;
 }
 
 #Canvas {
@@ -73,4 +74,8 @@
     left: 0;
     margin: 0;
     visibility: hidden;
+}
+
+.dropShadow {
+    text-shadow: 1px 1px 1px #000;
 }
