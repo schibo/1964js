@@ -2,21 +2,7 @@
 <head>
   <title>1964 and 1964js Home page</title>
   <link href="css/style.css" rel="stylesheet" type="text/css">
-  
-<script type="text/javascript">
-
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-31090418-4']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
-
+  <script src="googleAnalytics.js"></script>
 </head>
 <body onload="start1964({wireframe:document.getElementById('wireframe').checked})">
 <p></p>
@@ -24,7 +10,7 @@
 <script id="triangle-fragment-shader" type="x-shader/x-fragment">// <![CDATA[
     precision mediump float;
     varying float v_Dot;
-    vec4 color = vec4(0.5, 0.0, 1.0, 1.0);
+    vec4 color = vec4(1.0, 1.0, 1.0, 1.0);
     
     void main(void) {
         //color += vec4(0.1, 0.1, 0.1, 1.0);
@@ -78,32 +64,29 @@
 
 <select onchange="if (this.value !== 'Demos') window.open(this.value, '_self');">
   <option value="Demos">Demos</option>
-  <option value="http://1964js.com?rom=unofficial_roms/rotate.zip">rotate</option>
-  <option value="http://1964js.com?rom=unofficial_roms/liner.zip">Liner (0 to start)</option>
-  <option value="http://1964js.com?rom=unofficial_roms/sp_crap.zip">Absolute Crap</option>
-  <option value="http://1964js.com?rom=unofficial_roms/rotate.zip">Rotate</option>
-  <option value="http://1964js.com?rom=unofficial_roms/DynamixReadme.zip">Dynamix</option>
+  <option value="?rom=unofficial_roms/rotate.zip">Rotate</option>
+  <option value="?rom=unofficial_roms/chrome.zip">Chrome</option>
+  <option value="?rom=unofficial_roms/dextrose.zip">Dextrose</option>
+  <option value="?rom=unofficial_roms/n64stars.zip">N64 Stars</option>
+  <option value="?rom=unofficial_roms/liner.zip">Liner (0 to start)</option>
+  <option value="?rom=unofficial_roms/hardcode.zip">Hard Coded</option>
+  <option value="?rom=unofficial_roms/sp_crap.zip">Absolute Crap</option>
+  <option value="?rom=unofficial_roms/DynamixReadme.zip">Dynamix</option>
 </select>
 <input id="wireframe" name="wireframe" checked="checked" onchange="if (_1964js != undefined &amp;&amp; _1964js.settings != undefined) _1964js.settings.wireframe = this.checked;" type="checkbox" />wireframe<br />
- <center><a href="http://1964js.com/blog">news</a></center>
+ <center><a href="blog">news</a></center>
 </div>
-
-<script>
-function jsAppend(js_file)
-{
-  js_script = document.createElement('script');
-  js_script.type = "text/javascript";
-  js_script.src = js_file;
-  document.getElementsByTagName('body')[0].appendChild(js_script);
-}
-</script>
 
 <script src="js/lib/bitjs/io.js"></script>
 <script src="js/lib/bitjs/archive.js"></script>
 
+<!-- minification for deployment follows: -->
 
-<!--<script src="js/1964js-0.0.4.min.js"></script>-->
+<!--when developing, comment out this script: -->
+<script src="js/1964js-0.0.4.min.js"></script>
 
+<!--when developing, uncomment the following scripts: -->
+<!--
     <script src="js/lib/BigInt.js"></script>
     <script src="js/lib/closure/goog/base.js"></script>
     <script src="js/lib/Stats.js"></script>
@@ -124,6 +107,7 @@ function jsAppend(js_file)
     <script src="js/gfxHelpers.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/webGL.js"></script>
+-->
 </body>
 
 </html>
