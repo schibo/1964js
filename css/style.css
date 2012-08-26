@@ -21,10 +21,10 @@
 }
 
 #user_panel {
-    background-color:#6677FF;
-    border: 2px solid #89F;
+    background-color:#222222;
+    border: 5px solid #303030;
     text-align: center;
-    font-family: "Meta";
+    font-family: "Arial";
     color: #FFFFFF;
     width: 380px;
     opacity: 0;
@@ -51,7 +51,7 @@
 }
 
 #user_panel.show {
-    opacity: 0.95;
+    opacity: 0.8;
 }
 
 #Canvas {
@@ -77,5 +77,5 @@
 }
 
 .dropShadow {
-    text-shadow: 1px 1px 1px #000;
+    text-shadow: 3px 3px 3px #555;
 }
