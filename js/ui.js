@@ -182,8 +182,10 @@ function start1964(settings) {
       var percentLoaded = Math.round((evt.loaded / evt.total) * 100);
       // Increase the progress bar length.
       if (percentLoaded < 100) {
-        progress.style.width = percentLoaded + '%';
-        progress.textContent = percentLoaded + '%';
+        if (progress != undefined) {
+            progress.style.width = percentLoaded + '%';
+            progress.textContent = percentLoaded + '%';
+        }
       }
     }
   }
@@ -191,11 +193,14 @@ function start1964(settings) {
   var _1964js; 
 
 function handleFileSelect(evt) {
-   var fileName = evt.target.files[0].name;    
-    
+    var fileName = evt.target.files[0].name;    
+    var progressBar = document.getElementById('progress_bar');
+
     // Reset progress indicator on new file selection.
-    progress.style.width = '0%';
-    progress.textContent = '0%';
+    if (progress != undefined) {
+        progress.style.width = '0%';
+        progress.textContent = '0%';
+    }
 
     reader = new FileReader();
     reader.onerror = errorHandler;
@@ -204,13 +209,18 @@ function handleFileSelect(evt) {
       alert('File read cancelled');
     };
     reader.onloadstart = function(e) {
-      document.getElementById('progress_bar').className = 'loading';
+        if (progressBar != undefined)
+            document.getElementById('progress_bar').className = 'loading';
     };
     reader.onload = function(e) {
       // Ensure that the progress bar displays 100% at the end.
-      progress.style.width = '100%';
-      progress.textContent = '100%';
-      setTimeout("document.getElementById('progress_bar').className='';document.getElementById('user_panel').className='';", 1000);
+      if (progress != undefined) {
+        progress.style.width = '100%';
+        progress.textContent = '100%';
+    }
+    
+    if (progressBar != undefined)
+        setTimeout("document.getElementById('progress_bar').className='';document.getElementById('user_panel').className='';", 1000);
       //todo: add zip support (from index.html)
       
       uncompressAndRun(fileName, reader.result, _1964js);
