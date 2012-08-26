@@ -6,6 +6,19 @@
 </head>
 <body bgcolor="#000000" text="#ffffff" link="#ffa953" vlink="#ffa953" alink="#ff0000" onload="start1964({wireframe:document.getElementById('wireframe').checked})">
 <p></p>
+<!-- shader for wireframe triangles -->
+<script id="color-framebuffer-fragment-shader" type="x-shader/x-fragment">// <![CDATA[
+    precision mediump float;
+    varying float v_Dot;
+    vec4 color = vec4(0.0, 1.0, 1.0, 1.0);
+    
+    void main(void) {
+        //color += vec4(0.1, 0.1, 0.1, 1.0);
+        gl_FragColor = vec4(color.xyz, color.a);
+    }
+// ]]></script>
+
+
 <!-- shaders for wireframe triangles -->
 <script id="triangle-fragment-shader" type="x-shader/x-fragment">// <![CDATA[
     precision mediump float;
@@ -86,14 +99,13 @@
 <!-- minification for deployment follows: -->
 
 <!--when developing, comment out this script: -->
-<script src="js/1964js-0.0.4.min.js"></script>
+<!--<script src="js/1964js-0.0.4.min.js"></script> -->
 
 <!--when developing, uncomment the following scripts: -->
-<!--
     <script src="js/lib/BigInt.js"></script>
     <script src="js/lib/closure/goog/base.js"></script>
-    <script src="js/lib/Stats.js"></script>
-    <script src="js/1964.js"></script>
+<!--    <script src="js/lib/Stats.js"></script>
+-->    <script src="js/1964.js"></script>
     <script src="js/helpers.js"></script>
     <script src="js/opcodeMap.js"></script>
     <script src="js/boot.js"></script>
@@ -110,7 +122,6 @@
     <script src="js/gfxHelpers.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/webGL.js"></script>
--->
 </body>
 
 </html>

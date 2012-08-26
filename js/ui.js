@@ -156,7 +156,7 @@ function start1964(settings) {
   }
 
   document.getElementById("user_panel").ontouchend=function() { 
-    intervalVariable = setTimeout(function(){document.getElementById('user_panel').className='';}, 5000);  
+    intervalVariable = setTimeout(function(){document.getElementById('user_panel').className='';}, 1000);  
   }
 
   function errorHandler(evt) {
