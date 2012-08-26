@@ -151,8 +151,10 @@ function start1964(settings) {
     clearTimeout(intervalVariable);
   }
 
-  document.getElementById("user_panel").onmouseout = function() {
-    intervalVariable = setTimeout(function(){document.getElementById('user_panel').className='';}, 1000);  
+  document.getElementById("user_panel").onmouseout = function(event) {
+    //don't fade out if one of the child divs makes caused this event.
+    if ((event.relatedTarget || event.toElement) == this.parentNode)
+        intervalVariable = setTimeout(function(){document.getElementById('user_panel').className='';}, 1000);  
   }
 
   document.getElementById("user_panel").ontouchend=function() { 
