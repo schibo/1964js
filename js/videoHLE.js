@@ -526,9 +526,37 @@ var _1964jsVideoHLE = function(core) {
         this.RDP_GFX_PopDL();
     }
 
+var test = true;
+if (true) {
+    //create a heap of dummy texture mem.
+    var testTextureMem = new Array(256*256*4);
+    testTextureMem = new Uint8Array(testTextureMem);
+    for (var k=0; k<1024*1024; k++)
+        testTextureMem[k] = 128;
+   
+   this.RSP_GBI1_Texture = function(pc) {
+        //hack: experimenting.
+        
+        texImg.format = this.getTImgFormat(pc+4);
+        texImg.size = this.getTImgSize(pc+4);
+        texImg.width = this.getTImgWidth(pc+4);
+        texImg.addr = 0;
+        renderer.texTri(0, 0, 256, 256, 0, 0, 0, 0, 7, testTextureMem, texImg);
+        this.videoLog('TODO: RSP_GBI1_Texture');
+    }  
+} else {
     this.RSP_GBI1_Texture = function(pc) {
+        //hack: experimenting.
+        
+        texImg.format = this.getTImgFormat(pc);
+        texImg.size = this.getTImgSize(pc);
+        texImg.width = this.getTImgWidth(pc);
+        texImg.addr = this.getTImgAddr(pc+4);
+        //texImg.addr = 0;
+        renderer.texTri(0, 0, texImg.width, texImg.width, 0, 0, 0, 0, 7, core.memory.rdramUint8Array, texImg);
         this.videoLog('TODO: RSP_GBI1_Texture');
     }
+}
 
     this.RSP_GBI1_PopMtx = function(pc) {
         this.videoLog('TODO: RSP_GBI1_PopMtx');
@@ -545,7 +573,8 @@ var _1964jsVideoHLE = function(core) {
 
         this.prepareTriangle(v2, v1, v0);
 
-        this.drawScene();
+        this.drawScene(true, 7);
+       
 
         //clear vertices for another shape
         this.vertices = [];
@@ -603,18 +632,13 @@ var _1964jsVideoHLE = function(core) {
     	var dsdx = this.getTexRectDsDx(pc);
     	var dtdy = this.getTexRectDtDy(pc);
         
-        //temp: use 320x240. todo: ortho projection based on screen res
-        xh -= 160; xh /= 160;
-        xl -= 160; xl /= 160;
-        yl -= 120; yl /= -120;
-        yh -= 120; yh /= -120;
-
         renderer.texRect(xl, yl, xh, yh, s, t, dsdx, dtdy, tileno, core.memory.rdramUint8Array, texImg);
 
-        dlistStack[dlistStackPointer].pc += 16;
+        dlistStack[dlistStackPointer].pc += 8;
     }
 
     this.DLParser_TexRectFlip = function(pc) {
+        dlistStack[dlistStackPointer].pc += 8;
         this.videoLog('TODO: DLParser_TexRectFlip');
     }
 
@@ -770,16 +794,43 @@ var _1964jsVideoHLE = function(core) {
         ];
         triangleVertexPositionBuffer.itemSize = 3;
         triangleVertexPositionBuffer.numItems = this.trivertices.length/3;
+
+        triangleVertexTextureCoordBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexTextureCoordBuffer);
+        this.triTextureCoords = [
+        //front face
+        1.0, 0.0, 1.0,
+        0.0, 1.0, 1.0,
+        0.0, 0.0, 1.0
+        ];
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.triTextureCoords), gl.STATIC_DRAW);
+        gl.vertexAttribPointer(triangleShaderProgram.vertexPositionAttribute, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+        triangleVertexTextureCoordBuffer.itemSize = 3;
+        triangleVertexTextureCoordBuffer.numItems = this.triTextureCoords.length/3;
     }
 
-    this.drawScene = function() {
+    this.drawScene = function(useTexture, tileno) {
 
         switchShader(triangleShaderProgram);
+        gl.disable(gl.DEPTH_TEST);
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
         //simple lighting. Get the normal matrix of the model-view matrix
         
         gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.trivertices), gl.STATIC_DRAW);
         gl.vertexAttribPointer(triangleShaderProgram.vertexPositionAttribute, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+        if (useTexture === true) {
+            gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexTextureCoordBuffer);
+            gl.vertexAttribPointer(triangleShaderProgram.textureCoordAttribute, triangleVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, window['neheTexture'+tileno]);
+            gl.uniform1i(triangleShaderProgram.samplerUniform, 0);
+        }
+      //  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
+
         setMatrixUniforms(triangleShaderProgram);
 
         if (core.settings.wireframe === true)

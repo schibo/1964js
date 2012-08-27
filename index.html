@@ -3,6 +3,13 @@
   <title>1964 and 1964js Home page</title>
   <link href="css/style.css" rel="stylesheet" type="text/css">
   <script src="googleAnalytics.js"></script>
+  
+<meta property="og:title" content="1964js - N64 emulator in JavaScript" />
+<meta property="og:type" content="game" />
+<meta property="og:url" content="http://www.1964js.com" />
+<meta property="og:image" content="https://fbcdn-profile-a.akamaihd.net/hprofile-ak-snc4/373029_274941852620356_1206208449_n.jpg" />
+<meta property="og:site_name" content="1964js" />
+<meta property="fb:admins" content="1397141558" />
 </head>
 <body bgcolor="#000000" text="#ffffff" link="#ffa953" vlink="#ffa953" alink="#ff0000" onload="start1964({wireframe:document.getElementById('wireframe').checked})">
 
@@ -52,6 +59,7 @@
 
 
 <!-- shaders for wireframe triangles -->
+<!--
 <script id="triangle-fragment-shader" type="x-shader/x-fragment">// <![CDATA[
     precision mediump float;
     varying float v_Dot;
@@ -77,6 +85,38 @@
         v_Dot = max(dot(transNormal.xyz, lightDir), 0.0);
     }
 // ]]></script>
+-->
+
+<script id="triangle-fragment-shader" type="x-shader/x-fragment">// <![CDATA[
+    precision mediump float;
+    varying vec2 vTextureCoord;
+    uniform sampler2D uSampler;
+
+
+  //  vec4 color = vec4(1.0, 1.0, 1.0, 1.0);
+  //  void main(void) {
+  //      //color += vec4(0.1, 0.1, 0.1, 1.0);
+  //      gl_FragColor = vec4(color.xyz, color.a);
+  //  }
+    
+    void main(void) {
+        gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+    }
+// ]]></script>
+<script id="triangle-vertex-shader" type="x-shader/x-vertex">// <![CDATA[
+    attribute vec3 aVertexPosition;
+    attribute vec2 aTextureCoord;
+    uniform mat4 uMVMatrix;
+    uniform mat4 uPMatrix;
+    varying vec2 vTextureCoord;
+
+    void main(void) {
+        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+        vTextureCoord = aTextureCoord;
+    }
+// ]]></script>
+
+
 <!-- shaders for tiles -->
 <script id="tile-fragment-shader" type="x-shader/x-fragment">// <![CDATA[
     precision mediump float;
@@ -99,7 +139,21 @@
         vTextureCoord = aTextureCoord;
     }
 // ]]></script>
-<p><canvas id="Canvas" width="320" height="240">I'm sorry your browser does not support the HTML5 canvas element.</canvas> <canvas id="Canvas3D" width="800" height="600"></canvas> <canvas id="pow2Texture0" width="16" height="16"></canvas> <canvas id="pow2Texture1" width="16" height="16"></canvas> <canvas id="pow2Texture2" width="16" height="16"></canvas> <canvas id="pow2Texture3" width="16" height="16"></canvas> <canvas id="pow2Texture4" width="16" height="16"></canvas> <canvas id="pow2Texture5" width="16" height="16"></canvas> <canvas id="pow2Texture6" width="16" height="16"></canvas> <canvas id="pow2Texture7" width="16" height="16"></canvas></p>
+
+<div style="position: absolute; left: -600 px; top: -600 px">
+<canvas id="pow2Texture0" width="256" height="256"></canvas>
+<canvas id="pow2Texture1" width="256" height="256"></canvas>
+<canvas id="pow2Texture2" width="256" height="256"></canvas>
+<canvas id="pow2Texture3" width="256" height="256"></canvas>
+<canvas id="pow2Texture4" width="256" height="256"></canvas>
+<canvas id="pow2Texture5" width="256" height="256"></canvas>
+<canvas id="pow2Texture6" width="256" height="256"></canvas>
+<canvas id="pow2Texture7" width="256" height="256"></canvas>
+</div>
+
+<canvas id="Canvas" width="320" height="240">I'm sorry your browser does not support the HTML5 canvas element.</canvas>
+<canvas id="Canvas3D" width="1024" height="1024"></canvas>
+
 
 <div id="user_panel">
     <div class="header"><a href="blog">1964js news</a>
@@ -126,7 +180,7 @@
                 <option value="?rom=unofficial_roms/sp_crap.zip">Absolute Crap</option>
                 <option value="?rom=unofficial_roms/DynamixReadme.zip">Dynamix</option>
             </select>
-        <input id="wireframe" name="wireframe" checked="checked" onchange="if (_1964js != undefined &amp;&amp; _1964js.settings != undefined) _1964js.settings.wireframe = this.checked;" type="checkbox" />wireframe<br/><br/>
+        <input id="wireframe" name="wireframe" onchange="if (_1964js != undefined &amp;&amp; _1964js.settings != undefined) _1964js.settings.wireframe = this.checked;" type="checkbox" />wireframe<br/><br/>
         </div>
     </div>
     <div class="footer">
@@ -140,10 +194,10 @@
 <!-- minification for deployment follows: -->
 
 <!--when developing, comment out this script: -->
-<script src="js/1964js-0.0.6.min.js"></script>
+<!--<script src="js/1964js-0.0.6.min.js"></script>-->
 
 <!--when developing, uncomment the following scripts: -->
-<!--
+
     <script src="js/lib/BigInt.js"></script>
     <script src="js/lib/closure/goog/base.js"></script>
     <script src="js/1964.js"></script>
@@ -163,7 +217,7 @@
     <script src="js/gfxHelpers.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/webGL.js"></script>
--->
+
 </body>
 
 </html>

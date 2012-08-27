@@ -113,7 +113,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
         //if (shaderProgram.vertexPositionAttribute !== -1)
             gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
         
-        if (shaderProgram === tileShaderProgram)
         //if (shaderProgram.textureCoordAttribute !== -1)
             gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
     }

@@ -103,34 +103,34 @@ _1964jsVideoHLE.prototype.gbi0PushMatrix = function(pc) {
 //	uint16  uDTDY	    = (uint16)((  dwCmd3    )&0xFFFF);
 //X coordinate of upper left
 _1964jsVideoHLE.prototype.getTexRectXh = function(pc) { 
-    return (this.core.memory.getInt32(this.core.memory.rdramUint8Array, this.core.memory.rdramUint8Array, pc)>>>12&0x0FFF)/4;
+    return (this.core.memory.getInt32(this.core.memory.rdramUint8Array, this.core.memory.rdramUint8Array, pc)>>>12&0x0FFF);
 }
 //Y coordinate of upper left
 _1964jsVideoHLE.prototype.getTexRectYh = function(pc) { 
-    return (this.core.memory.getInt32(this.core.memory.rdramUint8Array, this.core.memory.rdramUint8Array, pc)&0x0FFF)/4;
+    return (this.core.memory.getInt32(this.core.memory.rdramUint8Array, this.core.memory.rdramUint8Array, pc)&0x0FFF);
 }
 _1964jsVideoHLE.prototype.getTexRectTileNo = function(pc) {
     return (this.core.memory.getInt32(this.core.memory.rdramUint8Array, this.core.memory.rdramUint8Array, pc+4)>>>24&0x07);
 }
 //X coordinate of lower right
 _1964jsVideoHLE.prototype.getTexRectXl = function(pc) {
-    return (this.core.memory.getInt32(this.core.memory.rdramUint8Array, this.core.memory.rdramUint8Array, pc+4)>>>12&0x0FFF)/4;
+    return (this.core.memory.getInt32(this.core.memory.rdramUint8Array, this.core.memory.rdramUint8Array, pc+4)>>>12&0x0FFF);
 }
 //Y coordinate of lower right
 _1964jsVideoHLE.prototype.getTexRectYl = function(pc) {
-    return (this.core.memory.getInt32(this.core.memory.rdramUint8Array, this.core.memory.rdramUint8Array, pc+4)&0x0FFF)/4;
+    return (this.core.memory.getInt32(this.core.memory.rdramUint8Array, this.core.memory.rdramUint8Array, pc+4)&0x0FFF);
 }
 _1964jsVideoHLE.prototype.getTexRectS = function(pc) {
-    return 0;
+    return (this.core.memory.getInt32(this.core.memory.rdramUint8Array, this.core.memory.rdramUint8Array, pc+8)>>>16&0xFFFF);
 }
 _1964jsVideoHLE.prototype.getTexRectT = function(pc) {
-    return 0;
+    return (this.core.memory.getInt32(this.core.memory.rdramUint8Array, this.core.memory.rdramUint8Array, pc+8)&0xFFFF);
 }
 _1964jsVideoHLE.prototype.getTexRectDsDx = function(pc) {
-    return 0;
+    return (this.core.memory.getInt32(this.core.memory.rdramUint8Array, this.core.memory.rdramUint8Array, pc+12)>>>16&0xFFFF);
 }
 _1964jsVideoHLE.prototype.getTexRectDtDy = function(pc) {
-    return 0;
+    return (this.core.memory.getInt32(this.core.memory.rdramUint8Array, this.core.memory.rdramUint8Array, pc+12)&0xFFFF);
 }
 
 _1964jsVideoHLE.prototype.getGbi1Type = function(pc) {

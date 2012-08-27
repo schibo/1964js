@@ -26,12 +26,51 @@ var _1964jsRenderer = function(settings) {
     var tilesInitialized = true;
 
     this.texRect = function(xl, yl, xh, yh, s, t, dsdx, dtdy, tileno, ram, texImg) { 
-        if (texImg.changed === true)
-            blitTexture(ram, texImg.addr, tileno);
+        //hack: getting width and height of texture by vertices
+        var w=xh-xl; w/=4;
+        var h=yh-yl; h/=4;
+        if (texImg.changed == true) {                
+            blitTexture(ram, texImg.addr, tileno, w, h);
+        }
 
-        initQuad(xl, yl, xh, yh); //inits a quad. good for tiles
+        var textureName = "pow2Texture"+tileno;
+
+        //temp: ortho to [-1, 1]. assuming 320x240. todo: ortho projection based on screen res
+        xh -= 160*4; xh /= (160*4);
+        xl -= 160*4; xl /= (160*4);
+        yl -= 120*4; yl /= (-120*4);
+        yh -= 120*4; yh /= (-120*4);
+
+        var textureWidth = document.getElementById(textureName).width;
+        var textureHeight = document.getElementById(textureName).height;
+        var scalex = (xh-xl)*((textureWidth/w)-1);
+        var scaley = (yh-yl)*((textureHeight/h)-1);
+        initQuad(xl, yl, xh+scalex, yh+scaley ); //inits a quad. good for tiles
+        //initQuad(xl, yl, xh, yh ); //inits a quad. good for tiles
         this.draw(tileno, texImg.changed);
-        //texImg.changed = false;
+        texImg.changed = false;
+    }
+
+    this.texTri = function(xl, yl, xh, yh, s, t, dsdx, dtdy, tileno, ram, texImg) { 
+        //hack: getting width and height of texture by vertices
+        var w=xh-xl;
+        var h=yh-yl;
+      //  if (texImg.changed == true) {                
+            blitTexture(ram, texImg.addr, tileno, w, h);
+       // }
+
+        var textureName = "pow2Texture"+tileno;
+
+        initTexture(tileno, true);
+
+        //var textureWidth = document.getElementById(textureName).width;
+        //var textureHeight = document.getElementById(textureName).height;
+        //var scalex = (xh-xl)*((textureWidth/w)-1);
+        //var scaley = (yh-yl)*((textureHeight/h)-1);
+        //initQuad(xl, yl, xh+scalex, yh+scaley ); //inits a quad. good for tiles
+        //initQuad(xl, yl, xh, yh ); //inits a quad. good for tiles
+     //   this.draw(tileno, texImg.changed);
+       // texImg.changed = false;
     }
 
     this.draw = function(tileno, changed) {
@@ -64,25 +103,32 @@ var _1964jsRenderer = function(settings) {
     }
 }
 
-function blitTexture(ram, offset, idx) {
+function blitTexture(ram, offset, idx, width, height) {
     //test dummy textures
-    var cc = document.getElementById("pow2Texture"+idx);
+    var textureName = "pow2Texture"+idx.toString();
+
+    var cc = document.getElementById(textureName);
     var cctx = cc.getContext("2d");
 
-    var ImDat=cctx.createImageData(16,16);
+
+    var ImDat=cctx.createImageData(cc.width,cc.height);
     var out = ImDat.data;
 
+    var stride = (cc.width-width) * 4; //Bytes per pixel = 4;
     var iii=0;
     var k=offset;
-    for (var y = -16*16; y !== 0; y++) {
-        var hi = ram[k]; 
-        var lo = ram[k+1];
-            out[iii+3] = 255; //alpha
-            out[iii] = (hi & 0xF8);
-            k+=2;
-            out[iii+1] = (((hi<<5) | (lo>>>3)) & 0xF8);
-            out[iii+2] = (lo << 2 & 0xF8);
-            iii+=4;
+    for (var y = -height; y !== 0; y++) {
+        for (var x=0; x < width; x++) {
+            var hi = ram[k]; 
+            var lo = ram[k+1];
+                out[iii+3] = 255; //alpha
+                out[iii] = (hi & 0xF8);
+                k+=2;
+                out[iii+1] = (((hi<<5) | (lo>>>3)) & 0xF8);
+                out[iii+2] = (lo << 2 & 0xF8);
+                iii+=4;
+        }
+        iii+=stride;
     }
     cctx.putImageData(ImDat,0,0);
 }
@@ -100,8 +146,8 @@ function handleLoadedTexture(texture, imageSrc) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
 
     //no wrapping
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+//    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+//    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
     gl.generateMipmap(gl.TEXTURE_2D);
     gl.bindTexture(gl.TEXTURE_2D, null);
