@@ -516,8 +516,7 @@ var C1964jsVideoHLE = function(core, glx) {
         this.RDP_GFX_PopDL();
     }
 
-var test = true;
-if (true) {
+if (false) {
     //create a heap of dummy texture mem.
     var testTextureMem = new Array(256*256*4);
     testTextureMem = new Uint8Array(testTextureMem);
@@ -542,8 +541,9 @@ if (true) {
         texImg.size = this.getTImgSize(pc);
         texImg.width = this.getTImgWidth(pc);
         texImg.addr = this.getTImgAddr(pc+4);
+        texImg.changed = true;
         //texImg.addr = 0;
-        renderer.texTri(0, 0, texImg.width, texImg.width, 0, 0, 0, 0, 7, core.memory.rdramUint8Array, texImg);
+        renderer.texTri(0, 0, 256, 256, 0, 0, 0, 0, 7, core.memory.rdramUint8Array, texImg);
         this.videoLog('TODO: RSP_GBI1_Texture');
     }
 }

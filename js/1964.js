@@ -385,7 +385,7 @@ var C1964jsEmulator = function (userSettings) {
         if (this.writeToDom === true) {
             string = 'function ' + fnName + '(r, h, m, t){';
         } else {
-            string = 'code.' + fnName + '=function(r, h, m, t){';
+            string = 'i1964js.code.' + fnName + '=function(r, h, m, t){';
         }
 
         while (!this.stopCompiling) {
@@ -794,7 +794,7 @@ var C1964jsEmulator = function (userSettings) {
 
     this.r4300i_slti = function (i) {
         var uoffset_imm_lo, soffset_imm_hi = (this.helpers.soffset_imm(i)) >> 31;
-        var uoffset_imm_lo = (this.helpers.soffset_imm(i)) >>> 0;
+        uoffset_imm_lo = (this.helpers.soffset_imm(i)) >>> 0;
 
         return '{if(' + this.helpers.RSH(i) + '>' + soffset_imm_hi + ')' + this.helpers.tRT(i) + '=0;'
             + 'else if(' + this.helpers.RSH(i) + '<' + soffset_imm_hi + ')' + this.helpers.tRT(i) + '=1;'

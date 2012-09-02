@@ -54,8 +54,8 @@ var C1964jsRenderer = function(settings, glx, webGL) {
 
     this.texTri = function(xl, yl, xh, yh, s, t, dsdx, dtdy, tileno, ram, texImg) { 
         //hack: getting width and height of texture by vertices
-        var w=xh-xl;
-        var h=yh-yl;
+        var w=256;
+        var h=256;
       //  if (texImg.changed == true) {                
             blitTexture(ram, texImg.addr, tileno, w, h);
        // }
