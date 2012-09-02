@@ -19,27 +19,29 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 //TODO: parameterize "Canvas3D" so this dom id can be arbitrary.
 
-   var gl;
-    function initGL(canvas) {
+var C1964jsWebGL = function () {
+   
+   this.gl = undefined;
+
+   this.initGL = function (canvas) {
         try {
             log("canvas = " + canvas);
             log("canvas.getContext = " + canvas.getContext);
-            gl = canvas.getContext("webgl") || canvas.getContext("moz-webgl") || canvas.getContext("webkit-3d") || canvas.getContext("experimental-webgl");
-            log("gl = " + gl);
-            gl.viewportWidth = canvas.width;
-            log("gl.viewportWidth = " + gl.viewportWidth);
-            gl.viewportHeight = canvas.height;
-            log("gl.viewportHeight = " + gl.viewportHeight);
+            this.gl = canvas.getContext("webgl") || canvas.getContext("moz-webgl") || canvas.getContext("webkit-3d") || canvas.getContext("experimental-webgl");
+            log("gl = " + this.gl);
+            this.gl.viewportWidth = canvas.width;
+            log("this.gl.viewportWidth = " + this.gl.viewportWidth);
+            this.gl.viewportHeight = canvas.height;
+            log("this.gl.viewportHeight = " + this.gl.viewportHeight);
             
         } catch (e) {
         }
-        if (!gl) {
+        if (!this.gl) {
             log("Could not initialise WebGL. Your browser may not support it.");
         }
     }
 
-
-    function getShader(gl, id) {
+    this.getShader = function (gl, id) {
 
         var shaderScript = document.getElementById(id);
         if (!shaderScript) {
@@ -57,18 +59,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
         var shader;
         if (shaderScript.type == "x-shader/x-fragment") {
-            shader = gl.createShader(gl.FRAGMENT_SHADER);
+            shader = this.gl.createShader(this.gl.FRAGMENT_SHADER);
         } else if (shaderScript.type == "x-shader/x-vertex") {
-            shader = gl.createShader(gl.VERTEX_SHADER);
+            shader = this.gl.createShader(this.gl.VERTEX_SHADER);
         } else {
             return null;
         }
 
-        gl.shaderSource(shader, str);
-        gl.compileShader(shader);
+        this.gl.shaderSource(shader, str);
+        this.gl.compileShader(shader);
 
-        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-            alert(gl.getShaderInfoLog(shader));
+        if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
+            alert(this.gl.getShaderInfoLog(shader));
             return null;
         }
 
@@ -76,51 +78,68 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     }
 
 
-    var tileShaderProgram;
-    var triangleShaderProgram;
+    this.tileShaderProgram = undefined;
+    this.triangleShaderProgram = undefined;
 
-    function initShaders(fs, vs) {
+    this.initShaders = function (fs, vs) {
         
-        var fragmentShader = getShader(gl, fs);
-        var vertexShader = getShader(gl, vs);
+        var fragmentShader = this.getShader(this.gl, fs);
+        var vertexShader = this.getShader(this.gl, vs);
 
-        shaderProgram = gl.createProgram();
-        gl.attachShader(shaderProgram, vertexShader);
-        gl.attachShader(shaderProgram, fragmentShader);
-        gl.linkProgram(shaderProgram);
+        shaderProgram = this.gl.createProgram();
+        this.gl.attachShader(shaderProgram, vertexShader);
+        this.gl.attachShader(shaderProgram, fragmentShader);
+        this.gl.linkProgram(shaderProgram);
 
-        if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+        if (!this.gl.getProgramParameter(shaderProgram, this.gl.LINK_STATUS)) {
             alert("Could not initialize shaders");
         }
 
-        gl.useProgram(shaderProgram);
+        this.gl.useProgram(shaderProgram);
 
-        shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+        shaderProgram.vertexPositionAttribute = this.gl.getAttribLocation(shaderProgram, "aVertexPosition");
         
-        shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
-        shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
-        shaderProgram.nMatrixUniform = gl.getUniformLocation(shaderProgram, "uNormalMatrix");
-        shaderProgram.textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
-        shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
+        shaderProgram.pMatrixUniform = this.gl.getUniformLocation(shaderProgram, "uPMatrix");
+        shaderProgram.mvMatrixUniform = this.gl.getUniformLocation(shaderProgram, "uMVMatrix");
+        shaderProgram.nMatrixUniform = this.gl.getUniformLocation(shaderProgram, "uNormalMatrix");
+        shaderProgram.textureCoordAttribute = this.gl.getAttribLocation(shaderProgram, "aTextureCoord");
+        shaderProgram.samplerUniform = this.gl.getUniformLocation(shaderProgram, "uSampler");
 
         return shaderProgram;
     }
 
-    function switchShader(shaderProgram) {
+    this.switchShader = function (shaderProgram) {
         
-        gl.useProgram(shaderProgram);
+        this.gl.useProgram(shaderProgram);
 
         //if (shaderProgram.vertexPositionAttribute !== -1)
-            gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+            this.gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
         
         //if (shaderProgram.textureCoordAttribute !== -1)
-            gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
+            this.gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
     }
 
-    function setMatrixUniforms(shaderProgram) {
-        gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
-        gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
-        gl.uniformMatrix4fv(shaderProgram.nMatrixUniform, false, nMatrix);
+    this.beginDList = function() {
+        this.gl.viewport(0, 0, this.gl.viewportWidth, this.gl.viewportHeight);
+        this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+
+        mat4.perspective(45, this.gl.viewportWidth / this.gl.viewportHeight, 0.1, 100.0, pMatrix);
+        mat4.identity(mvMatrix);
+        mat4.translate(mvMatrix, [0.0, 0.0, -2.4]);
+        mat4.set(mvMatrix, nMatrix);
+        mat4.inverse(nMatrix, nMatrix);
+        mat4.transpose(nMatrix);
+                
+       // mvPushMatrix();
+        mat4.translate(mvMatrix, [0.0, 0.0, -1.0]);
+
+    }
+
+
+    this.setMatrixUniforms = function (shaderProgram) {
+        this.gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
+        this.gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+        this.gl.uniformMatrix4fv(shaderProgram.nMatrixUniform, false, nMatrix);
     }
 
     var mvMatrix = mat4.create();
@@ -128,44 +147,45 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     var pMatrix = mat4.create();
     var nMatrix = mat4.create();
 
-    function mvPushMatrix() {
+    this.mvPushMatrix = function () {
         var copy = mat4.create();
         mat4.set(mvMatrix, copy);
         mvMatrixStack.push(copy);
     }
 
-    function mvPopMatrix() {
+    this.mvPopMatrix = function () {
         if (mvMatrixStack.length == 0) {
             throw "Invalid popMatrix!";
         }
         mvMatrix = mvMatrixStack.pop();
     }
 
-    function webGLStart(videoHLE) {
+    this.webGLStart = function () {
 
         var canvas = document.getElementById("Canvas3D");
 
-        initGL(canvas);
-        if (gl) {
-            tileShaderProgram = initShaders("tile-fragment-shader", "tile-vertex-shader");
-            initQuad(-1,-1,1,1);
-            triangleShaderProgram = initShaders("triangle-fragment-shader", "triangle-vertex-shader");
-            videoHLE.initBuffers();
+        this.initGL(canvas);
+        if (this.gl) {
+            this.tileShaderProgram = this.initShaders("tile-fragment-shader", "tile-vertex-shader");
+            this.triangleShaderProgram = this.initShaders("triangle-fragment-shader", "triangle-vertex-shader");
 
-            gl.clearColor(0.0, 0.0, 0.0, 1.0);
+            this.gl.clearColor(0.0, 0.0, 0.0, 1.0);
         }
         
         canvas.style.visibility = "hidden";
     }
 
-    function show3D() {
+    this.webGLStart();
+
+    this.show3D = function () {
         var canvas3D = document.getElementById("Canvas3D");
 
         canvas3D.style.visibility = "visible";    
     }
 
-    function hide3D() {
+    this.hide3D = function () {
         var canvas3D = document.getElementById("Canvas3D");
 
         canvas3D.style.visibility = "hidden";    
     }
+}

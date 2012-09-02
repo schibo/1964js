@@ -22,7 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 var currentHack = 0;
 
-_1964jsInterrupts = function(core, cp0) {
+C1964jsInterrupts = function(core, cp0) {
 
     this.setException = function(exception, causeFlag, pc, isFromDelaySlot) {
       //  log('set exception');
@@ -567,7 +567,7 @@ _1964jsInterrupts = function(core, cp0) {
             break;
             case GFX_TASK:
                 if (core.videoHLE == null || core.videoHLE == undefined) {
-                    core.videoHLE = new _1964jsVideoHLE(core);
+                    core.videoHLE = new C1964jsVideoHLE(core, core.webGL.gl);
                 }
                 core.videoHLE.processDisplayList();
             break;

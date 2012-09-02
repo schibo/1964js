@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 var _1964buttons = 0x00000000; //todo: don't depend on global buttons!
 
-var _1964jsPif = function(pifUint8Array) {
+var C1964jsPif = function(pifUint8Array) {
 
     this.EEProm_Status_Byte = 0;
     this.controlsPresent = new Array(4);

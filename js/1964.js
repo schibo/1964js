@@ -1,3 +1,10 @@
+/*jslint bitwise: true, evil: true, undef: false, todo: true, browser: true, devel: true*/
+/*globals Int32Array, ArrayBuffer, Float32Array, C1964jsMemory, C1964jsInterrupts */
+/*globals C1964jsPif, C1964jsDMA, Float64Array, C1964jsWebGL, cancelAnimFrame, C1964jsHelpers*/
+/*globals STATUS, CONFIG, RANDOM, PREVID, MI_VERSION_REG, RI_CONFIG_REG, VI_V_SYNC_REG*/
+/*globals VI_H_SYNC_REG, dec2hex, Uint8Array, VI_INTR_REG, Uint16Array, COUNT, CAUSE, EXC_INT*/
+/*globals VI_ORIGIN_REG, CPU_instruction, requestAnimFrame, ERROREPC, ERL, EXL, EPC*/
+
 /*
 1964js - JavaScript/HTML5 port of 1964 - N64 emulator
 Copyright (C) 2012 Joel Middendorf
@@ -42,7 +49,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  presumably because Chrome (currently) doesn't compile anything other than nodes in the root DOM.
  DataView is also only supported in Chrome.
 
- TODO:
+TODO:
  Long-term: more opcodes/timers/WinGL
  Short-term:
   - sdr, sdl, etc..
@@ -60,78 +67,85 @@ Convention:
  with a swap or bswap.
 */
 
-_1964jsEmulator = function(userSettings) {
+var C1964jsEmulator = function (userSettings) {
+
+    "use strict";
 
 //private:
-    var offset = 0;
- 
+    var offset = 0, i;
+
 //public:
     this.settings = userSettings;
 
     this.request = undefined;
-    this.debug=false;
+    this.debug = false;
 
     this.writeToDom = true;
 
-    if (this.writeToDom === true)
+    if (this.writeToDom === true) {
         this.code = window;
-    else
-        this.code = new Object();
+    } else {
+        this.code = {};
+    }
 
     this.vAddr = new Int32Array(4);
-    this.cp0 = new Int32Array(32*4);
-    this.cp1Buffer = new ArrayBuffer(32*4);
+    this.cp0 = new Int32Array(32 * 4);
+    this.cp1Buffer = new ArrayBuffer(32 * 4);
     this.cp1_i = new Int32Array(this.cp1Buffer);
     this.cp1_f = new Float32Array(this.cp1Buffer);
     this.cp1_f64 = new Float64Array(this.cp1Buffer);
-    this.cp1Con = new Int32Array(32*4);
-    this.LLbit=0;
+    this.cp1Con = new Int32Array(32 * 4);
+    this.LLbit = 0;
     this.tlb = new Array(32);
-    for (var i=0; i<32; i++)
-        this.tlb[i] = new Object();
+    for (i = 0; i < 32; i += 1) {
+        this.tlb[i] = {};
+    }
 
     //var docElement, errorElement, g, s, interval, keepRunning, stopCompiling, offset, programCounter, romLength, redrawDebug=0;
-    this.terminate=false;
-    //todo: get from emulation
+    this.terminate = false;
+
     this.NUM_CHANNELS = 1;
     this.NUM_SAMPLES = 40000;
-    thisSAMPLE_RATE = 40000;
+    this.SAMPLE_RATE = 40000;
     this.isLittleEndian = 0;
     this.isBigEndian = 0;
     this.magic_number = -625000;
     this.forceRepaint = false; //presumably origin reg doesn't change because not double or triple-buffered (single-buffered)
     //main run loop
-    this.doOnce=0;
-    this.kk=0;
+    this.doOnce = 0;
+    this.kk = 0;
     this.TV_SYSTEM_NTSC = 1;
     this.TV_SYSTEM_PAL = 0;
     this.currentHack = 0;
-    this.kfi=512;
+    this.kfi = 512;
 
     //hook-up system objects
-    this.memory = new _1964jsMemory(this);
-    this.interrupts = new _1964jsInterrupts(this, this.cp0);
-    this.pif = new _1964jsPif(this.memory.pifUint8Array);
-    this.dma = new _1964jsDMA(this.memory, this.interrupts, this.pif);
+    this.memory = new C1964jsMemory(this);
+    this.interrupts = new C1964jsInterrupts(this, this.cp0);
+    this.pif = new C1964jsPif(this.memory.pifUint8Array);
+    this.dma = new C1964jsDMA(this.memory, this.interrupts, this.pif);
 
-    this.log = function(message) {
-      console.log(message);
-    }
+    this.webGL = new C1964jsWebGL();
 
-    this.init = function(buffer) {
-        var r = new Int32Array(35*4);
-        var h = new Int32Array(35*4); //r hi
+    this.log = function (message) {
+        console.log(message);
+    };
+
+    this.init = function (buffer) {
+        var k, x, i, y, r = new Int32Array(35 * 4), h = new Int32Array(35 * 4);
 
         cancelAnimFrame(this.request);
         this.currentHack = 0;
         this.dma.startTime = 0;
-        this.kfi=512;
+        this.kfi = 512;
         this.doOnce = 0;
         this.magic_number = -625000;
         this.flushDynaCache();
         this.showFB = true;
-        hide3D();
+        this.webGL.hide3D();
         this.endianTest();
+        this.helpers = new C1964jsHelpers(this.isLittleEndian);
+
         //runTest();
 
         r[0] = 0;
@@ -180,14 +194,14 @@ _1964jsEmulator = function(userSettings) {
         this.c = document.getElementById("Canvas");
         this.ctx = this.c.getContext("2d");
 
-        this.ImDat=this.ctx.createImageData(320,240);
+        this.ImDat = this.ctx.createImageData(320, 240);
 
         //fill alpha
-        var i=3;
-        for (var y = 0; y < 240; y++) {
-            for (var x = 0; x < 320; x++) {
+        i = 3;
+        for (y = 0; y < 240; y += 1) {
+            for (x = 0; x < 320; x += 1) {
                 this.ImDat.data[i] = 255;
-                i+=4;
+                i += 4;
             }
         }
 
@@ -196,7 +210,7 @@ _1964jsEmulator = function(userSettings) {
 
         this.byteSwap(this.memory.rom);
         //copy first 4096 bytes to sp_dmem and run from there.
-        for (var k=0; k<0x1000; k++) {
+        for (k = 0; k < 0x1000; k += 1) {
             this.memory.spMemUint8Array[k] = this.memory.rom[k];
         }
 
@@ -222,110 +236,90 @@ _1964jsEmulator = function(userSettings) {
         //1964cpp sets this then clears it in RCP_Reset() ! 
 
         //set hi vals
-        var i=0;
-        for (i=0; i<35; i++)
-            h[i] = r[i]>>31;
+        for (i = 0; i < 35; i += 1) {
+            h[i] = r[i] >> 31;
+        }
 
         this.startEmulator(r, h);
-    }
+    };
 
-    this.trace2 = function(address, opcode) {
+    this.trace2 = function (address, opcode) {
         //comment this out for speed when not debugging
         console.log(address + ': ' + opcode);
-    }
+    };
 
     //swap to 0x80371240
-    this.byteSwap = function(rom) {
+    this.byteSwap = function (rom) {
+        var k, fmt, temp;
+
         console.log('byte swapping...');
-        
-        var fmt = this.memory.getUint32(rom, 0);
-        switch(fmt>>>0) {
-            case 0x37804012:
-            if ((rom.byteLength % 2) != 0)
+
+        fmt = this.memory.getUint32(rom, 0);
+        switch (fmt >>> 0) {
+        case 0x37804012:
+            if ((rom.byteLength % 2) !== 0) {
                 alert('help: support odd byte lengths for this swap');
-            for (k=0; k<rom.byteLength; k+=2) {
-                var temp = rom[k];
-                rom[k] = rom[k+1];
-                rom[k+1] = temp;
+            }
+            for (k = 0; k < rom.byteLength; k += 2) {
+                temp = rom[k];
+                rom[k] = rom[k + 1];
+                rom[k + 1] = temp;
             }
             break;
-            case 0x80371240:
+        case 0x80371240:
             break;
-            default:
-                this.log('Unhandled byte order: 0x' + dec2hex(fmt));
+        default:
+            this.log('Unhandled byte order: 0x' + dec2hex(fmt));
             break;
         }
         console.log('swap done');
-    }
+    };
 
-    this.endianTest = function() {
-        var ii = new ArrayBuffer(2);
-        var iiSetView = new Uint8Array(ii);
-        var iiView = new Uint16Array(ii);
-        
+    this.endianTest = function () {
+        var ii = new ArrayBuffer(2), iiSetView = new Uint8Array(ii), iiView = new Uint16Array(ii);
+
         iiSetView[0] = 0xff;
         iiSetView[1] = 0x11;
-        
+
         if (iiView[0] === 0x11FF) {
             this.log('You are on a little-endian system');
-            isLittleEndian = 1;
-            isBigEndian = 0;
+            this.isLittleEndian = 1;
+            this.isBigEndian = 0;
         } else {
             this.log('You are on a big-endian system');
-            isLittleEndian = 0;
-            isBigEndian = 1;
+            this.isLittleEndian = 0;
+            this.isBigEndian = 1;
         }
-    }
+    };
 
-    this.repaint = function(ctx, ImDat, origin) {
-        if (!this.showFB)
+    this.repaint = function (ctx, ImDat, origin) {
+        var out, k = origin, i = 0, y, hi, lo;
+
+        if (!this.showFB) {
             return;
-/*
-        if (!this.stats) {
-            this.stats = new Stats();
-
-            // Align top-left
-            this.stats.getDomElement().style.position = 'relative';
-            this.stats.getDomElement().style.left = '0px';
-            this.stats.getDomElement().style.top = '0px';
-           // document.getElementById('error').appendChild(this.stats.getDomElement());
         }
 
-        this.stats.update();
-*/
-        var out = ImDat.data;
+        out = ImDat.data;
 
-        var k=origin;
-        var i=0;
-
-        //endian-safe blit    
-        //rgba5551
-        for (var y = -240*320; y !== 0; y++) {
-            var hi = this.memory.rdramUint8Array[k];
-            var lo= this.memory.rdramUint8Array[k+1];
-                out[i] = (hi & 0xF8);
-                k+=2;
-                out[i+1] = (((hi<<5) | (lo>>>3)) & 0xF8);
-                out[i+2] = (lo << 2 & 0xF8);
-                i+=4;
+        //endian-safe blit: rgba5551
+        for (y = -240 * 320; y !== 0; y += 1) {
+            hi = this.memory.rdramUint8Array[k];
+            lo = this.memory.rdramUint8Array[k + 1];
+            out[i] = (hi & 0xF8);
+            k += 2;
+            out[i + 1] = (((hi << 5) | (lo >>> 3)) & 0xF8);
+            out[i + 2] = (lo << 2 & 0xF8);
+            i += 4;
         }
-        ctx.putImageData(ImDat,0,0);
-    }
+        ctx.putImageData(ImDat, 0, 0);
+    };
 
-    this.testHi = function() {    
-        var w = new Int32Array(34);
-        for (var i=0; i<34; i++) {
-            w[i] = r[i]>>31;
-            if (w[i] !== h[i])
-                alert(dec2hex(this.programCounter) + ' ' + h[i] + ' ' + w[i]);
-        }
-    }
+    this.runLoop = function (r, h) {
 
-    this.runLoop = function(r, h) {
-        
-        if (this.terminate === false)
+        if (this.terminate === false) {
             this.request = requestAnimFrame(this.runLoop.bind(this, r, h));
-        
+        }
+
         this.keepRunning = 180000;
         var pc, fnName, fn;
 
@@ -337,159 +331,161 @@ _1964jsEmulator = function(userSettings) {
             this.interrupts.triggerCompareInterrupt(0, false);
             this.interrupts.triggerVIInterrupt(0, false);
             this.interrupts.processException(this.programCounter);
-        }
-        else if((this.cp0[CAUSE] & this.cp0[STATUS] & 0x0000FF00) !== 0) {
+        } else if ((this.cp0[CAUSE] & this.cp0[STATUS] & 0x0000FF00) !== 0) {
             this.interrupts.setException(EXC_INT, 0, this.programCounter, false);
             this.interrupts.processException(this.programCounter);
         }
 
         pc = this.programCounter >>> 2;
-        fnName = '_' + pc; 
+        fnName = '_' + pc;
         fn = this.code[fnName];
 
-        while (this.keepRunning-- > 0) {
-            if (!fn)
-                fn = this.decompileBlock(this.programCounter);    
-        
+        while (this.keepRunning > 0) {
+            this.keepRunning -= 1;
+            if (!fn) {
+                fn = this.decompileBlock(this.programCounter);
+            }
             fn = fn(r, h, this.memory, this);
-            
-            if (this.magic_number >= 0)
+
+            if (this.magic_number >= 0) {
                 break;
+            }
         }
-        
+
         return this;
-    }
+    };
 
-    this.repaintWrapper = function() {
-        this.repaint(this.ctx, this.ImDat, this.memory.getInt32(this.memory.viUint8Array, this.memory.viUint8Array, VI_ORIGIN_REG) & 0x00FFFFFF)
-    }
+    this.repaintWrapper = function () {
+        this.repaint(this.ctx, this.ImDat, this.memory.getInt32(this.memory.viUint8Array, this.memory.viUint8Array, VI_ORIGIN_REG) & 0x00FFFFFF);
+    };
 
-    this.startEmulator = function(r, h) {
+    this.startEmulator = function (r, h) {
         this.terminate = false;
-        this.log('startEmulator');        
+        this.log('startEmulator');
         this.runLoop(r, h);
-    }
+    };
 
-    this.stopEmulator = function() {
+    this.stopEmulator = function () {
         this.stopCompiling = true;
         this.terminate = true;
-        
         this.log('stopEmulator');
         //clearInterval(interval);
-    }
+    };
 
-    this.getFnName = function(pc) {
-        return '_' + (pc>>>2);
-    }
+    this.getFnName = function (pc) {
+        return '_' + (pc >>> 2);
+    };
 
-    this.decompileBlock = function(pc) {
+    this.decompileBlock = function (pc) {
         offset = 0;
-        var string;
-        var fnName = '_' + (pc>>>2); 
+        var g, s, instruction, opcode, string, fnName = '_' + (pc >>> 2);
 
         //Syntax: function(register, hiRegister, this.memory, this)
-        if (this.writeToDom === true)
+        if (this.writeToDom === true) {
             string = 'function ' + fnName + '(r, h, m, t){';
-        else
+        } else {
             string = 'code.' + fnName + '=function(r, h, m, t){';
+        }
 
         while (!this.stopCompiling) {
-            var instruction = this.memory.loadWord(pc+offset);
-            var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction);
+            instruction = this.memory.loadWord(pc + offset);
+            opcode = this[CPU_instruction[instruction >> 26 & 0x3f]](instruction);
 
             string += 't.magic_number+=1.0;';
             string += opcode;
-            offset+=4;
+            offset += 4;
             if (offset > 10000) {
                 throw 'too many instructions! bailing.';
             }
         }
         this.stopCompiling = false;
-        
+
         //close out the function
-        string += 't.programCounter='+((pc+offset)>>0);
-        string += ';return t.code["'+this.getFnName((pc+offset)>>0)+'"];}';
+        string += 't.programCounter=' + ((pc + offset) >> 0);
+        string += ';return t.code["' + this.getFnName((pc + offset) >> 0) + '"];}';
 
         if (this.writeToDom === true) {
-            var g = document.createElement('script');
-            var s = document.getElementsByTagName('script')[this.kk++];
+            g = document.createElement('script');
+            s = document.getElementsByTagName('script')[this.kk];
+            this.kk += 1;
             s.parentNode.insertBefore(g, s);
             g.text = string;
-        }
-        else
+        } else {
             eval(string);
-            
+        }
+
         return this.code[fnName];
-    }
+    };
 
-    this.r4300i_add = function(i) {
-        return sLogic(i, '+');
-    }
+    this.r4300i_add = function (i) {
+        return this.helpers.sLogic(i, '+');
+    };
 
-    this.r4300i_addu = function(i) {
-        return sLogic(i, '+');
-    }
+    this.r4300i_addu = function (i) {
+        return this.helpers.sLogic(i, '+');
+    };
 
-    this.r4300i_sub = function(i) {
-        return sLogic(i, '-');
-    }
+    this.r4300i_sub = function (i) {
+        return this.helpers.sLogic(i, '-');
+    };
 
-    this.r4300i_subu = function(i) {
-        return sLogic(i, '-');
-    }
+    this.r4300i_subu = function (i) {
+        return this.helpers.sLogic(i, '-');
+    };
 
-    this.r4300i_or = function(i) {
-        return dLogic(i, '|');
-    }
+    this.r4300i_or = function (i) {
+        return this.helpers.dLogic(i, '|');
+    };
 
-    this.r4300i_xor = function(i) {
-        return dLogic(i, '^');
-    }
+    this.r4300i_xor = function (i) {
+        return this.helpers.dLogic(i, '^');
+    };
 
-    this.r4300i_nor = function(i) {
-        return '{'+_RD(i)+'=~('+RS(i)+'|'+RT(i)+');'+_RDH(i)+'=~('+RSH(i)+'|'+RTH(i)+');}';
-    }
+    this.r4300i_nor = function (i) {
+        return '{' + this.helpers.tRD(i) + '=~(' + this.helpers.RS(i) + '|' + this.helpers.RT(i) + ');' + this.helpers.tRDH(i) + '=~(' + this.helpers.RSH(i) + '|' + this.helpers.RTH(i) + ');}';
+    };
 
-    this.r4300i_and = function(i) {
-        return dLogic(i, '&');
-    }
+    this.r4300i_and = function (i) {
+        return this.helpers.dLogic(i, '&');
+    };
 
-    this.r4300i_lui = function(i) {
-        var temp = ((i&0x0000ffff)<<16);
-        return '{'+_RT(i)+'='+temp+';'+_RTH(i)+'='+(temp>>31)+';}';
-    }
+    this.r4300i_lui = function (i) {
+        var temp = ((i & 0x0000ffff) << 16);
+        return '{' + this.helpers.tRT(i) + '=' + temp + ';' + this.helpers.tRTH(i) + '=' + (temp >> 31) + ';}';
+    };
 
-    this.r4300i_lw = function(i) {
-        return '{'+setVAddr(i)+_RT(i)+'=m.loadWord(t.vAddr);'+_RTH(i)+'='+RT(i)+'>>31}';
-    }
+    this.r4300i_lw = function (i) {
+        return '{' + this.helpers.setVAddr(i) + this.helpers.tRT(i) + '=m.loadWord(t.vAddr);' + this.helpers.tRTH(i) + '=' + this.helpers.RT(i) + '>>31}';
+    };
 
-    this.r4300i_lwu = function(i) {
-        return '{'+setVAddr(i)+_RT(i)+'=m.loadWord(t.vAddr);'+_RTH(i)+'=0}';
-    }
+    this.r4300i_lwu = function (i) {
+        return '{' + this.helpers.setVAddr(i) + this.helpers.tRT(i) + '=m.loadWord(t.vAddr);' + this.helpers.tRTH(i) + '=0}';
+    };
 
-    this.r4300i_sw = function(i, isDelaySlot) {
-        var string = '{'+setVAddr(i)+'m.storeWord('+RT(i)+',t.vAddr'; 
+    this.r4300i_sw = function (i, isDelaySlot) {
+        var a, string = '{' + this.helpers.setVAddr(i) + 'm.storeWord(' + this.helpers.RT(i) + ',t.vAddr';
 
         //So we can process exceptions
         if (isDelaySlot === true) {
-            var a = (this.programCounter+offset+4)|0;
+            a = (this.programCounter + offset + 4) | 0;
             string += ', ' + a + ', true)}';
         } else {
-            var a = (this.programCounter+offset)|0;
+            a = (this.programCounter + offset) | 0;
             string += ', ' + a + ')}';
-        }   
+        }
 
         return string;
-    }
-    
-    this.delaySlot = function(i, likely) {
-        //delay slot
-        var pc = (this.programCounter+offset+4 + (soffset_imm(i)<< 2))|0;
-        var instruction = this.memory.loadWord((this.programCounter+offset+4)|0);
-        var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
-        var string = opcode;
+    };
 
-        string += 't.magic_number+=1.0;t.programCounter='+pc+';return t.code["'+this.getFnName(pc)+'"];}';
+    this.delaySlot = function (i, likely) {
+        var pc, instruction, opcode, string;
+
+        pc = (this.programCounter + offset + 4 + (this.helpers.soffset_imm(i) << 2)) | 0;
+        instruction = this.memory.loadWord((this.programCounter + offset + 4) | 0);
+        opcode = this[CPU_instruction[instruction >> 26 & 0x3f]](instruction, true);
+        string = opcode;
+
+        string += 't.magic_number+=1.0;t.programCounter=' + pc + ';return t.code["' + this.getFnName(pc) + '"];}';
 
         //if likely and if branch not taken, skip delay slot
         if (likely === false) {
@@ -497,943 +493,939 @@ _1964jsEmulator = function(userSettings) {
             string += 't.magic_number+=1.0;';
         }
 
-        offset+=4;
+        offset += 4;
         return string;
-    }
+    };
 
-    this.r4300i_bne = function(i) {
+    this.r4300i_bne = function (i) {
         this.stopCompiling = true;
-        var string= 'if (('+RS(i)+'!=='+RT(i)+')||('+RSH(i)+'!=='+RTH(i)+')){';
-        
-        string += this.delaySlot(i, false);
-        return string;
-    }
-
-    this.r4300i_beq = function(i) {
-        this.stopCompiling = true;
-        var string= 'if (('+RS(i)+'==='+RT(i)+')&&('+RSH(i)+'==='+RTH(i)+')){';
+        var string = 'if ((' + this.helpers.RS(i) + '!==' + this.helpers.RT(i) + ')||(' + this.helpers.RSH(i) + '!==' + this.helpers.RTH(i) + ')){';
 
         string += this.delaySlot(i, false);
         return string;
-    }
+    };
 
-    this.r4300i_bnel = function(i) {
+    this.r4300i_beq = function (i) {
         this.stopCompiling = true;
-        var string= 'if (('+RS(i)+'!=='+RT(i)+')||(' +RSH(i)+'!=='+RTH(i)+')){';
-        
-        string += this.delaySlot(i, true);
-        return string;
-    }
-
-    this.r4300i_blez = function(i) {
-        this.stopCompiling = true;
-        var string= 'if (('+RSH(i)+'<0)||(('+RSH(i)+'===0)&&('+RS(i)+'===0))){';
+        var string = 'if ((' + this.helpers.RS(i) + '===' + this.helpers.RT(i) + ')&&(' + this.helpers.RSH(i) + '===' + this.helpers.RTH(i) + ')){';
 
         string += this.delaySlot(i, false);
         return string;
-    }
+    };
 
-    this.r4300i_blezl = function(i) {
+    this.r4300i_bnel = function (i) {
         this.stopCompiling = true;
-        var string= 'if (('+RSH(i)+'<0)||(('+RSH(i)+'===0)&&('+RS(i)+'===0))){';
+        var string = 'if ((' + this.helpers.RS(i) + '!==' + this.helpers.RT(i) + ')||(' + this.helpers.RSH(i) + '!==' + this.helpers.RTH(i) + ')){';
 
         string += this.delaySlot(i, true);
         return string;
-    }
+    };
 
-    this.r4300i_bgez = function(i) {
+    this.r4300i_blez = function (i) {
         this.stopCompiling = true;
-        var string= 'if ('+RSH(i)+'>=0){';
+        var string = 'if ((' + this.helpers.RSH(i) + '<0)||((' + this.helpers.RSH(i) + '===0)&&(' + this.helpers.RS(i) + '===0))){';
 
         string += this.delaySlot(i, false);
         return string;
-    }
+    };
 
-    this.r4300i_bgezl = function(i) {
+    this.r4300i_blezl = function (i) {
         this.stopCompiling = true;
-        var string= 'if ('+RSH(i)+'>=0){';
+        var string = 'if ((' + this.helpers.RSH(i) + '<0)||((' + this.helpers.RSH(i) + '===0)&&(' + this.helpers.RS(i) + '===0))){';
 
         string += this.delaySlot(i, true);
         return string;
-    }
+    };
 
-    this.r4300i_bgtzl = function(i) {
+    this.r4300i_bgez = function (i) {
         this.stopCompiling = true;
-        var string= 'if (('+RSH(i)+'>0)||(('+RSH(i)+'===0)&&('+RS(i)+'!==0))){';
+        var string = 'if (' + this.helpers.RSH(i) + '>=0){';
+
+        string += this.delaySlot(i, false);
+        return string;
+    };
+
+    this.r4300i_bgezl = function (i) {
+        this.stopCompiling = true;
+        var string = 'if (' + this.helpers.RSH(i) + '>=0){';
 
         string += this.delaySlot(i, true);
         return string;
-    }
+    };
 
-    this.r4300i_bltzl = function(i) {
+    this.r4300i_bgtzl = function (i) {
         this.stopCompiling = true;
-        var string= 'if ('+RSH(i)+'<0){';
+        var string = 'if ((' + this.helpers.RSH(i) + '>0)||((' + this.helpers.RSH(i) + '===0)&&(' + this.helpers.RS(i) + '!==0))){';
 
         string += this.delaySlot(i, true);
         return string;
-    }
+    };
 
-    this.r4300i_bgezal = function(i) {
-        this.stopCompiling = true;    
-        var string= 'if ('+RSH(i)+'>=0){';
+    this.r4300i_bltzl = function (i) {
+        this.stopCompiling = true;
+        var string = 'if (' + this.helpers.RSH(i) + '<0){';
 
-        var link = (this.programCounter+offset+8)>>0;
+        string += this.delaySlot(i, true);
+        return string;
+    };
+
+    this.r4300i_bgezal = function (i) {
+        this.stopCompiling = true;
+        var link, string = 'if (' + this.helpers.RSH(i) + '>=0){';
+
+        link = (this.programCounter + offset + 8) >> 0;
         string += 'r[31]=' + link + ';';
-        string += 'h[31]=' + (link>>31) + ';';
+        string += 'h[31]=' + (link >> 31) + ';';
 
         string += this.delaySlot(i, false);
         return string;
-    }
+    };
 
-    this.r4300i_bgezall = function(i) {
-        this.stopCompiling = true;    
-        var string= 'if ('+RSH(i)+'>=0){';
+    this.r4300i_bgezall = function (i) {
+        this.stopCompiling = true;
+        var link, string = 'if (' + this.helpers.RSH(i) + '>=0){';
 
-        var link = (this.programCounter+offset+8)>>0;
+        link = (this.programCounter + offset + 8) >> 0;
         string += 'r[31]=' + link + ';';
-        string += 'h[31]=' + (link>>31) + ';';
+        string += 'h[31]=' + (link >> 31) + ';';
 
         string += this.delaySlot(i, true);
         return string;
-    }
+    };
 
-    this.r4300i_bltz = function(i) {
+    this.r4300i_bltz = function (i) {
         this.stopCompiling = true;
-        var string= 'if ('+RSH(i)+'<0){';
+        var string = 'if (' + this.helpers.RSH(i) + '<0){';
 
         string += this.delaySlot(i, false);
         return string;
-    }
+    };
 
-    this.r4300i_bgtz = function(i) {
+    this.r4300i_bgtz = function (i) {
         this.stopCompiling = true;
-        var string= 'if (('+RSH(i)+'>0)||(('+RSH(i)+'===0)&&('+RS(i)+'!==0))){';
+        var string = 'if ((' + this.helpers.RSH(i) + '>0)||((' + this.helpers.RSH(i) + '===0)&&(' + this.helpers.RS(i) + '!==0))){';
 
         string += this.delaySlot(i, false);
         return string;
-    }
+    };
 
-    this.r4300i_beql = function(i) {
+    this.r4300i_beql = function (i) {
         this.stopCompiling = true;
-        var string= 'if (('+RS(i)+'==='+RT(i)+')&&('+RSH(i)+'==='+RTH(i)+')){';
+        var string = 'if ((' + this.helpers.RS(i) + '===' + this.helpers.RT(i) + ')&&(' + this.helpers.RSH(i) + '===' + this.helpers.RTH(i) + ')){';
 
         string += this.delaySlot(i, true);
         return string;
-    }
+    };
 
-    this.r4300i_COP1_bc1f = function(i) {
+    this.r4300i_COP1_bc1f = function (i) {
         this.stopCompiling = true;
-        var string = 'if((t.cp1Con[31]&0x00800000)===0){';        
+        var string = 'if((t.cp1Con[31]&0x00800000)===0){';
 
         string += this.delaySlot(i, false);
         return string;
-    }
+    };
 
-    this.r4300i_COP1_bc1t = function(i) {
+    this.r4300i_COP1_bc1t = function (i) {
         this.stopCompiling = true;
         var string = 'if((t.cp1Con[31]&0x00800000)!==0){';
-        
+
         string += this.delaySlot(i, false);
         return string;
-    }
+    };
 
-    this.r4300i_COP1_bc1tl = function(i) {
+    this.r4300i_COP1_bc1tl = function (i) {
         this.stopCompiling = true;
         var string = 'if((t.cp1Con[31]&0x00800000)!==0){';
-        
+
         string += this.delaySlot(i, true);
         return string;
-    }
+    };
 
-    this.r4300i_COP1_bc1fl = function(i) {
+    this.r4300i_COP1_bc1fl = function (i) {
         this.stopCompiling = true;
         var string = 'if((t.cp1Con[31]&0x00800000)===0){';
 
         string += this.delaySlot(i, true);
         return string;
-    }
+    };
 
-    this.r4300i_j = function(i) {
+    this.r4300i_j = function (i) {
         this.stopCompiling = true;
 
-        var instr_index = (((((this.programCounter+offset+4) & 0xF0000000)) | ((i & 0x03FFFFFF) << 2))|0);
-        var string = '{';
+        var opcode, instruction, string = '{', instr_index = (((((this.programCounter + offset + 4) & 0xF0000000)) | ((i & 0x03FFFFFF) << 2)) | 0);
 
         //delay slot
-        var instruction = this.memory.loadWord((this.programCounter+offset+4)|0);
+        instruction = this.memory.loadWord((this.programCounter + offset + 4) | 0);
 
         string += 't.magic_number+=1.0;';
-        if (((instr_index>>0) === (this.programCounter+offset)>>0) && (instruction === 0)) {
-            string+= 't.magic_number=0;t.keepRunning=0;'
+        if (((instr_index >> 0) === (this.programCounter + offset) >> 0) && (instruction === 0)) {
+            string += 't.magic_number=0;t.keepRunning=0;';
         }
 
-        var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
+        opcode = this[CPU_instruction[instruction >> 26 & 0x3f]](instruction, true);
         string += opcode;
-        string += 't.programCounter='+instr_index+';return t.code["'+this.getFnName(instr_index)+'"];}';
+        string += 't.programCounter=' + instr_index + ';return t.code["' + this.getFnName(instr_index) + '"];}';
 
         return string;
-    }
+    };
 
-    this.r4300i_jal = function(i) {
+    this.r4300i_jal = function (i) {
         this.stopCompiling = true;
 
-        var instr_index = (((((this.programCounter+offset+4) & 0xF0000000)) | ((i & 0x03FFFFFF) << 2))|0);
-        var string = '{';
+        var pc, opcode, instruction, string = '{', instr_index = (((((this.programCounter + offset + 4) & 0xF0000000)) | ((i & 0x03FFFFFF) << 2)) | 0);
         //delay slot
-        var instruction = this.memory.loadWord((this.programCounter+offset+4)|0);
-        var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
+        instruction = this.memory.loadWord((this.programCounter + offset + 4) | 0);
+        opcode = this[CPU_instruction[instruction >> 26 & 0x3f]](instruction, true);
         string += opcode;
-        var pc = (this.programCounter+offset+8)|0;
+        pc = (this.programCounter + offset + 8) | 0;
         string += 't.magic_number+=1.0;';
-        string += 't.programCounter='+instr_index+';r[31]='+pc+';h[31]='+(pc>>31)+';return t.code["'+this.getFnName(instr_index)+'"];}';
+        string += 't.programCounter=' + instr_index + ';r[31]=' + pc + ';h[31]=' + (pc >> 31) + ';return t.code["' + this.getFnName(instr_index) + '"];}';
 
         return string;
-    }
+    };
 
     //should we set the programCounter after the delay slot or before it?
-    this.r4300i_jalr = function(i) {
+    this.r4300i_jalr = function (i) {
         this.stopCompiling = true;
 
-        var string = '{var temp='+RS(i)+';'; 
-        var link = (this.programCounter + offset + 8)>>0;
-        string += _RD(i)+'='+link+';'+_RDH(i)+'='+(link>>31)+';';
-         
+        var instruction, opcode, link, string = '{var temp=' + this.helpers.RS(i) + ';';
+        link = (this.programCounter + offset + 8) >> 0;
+        string += this.helpers.tRD(i) + '=' + link + ';' + this.helpers.tRDH(i) + '=' + (link >> 31) + ';';
+
         //delay slot
-        var instruction = this.memory.loadWord((this.programCounter+offset+4)|0);
-        var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
+        instruction = this.memory.loadWord((this.programCounter + offset + 4) | 0);
+        opcode = this[CPU_instruction[instruction >> 26 & 0x3f]](instruction, true);
         string += opcode;
         string += 't.magic_number+=1.0;';
         string += 't.programCounter=temp;return t.code[t.getFnName(temp)];}';
-        
-        return string;
-    }
 
-    this.r4300i_jr = function(i) {
+        return string;
+    };
+
+    this.r4300i_jr = function (i) {
         this.stopCompiling = true;
 
-        var string = '{var temp='+RS(i)+';'; 
+        var instruction, opcode, string = '{var temp=' + this.helpers.RS(i) + ';';
         //delay slot
-        var instruction = this.memory.loadWord((this.programCounter+offset+4)|0);
-        var opcode = this[CPU_instruction[instruction>>26 & 0x3f]](instruction, true);
+        instruction = this.memory.loadWord((this.programCounter + offset + 4) | 0);
+        opcode = this[CPU_instruction[instruction >> 26 & 0x3f]](instruction, true);
         string += opcode;
         string += 't.magic_number+=1.0;';
         string += 't.programCounter=temp;return t.code[t.getFnName(temp)];}';
-        
-        return string;
-    }
 
-    this.UNUSED = function(i) {
+        return string;
+    };
+
+    this.UNUSED = function (i) {
         this.log('warning: UNUSED');
-        return('');
-    }
+        return '';
+    };
 
-    this.r4300i_COP0_eret = function(i) {
+    this.r4300i_COP0_eret = function (i) {
         this.stopCompiling = true;
 
-        var string = '{if((t.cp0['+STATUS+']&'+ERL+')!==0){alert("error epc");t.programCounter=t.cp0['+ERROREPC+'];';
-        string += 't.cp0['+STATUS+']&=~'+ERL+';}else{t.programCounter=t.cp0['+EPC+'];t.cp0['+STATUS+']&=~'+EXL+';}';
+        var string = '{if((t.cp0[' + STATUS + ']&' + ERL + ')!==0){alert("error epc");t.programCounter=t.cp0[' + ERROREPC + '];';
+        string += 't.cp0[' + STATUS + ']&=~' + ERL + ';}else{t.programCounter=t.cp0[' + EPC + '];t.cp0[' + STATUS + ']&=~' + EXL + ';}';
         string += 't.LLbit=0;return t.code[t.getFnName(t.programCounter)];}';
 
         return string;
-    }
+    };
 
-    this.r4300i_COP0_mtc0 = function(i, isDelaySlot) {
-        var delaySlot;
+    this.r4300i_COP0_mtc0 = function (i, isDelaySlot) {
+        var delaySlot, lpc;
+
         if (isDelaySlot === true) {
-            pc = (this.programCounter + offset + 4)|0;
+            lpc = (this.programCounter + offset + 4) | 0;
             delaySlot = "true";
         } else {
-            pc = (this.programCounter + offset)|0;
+            lpc = (this.programCounter + offset) | 0;
             delaySlot = "false";
         }
 
-        return '_1964Helpers.prototype.inter_mtc0(r,'+fs(i)+','+rt(i)+','+delaySlot+','+pc+',t.cp0,t.interrupts);';
-    }
+        return 't.helpers.inter_mtc0(r,' + this.helpers.fs(i) + ',' + this.helpers.rt(i) + ',' + delaySlot + ',' + lpc + ',t.cp0,t.interrupts);';
+    };
 
-    this.r4300i_sll = function(i) {
-        if ((i&0x001FFFFF) === 0) return '';
+    this.r4300i_sll = function (i) {
+        if ((i & 0x001FFFFF) === 0) {
+            return '';
+        }
 
-        return '{'+_RD(i)+'='+RT(i)+'<<'+sa(i)+';'+_RDH(i)+'='+RD(i)+'>>31}';
-    }
+        return '{' + this.helpers.tRD(i) + '=' + this.helpers.RT(i) + '<<' + this.helpers.sa(i) + ';' + this.helpers.tRDH(i) + '=' + this.helpers.RD(i) + '>>31}';
+    };
 
-    this.r4300i_srl = function(i) {
-        return '{'+_RD(i)+'='+RT(i)+'>>>'+sa(i)+';'+_RDH(i)+'='+RD(i)+'>>31}';
-    }
+    this.r4300i_srl = function (i) {
+        return '{' + this.helpers.tRD(i) + '=' + this.helpers.RT(i) + '>>>' + this.helpers.sa(i) + ';' + this.helpers.tRDH(i) + '=' + this.helpers.RD(i) + '>>31}';
+    };
 
-    this.r4300i_ori = function(i) {
-        return '{'+_RT(i)+'='+RS(i)+'|'+offset_imm(i)+';'+_RTH(i)+'='+RSH(i)+';}';
-    }
+    this.r4300i_ori = function (i) {
+        return '{' + this.helpers.tRT(i) + '=' + this.helpers.RS(i) + '|' + this.helpers.offset_imm(i) + ';' + this.helpers.tRTH(i) + '=' + this.helpers.RSH(i) + ';}';
+    };
 
-    this.r4300i_xori = function(i) {
-        return '{'+_RT(i)+'='+RS(i)+'^'+offset_imm(i)+';'+_RTH(i)+'='+RSH(i)+'^0;}';
-    }
+    this.r4300i_xori = function (i) {
+        return '{' + this.helpers.tRT(i) + '=' + this.helpers.RS(i) + '^' + this.helpers.offset_imm(i) + ';' + this.helpers.tRTH(i) + '=' + this.helpers.RSH(i) + '^0;}';
+    };
 
-    this.r4300i_andi = function(i) {
-        return '{'+_RT(i)+'='+RS(i)+'&'+offset_imm(i)+';'+_RTH(i)+'=0;}';
-    }
+    this.r4300i_andi = function (i) {
+        return '{' + this.helpers.tRT(i) + '=' + this.helpers.RS(i) + '&' + this.helpers.offset_imm(i) + ';' + this.helpers.tRTH(i) + '=0;}';
+    };
 
-    this.r4300i_addi = function(i) {
-        return '{'+_RT(i)+'='+RS(i)+'+'+soffset_imm(i)+';'+_RTH(i)+'='+RT(i)+'>>31;}';
-    }
+    this.r4300i_addi = function (i) {
+        return '{' + this.helpers.tRT(i) + '=' + this.helpers.RS(i) + '+' + this.helpers.soffset_imm(i) + ';' + this.helpers.tRTH(i) + '=' + this.helpers.RT(i) + '>>31;}';
+    };
 
-    this.r4300i_addiu = function(i) {
-        return '{'+_RT(i)+'='+RS(i)+'+'+soffset_imm(i)+';'+_RTH(i)+'='+RT(i)+'>>31;}'; 
-    }
+    this.r4300i_addiu = function (i) {
+        return '{' + this.helpers.tRT(i) + '=' + this.helpers.RS(i) + '+' + this.helpers.soffset_imm(i) + ';' + this.helpers.tRTH(i) + '=' + this.helpers.RT(i) + '>>31;}';
+    };
 
-    this.r4300i_slt = function(i) {
-        return '{if('+RSH(i)+'>'+RTH(i)+')'+_RD(i)+'=0;'
-        +'else if('+RSH(i)+'<'+RTH(i)+')'+_RD(i)+'=1;'
-        +'else if('+uRS(i)+'<'+uRT(i)+')'+_RD(i)+'=1;'
-        +'else '+_RD(i)+'=0;'+_RDH(i)+'=0;}';
-    }
+    this.r4300i_slt = function (i) {
+        return '{if(' + this.helpers.RSH(i) + '>' + this.helpers.RTH(i) + ')' + this.helpers.tRD(i) + '=0;'
+            + 'else if(' + this.helpers.RSH(i) + '<' + this.helpers.RTH(i) + ')' + this.helpers.tRD(i) + '=1;'
+            + 'else if(' + this.helpers.uRS(i) + '<' + this.helpers.uRT(i) + ')' + this.helpers.tRD(i) + '=1;'
+            + 'else ' + this.helpers.tRD(i) + '=0;' + this.helpers.tRDH(i) + '=0;}';
+    };
 
-    this.r4300i_sltu = function(i) {
-        return '{if('+uRSH(i)+'>'+uRTH(i)+')'+_RD(i)+'=0;'
-        +'else if('+uRSH(i)+'<'+uRTH(i)+')'+_RD(i)+'=1;'
-        +'else if('+uRS(i)+'<'+uRT(i)+')'+_RD(i)+'=1;'
-        +'else '+_RD(i)+'=0;'+_RDH(i)+'=0;}';
-    }
+    this.r4300i_sltu = function (i) {
+        return '{if(' + this.helpers.uRSH(i) + '>' + this.helpers.uRTH(i) + ')' + this.helpers.tRD(i) + '=0;'
+            + 'else if(' + this.helpers.uRSH(i) + '<' + this.helpers.uRTH(i) + ')' + this.helpers.tRD(i) + '=1;'
+            + 'else if(' + this.helpers.uRS(i) + '<' + this.helpers.uRT(i) + ')' + this.helpers.tRD(i) + '=1;'
+            + 'else ' + this.helpers.tRD(i) + '=0;' + this.helpers.tRDH(i) + '=0;}';
+    };
 
-    this.r4300i_slti = function(i) {
-        var soffset_imm_hi = (soffset_imm(i))>>31;
-        var uoffset_imm_lo = (soffset_imm(i))>>>0;
+    this.r4300i_slti = function (i) {
+        var uoffset_imm_lo, soffset_imm_hi = (this.helpers.soffset_imm(i)) >> 31;
+        uoffset_imm_lo = (this.helpers.soffset_imm(i)) >>> 0;
 
-        return '{if('+RSH(i)+'>'+soffset_imm_hi+')'+_RT(i)+'=0;'
-        +'else if('+RSH(i)+'<'+soffset_imm_hi+')'+_RT(i)+'=1;'
-        +'else if('+uRS(i)+'<'+uoffset_imm_lo+')'+_RT(i)+'=1;'
-        +'else '+_RT(i)+'=0;'+_RTH(i)+'=0;}';
-    }
+        return '{if(' + this.helpers.RSH(i) + '>' + this.helpers.soffset_imm_hi + ')' + this.helpers.tRT(i) + '=0;'
+            + 'else if(' + this.helpers.RSH(i) + '<' + this.helpers.soffset_imm_hi + ')' + this.helpers.tRT(i) + '=1;'
+            + 'else if(' + this.helpers.uRS(i) + '<' + uoffset_imm_lo + ')' + this.helpers.tRT(i) + '=1;'
+            + 'else ' + this.helpers.tRT(i) + '=0;' + this.helpers.tRTH(i) + '=0;}';
+    };
 
-    this.r4300i_sltiu = function(i) {
-        var uoffset_imm_hi = (soffset_imm(i)>>31)>>>0;
-        var uoffset_imm_lo = (soffset_imm(i))>>>0;
+    this.r4300i_sltiu = function (i) {
+        var uoffset_imm_lo, uoffset_imm_hi = (this.helpers.soffset_imm(i) >> 31) >>> 0;
+        uoffset_imm_lo = (this.helpers.soffset_imm(i)) >>> 0;
 
-        return '{if('+uRSH(i)+'>'+uoffset_imm_hi+')'+_RT(i)+'=0;'
-        +'else if('+uRSH(i)+'<'+uoffset_imm_hi+')'+_RT(i)+'=1;'
-        +'else if('+uRS(i)+'<'+uoffset_imm_lo+')'+_RT(i)+'=1;'
-        +'else '+_RT(i)+'=0;'+_RTH(i)+'=0;}';
-    }
+        return '{if(' + this.helpers.uRSH(i) + '>' + uoffset_imm_hi + ')' + this.helpers.tRT(i) + '=0;'
+            + 'else if(' + this.helpers.uRSH(i) + '<' + uoffset_imm_hi + ')' + this.helpers.tRT(i) + '=1;'
+            + 'else if(' + this.helpers.uRS(i) + '<' + uoffset_imm_lo + ')' + this.helpers.tRT(i) + '=1;'
+            + 'else ' + this.helpers.tRT(i) + '=0;' + this.helpers.tRTH(i) + '=0;}';
+    };
 
-    this.r4300i_cache = function(i) {
+    this.r4300i_cache = function (i) {
         this.log('todo: r4300i_cache');
-        return('');
-    }
+        return '';
+    };
 
-    this.r4300i_multu = function(i) {
-        return '_1964Helpers.prototype.inter_multu(r,h,'+i+');';
-    }
+    this.r4300i_multu = function (i) {
+        return 't.helpers.inter_multu(r,h,' + i + ');';
+    };
 
-    this.r4300i_mult = function(i) {
-        return '_1964Helpers.prototype.inter_mult(r,h,'+i+');'; 
-    }
+    this.r4300i_mult = function (i) {
+        return 't.helpers.inter_mult(r,h,' + i + ');';
+    };
 
-    this.r4300i_mflo = function(i) {
-         return '{'+_RD(i)+'=r[32];'+_RDH(i)+'=h[32];}'; 
-    }
+    this.r4300i_mflo = function (i) {
+        return '{' + this.helpers.tRD(i) + '=r[32];' + this.helpers.tRDH(i) + '=h[32];}';
+    };
 
-    this.r4300i_mfhi = function(i) {
-         return '{'+_RD(i)+'=r[33];'+_RDH(i)+'=h[33];}'; 
-    }
+    this.r4300i_mfhi = function (i) {
+        return '{' + this.helpers.tRD(i) + '=r[33];' + this.helpers.tRDH(i) + '=h[33];}';
+    };
 
-    this.r4300i_mtlo = function(i) {
-         return '{r[32]='+RS(i)+';h[32]='+RSH(i)+';}';
-    }
+    this.r4300i_mtlo = function (i) {
+        return '{r[32]=' + this.helpers.RS(i) + ';h[32]=' + this.helpers.RSH(i) + ';}';
+    };
 
-    this.r4300i_mthi = function(i) {
-         return '{r[33]='+RS(i)+';h[33]='+RSH(i)+';}';
-    }
+    this.r4300i_mthi = function (i) {
+        return '{r[33]=' + this.helpers.RS(i) + ';h[33]=' + this.helpers.RSH(i) + ';}';
+    };
 
     //todo: timing
-    this.getCountRegister = function() {
+    this.getCountRegister = function () {
         return 1;
-    }
+    };
 
-    this.r4300i_COP0_mfc0 = function(i) {
+    this.r4300i_COP0_mfc0 = function (i) {
         var string = '{';
 
-        switch (fs(i)) {
-            case RANDOM:
-                alert('RANDOM');
+        switch (this.helpers.fs(i)) {
+        case RANDOM:
+            alert('RANDOM');
             break;
-            case COUNT:
-                
-                //string += 't.cp0['+fs(i)+']=getCountRegister();';
+        case COUNT:
+            //string += 't.cp0[' + this.helpers.fs(i) + ']=getCountRegister();';
             break;
-            default:
+        default:
             break;
         }
-        string += _RT(i)+'=t.cp0['+fs(i)+'];'+_RTH(i)+'=t.cp0['+fs(i)+']>>31;}';
+        string += this.helpers.tRT(i) + '=t.cp0[' + this.helpers.fs(i) + '];' + this.helpers.tRTH(i) + '=t.cp0[' + this.helpers.fs(i) + ']>>31;}';
         return string;
-    }
+    };
 
-    this.r4300i_lb = function(i) {
-        return '{'+setVAddr(i)+_RT(i)+'=(m.loadByte(t.vAddr)<<24)>>24;'+_RTH(i)+'='+RT(i)+'>>31}';
-    }
+    this.r4300i_lb = function (i) {
+        return '{' + this.helpers.setVAddr(i) + this.helpers.tRT(i) + '=(m.loadByte(t.vAddr)<<24)>>24;' + this.helpers.tRTH(i) + '=' + this.helpers.RT(i) + '>>31}';
+    };
 
-    this.r4300i_lbu = function(i) {
-        return '{'+setVAddr(i)+_RT(i)+'=(m.loadByte(t.vAddr))&0x000000ff;'+_RTH(i)+'=0;}';
-    }
+    this.r4300i_lbu = function (i) {
+        return '{' + this.helpers.setVAddr(i) + this.helpers.tRT(i) + '=(m.loadByte(t.vAddr))&0x000000ff;' + this.helpers.tRTH(i) + '=0;}';
+    };
 
-    this.r4300i_lh = function(i) {
-        return '{'+setVAddr(i)+_RT(i)+'=(m.loadHalf(t.vAddr)<<16)>>16;'+_RTH(i)+'='+RT(i)+'>>31}';
-    }
+    this.r4300i_lh = function (i) {
+        return '{' + this.helpers.setVAddr(i) + this.helpers.tRT(i) + '=(m.loadHalf(t.vAddr)<<16)>>16;' + this.helpers.tRTH(i) + '=' + this.helpers.RT(i) + '>>31}';
+    };
 
-    this.r4300i_lhu = function(i) {
-        return '{'+setVAddr(i)+_RT(i)+'=(m.loadHalf(t.vAddr))&0x0000ffff;'+_RTH(i)+'=0;}';
-    }
+    this.r4300i_lhu = function (i) {
+        return '{' + this.helpers.setVAddr(i) + this.helpers.tRT(i) + '=(m.loadHalf(t.vAddr))&0x0000ffff;' + this.helpers.tRTH(i) + '=0;}';
+    };
 
-    this.r4300i_sb = function(i) {
-        return '{'+setVAddr(i)+'m.storeByte('+RT(i)+',t.vAddr);}'; 
-    }
+    this.r4300i_sb = function (i) {
+        return '{' + this.helpers.setVAddr(i) + 'm.storeByte(' + this.helpers.RT(i) + ',t.vAddr);}';
+    };
 
-    this.r4300i_sh = function(i) {
-        return '{'+setVAddr(i)+'m.storeHalf('+RT(i)+',t.vAddr);}'; 
-    }
+    this.r4300i_sh = function (i) {
+        return '{' + this.helpers.setVAddr(i) + 'm.storeHalf(' + this.helpers.RT(i) + ',t.vAddr);}';
+    };
 
-    this.r4300i_srlv = function(i) {
-        return '{'+_RD(i)+'='+RT(i)+'>>>('+RS(i)+'&0x1f);'+_RDH(i)+'='+RD(i)+'>>31;}';
-    }
+    this.r4300i_srlv = function (i) {
+        return '{' + this.helpers.tRD(i) + '=' + this.helpers.RT(i) + '>>>(' + this.helpers.RS(i) + '&0x1f);' + this.helpers.tRDH(i) + '=' + this.helpers.RD(i) + '>>31;}';
+    };
 
-    this.r4300i_sllv = function(i) {
-        return '{'+_RD(i)+'='+RT(i)+'<<('+RS(i)+'&0x1f);'+_RDH(i)+'='+RD(i)+'>>31;}'; 
-    }
+    this.r4300i_sllv = function (i) {
+        return '{' + this.helpers.tRD(i) + '=' + this.helpers.RT(i) + '<<(' + this.helpers.RS(i) + '&0x1f);' + this.helpers.tRDH(i) + '=' + this.helpers.RD(i) + '>>31;}';
+    };
 
-    this.r4300i_srav = function(i) {
+    this.r4300i_srav = function (i) {
         //optimization: r[hi] can safely right-shift rt
-        return '{'+_RD(i)+'='+RT(i)+'>>('+RS(i)+'&0x1f);'+_RDH(i)+'='+RT(i)+'>>31;}'; 
-    }
+        return '{' + this.helpers.tRD(i) + '=' + this.helpers.RT(i) + '>>(' + this.helpers.RS(i) + '&0x1f);' + this.helpers.tRDH(i) + '=' + this.helpers.RT(i) + '>>31;}';
+    };
 
-    this.r4300i_COP1_cfc1 = function(i) {
-        if(fs(i) === 0 || fs(i) === 31) {
-            return '{'+_RT(i)+'=t.cp1Con['+fs(i)+'];'+_RTH(i)+'=t.cp1Con['+fs(i)+']>>31;}';
+    this.r4300i_COP1_cfc1 = function (i) {
+        if (this.helpers.fs(i) === 0 || this.helpers.fs(i) === 31) {
+            return '{' + this.helpers.tRT(i) + '=t.cp1Con[' + this.helpers.fs(i) + '];' + this.helpers.tRTH(i) + '=t.cp1Con[' + this.helpers.fs(i) + ']>>31;}';
         }
-    }
+    };
 
-    this.r4300i_COP1_ctc1 = function(i) {
+    this.r4300i_COP1_ctc1 = function (i) {
         //incomplete:
-        if (fs(i) === 31) {
-            return 't.cp1Con[31]='+RT(i)+';'
+        if (this.helpers.fs(i) === 31) {
+            return 't.cp1Con[31]=' + this.helpers.RT(i) + ';';
         }
-    }
+    };
 
-    this.r4300i_ld = function(i) {
-        var string = '{'+setVAddr(i)+_RT(i)+'=m.loadWord((t.vAddr+4)|0);'+_RTH(i)+'=m.loadWord(t.vAddr);}';
-
-        return string;
-    }
-
-    this.r4300i_lld = function(i) {
-        var string = '{'+setVAddr(i)+_RT(i)+'=m.loadWord((t.vAddr+4)|0);'+_RTH(i)+'=m.loadWord(t.vAddr);t.LLbit=1;}';
+    this.r4300i_ld = function (i) {
+        var string = '{' + this.helpers.setVAddr(i) + this.helpers.tRT(i) + '=m.loadWord((t.vAddr+4)|0);' + this.helpers.tRTH(i) + '=m.loadWord(t.vAddr);}';
 
         return string;
-    }
+    };
+
+    this.r4300i_lld = function (i) {
+        var string = '{' + this.helpers.setVAddr(i) + this.helpers.tRT(i) + '=m.loadWord((t.vAddr+4)|0);' + this.helpers.tRTH(i) + '=m.loadWord(t.vAddr);t.LLbit=1;}';
+
+        return string;
+    };
 
     //address error exceptions in ld and sd are weird since this is split up 
     //into 2 reads or writes. i guess they're fatal exceptions, so
     //doesn't matter. 
-    this.r4300i_sd = function(i, isDelaySlot) {
+    this.r4300i_sd = function (i, isDelaySlot) {
         //lo
-        var string = '{'+setVAddr(i)+'m.storeWord('+RT(i)+',(t.vAddr+4)|0'; 
+        var a, string = '{' + this.helpers.setVAddr(i) + 'm.storeWord(' + this.helpers.RT(i) + ',(t.vAddr+4)|0';
 
         //So we can process exceptions
         if (isDelaySlot === true) {
-            var a = (this.programCounter+offset+4)|0;
+            a = (this.programCounter + offset + 4) | 0;
             string += ', ' + a + ', true);';
         } else {
-            var a = (this.programCounter+offset)|0;
+            a = (this.programCounter + offset) | 0;
             string += ', ' + a + ');';
-        }   
+        }
 
         //hi
-        string += 'm.storeWord('+RTH(i)+',t.vAddr'; 
+        string += 'm.storeWord(' + this.helpers.RTH(i) + ',t.vAddr';
 
         //So we can process exceptions
         if (isDelaySlot === true) {
-            var a = (this.programCounter+offset+4)|0;
+            a = (this.programCounter + offset + 4) | 0;
             string += ', ' + a + ', true);';
         } else {
-            var a = (this.programCounter+offset)|0;
+            a = (this.programCounter + offset) | 0;
             string += ', ' + a + ');';
         }
 
         string += '}';
 
         return string;
-    }
+    };
 
-    this.r4300i_dmultu = function(i) {
-        return '_1964Helpers.prototype.inter_dmultu(r,h,'+i+');';
-    }
+    this.r4300i_dmultu = function (i) {
+        return 't.helpers.inter_dmultu(r,h,' + i + ');';
+    };
 
-    this.r4300i_dsll32 = function(i) {
-        return '{'+_RDH(i)+'='+RT(i)+'<<'+sa(i)+';'+_RD(i)+'=0;}';
-    }
+    this.r4300i_dsll32 = function (i) {
+        return '{' + this.helpers.tRDH(i) + '=' + this.helpers.RT(i) + '<<' + this.helpers.sa(i) + ';' + this.helpers.tRD(i) + '=0;}';
+    };
 
-    this.r4300i_dsra32 = function(i) {
-        return '{'+_RD(i)+'='+RTH(i)+'>>'+sa(i)+';'+_RDH(i)+'='+RTH(i)+'>>31;}';
-    }
+    this.r4300i_dsra32 = function (i) {
+        return '{' + this.helpers.tRD(i) + '=' + this.helpers.RTH(i) + '>>' + this.helpers.sa(i) + ';' + this.helpers.tRDH(i) + '=' + this.helpers.RTH(i) + '>>31;}';
+    };
 
-    this.r4300i_ddivu = function(i) {
-        return '_1964Helpers.prototype.inter_ddivu(r,h,'+i+');'
-    }
+    this.r4300i_ddivu = function (i) {
+        return 't.helpers.inter_ddivu(r,h,' + i + ');';
+    };
 
-    this.r4300i_ddiv = function(i) {
-        return '_1964Helpers.prototype.inter_ddiv(r,h,'+i+');'
-    }
+    this.r4300i_ddiv = function (i) {
+        return 't.helpers.inter_ddiv(r,h,' + i + ');';
+    };
 
-    this.r4300i_dadd = function(i) {
+    this.r4300i_dadd = function (i) {
         this.log('todo: dadd');
 
-        return r4300i_dadd(i);
-    }
+        return '';
+    };
 
-    this.r4300i_break = function(i) {
+    this.r4300i_break = function (i) {
         this.log('todo: break');
-        return('');
-    }
+        return '';
+    };
 
-    this.r4300i_COP0_tlbwi = function(i) {
+    this.r4300i_COP0_tlbwi = function (i) {
         //var index = t.cp0[INDEX] & NTLBENTRIES;
         this.log('todo: tlbwi');
-        return('');
-    }
+        return '';
+    };
 
-    this.r4300i_div = function(i) {
-        return '_1964Helpers.prototype.inter_div(r,h,'+i+');'; 
-    }
+    this.r4300i_div = function (i) {
+        return 't.helpers.inter_div(r,h,' + i + ');';
+    };
 
-    this.r4300i_divu = function(i) {
-        return '_1964Helpers.prototype.inter_divu(r,h,'+i+');'; 
-    }
+    this.r4300i_divu = function (i) {
+        return 't.helpers.inter_divu(r,h,' + i + ');';
+    };
 
-    this.r4300i_sra = function(i) {
+    this.r4300i_sra = function (i) {
         //optimization: sra's r[hi] can safely right-shift RT.
-        return '{'+_RD(i)+'='+RT(i)+'>>'+sa(i)+';'+_RDH(i)+'='+RT(i)+'>>31}';
-    }
+        return '{' + this.helpers.tRD(i) + '=' + this.helpers.RT(i) + '>>' + this.helpers.sa(i) + ';' + this.helpers.tRDH(i) + '=' + this.helpers.RT(i) + '>>31}';
+    };
 
-    this.r4300i_COP0_tlbp = function(i) {
+    this.r4300i_COP0_tlbp = function (i) {
         this.log('todo: tlbp');
-        return('');
-    }
+        return '';
+    };
 
-    this.r4300i_COP0_tlbr = function(i) {
+    this.r4300i_COP0_tlbr = function (i) {
         this.log('todo: tlbr');
-        return('');
-    }
+        return '';
+    };
 
-    this.r4300i_lwl = function(i) {
-        var string = '{'+setVAddr(i);
+    this.r4300i_lwl = function (i) {
+        var string = '{' + this.helpers.setVAddr(i);
 
         string += 'var vAddrAligned=(t.vAddr&0xfffffffc)|0;var value=m.loadWord(vAddrAligned);';
-        string += 'switch(t.vAddr&3){case 0:'+_RT(i)+'=value;break;';
-        string += 'case 1:'+_RT(i)+'=('+RT(i)+'&0x000000ff)|((value<<8)>>>0);break;';
-        string += 'case 2:'+_RT(i)+'=('+RT(i)+'&0x0000ffff)|((value<<16)>>>0);break;';
-        string += 'case 3:'+_RT(i)+'=('+RT(i)+'&0x00ffffff)|((value<<24)>>>0);break;}';
-        string += _RTH(i)+'='+RT(i)+'>>31;}';
+        string += 'switch(t.vAddr&3){case 0:' + this.helpers.tRT(i) + '=value;break;';
+        string += 'case 1:' + this.helpers.tRT(i) + '=(' + this.helpers.RT(i) + '&0x000000ff)|((value<<8)>>>0);break;';
+        string += 'case 2:' + this.helpers.tRT(i) + '=(' + this.helpers.RT(i) + '&0x0000ffff)|((value<<16)>>>0);break;';
+        string += 'case 3:' + this.helpers.tRT(i) + '=(' + this.helpers.RT(i) + '&0x00ffffff)|((value<<24)>>>0);break;}';
+        string += this.helpers.tRTH(i) + '=' + this.helpers.RT(i) + '>>31;}';
 
         return string;
-    }
+    };
 
-    this.r4300i_lwr = function(i) {
-        var string = '{'+setVAddr(i);
-        
+    this.r4300i_lwr = function (i) {
+        var string = '{' + this.helpers.setVAddr(i);
+
         string += 'var vAddrAligned=(t.vAddr&0xfffffffc)|0;var value=m.loadWord(vAddrAligned);';
-        string += 'switch(t.vAddr&3){case 3:'+_RT(i)+'=value;break;';
-        string += 'case 2:'+_RT(i)+'=('+RT(i)+'&0xff000000)|(value>>>8);break;';
-        string += 'case 1:'+_RT(i)+'=('+RT(i)+'&0xffff0000)|(value>>>16);break;';
-        string += 'case 0:'+_RT(i)+'=('+RT(i)+'&0xffffff00)|(value>>>24);break;}';
-        string += _RTH(i)+'='+RT(i)+'>>31;}';
-        
+        string += 'switch(t.vAddr&3){case 3:' + this.helpers.tRT(i) + '=value;break;';
+        string += 'case 2:' + this.helpers.tRT(i) + '=(' + this.helpers.RT(i) + '&0xff000000)|(value>>>8);break;';
+        string += 'case 1:' + this.helpers.tRT(i) + '=(' + this.helpers.RT(i) + '&0xffff0000)|(value>>>16);break;';
+        string += 'case 0:' + this.helpers.tRT(i) + '=(' + this.helpers.RT(i) + '&0xffffff00)|(value>>>24);break;}';
+        string += this.helpers.tRTH(i) + '=' + this.helpers.RT(i) + '>>31;}';
+
         return string;
-    }
+    };
 
-    this.r4300i_swl = function(i) {
-        var string = '{'+setVAddr(i);
-        
+    this.r4300i_swl = function (i) {
+        var string = '{' + this.helpers.setVAddr(i);
+
         string += 'var vAddrAligned=(t.vAddr&0xfffffffc)|0;var value=m.loadWord(vAddrAligned);';
-        string += 'switch(t.vAddr&3){case 0:value='+RT(i)+';break;';
-        string += 'case 1:value=((value&0xff000000)|('+RT(i)+'>>>8));break;';
-        string += 'case 2:value=((value&0xffff0000)|('+RT(i)+'>>>16));break;';
-        string += 'case 3:value=((value&0xffffff00)|('+RT(i)+'>>>24));break;}';
+        string += 'switch(t.vAddr&3){case 0:value=' + this.helpers.RT(i) + ';break;';
+        string += 'case 1:value=((value&0xff000000)|(' + this.helpers.RT(i) + '>>>8));break;';
+        string += 'case 2:value=((value&0xffff0000)|(' + this.helpers.RT(i) + '>>>16));break;';
+        string += 'case 3:value=((value&0xffffff00)|(' + this.helpers.RT(i) + '>>>24));break;}';
         string += 'm.storeWord(value,vAddrAligned,false);}';
 
         return string;
-    }
+    };
 
-    this.r4300i_swr = function(i) {
-        var string = '{'+setVAddr(i);
-        
+    this.r4300i_swr = function (i) {
+        var string = '{' + this.helpers.setVAddr(i);
+
         string += 'var vAddrAligned=(t.vAddr&0xfffffffc)|0;var value=m.loadWord(vAddrAligned);';
-        string += 'switch(t.vAddr&3){case 3:value='+RT(i)+';break;';
-        string += 'case 2:value=((value & 0x000000FF)|(('+RT(i)+'<<8)>>>0));break;';
-        string += 'case 1:value=((value & 0x0000FFFF)|(('+RT(i)+'<<16)>>>0));break;';
-        string += 'case 0:value=((value & 0x00FFFFFF)|(('+RT(i)+'<<24)>>>0));break;}';        
-        string += 'm.storeWord(value,vAddrAligned,false);}'
+        string += 'switch(t.vAddr&3){case 3:value=' + this.helpers.RT(i) + ';break;';
+        string += 'case 2:value=((value & 0x000000FF)|((' + this.helpers.RT(i) + '<<8)>>>0));break;';
+        string += 'case 1:value=((value & 0x0000FFFF)|((' + this.helpers.RT(i) + '<<16)>>>0));break;';
+        string += 'case 0:value=((value & 0x00FFFFFF)|((' + this.helpers.RT(i) + '<<24)>>>0));break;}';
+        string += 'm.storeWord(value,vAddrAligned,false);}';
 
         return string;
-    }
+    };
 
-    this.r4300i_lwc1 = function(i) {
-        return '{'+setVAddr(i)+'t.cp1_i['+FT32ArrayView(i)+']=m.loadWord(t.vAddr);}';
-    }
+    this.r4300i_lwc1 = function (i) {
+        return '{' + this.helpers.setVAddr(i) + 't.cp1_i[' + this.helpers.FT32ArrayView(i) + ']=m.loadWord(t.vAddr);}';
+    };
 
-    this.r4300i_ldc1 = function(i) {
-        var string = '{'+setVAddr(i)+'t.cp1_i['+FT32ArrayView(i)+']=m.loadWord((t.vAddr+4)|0);'; 
-        string += 't.cp1_i['+FT32HIArrayView(i)+']=m.loadWord((t.vAddr)|0);}'; 
+    this.r4300i_ldc1 = function (i) {
+        var string = '{' + this.helpers.setVAddr(i) + 't.cp1_i[' + this.helpers.FT32ArrayView(i) + ']=m.loadWord((t.vAddr+4)|0);';
+        string += 't.cp1_i[' + this.helpers.FT32HIArrayView(i) + ']=m.loadWord((t.vAddr)|0);}';
 
         return string;
-    }
+    };
 
-    this.r4300i_swc1 = function(i, isDelaySlot) {
-        var string = '{'+setVAddr(i)+'m.storeWord(t.cp1_i['+FT32ArrayView(i)+'],t.vAddr'; 
+    this.r4300i_swc1 = function (i, isDelaySlot) {
+        var a, string = '{' + this.helpers.setVAddr(i) + 'm.storeWord(t.cp1_i[' + this.helpers.FT32ArrayView(i) + '],t.vAddr';
 
         //So we can process exceptions
         if (isDelaySlot === true) {
-            var a = (this.programCounter+offset+4)|0;
+            a = (this.programCounter + offset + 4) | 0;
             string += ', ' + a + ', true)}';
         } else {
-            var a = (this.programCounter+offset)|0;
+            a = (this.programCounter + offset) | 0;
             string += ', ' + a + ')}';
-        }   
+        }
 
         return string;
-    }
+    };
 
-    this.r4300i_sdc1 = function(i, isDelaySlot) {
-        var string = '{'+setVAddr(i)+'m.storeWord(t.cp1_i['+FT32ArrayView(i)+'],(t.vAddr+4)|0'; 
+    this.r4300i_sdc1 = function (i, isDelaySlot) {
+        var a, string = '{' + this.helpers.setVAddr(i) + 'm.storeWord(t.cp1_i[' + this.helpers.FT32ArrayView(i) + '],(t.vAddr+4)|0';
 
         //So we can process exceptions
         if (isDelaySlot === true) {
-            var a = (this.programCounter+offset+4)|0;
+            a = (this.programCounter + offset + 4) | 0;
             string += ', ' + a + ', true);';
         } else {
-            var a = (this.programCounter+offset)|0;
+            a = (this.programCounter + offset) | 0;
             string += ', ' + a + ');';
-        }   
+        }
 
-        string += 'm.storeWord(t.cp1_i['+FT32HIArrayView(i)+'],(t.vAddr)|0'; 
+        string += 'm.storeWord(t.cp1_i[' + this.helpers.FT32HIArrayView(i) + '],(t.vAddr)|0';
 
         //So we can process exceptions
         if (isDelaySlot === true) {
-            var a = (this.programCounter+offset+4)|0;
+            a = (this.programCounter + offset + 4) | 0;
             string += ', ' + a + ', true);';
         } else {
-            var a = (this.programCounter+offset)|0;
+            a = (this.programCounter + offset) | 0;
             string += ', ' + a + ');';
         }
 
         string += '}';
 
         return string;
-    }
+    };
 
-    this.r4300i_COP1_mtc1 = function(i) {
-      return 't.cp1_i['+FS32ArrayView(i)+']='+RT(i)+';';
-    }
+    this.r4300i_COP1_mtc1 = function (i) {
+        return 't.cp1_i[' + this.helpers.FS32ArrayView(i) + ']=' + this.helpers.RT(i) + ';';
+    };
 
-    this.r4300i_COP1_mfc1 = function(i) {
-        return '{'+_RT(i)+'=t.cp1_i['+FS32ArrayView(i)+'];'+_RTH(i)+'='+RT(i)+'>>31;}';
-    }
+    this.r4300i_COP1_mfc1 = function (i) {
+        return '{' + this.helpers.tRT(i) + '=t.cp1_i[' + this.helpers.FS32ArrayView(i) + '];' + this.helpers.tRTH(i) + '=' + this.helpers.RT(i) + '>>31;}';
+    };
 
-    this.r4300i_COP1_cvts_w = function(i) {
-        return 't.cp1_f['+FD32ArrayView(i)+']=t.cp1_i['+FS32ArrayView(i)+'];';
-    }
+    this.r4300i_COP1_cvts_w = function (i) {
+        return 't.cp1_f[' + this.helpers.FD32ArrayView(i) + ']=t.cp1_i[' + this.helpers.FS32ArrayView(i) + '];';
+    };
 
-    this.r4300i_COP1_cvtw_s = function(i) {
-        return 't.cp1_i['+FD32ArrayView(i)+']=t.cp1_f['+FS32ArrayView(i)+'];';
-    }
+    this.r4300i_COP1_cvtw_s = function (i) {
+        return 't.cp1_i[' + this.helpers.FD32ArrayView(i) + ']=t.cp1_f[' + this.helpers.FS32ArrayView(i) + '];';
+    };
 
-    this.r4300i_COP1_div_s = function(i) {
-        return 't.cp1_f['+FD32ArrayView(i)+']=t.cp1_f['+FS32ArrayView(i)+']/t.cp1_f['+FT32ArrayView(i)+'];';
-    }
+    this.r4300i_COP1_div_s = function (i) {
+        return 't.cp1_f[' + this.helpers.FD32ArrayView(i) + ']=t.cp1_f[' + this.helpers.FS32ArrayView(i) + ']/t.cp1_f[' + this.helpers.FT32ArrayView(i) + '];';
+    };
 
-    this.r4300i_COP1_div_d = function(i) {
-        return 't.cp1_f64['+FD64ArrayView(i)+']=t.cp1_f64['+FS64ArrayView(i)+']/t.cp1_f64['+FT64ArrayView(i)+'];';
-    }
+    this.r4300i_COP1_div_d = function (i) {
+        return 't.cp1_f64[' + this.helpers.FD64ArrayView(i) + ']=t.cp1_f64[' + this.helpers.FS64ArrayView(i) + ']/t.cp1_f64[' + this.helpers.FT64ArrayView(i) + '];';
+    };
 
-    this.r4300i_COP1_mul_s = function(i) {
-        return 't.cp1_f['+FD32ArrayView(i)+']=t.cp1_f['+FS32ArrayView(i)+']*t.cp1_f['+FT32ArrayView(i)+'];';
-    }
+    this.r4300i_COP1_mul_s = function (i) {
+        return 't.cp1_f[' + this.helpers.FD32ArrayView(i) + ']=t.cp1_f[' + this.helpers.FS32ArrayView(i) + ']*t.cp1_f[' + this.helpers.FT32ArrayView(i) + '];';
+    };
 
-    this.r4300i_COP1_mul_d = function(i) {
-        return 't.cp1_f64['+FD64ArrayView(i)+']=t.cp1_f64['+FS64ArrayView(i)+']*t.cp1_f64['+FT64ArrayView(i)+'];';
-    }
+    this.r4300i_COP1_mul_d = function (i) {
+        return 't.cp1_f64[' + this.helpers.FD64ArrayView(i) + ']=t.cp1_f64[' + this.helpers.FS64ArrayView(i) + ']*t.cp1_f64[' + this.helpers.FT64ArrayView(i) + '];';
+    };
 
-    this.r4300i_COP1_mov_s = function(i) {
-        return 't.cp1_i['+FD32ArrayView(i)+']=t.cp1_i['+FS32ArrayView(i)+'];';
-    }
+    this.r4300i_COP1_mov_s = function (i) {
+        return 't.cp1_i[' + this.helpers.FD32ArrayView(i) + ']=t.cp1_i[' + this.helpers.FS32ArrayView(i) + '];';
+    };
 
-    this.r4300i_COP1_mov_d = function(i) {
-        return 't.cp1_f64['+FD32ArrayView(i)+']=t.cp1_f64['+FS32ArrayView(i)+'];';
-    }
+    this.r4300i_COP1_mov_d = function (i) {
+        return 't.cp1_f64[' + this.helpers.FD32ArrayView(i) + ']=t.cp1_f64[' + this.helpers.FS32ArrayView(i) + '];';
+    };
 
-    this.r4300i_COP1_add_s = function(i) {
-        return 't.cp1_f['+FD32ArrayView(i)+']=t.cp1_f['+FS32ArrayView(i)+']+t.cp1_f['+FT32ArrayView(i)+'];';
-    }
+    this.r4300i_COP1_add_s = function (i) {
+        return 't.cp1_f[' + this.helpers.FD32ArrayView(i) + ']=t.cp1_f[' + this.helpers.FS32ArrayView(i) + ']+t.cp1_f[' + this.helpers.FT32ArrayView(i) + '];';
+    };
 
-    this.r4300i_COP1_sub_s = function(i) {
-        return 't.cp1_f['+FD32ArrayView(i)+']=t.cp1_f['+FS32ArrayView(i)+']-t.cp1_f['+FT32ArrayView(i)+'];';
-    }
+    this.r4300i_COP1_sub_s = function (i) {
+        return 't.cp1_f[' + this.helpers.FD32ArrayView(i) + ']=t.cp1_f[' + this.helpers.FS32ArrayView(i) + ']-t.cp1_f[' + this.helpers.FT32ArrayView(i) + '];';
+    };
 
-    this.r4300i_COP1_cvtd_s = function(i) {
-        return 't.cp1_f64['+FD64ArrayView(i)+']=t.cp1_f['+FS32ArrayView(i)+'];';
-    }
+    this.r4300i_COP1_cvtd_s = function (i) {
+        return 't.cp1_f64[' + this.helpers.FD64ArrayView(i) + ']=t.cp1_f[' + this.helpers.FS32ArrayView(i) + '];';
+    };
 
-    this.r4300i_COP1_cvtd_w = function(i) {
-        return 't.cp1_f64['+FD64ArrayView(i)+']=t.cp1_i['+FS32ArrayView(i)+'];';
-    }
+    this.r4300i_COP1_cvtd_w = function (i) {
+        return 't.cp1_f64[' + this.helpers.FD64ArrayView(i) + ']=t.cp1_i[' + this.helpers.FS32ArrayView(i) + '];';
+    };
 
-    this.r4300i_COP1_cvts_d = function(i) {
-        return 't.cp1_f['+FD32ArrayView(i)+']=t.cp1_f64['+FS64ArrayView(i)+'];';
-    }
+    this.r4300i_COP1_cvts_d = function (i) {
+        return 't.cp1_f[' + this.helpers.FD32ArrayView(i) + ']=t.cp1_f64[' + this.helpers.FS64ArrayView(i) + '];';
+    };
 
-    this.r4300i_COP1_cvtw_d = function(i) {
-        return 't.cp1_i['+FD32ArrayView(i)+']=t.cp1_f64['+FS64ArrayView(i)+'];';
-    }
+    this.r4300i_COP1_cvtw_d = function (i) {
+        return 't.cp1_i[' + this.helpers.FD32ArrayView(i) + ']=t.cp1_f64[' + this.helpers.FS64ArrayView(i) + '];';
+    };
 
-    this.r4300i_COP1_add_d = function(i) {
-        return 't.cp1_f64['+FD64ArrayView(i)+']=t.cp1_f64['+FS64ArrayView(i)+']+t.cp1_f64['+FT64ArrayView(i)+'];';
-    }
+    this.r4300i_COP1_add_d = function (i) {
+        return 't.cp1_f64[' + this.helpers.FD64ArrayView(i) + ']=t.cp1_f64[' + this.helpers.FS64ArrayView(i) + ']+t.cp1_f64[' + this.helpers.FT64ArrayView(i) + '];';
+    };
 
-    this.r4300i_COP1_sub_d = function(i) {
-        return 't.cp1_f64['+FD64ArrayView(i)+']=t.cp1_f64['+FS64ArrayView(i)+']-t.cp1_f64['+FT64ArrayView(i)+'];';
-    }
+    this.r4300i_COP1_sub_d = function (i) {
+        return 't.cp1_f64[' + this.helpers.FD64ArrayView(i) + ']=t.cp1_f64[' + this.helpers.FS64ArrayView(i) + ']-t.cp1_f64[' + this.helpers.FT64ArrayView(i) + '];';
+    };
 
     //todo:rounding
-    this.r4300i_COP1_truncw_d = function(i) {
-        return 't.cp1_i['+FD32ArrayView(i)+']=t.cp1_f64['+FS64ArrayView(i)+'];';
-    }
+    this.r4300i_COP1_truncw_d = function (i) {
+        return 't.cp1_i[' + this.helpers.FD32ArrayView(i) + ']=t.cp1_f64[' + this.helpers.FS64ArrayView(i) + '];';
+    };
 
-    this.r4300i_COP1_truncw_s = function(i) {
-        return 't.cp1_i['+FD32ArrayView(i)+']=t.cp1_f['+FS32ArrayView(i)+'];';
-    }
+    this.r4300i_COP1_truncw_s = function (i) {
+        return 't.cp1_i[' + this.helpers.FD32ArrayView(i) + ']=t.cp1_f[' + this.helpers.FS32ArrayView(i) + '];';
+    };
 
-    this.r4300i_COP1_neg_s = function(i) {
-        return 't.cp1_i['+FD32ArrayView(i)+']=t.cp1_i['+FS32ArrayView(i)+']^0x80000000;';
-    }
+    this.r4300i_COP1_neg_s = function (i) {
+        return 't.cp1_i[' + this.helpers.FD32ArrayView(i) + ']=t.cp1_i[' + this.helpers.FS32ArrayView(i) + ']^0x80000000;';
+    };
 
-    this.r4300i_COP1_neg_d = function(i) {
-        return 't.cp1_i['+FD32HIArrayView(i)+']=t.cp1_i['+FS32HIArrayView(i)+']^0x80000000;';
-    }
+    this.r4300i_COP1_neg_d = function (i) {
+        return 't.cp1_i[' + this.helpers.FD32HIArrayView(i) + ']=t.cp1_i[' + this.helpers.FS32HIArrayView(i) + ']^0x80000000;';
+    };
 
-    this.r4300i_COP1_abs_s = function(i) {
-        return 't.cp1_i['+FD32ArrayView(i)+']=t.cp1_i['+FS32ArrayView(i)+']&0x7fffffff;';
-    }
+    this.r4300i_COP1_abs_s = function (i) {
+        return 't.cp1_i[' + this.helpers.FD32ArrayView(i) + ']=t.cp1_i[' + this.helpers.FS32ArrayView(i) + ']&0x7fffffff;';
+    };
 
-    this.r4300i_COP1_abs_d = function(i) {
-        return 't.cp1_i['+FD32HIArrayView(i)+']=t.cp1_i['+FS32HIArrayView(i)+']&0x7fffffff;';
-    }
+    this.r4300i_COP1_abs_d = function (i) {
+        return 't.cp1_i[' + this.helpers.FD32HIArrayView(i) + ']=t.cp1_i[' + this.helpers.FS32HIArrayView(i) + ']&0x7fffffff;';
+    };
 
+    this.r4300i_COP1_sqrt_s = function (i) {
+        return 't.cp1_f[' + this.helpers.FD32ArrayView(i) + ']=Math.sqrt(t.cp1_f[' + this.helpers.FS32ArrayView(i) + ']);';
+    };
 
-    this.r4300i_COP1_sqrt_s = function(i) {
-        return 't.cp1_f['+FD32ArrayView(i)+']=Math.sqrt(t.cp1_f['+FS32ArrayView(i)+']);';
-    }
+    this.r4300i_COP1_sqrt_d = function (i) {
+        return 't.cp1_f64[' + this.helpers.FD64ArrayView(i) + ']=Math.sqrt(t.cp1_f64[' + this.helpers.FS64ArrayView(i) + ']);';
+    };
 
-    this.r4300i_COP1_sqrt_d = function(i) {
-        return 't.cp1_f64['+FD64ArrayView(i)+']=Math.sqrt(t.cp1_f64['+FS64ArrayView(i)+']);';
-    }
-    
-
-    this.r4300i_sync = function(i) {
+    this.r4300i_sync = function (i) {
         this.log('todo: sync');
-        return('');
-    }
+        return '';
+    };
 
-    this.r4300i_sdr = function(i) {
+    this.r4300i_sdr = function (i) {
         this.log('todo: sdr');
-        return('');
-    }
+        return '';
+    };
 
-    this.r4300i_ldr = function(i) {
+    this.r4300i_ldr = function (i) {
         this.log('todo: ldr');
-        return('');
-    }
-    
-    this.r4300i_sdl = function(i) {
+        return '';
+    };
+
+    this.r4300i_sdl = function (i) {
         this.log('todo: sdl');
-        return('');
-    }
+        return '';
+    };
 
-    this.r4300i_ldl = function(i) {
+    this.r4300i_ldl = function (i) {
         this.log('todo: ldl');
-        return('');
-    }
+        return '';
+    };
 
-    this.r4300i_sc = function(i) {
+    this.r4300i_sc = function (i) {
         this.log('todo: sc');
-        return('');
-    }
-    
-    this.r4300i_scd = function(i) {
+        return '';
+    };
+
+    this.r4300i_scd = function (i) {
         this.log('todo: scd');
-        return('');
-    }
-    
+        return '';
+    };
 
-    this.r4300i_daddi = function(i) {
-        return '_1964Helpers.prototype.inter_daddi(r,h,'+i+');';
-    }
+    this.r4300i_daddi = function (i) {
+        return 't.helpers.inter_daddi(r,h,' + i + ');';
+    };
 
-    this.r4300i_teq = function(i) {
+    this.r4300i_teq = function (i) {
         this.log('todo: r4300i_teq');
-        return ('');
-    }
+        return '';
+    };
 
-    this.r4300i_tgeu = function(i) {
+    this.r4300i_tgeu = function (i) {
         this.log('todo: r4300i_tgeu');
-        return ('');
-    }
+        return '';
+    };
 
-    this.r4300i_tlt = function(i) {
+    this.r4300i_tlt = function (i) {
         this.log('todo: r4300i_tlt');
-        return ('');
-    }
+        return '';
+    };
 
-    this.r4300i_tltu = function(i) {
+    this.r4300i_tltu = function (i) {
         this.log('todo: r4300i_tltu');
-        return ('');
-    }
+        return '';
+    };
 
-    this.r4300i_tne = function(i) {
+    this.r4300i_tne = function (i) {
         this.log('todo: r4300i_tne');
-        return ('');
-    }
+        return '';
+    };
 
     //using same as daddi
-    this.r4300i_daddiu = function(i) {
-        return '_1964Helpers.prototype.inter_daddiu(r,h,'+i+');';
-    }
+    this.r4300i_daddiu = function (i) {
+        return 't.helpers.inter_daddiu(r,h,' + i + ');';
+    };
 
-    this.r4300i_daddu = function(i) {
-        return '_1964Helpers.prototype.inter_daddu(r,h,'+i+');';
-    }
+    this.r4300i_daddu = function (i) {
+        return 't.helpers.inter_daddu(r,h,' + i + ');';
+    };
 
+	this.r4300i_C_F_S = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
+    };
 
-	this.r4300i_C_F_S = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+',t.cp1Con,t.cp1_f);';
-    }
+	this.r4300i_C_UN_S = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
+    };
 
-	this.r4300i_C_UN_S = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+',t.cp1Con,t.cp1_f);';
-    }
+	this.r4300i_C_EQ_S = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
+    };
 
-	this.r4300i_C_EQ_S = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+',t.cp1Con,t.cp1_f);';
-    }
+	this.r4300i_C_UEQ_S = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
+    };
 
-	this.r4300i_C_UEQ_S = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+',t.cp1Con,t.cp1_f);';
-    }
+	this.r4300i_C_OLT_S = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
+    };
 
-	this.r4300i_C_OLT_S = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+',t.cp1Con,t.cp1_f);';
-    }
+	this.r4300i_C_ULT_S = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
+    };
 
-	this.r4300i_C_ULT_S = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+',t.cp1Con,t.cp1_f);';
-    }
+	this.r4300i_C_OLE_S = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
+    };
 
-	this.r4300i_C_OLE_S = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+',t.cp1Con,t.cp1_f);';
-    }
+	this.r4300i_C_ULE_S = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
+    };
 
-	this.r4300i_C_ULE_S = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+',t.cp1Con,t.cp1_f);';
-    }
+	this.r4300i_C_SF_S = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
+    };
 
-	this.r4300i_C_SF_S = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+',t.cp1Con,t.cp1_f);';
-    }
+	this.r4300i_C_NGLE_S = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
+    };
 
-	this.r4300i_C_NGLE_S = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+',t.cp1Con,t.cp1_f);';
-    }
+	this.r4300i_C_SEQ_S = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
+    };
 
-	this.r4300i_C_SEQ_S = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+',t.cp1Con,t.cp1_f);';
-    }
+	this.r4300i_C_NGL_S = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
+    };
 
-	this.r4300i_C_NGL_S = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+',t.cp1Con,t.cp1_f);';
-    }
+	this.r4300i_C_LT_S = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
+    };
 
-	this.r4300i_C_LT_S = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+',t.cp1Con,t.cp1_f);';
-    }
+	this.r4300i_C_NGE_S = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
+    };
 
-	this.r4300i_C_NGE_S = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+',t.cp1Con,t.cp1_f);';
-    }
+	this.r4300i_C_LE_S = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
+    };
 
-	this.r4300i_C_LE_S = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+',t.cp1Con,t.cp1_f);';
-    }
+	this.r4300i_C_NGT_S = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
+    };
 
-	this.r4300i_C_NGT_S = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s('+i+',t.cp1Con,t.cp1_f);';
-    }
-    
-	this.r4300i_C_F_D = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+',t.cp1Con,t.cp1_f64);';
-    }
+	this.r4300i_C_F_D = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
+    };
 
-	this.r4300i_C_UN_D = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+',t.cp1Con,t.cp1_f64);';
-    }
+	this.r4300i_C_UN_D = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
+    };
 
-	this.r4300i_C_EQ_D = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+',t.cp1Con,t.cp1_f64);';
-    }
+	this.r4300i_C_EQ_D = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
+    };
 
-	this.r4300i_C_UEQ_D = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+',t.cp1Con,t.cp1_f64);';
-    }
+	this.r4300i_C_UEQ_D = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
+    };
 
-	this.r4300i_C_OLT_D = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+',t.cp1Con,t.cp1_f64);';
-    }
+	this.r4300i_C_OLT_D = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
+    };
 
-	this.r4300i_C_ULT_D = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+',t.cp1Con,t.cp1_f64);';
-    }
+	this.r4300i_C_ULT_D = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
+    };
 
-	this.r4300i_C_OLE_D = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+',t.cp1Con,t.cp1_f64);';
-    }
+	this.r4300i_C_OLE_D = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
+    };
 
-	this.r4300i_C_ULE_D = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+',t.cp1Con,t.cp1_f64);';
-    }
+	this.r4300i_C_ULE_D = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
+    };
 
-	this.r4300i_C_SF_D = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+',t.cp1Con,t.cp1_f64);';
-    }
+	this.r4300i_C_SF_D = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
+    };
 
-	this.r4300i_C_NGLE_D = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+',t.cp1Con,t.cp1_f64);';
-    }
+	this.r4300i_C_NGLE_D = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
+    };
 
-	this.r4300i_C_SEQ_D = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+',t.cp1Con,t.cp1_f64);';
-    }
+	this.r4300i_C_SEQ_D = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
+    };
 
-	this.r4300i_C_NGL_D = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+',t.cp1Con,t.cp1_f64);';
-    }
+	this.r4300i_C_NGL_D = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
+    };
 
-	this.r4300i_C_LT_D = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+',t.cp1Con,t.cp1_f64);';
-    }
+	this.r4300i_C_LT_D = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
+    };
 
-	this.r4300i_C_NGE_D = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+',t.cp1Con,t.cp1_f64);';
-    }
+	this.r4300i_C_NGE_D = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
+    };
 
-	this.r4300i_C_LE_D = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+',t.cp1Con,t.cp1_f64);';
-    }
+	this.r4300i_C_LE_D = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
+    };
 
-	this.r4300i_C_NGT_D = function(i) {
-        return '_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d('+i+',t.cp1Con,t.cp1_f64);';
-    }
-}
+	this.r4300i_C_NGT_D = function (i) {
+        return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
+    };
+};

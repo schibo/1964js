@@ -17,7 +17,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-_1964jsEmulator.prototype.getTVSystem = function(countryCode)
+C1964jsEmulator.prototype.getTVSystem = function(countryCode)
 {
 	var system;
 	switch(countryCode)
@@ -75,7 +75,7 @@ _1964jsEmulator.prototype.getTVSystem = function(countryCode)
 	return system;
 }
 
-_1964jsEmulator.prototype.getCIC = function() {
+C1964jsEmulator.prototype.getCIC = function() {
 	var CIC_CRC = 0;
     var cic = 0;
 	var i;

@@ -21,59 +21,66 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //Operand helpers
 /////////////////
 
-function fs(i) {
+C1964jsHelpers = function(isLittleEndian){
+
+    this.isLittleEndian = isLittleEndian;
+    this.isBigEndian = (isLittleEndian === false);
+}
+
+
+C1964jsHelpers.prototype.fs = function(i) {
     return i >> 11 & 0x1f;
 }
 
-function ft(i) {
+C1964jsHelpers.prototype.ft = function(i) {
     return i >> 16 & 0x1f;
 }
 
-function FS32ArrayView(i) {
-    return ((i >> 11 & 0x1f)^isBigEndian);
+C1964jsHelpers.prototype.FS32ArrayView = function(i) {
+    return ((i >> 11 & 0x1f)^this.isBigEndian);
 }
 
-function FS32HIArrayView(i) {
-    return ((i >> 11 & 0x1f)^isLittleEndian);
+C1964jsHelpers.prototype.FS32HIArrayView = function(i) {
+    return ((i >> 11 & 0x1f)^this.isLittleEndian);
 }
 
-function FT32ArrayView(i) {
-    return ((i >> 16 & 0x1f)^isBigEndian);
+C1964jsHelpers.prototype.FT32ArrayView = function(i) {
+    return ((i >> 16 & 0x1f)^this.isBigEndian);
 }
 
-function FT32HIArrayView(i) {
-    return ((i >> 16 & 0x1f)^isLittleEndian);
+C1964jsHelpers.prototype.FT32HIArrayView = function(i) {
+    return ((i >> 16 & 0x1f)^this.isLittleEndian);
 }
 
-function FD32ArrayView(i) {
-    return ((i >> 6 & 0x1F)^isBigEndian);
+C1964jsHelpers.prototype.FD32ArrayView = function(i) {
+    return ((i >> 6 & 0x1F)^this.isBigEndian);
 }
 
-function FD32HIArrayView(i) {
-    return ((i >> 6 & 0x1f)^isLittleEndian);
+C1964jsHelpers.prototype.FD32HIArrayView = function(i) {
+    return ((i >> 6 & 0x1f)^this.isLittleEndian);
 }
 
-function FS64ArrayView(i) {
+C1964jsHelpers.prototype.FS64ArrayView = function(i) {
     return (i >> 11 & 0x1f)>>1;
 }
 
-function FT64ArrayView(i) {
+C1964jsHelpers.prototype.FT64ArrayView = function(i) {
     return (i >> 16 & 0x1f)>>1;
 }
 
-function FD64ArrayView(i) {
+C1964jsHelpers.prototype.FD64ArrayView = function(i) {
     return (i >> 6 & 0x1F)>>1;
 }
 
-function rd(i) {
+C1964jsHelpers.prototype.rd = function(i) {
     return i >> 11 & 0x1f;
 }
 
-function rs(i) {
+C1964jsHelpers.prototype.rs = function(i) {
     return i >> 21 & 0x1f;
 }
 
-function RS(i) {
+C1964jsHelpers.prototype.RS = function(i) {
     var reg=(i >> 21 & 0x1f);
     if (reg===0)
         return '0';
@@ -81,7 +88,7 @@ function RS(i) {
         return 'r[' + reg + ']';
 }
 
-function RSH(i)
+C1964jsHelpers.prototype.RSH = function(i)
 {
     var reg=(i >> 21 & 0x1f);
     if (reg===0)
@@ -90,7 +97,7 @@ function RSH(i)
         return 'h[' + reg + ']';
 }
 
-function uRS(i)
+C1964jsHelpers.prototype.uRS = function(i)
 {
     var reg=(i >> 21 & 0x1f);
     if (reg===0)
@@ -99,7 +106,7 @@ function uRS(i)
         return '(r[' + reg + ']>>>0)';
 }
 
-function uRSH(i)
+C1964jsHelpers.prototype.uRSH = function(i)
 {
     var reg=(i >> 21 & 0x1f);
     if (reg===0)
@@ -108,7 +115,7 @@ function uRSH(i)
         return '(h[' + reg + ']>>>0)';
 }
 
-function _RS(i)
+C1964jsHelpers.prototype.tRS = function(i)
 {
     var reg=(i >> 21 & 0x1f);
     if (reg===0)
@@ -117,7 +124,7 @@ function _RS(i)
         return 'r[' + reg + ']';
 }
 
-function _RSH(i)
+C1964jsHelpers.prototype.tRSH = function(i)
 {
     var reg=(i >> 21 & 0x1f);
     if (reg===0)
@@ -126,7 +133,7 @@ function _RSH(i)
         return 'h[' + reg + ']';
 }
 
-function _RD(i)
+C1964jsHelpers.prototype.tRD = function(i)
 {
     var reg=(i >> 11 & 0x1f);
     if (reg===0)
@@ -135,7 +142,7 @@ function _RD(i)
         return 'r[' + reg + ']';
 }
 
-function _RDH(i)
+C1964jsHelpers.prototype.tRDH = function(i)
 {
     var reg=(i >> 11 & 0x1f);
     if (reg===0)
@@ -144,7 +151,7 @@ function _RDH(i)
         return 'h[' + reg + ']';
 }
 
-function _RT(i)
+C1964jsHelpers.prototype.tRT = function(i)
 {
     var reg=(i >> 16 & 0x1f);
     if (reg===0)
@@ -153,7 +160,7 @@ function _RT(i)
         return 'r[' + reg + ']';
 }
 
-function _RTH(i)
+C1964jsHelpers.prototype.tRTH = function(i)
 {
     var reg=(i >> 16 & 0x1f);
     if (reg===0)
@@ -162,7 +169,7 @@ function _RTH(i)
         return 'h[' + reg + ']';
 }
 
-function RD(i)
+C1964jsHelpers.prototype.RD = function(i)
 {
     var reg=(i >> 11 & 0x1f);
     
@@ -172,7 +179,7 @@ function RD(i)
         return 'r[' + reg + ']';
 }
 
-function RDH(i)
+C1964jsHelpers.prototype.RDH = function(i)
 {
     var reg=(i >> 11 & 0x1f);
     
@@ -182,7 +189,7 @@ function RDH(i)
         return 'h[' + reg + ']';
 }
 
-function uRD(i)
+C1964jsHelpers.prototype.uRD = function(i)
 {
     var reg=(i >> 11 & 0x1f);
     
@@ -192,7 +199,7 @@ function uRD(i)
         return '(r[' + reg + ']>>>0)';
 }
 
-function uRDH(i)
+C1964jsHelpers.prototype.uRDH = function(i)
 {
     var reg=(i >> 11 & 0x1f);
     
@@ -202,7 +209,7 @@ function uRDH(i)
         return '(h[' + reg + ']>>>0)';
 }
 
-function RT(i)
+C1964jsHelpers.prototype.RT = function(i)
 {
     var reg=(i >> 16 & 0x1f);
     
@@ -212,7 +219,7 @@ function RT(i)
         return 'r[' + reg + ']';
 }
 
-function RTH(i)
+C1964jsHelpers.prototype.RTH = function(i)
 {
     var reg=(i >> 16 & 0x1f);
     
@@ -222,7 +229,7 @@ function RTH(i)
         return 'h[' + reg + ']';
 }
 
-function uRT(i)
+C1964jsHelpers.prototype.uRT = function(i)
 {
     var reg=(i >> 16 & 0x1f);
     
@@ -232,7 +239,7 @@ function uRT(i)
         return '(r[' + reg + ']>>>0)';
 }
 
-function uRTH(i)
+C1964jsHelpers.prototype.uRTH = function(i)
 {
     var reg=(i >> 16 & 0x1f);
     
@@ -242,37 +249,37 @@ function uRTH(i)
         return '(h[' + reg + ']>>>0)';
 }
 
-function rt(i)
+C1964jsHelpers.prototype.rt = function(i)
 {
     return i >> 16 & 0x1f;
 }
 
-function offset_imm(i)
+C1964jsHelpers.prototype.offset_imm = function(i)
 {
     return i & 0x0000ffff;
 }
 
-function soffset_imm(i)
+C1964jsHelpers.prototype.soffset_imm = function(i)
 {
     return (((i&0x0000ffff)<<16)>>16);
 }
 
-function setVAddr(i)
+C1964jsHelpers.prototype.setVAddr = function(i)
 {
-    return 't.vAddr='+se(RS(i)+'+'+soffset_imm(i));
+    return 't.vAddr='+this.se(this.RS(i)+'+'+this.soffset_imm(i));
 }
 
-function fn(i)
+C1964jsHelpers.prototype.fn = function(i)
 {
     return i & 0x3f;
 }
 
-function sa(i)
+C1964jsHelpers.prototype.sa = function(i)
 {
     return i >> 6 & 0x1F;
 }
 
-function fd(i)
+C1964jsHelpers.prototype.fd = function(i)
 {
     return i >> 6 & 0x1F;
 }
@@ -282,13 +289,13 @@ function fd(i)
 ////////////////////
 
 //sign-extend 32bit operation
-function se(o)
+C1964jsHelpers.prototype.se = function(o)
 {
     return '(' + o + ')>>0;';
 }
 
 //zero-extend 32bit operation
-function ze(o)
+C1964jsHelpers.prototype.ze = function(o)
 {
     return '(' + o + ')>>>0;';
 }
@@ -297,22 +304,21 @@ function ze(o)
 //Opcode logic helpers
 //////////////////////
 
-function sLogic(i, n) {
-    return '{'+_RD(i)+'='+RS(i)+n+RT(i)+';'+_RDH(i)+'='+RD(i)+'>>31;}';
+C1964jsHelpers.prototype.sLogic = function(i, n) {
+    return '{'+this.tRD(i)+'='+this.RS(i)+n+this.RT(i)+';'+this.tRDH(i)+'='+this.RD(i)+'>>31;}';
 }
 
-function dLogic(i, n) {
-    return '{'+_RD(i)+'='+RS(i)+n+RT(i)+';'+_RDH(i)+'='+RSH(i)+n+RTH(i)+';}';
+C1964jsHelpers.prototype.dLogic = function(i, n) {
+    return '{'+this.tRD(i)+'='+this.RS(i)+n+this.RT(i)+';'+this.tRDH(i)+'='+this.RSH(i)+n+this.RTH(i)+';}';
 }
 
 ////////////////////////////
 //Interpreted opcode helpers
 ////////////////////////////
 
-_1964Helpers = function(){}
 
     //called function, not compiled
-_1964Helpers.prototype.inter_mtc0 = function(r, f, rt, isDelaySlot, pc, cp0, interrupts) {
+C1964jsHelpers.prototype.inter_mtc0 = function(r, f, rt, isDelaySlot, pc, cp0, interrupts) {
         //incomplete:
         switch (f) {
             case CAUSE:
@@ -386,10 +392,10 @@ _1964Helpers.prototype.inter_mtc0 = function(r, f, rt, isDelaySlot, pc, cp0, int
     }
 
 
-_1964Helpers.prototype.inter_mult = function(r, h, i)
+C1964jsHelpers.prototype.inter_mult = function(r, h, i)
 {
-    var rs32 = r[rs(i)];
-    var rt32 = r[rt(i)];
+    var rs32 = r[this.rs(i)];
+    var rt32 = r[this.rt(i)];
     
     var r1 = goog.math.Long.fromBits(rs32, rs32>>31);
     var r2 = goog.math.Long.fromBits(rt32, rt32>>31);
@@ -402,10 +408,10 @@ _1964Helpers.prototype.inter_mult = function(r, h, i)
     h[33]=r[33]>>31;
 }
 
-_1964Helpers.prototype.inter_multu = function(r, h, i)
+C1964jsHelpers.prototype.inter_multu = function(r, h, i)
 {
-    var rs32 = r[rs(i)];
-    var rt32 = r[rt(i)];
+    var rs32 = r[this.rs(i)];
+    var rt32 = r[this.rt(i)];
 
     var r1 = goog.math.Long.fromBits(rs32, 0);
     var r2 = goog.math.Long.fromBits(rt32, 0);
@@ -417,35 +423,35 @@ _1964Helpers.prototype.inter_multu = function(r, h, i)
     r[33]=res.getHighBits(); //hi
     h[33]=r[33]>>31;
 
-//    alert('multu: '+r[rs(i)]+'*'+r[rt(i)]+'='+dec2hex(h[33]) +' '+dec2hex(r[33])+' '+dec2hex(h[32])+' '+dec2hex(r[32]));
+//    alert('multu: '+r[this.rs(i)]+'*'+r[this.rt(i)]+'='+dec2hex(h[33]) +' '+dec2hex(r[33])+' '+dec2hex(h[32])+' '+dec2hex(r[32]));
 }
 
-_1964Helpers.prototype.inter_daddi = function(r, h, i)
+C1964jsHelpers.prototype.inter_daddi = function(r, h, i)
 {    
-    var rs1 = goog.math.Long.fromBits(r[rs(i)], h[rs(i)]);
+    var rs1 = goog.math.Long.fromBits(r[this.rs(i)], h[this.rs(i)]);
     var imm = goog.math.Long.fromBits(soffset_imm(i), soffset_imm(i)>>31);
 
     var rtres = rs1.add(imm);
     
-    r[rt(i)]=rtres.getLowBits(); //lo
-    h[rt(i)]=rtres.getHighBits(); //hi
+    r[this.rt(i)]=rtres.getLowBits(); //lo
+    h[this.rt(i)]=rtres.getHighBits(); //hi
 }
 
-_1964Helpers.prototype.inter_daddiu = function(r, h, i)
+C1964jsHelpers.prototype.inter_daddiu = function(r, h, i)
 {    
-    var rs1 = goog.math.Long.fromBits(r[rs(i)], h[rs(i)]);
+    var rs1 = goog.math.Long.fromBits(r[this.rs(i)], h[this.rs(i)]);
     var imm = goog.math.Long.fromBits(soffset_imm(i), soffset_imm(i)>>31);
 
     var rtres = rs1.add(imm);
     
-    r[rt(i)]=rtres.getLowBits(); //lo
-    h[rt(i)]=rtres.getHighBits(); //hi
+    r[this.rt(i)]=rtres.getLowBits(); //lo
+    h[this.rt(i)]=rtres.getHighBits(); //hi
 }
 
-_1964Helpers.prototype.inter_dadd = function(r, h, i)
+C1964jsHelpers.prototype.inter_dadd = function(r, h, i)
 {    
-    var rs1 = goog.math.Long.fromBits(r[rs(i)], h[rs(i)]);
-    var rt1 = goog.math.Long.fromBits(r[rt(i)], h[rt(i)]);
+    var rs1 = goog.math.Long.fromBits(r[this.rs(i)], h[this.rs(i)]);
+    var rt1 = goog.math.Long.fromBits(r[this.rt(i)], h[this.rt(i)]);
 
     var rdres = rs1.add(rt1);
     
@@ -453,10 +459,10 @@ _1964Helpers.prototype.inter_dadd = function(r, h, i)
     h[rd(i)]=rdres.getHighBits(); //hi
 }
 
-_1964Helpers.prototype.inter_daddu = function(r, h, i)
+C1964jsHelpers.prototype.inter_daddu = function(r, h, i)
 {    
-    var rs1 = goog.math.Long.fromBits(r[rs(i)], h[rs(i)]);
-    var rt1 = goog.math.Long.fromBits(r[rt(i)], h[rt(i)]);
+    var rs1 = goog.math.Long.fromBits(r[this.rs(i)], h[this.rs(i)]);
+    var rt1 = goog.math.Long.fromBits(r[this.rt(i)], h[this.rt(i)]);
 
     var rdres = rs1.add(rt1);
     
@@ -464,9 +470,9 @@ _1964Helpers.prototype.inter_daddu = function(r, h, i)
     h[rd(i)]=rdres.getHighBits(); //hi
 }
 
-_1964Helpers.prototype.inter_div = function(r, h, i)
+C1964jsHelpers.prototype.inter_div = function(r, h, i)
 {
-    if (r[rt(i)] === 0)
+    if (r[this.rt(i)] === 0)
     {
         alert('divide by zero');
         return;
@@ -474,22 +480,22 @@ _1964Helpers.prototype.inter_div = function(r, h, i)
     //todo: handle div by zero
     
 
-    r[32]=r[rs(i)]/r[rt(i)]; //lo
+    r[32]=r[this.rs(i)]/r[this.rt(i)]; //lo
     h[32]=r[32]>>31; //hi
 
-    r[33]=r[rs(i)]%r[rt(i)]; //lo
+    r[33]=r[this.rs(i)]%r[this.rt(i)]; //lo
     h[33]=r[33]>>31; //hi
 
-//    alert('div: '+r[rs(i)]+'/'+r[rt(i)]+'='+dec2hex(h[33]) +' '+dec2hex(r[33])+' '+dec2hex(h[32])+' '+dec2hex(r[32]));
+//    alert('div: '+r[this.rs(i)]+'/'+r[this.rt(i)]+'='+dec2hex(h[33]) +' '+dec2hex(r[33])+' '+dec2hex(h[32])+' '+dec2hex(r[32]));
 
 }
 
-_1964Helpers.prototype.inter_ddiv = function(r, h, i)
+C1964jsHelpers.prototype.inter_ddiv = function(r, h, i)
 {
-    var rs32 = r[rs(i)];
-    var rt32 = r[rt(i)];
-    var rsh32 = h[rs(i)];
-    var rth32 = h[rt(i)];
+    var rs32 = r[this.rs(i)];
+    var rt32 = r[this.rt(i)];
+    var rsh32 = h[this.rs(i)];
+    var rth32 = h[this.rt(i)];
 
     var r1 = goog.math.Long.fromBits(rs32, rsh32);
     var r2 = goog.math.Long.fromBits(rt32, rth32);
@@ -513,10 +519,10 @@ _1964Helpers.prototype.inter_ddiv = function(r, h, i)
 }
 
 
-_1964Helpers.prototype.inter_divu = function(r, h, i)
+C1964jsHelpers.prototype.inter_divu = function(r, h, i)
 {
 
-    if (r[rt(i)] === 0)
+    if (r[this.rt(i)] === 0)
     {
         alert('divide by zero');
         return;
@@ -524,20 +530,20 @@ _1964Helpers.prototype.inter_divu = function(r, h, i)
     //todo: handle div by zero
     
 
-    r[32]=(r[rs(i)]>>>0)/(r[rt(i)]>>>0); //lo
+    r[32]=(r[this.rs(i)]>>>0)/(r[this.rt(i)]>>>0); //lo
     h[32]=0; //hi
 
-    r[33]=(r[rs(i)]>>>0)%(r[rt(i)]>>>0); //lo
+    r[33]=(r[this.rs(i)]>>>0)%(r[this.rt(i)]>>>0); //lo
     h[33]=0; //hi
 
-//    alert('divu: '+r[rs(i)]+'/'+r[rt(i)]+'='+dec2hex(h[33]) +' '+dec2hex(r[33])+' '+dec2hex(h[32])+' '+dec2hex(r[32]));
+//    alert('divu: '+r[this.rs(i)]+'/'+r[this.rt(i)]+'='+dec2hex(h[33]) +' '+dec2hex(r[33])+' '+dec2hex(h[32])+' '+dec2hex(r[32]));
 }
 
-_1964Helpers.prototype.inter_dmult = function(r, h, i)
+C1964jsHelpers.prototype.inter_dmult = function(r, h, i)
 {
     //this is wrong..i think BigInt it will treat hex as unsigned? 
-    var rs64 = '0x' + dec2hex(h[rs(i)]) + '' + dec2hex(r[rs(i)]);
-    var rt64 = '0x' + dec2hex(h[rt(i)]) + '' + dec2hex(r[rt(i)]);
+    var rs64 = '0x' + dec2hex(h[this.rs(i)]) + '' + dec2hex(r[this.rs(i)]);
+    var rt64 = '0x' + dec2hex(h[this.rt(i)]) + '' + dec2hex(r[this.rt(i)]);
 
     var x = new BigInt(rs64);
     var y = new BigInt(rt64);
@@ -584,11 +590,11 @@ _1964Helpers.prototype.inter_dmult = function(r, h, i)
 //    alert('dmult: '+rs64+'*'+rt64+'='+dec2hex(h[33]) +' '+dec2hex(r[33])+' '+dec2hex(h[32])+' '+dec2hex(r[32]));
 }
 
-_1964Helpers.prototype.inter_dmultu = function(r, h, i)
+C1964jsHelpers.prototype.inter_dmultu = function(r, h, i)
 {
 //Attax demo
-    var rs64 = '0x0' + dec2hex(h[rs(i)]) + '' + dec2hex(r[rs(i)]);
-    var rt64 = '0x0' + dec2hex(h[rt(i)]) + '' + dec2hex(r[rt(i)]);
+    var rs64 = '0x0' + dec2hex(h[this.rs(i)]) + '' + dec2hex(r[this.rs(i)]);
+    var rt64 = '0x0' + dec2hex(h[this.rt(i)]) + '' + dec2hex(r[this.rt(i)]);
 
     var x = new BigInt(rs64);
     var y = new BigInt(rt64);
@@ -636,10 +642,10 @@ _1964Helpers.prototype.inter_dmultu = function(r, h, i)
 }
 
 
-_1964Helpers.prototype.inter_ddivu = function(r, h, i)
+C1964jsHelpers.prototype.inter_ddivu = function(r, h, i)
 {
-    var rs64 = '0x0' + dec2hex(h[rs(i)]) + '' + dec2hex(r[rs(i)]);
-    var rt64 = '0x0' + dec2hex(h[rt(i)]) + '' + dec2hex(r[rt(i)]);
+    var rs64 = '0x0' + dec2hex(h[this.rs(i)]) + '' + dec2hex(r[this.rs(i)]);
+    var rt64 = '0x0' + dec2hex(h[this.rt(i)]) + '' + dec2hex(r[this.rt(i)]);
 
     var x = new BigInt(rs64);
     var y = new BigInt(rt64);
@@ -694,7 +700,7 @@ _1964Helpers.prototype.inter_ddivu = function(r, h, i)
 
 }
 
-_1964Helpers.prototype.inter_r4300i_C_cond_fmt_s = function(instruction, cp1Con, cp1_f)
+C1964jsHelpers.prototype.inter_r4300i_C_cond_fmt_s = function(instruction, cp1Con, cp1_f)
 {
 	var	fcFS32, fcFT32;
 	var	less, equal, unordered, cond, cond0, cond1, cond2, cond3;
@@ -705,8 +711,8 @@ _1964Helpers.prototype.inter_r4300i_C_cond_fmt_s = function(instruction, cp1Con,
 	cond1 = (instruction >> 1) & 0x1;
 	cond2 = (instruction >> 2) & 0x1;
 	cond3 = (instruction >> 3) & 0x1;
-	fcFS32 = cp1_f[FS32ArrayView(instruction)];
-	fcFT32 = cp1_f[FT32ArrayView(instruction)];
+	fcFS32 = cp1_f[this.FS32ArrayView(instruction)];
+	fcFT32 = cp1_f[this.FT32ArrayView(instruction)];
 
 	if(isNaN(fcFS32) || isNaN(fcFT32))
 	{
@@ -735,7 +741,7 @@ _1964Helpers.prototype.inter_r4300i_C_cond_fmt_s = function(instruction, cp1Con,
 		cp1Con[31] |= COP1_CONDITION_BIT;
 }
 
-_1964Helpers.prototype.inter_r4300i_C_cond_fmt_d = function(instruction, cp1Con, cp1_f64)
+C1964jsHelpers.prototype.inter_r4300i_C_cond_fmt_d = function(instruction, cp1Con, cp1_f64)
 {
 	var	fcFS64, fcFT64;
 	var	less, equal, unordered, cond, cond0, cond1, cond2, cond3;
@@ -746,8 +752,8 @@ _1964Helpers.prototype.inter_r4300i_C_cond_fmt_d = function(instruction, cp1Con,
 	cond1 = (instruction >> 1) & 0x1;
 	cond2 = (instruction >> 2) & 0x1;
 	cond3 = (instruction >> 3) & 0x1;
-	fcFS64 = cp1_f64[FS64ArrayView(instruction)];
-	fcFT64 = cp1_f64[FT64ArrayView(instruction)];
+	fcFS64 = cp1_f64[this.FS64ArrayView(instruction)];
+	fcFT64 = cp1_f64[this.FT64ArrayView(instruction)];
 
 	if(isNaN(fcFS64) || isNaN(fcFT64))
 	{

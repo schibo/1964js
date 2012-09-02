@@ -21,7 +21,7 @@ function log(message) {
     //console.log(message);
 }
 
-_1964jsEmulator.prototype.flushDynaCache = function()
+C1964jsEmulator.prototype.flushDynaCache = function()
 {
     if (this.writeToDom === false)
     {
@@ -39,7 +39,7 @@ _1964jsEmulator.prototype.flushDynaCache = function()
         this.deleteFunction(--this.kk);
 }
 
-_1964jsEmulator.prototype.deleteFunction = function(k) {
+C1964jsEmulator.prototype.deleteFunction = function(k) {
     //log('cleanup');
     var s = document.getElementsByTagName('script')[k];
     var splitResult = s.text.split('_');
@@ -65,7 +65,7 @@ _1964jsEmulator.prototype.deleteFunction = function(k) {
         alert('blah');
 }
 
-var _1964jsDMA = function(memory, interrupts, pif) {
+var C1964jsDMA = function(memory, interrupts, pif) {
 
     var audioContext;
     var audioBuffer;

@@ -609,44 +609,44 @@ var COP1_L_Instruction =
 	'UNUSED'
 ];
 
-_1964jsEmulator.prototype.instr = function(i, isDelay) {
-	return this[r4300i_Instruction[fn(i)]](i, isDelay);
+C1964jsEmulator.prototype.instr = function(i, isDelay) {
+	return this[r4300i_Instruction[this.helpers.fn(i)]](i, isDelay);
 }
 
-_1964jsEmulator.prototype.REGIMM_instr = function(i, isDelay) {
-	return this[REGIMM_Instruction[rt(i)]](i, isDelay);
+C1964jsEmulator.prototype.REGIMM_instr = function(i, isDelay) {
+	return this[REGIMM_Instruction[this.helpers.rt(i)]](i, isDelay);
 }
 
-_1964jsEmulator.prototype.COP0_instr = function(i, isDelay) {
-	return this[COP0_Instruction[rs(i)]](i, isDelay);
+C1964jsEmulator.prototype.COP0_instr = function(i, isDelay) {
+	return this[COP0_Instruction[this.helpers.rs(i)]](i, isDelay);
 }
 
-_1964jsEmulator.prototype.COP1_instr = function(i, isDelay) {
-	return this[COP1_Instruction[rs(i)]](i, isDelay);
+C1964jsEmulator.prototype.COP1_instr = function(i, isDelay) {
+	return this[COP1_Instruction[this.helpers.rs(i)]](i, isDelay);
 }
 
-_1964jsEmulator.prototype.TLB_instr = function(i, isDelay) {
-	return this[TLB_Instruction[fn(i)]](i, isDelay);
+C1964jsEmulator.prototype.TLB_instr = function(i, isDelay) {
+	return this[TLB_Instruction[this.helpers.fn(i)]](i, isDelay);
 }
 
-_1964jsEmulator.prototype.COP1_BC_instr = function(i, isDelay) {
-	return this[COP1_BC_Instruction[rt(i)]](i, isDelay);
+C1964jsEmulator.prototype.COP1_BC_instr = function(i, isDelay) {
+	return this[COP1_BC_Instruction[this.helpers.rt(i)]](i, isDelay);
 }
 
-_1964jsEmulator.prototype.COP1_S_instr = function(i, isDelay) {
-	return this[COP1_S_Instruction[fn(i)]](i, isDelay);
+C1964jsEmulator.prototype.COP1_S_instr = function(i, isDelay) {
+	return this[COP1_S_Instruction[this.helpers.fn(i)]](i, isDelay);
 }
 
-_1964jsEmulator.prototype.COP1_D_instr = function(i, isDelay) {
-	return this[COP1_D_Instruction[fn(i)]](i, isDelay);
+C1964jsEmulator.prototype.COP1_D_instr = function(i, isDelay) {
+	return this[COP1_D_Instruction[this.helpers.fn(i)]](i, isDelay);
 }
 
-_1964jsEmulator.prototype.COP1_W_instr = function(i, isDelay) {
-	return this[COP1_W_Instruction[fn(i)]](i, isDelay);
+C1964jsEmulator.prototype.COP1_W_instr = function(i, isDelay) {
+	return this[COP1_W_Instruction[this.helpers.fn(i)]](i, isDelay);
 }
 
-_1964jsEmulator.prototype.COP1_L_instr = function(i, isDelay) {
-	return window[COP1_L_Instruction[fn(i)]](i, isDelay);
+C1964jsEmulator.prototype.COP1_L_instr = function(i, isDelay) {
+	return window[COP1_L_Instruction[this.helpers.fn(i)]](i, isDelay);
 }
 
 var microcodeMap0 =

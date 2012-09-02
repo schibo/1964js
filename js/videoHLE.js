@@ -17,9 +17,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-var _1964jsVideoHLE = function(core) {
+var C1964jsVideoHLE = function(core, glx) {
 
     this.core = core; //only needed for gfxHelpers prototypes to access.
+    var gl = glx;
 
     //todo: make gRSP a class object.
     var RICE_MATRIX_STACK = 60
@@ -34,7 +35,7 @@ var _1964jsVideoHLE = function(core) {
     var triangleVertexPositionBuffer;
     var dlistStackPointer = 0;
     var dlistStack = new Array(MAX_DL_STACK_SIZE);
-    var renderer = new _1964jsRenderer(core.settings);
+    var renderer = new C1964jsRenderer(core.settings, core.webGL.gl, core.webGL);
     var texImg = new Object();
     this.segments = new Array(16);
     //todo: different microcodes support
@@ -59,23 +60,12 @@ var _1964jsVideoHLE = function(core) {
 
     this.processDisplayList = function() {
         if (core.showFB === true) {
-            webGLStart(this);
-            show3D();
+            this.initBuffers();
+            core.webGL.show3D();
             core.showFB = false;
         }
 
-        gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-        mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
-        mat4.identity(mvMatrix);
-        mat4.translate(mvMatrix, [0.0, 0.0, -2.4]);
-        mat4.set(mvMatrix, nMatrix);
-        mat4.inverse(nMatrix, nMatrix);
-        mat4.transpose(nMatrix);
-                
-       // mvPushMatrix();
-        mat4.translate(mvMatrix, [0.0, 0.0, -1.0]);
+        core.webGL.beginDList();
 
 
         this.dlParserProcess();
@@ -574,7 +564,6 @@ if (true) {
         this.prepareTriangle(v2, v1, v0);
 
         this.drawScene(true, 7);
-       
 
         //clear vertices for another shape
         this.vertices = [];
@@ -783,6 +772,38 @@ if (true) {
         return true;
     }
 
+    this.drawScene = function(useTexture, tileno) {
+
+        core.webGL.switchShader(core.webGL.triangleShaderProgram);
+        gl.disable(gl.DEPTH_TEST);
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+        //simple lighting. Get the normal matrix of the model-view matrix
+        
+        gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.trivertices), gl.STATIC_DRAW);
+        gl.vertexAttribPointer(core.webGL.triangleShaderProgram.vertexPositionAttribute, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+        if (useTexture === true) {
+            gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexTextureCoordBuffer);
+            gl.vertexAttribPointer(core.webGL.triangleShaderProgram.textureCoordAttribute, triangleVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, window['neheTexture'+tileno]);
+            gl.uniform1i(core.webGL.triangleShaderProgram.samplerUniform, 0);
+        }
+      //  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
+
+        core.webGL.setMatrixUniforms(core.webGL.triangleShaderProgram);
+
+        if (core.settings.wireframe === true)
+            gl.drawArrays(gl.LINE_LOOP, 0, triangleVertexPositionBuffer.numItems);
+        else
+            gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
+
+      //  mvPopMatrix();
+    }
+
     this.initBuffers = function() {
     
         triangleVertexPositionBuffer = gl.createBuffer();
@@ -804,40 +825,10 @@ if (true) {
         0.0, 0.0, 1.0
         ];
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.triTextureCoords), gl.STATIC_DRAW);
-        gl.vertexAttribPointer(triangleShaderProgram.vertexPositionAttribute, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+        gl.vertexAttribPointer(core.webGL.triangleShaderProgram.vertexPositionAttribute, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
         triangleVertexTextureCoordBuffer.itemSize = 3;
         triangleVertexTextureCoordBuffer.numItems = this.triTextureCoords.length/3;
     }
 
-    this.drawScene = function(useTexture, tileno) {
 
-        switchShader(triangleShaderProgram);
-        gl.disable(gl.DEPTH_TEST);
-        gl.enable(gl.BLEND);
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-        //simple lighting. Get the normal matrix of the model-view matrix
-        
-        gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.trivertices), gl.STATIC_DRAW);
-        gl.vertexAttribPointer(triangleShaderProgram.vertexPositionAttribute, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-        if (useTexture === true) {
-            gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexTextureCoordBuffer);
-            gl.vertexAttribPointer(triangleShaderProgram.textureCoordAttribute, triangleVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-            gl.activeTexture(gl.TEXTURE0);
-            gl.bindTexture(gl.TEXTURE_2D, window['neheTexture'+tileno]);
-            gl.uniform1i(triangleShaderProgram.samplerUniform, 0);
-        }
-      //  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
-
-        setMatrixUniforms(triangleShaderProgram);
-
-        if (core.settings.wireframe === true)
-            gl.drawArrays(gl.LINE_LOOP, 0, triangleVertexPositionBuffer.numItems);
-        else
-            gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
-
-      //  mvPopMatrix();
-    }
 }

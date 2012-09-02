@@ -45,10 +45,10 @@ function getUrlVars()
 
 function initTryCatch(buffer) {
   try {
-    _1964js.init(buffer);
+    C1964js.init(buffer);
   } catch(e) {
-    if (_1964js != undefined && _1964js != null) {
-      _1964js.terminate = true;
+    if (C1964js != undefined && C1964js != null) {
+      C1964js.terminate = true;
       throw e;
     }
   }
@@ -95,8 +95,8 @@ function uncompressAndRun(romPath, response) {
 
 function start1964(settings) {
 
-    if (_1964js == null || _1964js == undefined)
-        _1964js = new _1964jsEmulator(settings);
+    if (C1964js == null || C1964js == undefined)
+        C1964js = new C1964jsEmulator(settings);
         
     vars = getUrlVars();
     var romPath;
@@ -111,7 +111,7 @@ function start1964(settings) {
         xhr.send();
 
         xhr.onload = function(e) {
-            uncompressAndRun(romPath, e.target.response, _1964js);
+            uncompressAndRun(romPath, e.target.response, C1964js);
         };
     }
 }
@@ -190,7 +190,7 @@ function start1964(settings) {
     }
   }
 
-  var _1964js; 
+  var C1964js; 
 
 function handleFileSelect(evt) {
     var fileName = evt.target.files[0].name;    
@@ -223,7 +223,7 @@ function handleFileSelect(evt) {
         setTimeout("document.getElementById('progress_bar').className='';document.getElementById('user_panel').className='';", 1000);
       //todo: add zip support (from index.html)
       
-      uncompressAndRun(fileName, reader.result, _1964js);
+      uncompressAndRun(fileName, reader.result, C1964js);
     }
 
     // Read in the file as an array buffer.
