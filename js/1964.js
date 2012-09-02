@@ -69,11 +69,10 @@ Convention:
 var consts = new C1964jsConstants();
 
 var C1964jsEmulator = function (userSettings) {
-
     "use strict";
 
 //private:
-    var offset = 0, i;
+    var i;
 
 //public:
     this.settings = userSettings;
@@ -131,8 +130,13 @@ var C1964jsEmulator = function (userSettings) {
     this.log = function (message) {
         console.log(message);
     };
+};
 
-    this.init = function (buffer) {
+(function () {
+    "use strict";
+    var offset;
+
+    C1964jsEmulator.prototype.init = function (buffer) {
         var k, x, i, y, r = new Int32Array(35 * 4), h = new Int32Array(35 * 4);
 
         cancelAnimFrame(this.request);
@@ -244,13 +248,13 @@ var C1964jsEmulator = function (userSettings) {
         this.startEmulator(r, h);
     };
 
-    this.trace2 = function (address, opcode) {
+    C1964jsEmulator.prototype.trace2 = function (address, opcode) {
         //comment this out for speed when not debugging
         console.log(address + ': ' + opcode);
     };
 
     //swap to 0x80371240
-    this.byteSwap = function (rom) {
+    C1964jsEmulator.prototype.byteSwap = function (rom) {
         var k, fmt, temp;
 
         console.log('byte swapping...');
@@ -276,7 +280,7 @@ var C1964jsEmulator = function (userSettings) {
         console.log('swap done');
     };
 
-    this.endianTest = function () {
+    C1964jsEmulator.prototype.endianTest = function () {
         var ii = new ArrayBuffer(2), iiSetView = new Uint8Array(ii), iiView = new Uint16Array(ii);
 
         iiSetView[0] = 0xff;
@@ -293,7 +297,7 @@ var C1964jsEmulator = function (userSettings) {
         }
     };
 
-    this.repaint = function (ctx, ImDat, origin) {
+    C1964jsEmulator.prototype.repaint = function (ctx, ImDat, origin) {
         var out, k = origin, i = 0, y, hi, lo;
 
         if (!this.showFB) {
@@ -315,8 +319,7 @@ var C1964jsEmulator = function (userSettings) {
         ctx.putImageData(ImDat, 0, 0);
     };
 
-    this.runLoop = function (r, h) {
-
+    C1964jsEmulator.prototype.runLoop = function (r, h) {
         if (this.terminate === false) {
             this.request = requestAnimFrame(this.runLoop.bind(this, r, h));
         }
@@ -356,28 +359,28 @@ var C1964jsEmulator = function (userSettings) {
         return this;
     };
 
-    this.repaintWrapper = function () {
+    C1964jsEmulator.prototype.repaintWrapper = function () {
         this.repaint(this.ctx, this.ImDat, this.memory.getInt32(this.memory.viUint8Array, this.memory.viUint8Array, consts.VI_ORIGIN_REG) & 0x00FFFFFF);
     };
 
-    this.startEmulator = function (r, h) {
+    C1964jsEmulator.prototype.startEmulator = function (r, h) {
         this.terminate = false;
         this.log('startEmulator');
         this.runLoop(r, h);
     };
 
-    this.stopEmulator = function () {
+    C1964jsEmulator.prototype.stopEmulator = function () {
         this.stopCompiling = true;
         this.terminate = true;
         this.log('stopEmulator');
         //clearInterval(interval);
     };
 
-    this.getFnName = function (pc) {
+    C1964jsEmulator.prototype.getFnName = function (pc) {
         return '_' + (pc >>> 2);
     };
 
-    this.decompileBlock = function (pc) {
+    C1964jsEmulator.prototype.decompileBlock = function (pc) {
         offset = 0;
         var g, s, instruction, opcode, string, fnName = '_' + (pc >>> 2);
 
@@ -418,52 +421,52 @@ var C1964jsEmulator = function (userSettings) {
         return this.code[fnName];
     };
 
-    this.r4300i_add = function (i) {
+    C1964jsEmulator.prototype.r4300i_add = function (i) {
         return this.helpers.sLogic(i, '+');
     };
 
-    this.r4300i_addu = function (i) {
+    C1964jsEmulator.prototype.r4300i_addu = function (i) {
         return this.helpers.sLogic(i, '+');
     };
 
-    this.r4300i_sub = function (i) {
+    C1964jsEmulator.prototype.r4300i_sub = function (i) {
         return this.helpers.sLogic(i, '-');
     };
 
-    this.r4300i_subu = function (i) {
+    C1964jsEmulator.prototype.r4300i_subu = function (i) {
         return this.helpers.sLogic(i, '-');
     };
 
-    this.r4300i_or = function (i) {
+    C1964jsEmulator.prototype.r4300i_or = function (i) {
         return this.helpers.dLogic(i, '|');
     };
 
-    this.r4300i_xor = function (i) {
+    C1964jsEmulator.prototype.r4300i_xor = function (i) {
         return this.helpers.dLogic(i, '^');
     };
 
-    this.r4300i_nor = function (i) {
+    C1964jsEmulator.prototype.r4300i_nor = function (i) {
         return '{' + this.helpers.tRD(i) + '=~(' + this.helpers.RS(i) + '|' + this.helpers.RT(i) + ');' + this.helpers.tRDH(i) + '=~(' + this.helpers.RSH(i) + '|' + this.helpers.RTH(i) + ');}';
     };
 
-    this.r4300i_and = function (i) {
+    C1964jsEmulator.prototype.r4300i_and = function (i) {
         return this.helpers.dLogic(i, '&');
     };
 
-    this.r4300i_lui = function (i) {
+    C1964jsEmulator.prototype.r4300i_lui = function (i) {
         var temp = ((i & 0x0000ffff) << 16);
         return '{' + this.helpers.tRT(i) + '=' + temp + ';' + this.helpers.tRTH(i) + '=' + (temp >> 31) + ';}';
     };
 
-    this.r4300i_lw = function (i) {
+    C1964jsEmulator.prototype.r4300i_lw = function (i) {
         return '{' + this.helpers.setVAddr(i) + this.helpers.tRT(i) + '=m.loadWord(t.vAddr);' + this.helpers.tRTH(i) + '=' + this.helpers.RT(i) + '>>31}';
     };
 
-    this.r4300i_lwu = function (i) {
+    C1964jsEmulator.prototype.r4300i_lwu = function (i) {
         return '{' + this.helpers.setVAddr(i) + this.helpers.tRT(i) + '=m.loadWord(t.vAddr);' + this.helpers.tRTH(i) + '=0}';
     };
 
-    this.r4300i_sw = function (i, isDelaySlot) {
+    C1964jsEmulator.prototype.r4300i_sw = function (i, isDelaySlot) {
         var a, string = '{' + this.helpers.setVAddr(i) + 'm.storeWord(' + this.helpers.RT(i) + ',t.vAddr';
 
         //So we can process exceptions
@@ -478,7 +481,7 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.delaySlot = function (i, likely) {
+    C1964jsEmulator.prototype.delaySlot = function (i, likely) {
         var pc, instruction, opcode, string;
 
         pc = (this.programCounter + offset + 4 + (this.helpers.soffset_imm(i) << 2)) | 0;
@@ -498,7 +501,7 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.r4300i_bne = function (i) {
+    C1964jsEmulator.prototype.r4300i_bne = function (i) {
         this.stopCompiling = true;
         var string = 'if ((' + this.helpers.RS(i) + '!==' + this.helpers.RT(i) + ')||(' + this.helpers.RSH(i) + '!==' + this.helpers.RTH(i) + ')){';
 
@@ -506,7 +509,7 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.r4300i_beq = function (i) {
+    C1964jsEmulator.prototype.r4300i_beq = function (i) {
         this.stopCompiling = true;
         var string = 'if ((' + this.helpers.RS(i) + '===' + this.helpers.RT(i) + ')&&(' + this.helpers.RSH(i) + '===' + this.helpers.RTH(i) + ')){';
 
@@ -514,7 +517,7 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.r4300i_bnel = function (i) {
+    C1964jsEmulator.prototype.r4300i_bnel = function (i) {
         this.stopCompiling = true;
         var string = 'if ((' + this.helpers.RS(i) + '!==' + this.helpers.RT(i) + ')||(' + this.helpers.RSH(i) + '!==' + this.helpers.RTH(i) + ')){';
 
@@ -522,7 +525,7 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.r4300i_blez = function (i) {
+    C1964jsEmulator.prototype.r4300i_blez = function (i) {
         this.stopCompiling = true;
         var string = 'if ((' + this.helpers.RSH(i) + '<0)||((' + this.helpers.RSH(i) + '===0)&&(' + this.helpers.RS(i) + '===0))){';
 
@@ -530,7 +533,7 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.r4300i_blezl = function (i) {
+    C1964jsEmulator.prototype.r4300i_blezl = function (i) {
         this.stopCompiling = true;
         var string = 'if ((' + this.helpers.RSH(i) + '<0)||((' + this.helpers.RSH(i) + '===0)&&(' + this.helpers.RS(i) + '===0))){';
 
@@ -538,7 +541,7 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.r4300i_bgez = function (i) {
+    C1964jsEmulator.prototype.r4300i_bgez = function (i) {
         this.stopCompiling = true;
         var string = 'if (' + this.helpers.RSH(i) + '>=0){';
 
@@ -546,7 +549,7 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.r4300i_bgezl = function (i) {
+    C1964jsEmulator.prototype.r4300i_bgezl = function (i) {
         this.stopCompiling = true;
         var string = 'if (' + this.helpers.RSH(i) + '>=0){';
 
@@ -554,7 +557,7 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.r4300i_bgtzl = function (i) {
+    C1964jsEmulator.prototype.r4300i_bgtzl = function (i) {
         this.stopCompiling = true;
         var string = 'if ((' + this.helpers.RSH(i) + '>0)||((' + this.helpers.RSH(i) + '===0)&&(' + this.helpers.RS(i) + '!==0))){';
 
@@ -562,7 +565,7 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.r4300i_bltzl = function (i) {
+    C1964jsEmulator.prototype.r4300i_bltzl = function (i) {
         this.stopCompiling = true;
         var string = 'if (' + this.helpers.RSH(i) + '<0){';
 
@@ -570,7 +573,7 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.r4300i_bgezal = function (i) {
+    C1964jsEmulator.prototype.r4300i_bgezal = function (i) {
         this.stopCompiling = true;
         var link, string = 'if (' + this.helpers.RSH(i) + '>=0){';
 
@@ -582,7 +585,7 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.r4300i_bgezall = function (i) {
+    C1964jsEmulator.prototype.r4300i_bgezall = function (i) {
         this.stopCompiling = true;
         var link, string = 'if (' + this.helpers.RSH(i) + '>=0){';
 
@@ -594,7 +597,7 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.r4300i_bltz = function (i) {
+    C1964jsEmulator.prototype.r4300i_bltz = function (i) {
         this.stopCompiling = true;
         var string = 'if (' + this.helpers.RSH(i) + '<0){';
 
@@ -602,7 +605,7 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.r4300i_bgtz = function (i) {
+    C1964jsEmulator.prototype.r4300i_bgtz = function (i) {
         this.stopCompiling = true;
         var string = 'if ((' + this.helpers.RSH(i) + '>0)||((' + this.helpers.RSH(i) + '===0)&&(' + this.helpers.RS(i) + '!==0))){';
 
@@ -610,7 +613,7 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.r4300i_beql = function (i) {
+    C1964jsEmulator.prototype.r4300i_beql = function (i) {
         this.stopCompiling = true;
         var string = 'if ((' + this.helpers.RS(i) + '===' + this.helpers.RT(i) + ')&&(' + this.helpers.RSH(i) + '===' + this.helpers.RTH(i) + ')){';
 
@@ -618,7 +621,7 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.r4300i_COP1_bc1f = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_bc1f = function (i) {
         this.stopCompiling = true;
         var string = 'if((t.cp1Con[31]&0x00800000)===0){';
 
@@ -626,7 +629,7 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.r4300i_COP1_bc1t = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_bc1t = function (i) {
         this.stopCompiling = true;
         var string = 'if((t.cp1Con[31]&0x00800000)!==0){';
 
@@ -634,7 +637,7 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.r4300i_COP1_bc1tl = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_bc1tl = function (i) {
         this.stopCompiling = true;
         var string = 'if((t.cp1Con[31]&0x00800000)!==0){';
 
@@ -642,7 +645,7 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.r4300i_COP1_bc1fl = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_bc1fl = function (i) {
         this.stopCompiling = true;
         var string = 'if((t.cp1Con[31]&0x00800000)===0){';
 
@@ -650,7 +653,7 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.r4300i_j = function (i) {
+    C1964jsEmulator.prototype.r4300i_j = function (i) {
         this.stopCompiling = true;
 
         var opcode, instruction, string = '{', instr_index = (((((this.programCounter + offset + 4) & 0xF0000000)) | ((i & 0x03FFFFFF) << 2)) | 0);
@@ -670,7 +673,7 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.r4300i_jal = function (i) {
+    C1964jsEmulator.prototype.r4300i_jal = function (i) {
         this.stopCompiling = true;
 
         var pc, opcode, instruction, string = '{', instr_index = (((((this.programCounter + offset + 4) & 0xF0000000)) | ((i & 0x03FFFFFF) << 2)) | 0);
@@ -686,7 +689,7 @@ var C1964jsEmulator = function (userSettings) {
     };
 
     //should we set the programCounter after the delay slot or before it?
-    this.r4300i_jalr = function (i) {
+    C1964jsEmulator.prototype.r4300i_jalr = function (i) {
         this.stopCompiling = true;
 
         var instruction, opcode, link, string = '{var temp=' + this.helpers.RS(i) + ';';
@@ -703,7 +706,7 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.r4300i_jr = function (i) {
+    C1964jsEmulator.prototype.r4300i_jr = function (i) {
         this.stopCompiling = true;
 
         var instruction, opcode, string = '{var temp=' + this.helpers.RS(i) + ';';
@@ -717,12 +720,12 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.UNUSED = function (i) {
+    C1964jsEmulator.prototype.UNUSED = function (i) {
         this.log('warning: UNUSED');
         return '';
     };
 
-    this.r4300i_COP0_eret = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP0_eret = function (i) {
         this.stopCompiling = true;
 
         var string = '{if((t.cp0[' + consts.STATUS + ']&' + consts.ERL + ')!==0){alert("error epc");t.programCounter=t.cp0[' + consts.ERROREPC + '];';
@@ -732,7 +735,7 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.r4300i_COP0_mtc0 = function (i, isDelaySlot) {
+    C1964jsEmulator.prototype.r4300i_COP0_mtc0 = function (i, isDelaySlot) {
         var delaySlot, lpc;
 
         if (isDelaySlot === true) {
@@ -746,7 +749,7 @@ var C1964jsEmulator = function (userSettings) {
         return 't.helpers.inter_mtc0(r,' + this.helpers.fs(i) + ',' + this.helpers.rt(i) + ',' + delaySlot + ',' + lpc + ',t.cp0,t.interrupts);';
     };
 
-    this.r4300i_sll = function (i) {
+    C1964jsEmulator.prototype.r4300i_sll = function (i) {
         if ((i & 0x001FFFFF) === 0) {
             return '';
         }
@@ -754,45 +757,45 @@ var C1964jsEmulator = function (userSettings) {
         return '{' + this.helpers.tRD(i) + '=' + this.helpers.RT(i) + '<<' + this.helpers.sa(i) + ';' + this.helpers.tRDH(i) + '=' + this.helpers.RD(i) + '>>31}';
     };
 
-    this.r4300i_srl = function (i) {
+    C1964jsEmulator.prototype.r4300i_srl = function (i) {
         return '{' + this.helpers.tRD(i) + '=' + this.helpers.RT(i) + '>>>' + this.helpers.sa(i) + ';' + this.helpers.tRDH(i) + '=' + this.helpers.RD(i) + '>>31}';
     };
 
-    this.r4300i_ori = function (i) {
+    C1964jsEmulator.prototype.r4300i_ori = function (i) {
         return '{' + this.helpers.tRT(i) + '=' + this.helpers.RS(i) + '|' + this.helpers.offset_imm(i) + ';' + this.helpers.tRTH(i) + '=' + this.helpers.RSH(i) + ';}';
     };
 
-    this.r4300i_xori = function (i) {
+    C1964jsEmulator.prototype.r4300i_xori = function (i) {
         return '{' + this.helpers.tRT(i) + '=' + this.helpers.RS(i) + '^' + this.helpers.offset_imm(i) + ';' + this.helpers.tRTH(i) + '=' + this.helpers.RSH(i) + '^0;}';
     };
 
-    this.r4300i_andi = function (i) {
+    C1964jsEmulator.prototype.r4300i_andi = function (i) {
         return '{' + this.helpers.tRT(i) + '=' + this.helpers.RS(i) + '&' + this.helpers.offset_imm(i) + ';' + this.helpers.tRTH(i) + '=0;}';
     };
 
-    this.r4300i_addi = function (i) {
+    C1964jsEmulator.prototype.r4300i_addi = function (i) {
         return '{' + this.helpers.tRT(i) + '=' + this.helpers.RS(i) + '+' + this.helpers.soffset_imm(i) + ';' + this.helpers.tRTH(i) + '=' + this.helpers.RT(i) + '>>31;}';
     };
 
-    this.r4300i_addiu = function (i) {
+    C1964jsEmulator.prototype.r4300i_addiu = function (i) {
         return '{' + this.helpers.tRT(i) + '=' + this.helpers.RS(i) + '+' + this.helpers.soffset_imm(i) + ';' + this.helpers.tRTH(i) + '=' + this.helpers.RT(i) + '>>31;}';
     };
 
-    this.r4300i_slt = function (i) {
+    C1964jsEmulator.prototype.r4300i_slt = function (i) {
         return '{if(' + this.helpers.RSH(i) + '>' + this.helpers.RTH(i) + ')' + this.helpers.tRD(i) + '=0;'
             + 'else if(' + this.helpers.RSH(i) + '<' + this.helpers.RTH(i) + ')' + this.helpers.tRD(i) + '=1;'
             + 'else if(' + this.helpers.uRS(i) + '<' + this.helpers.uRT(i) + ')' + this.helpers.tRD(i) + '=1;'
             + 'else ' + this.helpers.tRD(i) + '=0;' + this.helpers.tRDH(i) + '=0;}';
     };
 
-    this.r4300i_sltu = function (i) {
+    C1964jsEmulator.prototype.r4300i_sltu = function (i) {
         return '{if(' + this.helpers.uRSH(i) + '>' + this.helpers.uRTH(i) + ')' + this.helpers.tRD(i) + '=0;'
             + 'else if(' + this.helpers.uRSH(i) + '<' + this.helpers.uRTH(i) + ')' + this.helpers.tRD(i) + '=1;'
             + 'else if(' + this.helpers.uRS(i) + '<' + this.helpers.uRT(i) + ')' + this.helpers.tRD(i) + '=1;'
             + 'else ' + this.helpers.tRD(i) + '=0;' + this.helpers.tRDH(i) + '=0;}';
     };
 
-    this.r4300i_slti = function (i) {
+    C1964jsEmulator.prototype.r4300i_slti = function (i) {
         var uoffset_imm_lo, soffset_imm_hi = (this.helpers.soffset_imm(i)) >> 31;
         uoffset_imm_lo = (this.helpers.soffset_imm(i)) >>> 0;
 
@@ -802,7 +805,7 @@ var C1964jsEmulator = function (userSettings) {
             + 'else ' + this.helpers.tRT(i) + '=0;' + this.helpers.tRTH(i) + '=0;}';
     };
 
-    this.r4300i_sltiu = function (i) {
+    C1964jsEmulator.prototype.r4300i_sltiu = function (i) {
         var uoffset_imm_lo, uoffset_imm_hi = (this.helpers.soffset_imm(i) >> 31) >>> 0;
         uoffset_imm_lo = (this.helpers.soffset_imm(i)) >>> 0;
 
@@ -812,41 +815,36 @@ var C1964jsEmulator = function (userSettings) {
             + 'else ' + this.helpers.tRT(i) + '=0;' + this.helpers.tRTH(i) + '=0;}';
     };
 
-    this.r4300i_cache = function (i) {
+    C1964jsEmulator.prototype.r4300i_cache = function (i) {
         this.log('todo: r4300i_cache');
         return '';
     };
 
-    this.r4300i_multu = function (i) {
+    C1964jsEmulator.prototype.r4300i_multu = function (i) {
         return 't.helpers.inter_multu(r,h,' + i + ');';
     };
 
-    this.r4300i_mult = function (i) {
+    C1964jsEmulator.prototype.r4300i_mult = function (i) {
         return 't.helpers.inter_mult(r,h,' + i + ');';
     };
 
-    this.r4300i_mflo = function (i) {
+    C1964jsEmulator.prototype.r4300i_mflo = function (i) {
         return '{' + this.helpers.tRD(i) + '=r[32];' + this.helpers.tRDH(i) + '=h[32];}';
     };
 
-    this.r4300i_mfhi = function (i) {
+    C1964jsEmulator.prototype.r4300i_mfhi = function (i) {
         return '{' + this.helpers.tRD(i) + '=r[33];' + this.helpers.tRDH(i) + '=h[33];}';
     };
 
-    this.r4300i_mtlo = function (i) {
+    C1964jsEmulator.prototype.r4300i_mtlo = function (i) {
         return '{r[32]=' + this.helpers.RS(i) + ';h[32]=' + this.helpers.RSH(i) + ';}';
     };
 
-    this.r4300i_mthi = function (i) {
+    C1964jsEmulator.prototype.r4300i_mthi = function (i) {
         return '{r[33]=' + this.helpers.RS(i) + ';h[33]=' + this.helpers.RSH(i) + ';}';
     };
 
-    //todo: timing
-    this.getCountRegister = function () {
-        return 1;
-    };
-
-    this.r4300i_COP0_mfc0 = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP0_mfc0 = function (i) {
         var string = '{';
 
         switch (this.helpers.fs(i)) {
@@ -863,63 +861,63 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.r4300i_lb = function (i) {
+    C1964jsEmulator.prototype.r4300i_lb = function (i) {
         return '{' + this.helpers.setVAddr(i) + this.helpers.tRT(i) + '=(m.loadByte(t.vAddr)<<24)>>24;' + this.helpers.tRTH(i) + '=' + this.helpers.RT(i) + '>>31}';
     };
 
-    this.r4300i_lbu = function (i) {
+    C1964jsEmulator.prototype.r4300i_lbu = function (i) {
         return '{' + this.helpers.setVAddr(i) + this.helpers.tRT(i) + '=(m.loadByte(t.vAddr))&0x000000ff;' + this.helpers.tRTH(i) + '=0;}';
     };
 
-    this.r4300i_lh = function (i) {
+    C1964jsEmulator.prototype.r4300i_lh = function (i) {
         return '{' + this.helpers.setVAddr(i) + this.helpers.tRT(i) + '=(m.loadHalf(t.vAddr)<<16)>>16;' + this.helpers.tRTH(i) + '=' + this.helpers.RT(i) + '>>31}';
     };
 
-    this.r4300i_lhu = function (i) {
+    C1964jsEmulator.prototype.r4300i_lhu = function (i) {
         return '{' + this.helpers.setVAddr(i) + this.helpers.tRT(i) + '=(m.loadHalf(t.vAddr))&0x0000ffff;' + this.helpers.tRTH(i) + '=0;}';
     };
 
-    this.r4300i_sb = function (i) {
+    C1964jsEmulator.prototype.r4300i_sb = function (i) {
         return '{' + this.helpers.setVAddr(i) + 'm.storeByte(' + this.helpers.RT(i) + ',t.vAddr);}';
     };
 
-    this.r4300i_sh = function (i) {
+    C1964jsEmulator.prototype.r4300i_sh = function (i) {
         return '{' + this.helpers.setVAddr(i) + 'm.storeHalf(' + this.helpers.RT(i) + ',t.vAddr);}';
     };
 
-    this.r4300i_srlv = function (i) {
+    C1964jsEmulator.prototype.r4300i_srlv = function (i) {
         return '{' + this.helpers.tRD(i) + '=' + this.helpers.RT(i) + '>>>(' + this.helpers.RS(i) + '&0x1f);' + this.helpers.tRDH(i) + '=' + this.helpers.RD(i) + '>>31;}';
     };
 
-    this.r4300i_sllv = function (i) {
+    C1964jsEmulator.prototype.r4300i_sllv = function (i) {
         return '{' + this.helpers.tRD(i) + '=' + this.helpers.RT(i) + '<<(' + this.helpers.RS(i) + '&0x1f);' + this.helpers.tRDH(i) + '=' + this.helpers.RD(i) + '>>31;}';
     };
 
-    this.r4300i_srav = function (i) {
+    C1964jsEmulator.prototype.r4300i_srav = function (i) {
         //optimization: r[hi] can safely right-shift rt
         return '{' + this.helpers.tRD(i) + '=' + this.helpers.RT(i) + '>>(' + this.helpers.RS(i) + '&0x1f);' + this.helpers.tRDH(i) + '=' + this.helpers.RT(i) + '>>31;}';
     };
 
-    this.r4300i_COP1_cfc1 = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_cfc1 = function (i) {
         if (this.helpers.fs(i) === 0 || this.helpers.fs(i) === 31) {
             return '{' + this.helpers.tRT(i) + '=t.cp1Con[' + this.helpers.fs(i) + '];' + this.helpers.tRTH(i) + '=t.cp1Con[' + this.helpers.fs(i) + ']>>31;}';
         }
     };
 
-    this.r4300i_COP1_ctc1 = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_ctc1 = function (i) {
         //incomplete:
         if (this.helpers.fs(i) === 31) {
             return 't.cp1Con[31]=' + this.helpers.RT(i) + ';';
         }
     };
 
-    this.r4300i_ld = function (i) {
+    C1964jsEmulator.prototype.r4300i_ld = function (i) {
         var string = '{' + this.helpers.setVAddr(i) + this.helpers.tRT(i) + '=m.loadWord((t.vAddr+4)|0);' + this.helpers.tRTH(i) + '=m.loadWord(t.vAddr);}';
 
         return string;
     };
 
-    this.r4300i_lld = function (i) {
+    C1964jsEmulator.prototype.r4300i_lld = function (i) {
         var string = '{' + this.helpers.setVAddr(i) + this.helpers.tRT(i) + '=m.loadWord((t.vAddr+4)|0);' + this.helpers.tRTH(i) + '=m.loadWord(t.vAddr);t.LLbit=1;}';
 
         return string;
@@ -928,7 +926,7 @@ var C1964jsEmulator = function (userSettings) {
     //address error exceptions in ld and sd are weird since this is split up 
     //into 2 reads or writes. i guess they're fatal exceptions, so
     //doesn't matter. 
-    this.r4300i_sd = function (i, isDelaySlot) {
+    C1964jsEmulator.prototype.r4300i_sd = function (i, isDelaySlot) {
         //lo
         var a, string = '{' + this.helpers.setVAddr(i) + 'm.storeWord(' + this.helpers.RT(i) + ',(t.vAddr+4)|0';
 
@@ -958,67 +956,67 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.r4300i_dmultu = function (i) {
+    C1964jsEmulator.prototype.r4300i_dmultu = function (i) {
         return 't.helpers.inter_dmultu(r,h,' + i + ');';
     };
 
-    this.r4300i_dsll32 = function (i) {
+    C1964jsEmulator.prototype.r4300i_dsll32 = function (i) {
         return '{' + this.helpers.tRDH(i) + '=' + this.helpers.RT(i) + '<<' + this.helpers.sa(i) + ';' + this.helpers.tRD(i) + '=0;}';
     };
 
-    this.r4300i_dsra32 = function (i) {
+    C1964jsEmulator.prototype.r4300i_dsra32 = function (i) {
         return '{' + this.helpers.tRD(i) + '=' + this.helpers.RTH(i) + '>>' + this.helpers.sa(i) + ';' + this.helpers.tRDH(i) + '=' + this.helpers.RTH(i) + '>>31;}';
     };
 
-    this.r4300i_ddivu = function (i) {
+    C1964jsEmulator.prototype.r4300i_ddivu = function (i) {
         return 't.helpers.inter_ddivu(r,h,' + i + ');';
     };
 
-    this.r4300i_ddiv = function (i) {
+    C1964jsEmulator.prototype.r4300i_ddiv = function (i) {
         return 't.helpers.inter_ddiv(r,h,' + i + ');';
     };
 
-    this.r4300i_dadd = function (i) {
+    C1964jsEmulator.prototype.r4300i_dadd = function (i) {
         this.log('todo: dadd');
 
         return '';
     };
 
-    this.r4300i_break = function (i) {
+    C1964jsEmulator.prototype.r4300i_break = function (i) {
         this.log('todo: break');
         return '';
     };
 
-    this.r4300i_COP0_tlbwi = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP0_tlbwi = function (i) {
         //var index = t.cp0[INDEX] & NTLBENTRIES;
         this.log('todo: tlbwi');
         return '';
     };
 
-    this.r4300i_div = function (i) {
+    C1964jsEmulator.prototype.r4300i_div = function (i) {
         return 't.helpers.inter_div(r,h,' + i + ');';
     };
 
-    this.r4300i_divu = function (i) {
+    C1964jsEmulator.prototype.r4300i_divu = function (i) {
         return 't.helpers.inter_divu(r,h,' + i + ');';
     };
 
-    this.r4300i_sra = function (i) {
+    C1964jsEmulator.prototype.r4300i_sra = function (i) {
         //optimization: sra's r[hi] can safely right-shift RT.
         return '{' + this.helpers.tRD(i) + '=' + this.helpers.RT(i) + '>>' + this.helpers.sa(i) + ';' + this.helpers.tRDH(i) + '=' + this.helpers.RT(i) + '>>31;}';
     };
 
-    this.r4300i_COP0_tlbp = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP0_tlbp = function (i) {
         this.log('todo: tlbp');
         return '';
     };
 
-    this.r4300i_COP0_tlbr = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP0_tlbr = function (i) {
         this.log('todo: tlbr');
         return '';
     };
 
-    this.r4300i_lwl = function (i) {
+    C1964jsEmulator.prototype.r4300i_lwl = function (i) {
         var string = '{' + this.helpers.setVAddr(i);
 
         string += 'var vAddrAligned=(t.vAddr&0xfffffffc)|0;var value=m.loadWord(vAddrAligned);';
@@ -1031,7 +1029,7 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.r4300i_lwr = function (i) {
+    C1964jsEmulator.prototype.r4300i_lwr = function (i) {
         var string = '{' + this.helpers.setVAddr(i);
 
         string += 'var vAddrAligned=(t.vAddr&0xfffffffc)|0;var value=m.loadWord(vAddrAligned);';
@@ -1044,7 +1042,7 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.r4300i_swl = function (i) {
+    C1964jsEmulator.prototype.r4300i_swl = function (i) {
         var string = '{' + this.helpers.setVAddr(i);
 
         string += 'var vAddrAligned=(t.vAddr&0xfffffffc)|0;var value=m.loadWord(vAddrAligned);';
@@ -1057,7 +1055,7 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.r4300i_swr = function (i) {
+    C1964jsEmulator.prototype.r4300i_swr = function (i) {
         var string = '{' + this.helpers.setVAddr(i);
 
         string += 'var vAddrAligned=(t.vAddr&0xfffffffc)|0;var value=m.loadWord(vAddrAligned);';
@@ -1070,18 +1068,18 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.r4300i_lwc1 = function (i) {
+    C1964jsEmulator.prototype.r4300i_lwc1 = function (i) {
         return '{' + this.helpers.setVAddr(i) + 't.cp1_i[' + this.helpers.FT32ArrayView(i) + ']=m.loadWord(t.vAddr);}';
     };
 
-    this.r4300i_ldc1 = function (i) {
+    C1964jsEmulator.prototype.r4300i_ldc1 = function (i) {
         var string = '{' + this.helpers.setVAddr(i) + 't.cp1_i[' + this.helpers.FT32ArrayView(i) + ']=m.loadWord((t.vAddr+4)|0);';
         string += 't.cp1_i[' + this.helpers.FT32HIArrayView(i) + ']=m.loadWord((t.vAddr)|0);}';
 
         return string;
     };
 
-    this.r4300i_swc1 = function (i, isDelaySlot) {
+    C1964jsEmulator.prototype.r4300i_swc1 = function (i, isDelaySlot) {
         var a, string = '{' + this.helpers.setVAddr(i) + 'm.storeWord(t.cp1_i[' + this.helpers.FT32ArrayView(i) + '],t.vAddr';
 
         //So we can process exceptions
@@ -1096,7 +1094,7 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.r4300i_sdc1 = function (i, isDelaySlot) {
+    C1964jsEmulator.prototype.r4300i_sdc1 = function (i, isDelaySlot) {
         var a, string = '{' + this.helpers.setVAddr(i) + 'm.storeWord(t.cp1_i[' + this.helpers.FT32ArrayView(i) + '],(t.vAddr+4)|0';
 
         //So we can process exceptions
@@ -1124,309 +1122,309 @@ var C1964jsEmulator = function (userSettings) {
         return string;
     };
 
-    this.r4300i_COP1_mtc1 = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_mtc1 = function (i) {
         return 't.cp1_i[' + this.helpers.FS32ArrayView(i) + ']=' + this.helpers.RT(i) + ';';
     };
 
-    this.r4300i_COP1_mfc1 = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_mfc1 = function (i) {
         return '{' + this.helpers.tRT(i) + '=t.cp1_i[' + this.helpers.FS32ArrayView(i) + '];' + this.helpers.tRTH(i) + '=' + this.helpers.RT(i) + '>>31;}';
     };
 
-    this.r4300i_COP1_cvts_w = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_cvts_w = function (i) {
         return 't.cp1_f[' + this.helpers.FD32ArrayView(i) + ']=t.cp1_i[' + this.helpers.FS32ArrayView(i) + '];';
     };
 
-    this.r4300i_COP1_cvtw_s = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_cvtw_s = function (i) {
         return 't.cp1_i[' + this.helpers.FD32ArrayView(i) + ']=t.cp1_f[' + this.helpers.FS32ArrayView(i) + '];';
     };
 
-    this.r4300i_COP1_div_s = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_div_s = function (i) {
         return 't.cp1_f[' + this.helpers.FD32ArrayView(i) + ']=t.cp1_f[' + this.helpers.FS32ArrayView(i) + ']/t.cp1_f[' + this.helpers.FT32ArrayView(i) + '];';
     };
 
-    this.r4300i_COP1_div_d = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_div_d = function (i) {
         return 't.cp1_f64[' + this.helpers.FD64ArrayView(i) + ']=t.cp1_f64[' + this.helpers.FS64ArrayView(i) + ']/t.cp1_f64[' + this.helpers.FT64ArrayView(i) + '];';
     };
 
-    this.r4300i_COP1_mul_s = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_mul_s = function (i) {
         return 't.cp1_f[' + this.helpers.FD32ArrayView(i) + ']=t.cp1_f[' + this.helpers.FS32ArrayView(i) + ']*t.cp1_f[' + this.helpers.FT32ArrayView(i) + '];';
     };
 
-    this.r4300i_COP1_mul_d = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_mul_d = function (i) {
         return 't.cp1_f64[' + this.helpers.FD64ArrayView(i) + ']=t.cp1_f64[' + this.helpers.FS64ArrayView(i) + ']*t.cp1_f64[' + this.helpers.FT64ArrayView(i) + '];';
     };
 
-    this.r4300i_COP1_mov_s = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_mov_s = function (i) {
         return 't.cp1_i[' + this.helpers.FD32ArrayView(i) + ']=t.cp1_i[' + this.helpers.FS32ArrayView(i) + '];';
     };
 
-    this.r4300i_COP1_mov_d = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_mov_d = function (i) {
         return 't.cp1_f64[' + this.helpers.FD32ArrayView(i) + ']=t.cp1_f64[' + this.helpers.FS32ArrayView(i) + '];';
     };
 
-    this.r4300i_COP1_add_s = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_add_s = function (i) {
         return 't.cp1_f[' + this.helpers.FD32ArrayView(i) + ']=t.cp1_f[' + this.helpers.FS32ArrayView(i) + ']+t.cp1_f[' + this.helpers.FT32ArrayView(i) + '];';
     };
 
-    this.r4300i_COP1_sub_s = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_sub_s = function (i) {
         return 't.cp1_f[' + this.helpers.FD32ArrayView(i) + ']=t.cp1_f[' + this.helpers.FS32ArrayView(i) + ']-t.cp1_f[' + this.helpers.FT32ArrayView(i) + '];';
     };
 
-    this.r4300i_COP1_cvtd_s = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_cvtd_s = function (i) {
         return 't.cp1_f64[' + this.helpers.FD64ArrayView(i) + ']=t.cp1_f[' + this.helpers.FS32ArrayView(i) + '];';
     };
 
-    this.r4300i_COP1_cvtd_w = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_cvtd_w = function (i) {
         return 't.cp1_f64[' + this.helpers.FD64ArrayView(i) + ']=t.cp1_i[' + this.helpers.FS32ArrayView(i) + '];';
     };
 
-    this.r4300i_COP1_cvts_d = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_cvts_d = function (i) {
         return 't.cp1_f[' + this.helpers.FD32ArrayView(i) + ']=t.cp1_f64[' + this.helpers.FS64ArrayView(i) + '];';
     };
 
-    this.r4300i_COP1_cvtw_d = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_cvtw_d = function (i) {
         return 't.cp1_i[' + this.helpers.FD32ArrayView(i) + ']=t.cp1_f64[' + this.helpers.FS64ArrayView(i) + '];';
     };
 
-    this.r4300i_COP1_add_d = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_add_d = function (i) {
         return 't.cp1_f64[' + this.helpers.FD64ArrayView(i) + ']=t.cp1_f64[' + this.helpers.FS64ArrayView(i) + ']+t.cp1_f64[' + this.helpers.FT64ArrayView(i) + '];';
     };
 
-    this.r4300i_COP1_sub_d = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_sub_d = function (i) {
         return 't.cp1_f64[' + this.helpers.FD64ArrayView(i) + ']=t.cp1_f64[' + this.helpers.FS64ArrayView(i) + ']-t.cp1_f64[' + this.helpers.FT64ArrayView(i) + '];';
     };
 
     //todo:rounding
-    this.r4300i_COP1_truncw_d = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_truncw_d = function (i) {
         return 't.cp1_i[' + this.helpers.FD32ArrayView(i) + ']=t.cp1_f64[' + this.helpers.FS64ArrayView(i) + '];';
     };
 
-    this.r4300i_COP1_truncw_s = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_truncw_s = function (i) {
         return 't.cp1_i[' + this.helpers.FD32ArrayView(i) + ']=t.cp1_f[' + this.helpers.FS32ArrayView(i) + '];';
     };
 
-    this.r4300i_COP1_neg_s = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_neg_s = function (i) {
         return 't.cp1_i[' + this.helpers.FD32ArrayView(i) + ']=t.cp1_i[' + this.helpers.FS32ArrayView(i) + ']^0x80000000;';
     };
 
-    this.r4300i_COP1_neg_d = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_neg_d = function (i) {
         return 't.cp1_i[' + this.helpers.FD32HIArrayView(i) + ']=t.cp1_i[' + this.helpers.FS32HIArrayView(i) + ']^0x80000000;';
     };
 
-    this.r4300i_COP1_abs_s = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_abs_s = function (i) {
         return 't.cp1_i[' + this.helpers.FD32ArrayView(i) + ']=t.cp1_i[' + this.helpers.FS32ArrayView(i) + ']&0x7fffffff;';
     };
 
-    this.r4300i_COP1_abs_d = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_abs_d = function (i) {
         return 't.cp1_i[' + this.helpers.FD32HIArrayView(i) + ']=t.cp1_i[' + this.helpers.FS32HIArrayView(i) + ']&0x7fffffff;';
     };
 
-    this.r4300i_COP1_sqrt_s = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_sqrt_s = function (i) {
         return 't.cp1_f[' + this.helpers.FD32ArrayView(i) + ']=Math.sqrt(t.cp1_f[' + this.helpers.FS32ArrayView(i) + ']);';
     };
 
-    this.r4300i_COP1_sqrt_d = function (i) {
+    C1964jsEmulator.prototype.r4300i_COP1_sqrt_d = function (i) {
         return 't.cp1_f64[' + this.helpers.FD64ArrayView(i) + ']=Math.sqrt(t.cp1_f64[' + this.helpers.FS64ArrayView(i) + ']);';
     };
 
-    this.r4300i_sync = function (i) {
+    C1964jsEmulator.prototype.r4300i_sync = function (i) {
         this.log('todo: sync');
         return '';
     };
 
-    this.r4300i_sdr = function (i) {
+    C1964jsEmulator.prototype.r4300i_sdr = function (i) {
         this.log('todo: sdr');
         return '';
     };
 
-    this.r4300i_ldr = function (i) {
+    C1964jsEmulator.prototype.r4300i_ldr = function (i) {
         this.log('todo: ldr');
         return '';
     };
 
-    this.r4300i_sdl = function (i) {
+    C1964jsEmulator.prototype.r4300i_sdl = function (i) {
         this.log('todo: sdl');
         return '';
     };
 
-    this.r4300i_ldl = function (i) {
+    C1964jsEmulator.prototype.r4300i_ldl = function (i) {
         this.log('todo: ldl');
         return '';
     };
 
-    this.r4300i_sc = function (i) {
+    C1964jsEmulator.prototype.r4300i_sc = function (i) {
         this.log('todo: sc');
         return '';
     };
 
-    this.r4300i_scd = function (i) {
+    C1964jsEmulator.prototype.r4300i_scd = function (i) {
         this.log('todo: scd');
         return '';
     };
 
-    this.r4300i_daddi = function (i) {
+    C1964jsEmulator.prototype.r4300i_daddi = function (i) {
         return 't.helpers.inter_daddi(r,h,' + i + ');';
     };
 
-    this.r4300i_teq = function (i) {
+    C1964jsEmulator.prototype.r4300i_teq = function (i) {
         this.log('todo: r4300i_teq');
         return '';
     };
 
-    this.r4300i_tgeu = function (i) {
+    C1964jsEmulator.prototype.r4300i_tgeu = function (i) {
         this.log('todo: r4300i_tgeu');
         return '';
     };
 
-    this.r4300i_tlt = function (i) {
+    C1964jsEmulator.prototype.r4300i_tlt = function (i) {
         this.log('todo: r4300i_tlt');
         return '';
     };
 
-    this.r4300i_tltu = function (i) {
+    C1964jsEmulator.prototype.r4300i_tltu = function (i) {
         this.log('todo: r4300i_tltu');
         return '';
     };
 
-    this.r4300i_tne = function (i) {
+    C1964jsEmulator.prototype.r4300i_tne = function (i) {
         this.log('todo: r4300i_tne');
         return '';
     };
 
     //using same as daddi
-    this.r4300i_daddiu = function (i) {
+    C1964jsEmulator.prototype.r4300i_daddiu = function (i) {
         return 't.helpers.inter_daddiu(r,h,' + i + ');';
     };
 
-    this.r4300i_daddu = function (i) {
+    C1964jsEmulator.prototype.r4300i_daddu = function (i) {
         return 't.helpers.inter_daddu(r,h,' + i + ');';
     };
 
-	this.r4300i_C_F_S = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_F_S = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
     };
 
-	this.r4300i_C_UN_S = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_UN_S = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
     };
 
-	this.r4300i_C_EQ_S = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_EQ_S = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
     };
 
-	this.r4300i_C_UEQ_S = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_UEQ_S = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
     };
 
-	this.r4300i_C_OLT_S = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_OLT_S = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
     };
 
-	this.r4300i_C_ULT_S = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_ULT_S = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
     };
 
-	this.r4300i_C_OLE_S = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_OLE_S = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
     };
 
-	this.r4300i_C_ULE_S = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_ULE_S = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
     };
 
-	this.r4300i_C_SF_S = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_SF_S = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
     };
 
-	this.r4300i_C_NGLE_S = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_NGLE_S = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
     };
 
-	this.r4300i_C_SEQ_S = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_SEQ_S = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
     };
 
-	this.r4300i_C_NGL_S = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_NGL_S = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
     };
 
-	this.r4300i_C_LT_S = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_LT_S = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
     };
 
-	this.r4300i_C_NGE_S = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_NGE_S = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
     };
 
-	this.r4300i_C_LE_S = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_LE_S = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
     };
 
-	this.r4300i_C_NGT_S = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_NGT_S = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_s(' + i + ',t.cp1Con,t.cp1_f);';
     };
 
-	this.r4300i_C_F_D = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_F_D = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
     };
 
-	this.r4300i_C_UN_D = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_UN_D = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
     };
 
-	this.r4300i_C_EQ_D = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_EQ_D = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
     };
 
-	this.r4300i_C_UEQ_D = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_UEQ_D = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
     };
 
-	this.r4300i_C_OLT_D = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_OLT_D = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
     };
 
-	this.r4300i_C_ULT_D = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_ULT_D = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
     };
 
-	this.r4300i_C_OLE_D = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_OLE_D = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
     };
 
-	this.r4300i_C_ULE_D = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_ULE_D = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
     };
 
-	this.r4300i_C_SF_D = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_SF_D = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
     };
 
-	this.r4300i_C_NGLE_D = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_NGLE_D = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
     };
 
-	this.r4300i_C_SEQ_D = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_SEQ_D = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
     };
 
-	this.r4300i_C_NGL_D = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_NGL_D = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
     };
 
-	this.r4300i_C_LT_D = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_LT_D = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
     };
 
-	this.r4300i_C_NGE_D = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_NGE_D = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
     };
 
-	this.r4300i_C_LE_D = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_LE_D = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
     };
 
-	this.r4300i_C_NGT_D = function (i) {
+    C1964jsEmulator.prototype.r4300i_C_NGT_D = function (i) {
         return 't.helpers.inter_r4300i_C_cond_fmt_d(' + i + ',t.cp1Con,t.cp1_f64);';
     };
-};
+}());

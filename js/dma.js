@@ -26,6 +26,7 @@ function log(message) {
 }
 
 C1964jsEmulator.prototype.flushDynaCache = function () {
+    "use strict";
     var pc;
     if (this.writeToDom === false) {
         for (pc in this.code) {
@@ -46,41 +47,36 @@ C1964jsEmulator.prototype.flushDynaCache = function () {
 };
 
 C1964jsEmulator.prototype.deleteFunction = function (k) {
+    "use strict";
     //log('cleanup');
-    var pc, splitResult, s = document.getElementsByTagName('script')[k];
+    var fnName, splitResult, s = document.getElementsByTagName('script')[k];
     splitResult = s.text.split('_');
     splitResult = splitResult[1].split('(');
 
-    pc = '_' + splitResult[0];
-   // s.text = '';
-
-    s.parentNode.removeChild(s);
-
-    splitResult = s.text.split('_');
-   
-    //allow deletion of this function
-    eval(pc + '= function (r){}; delete ' + pc + ';');
+    fnName = '_' + splitResult[0];
  
-   // log('now it is:' + s.text + '.');
-
-    fnName = pc; 
+    s.parentNode.removeChild(s);
+   
     window[fnName] = null;
-    //log(s.text);
-
+ 
     if (window[fnName])
         alert('blah');
 };
 
 var C1964jsDMA = function (memory, interrupts, pif) {
-
-    var audioContext;
-    var audioBuffer;
+    "use strict";
     this.startTime = 0;
-
     this.memory = memory;
     this.interrupts = interrupts;
+    this.pif = pif;
+};
 
-    this.copyCartToDram = function (pc, isDelaySlot) {
+(function () {
+    "use strict";
+    var audioContext;
+    var audioBuffer;
+
+    C1964jsDMA.prototype.copyCartToDram = function (pc, isDelaySlot) {
     	var end = this.memory.getInt32(this.memory.piUint8Array, this.memory.piUint8Array, consts.PI_WR_LEN_REG);
     	var to = this.memory.getInt32(this.memory.piUint8Array, this.memory.piUint8Array, consts.PI_DRAM_ADDR_REG);
         var from = this.memory.getInt32(this.memory.piUint8Array, this.memory.piUint8Array, consts.PI_CART_ADDR_REG);
@@ -100,13 +96,13 @@ var C1964jsDMA = function (memory, interrupts, pif) {
 
             //the ROM buffer size could be less than the amount requested
             //because the file is not padded with zeros.
-            if (from+end+1 > memory.rom.byteLength) {
-                transfer = memory.rom.byteLength-from-1;
+            if (from+end+1 > this.memory.rom.byteLength) {
+                transfer = this.memory.rom.byteLength-from-1;
                 remaining = end - transfer;
             }
 
             for (; transfer>=0; --transfer) {
-                memory.rdramUint8Array[to] = memory.romUint8Array[from];
+                this.memory.rdramUint8Array[to] = this.memory.romUint8Array[from];
                 to++;
                 from++;
             }
@@ -116,7 +112,7 @@ var C1964jsDMA = function (memory, interrupts, pif) {
             alert('pi reading from somewhere other than cartridge domain');
         
             while (end-- >= 0) {
-                memory.rdramUint8Array[to] = memory.loadByte(from);
+                this.memory.rdramUint8Array[to] = this.memory.loadByte(from);
                 from++;
                 to++;
             }
@@ -128,7 +124,7 @@ var C1964jsDMA = function (memory, interrupts, pif) {
         this.interrupts.triggerPIInterrupt(pc, isDelaySlot);
     };
 
-    this.copySiToDram = function (pc, isDelaySlot) {
+    C1964jsDMA.prototype.copySiToDram = function (pc, isDelaySlot) {
         var end = 63; //read 64 bytes. Is there an si_wr_len_reg?
         var to = this.memory.getInt32(this.memory.siUint8Array, this.memory.siUint8Array, consts.SI_DRAM_ADDR_REG);
         var from = this.memory.getInt32(this.memory.siUint8Array, this.memory.siUint8Array, consts.SI_PIF_ADDR_RD64B_REG);
@@ -142,7 +138,7 @@ var C1964jsDMA = function (memory, interrupts, pif) {
         to &= 0x0fffffff;
         from &= 0x0000ffff;
 
-        pif.processPif();
+        this.pif.processPif();
 
         for (; end>=0; --end) {
             this.memory.rdramUint8Array[to] = this.memory.pifUint8Array[from];
@@ -154,7 +150,7 @@ var C1964jsDMA = function (memory, interrupts, pif) {
         this.interrupts.triggerSIInterrupt(pc, isDelaySlot);
     };
 
-    this.copyDramToAi = function (pc, isDelaySlot)
+    C1964jsDMA.prototype.copyDramToAi = function (pc, isDelaySlot)
     {
         var length = this.memory.getInt32(this.memory.aiUint8Array, this.memory.aiUint8Array, consts.AI_LEN_REG);
         var from = this.memory.getInt32(this.memory.aiUint8Array, this.memory.aiUint8Array, consts.AI_DRAM_ADDR_REG);
@@ -170,7 +166,7 @@ var C1964jsDMA = function (memory, interrupts, pif) {
     };
 
     //this function doesn't belong in dma
-    this.processAudio = function (from, length) {
+    C1964jsDMA.prototype.processAudio = function (from, length) {
         try {
             if (audioContext === "unsupported")
                 return;
@@ -210,7 +206,7 @@ var C1964jsDMA = function (memory, interrupts, pif) {
         source.noteOn(this.startTime);
     };
 
-    this.copyDramToSi = function (pc, isDelaySlot) {
+    C1964jsDMA.prototype.copyDramToSi = function (pc, isDelaySlot) {
         var end = 63; //read 64 bytes. Is there an si_rd_len_reg?
         var to = this.memory.getInt32(this.memory.siUint8Array, this.memory.siUint8Array, consts.SI_PIF_ADDR_WR64B_REG);
         var from = this.memory.getInt32(this.memory.siUint8Array, this.memory.siUint8Array, consts.SI_DRAM_ADDR_REG);
@@ -230,16 +226,16 @@ var C1964jsDMA = function (memory, interrupts, pif) {
             from++;
         }
 
-        pif.processPif();
+        this.pif.processPif();
         this.interrupts.setFlag(this.memory.siUint8Array, consts.SI_STATUS_REG, consts.SI_STATUS_INTERRUPT);
         this.interrupts.triggerSIInterrupt(pc, isDelaySlot);
     };
 
-    this.copySpToDram = function (pc, isDelaySlot) {
+    C1964jsDMA.prototype.copySpToDram = function (pc, isDelaySlot) {
         alert('todo: copySpToDram');
     };
 
-    this.copyDramToSp = function (pc, isDelaySlot) {
+    C1964jsDMA.prototype.copyDramToSp = function (pc, isDelaySlot) {
         var end = this.memory.getInt32(this.memory.spReg1Uint8Array, this.memory.spReg1Uint8Array, consts.SP_RD_LEN_REG);
         var to = this.memory.getInt32(this.memory.spReg1Uint8Array, this.memory.spReg1Uint8Array, consts.SP_MEM_ADDR_REG);
         var from = this.memory.getInt32(this.memory.spReg1Uint8Array, this.memory.spReg1Uint8Array, consts.SP_DRAM_ADDR_REG);
@@ -265,4 +261,4 @@ var C1964jsDMA = function (memory, interrupts, pif) {
         //hack for now
         //triggerDPInterrupt(0, false);
     };
-}
+}());
