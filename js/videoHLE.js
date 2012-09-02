@@ -25,23 +25,23 @@ var C1964jsVideoHLE = function(core, glx) {
     //todo: make gRSP a class object.
     var RICE_MATRIX_STACK = 60
     var MAX_TEXTURES = 8
-    var vtxTransformed = new Array(MAX_VERTS);
-    var vtxNonTransformed = new Array(MAX_VERTS);
-    var vecProjected = new Array(MAX_VERTS);
+    var vtxTransformed = new Array(consts.MAX_VERTS);
+    var vtxNonTransformed = new Array(consts.MAX_VERTS);
+    var vecProjected = new Array(consts.MAX_VERTS);
     var	vtxProjected5 = new Array(1000);
     var gRSP = new Object();
     var matToLoad = mat4.create();
     var gRSPworldProject = mat4.create();
     var triangleVertexPositionBuffer;
     var dlistStackPointer = 0;
-    var dlistStack = new Array(MAX_DL_STACK_SIZE);
+    var dlistStack = new Array(consts.MAX_DL_STACK_SIZE);
     var renderer = new C1964jsRenderer(core.settings, core.webGL.gl, core.webGL);
     var texImg = new Object();
     this.segments = new Array(16);
     //todo: different microcodes support
     var currentMicrocodeMap = microcodeMap0;
 
-    for (var i=0; i<MAX_DL_STACK_SIZE; i++)
+    for (var i=0; i<consts.MAX_DL_STACK_SIZE; i++)
         dlistStack[i] = new Object();
     for (var i=0; i<this.segments.length; i++)
         this.segments[i] = 0;
@@ -80,8 +80,8 @@ var C1964jsVideoHLE = function(core, glx) {
 
     this.dlParserProcess = function() {
         dlistStackPointer = 0;
-        dlistStack[dlistStackPointer].pc = core.memory.getInt32(core.memory.spMemUint8Array, core.memory.spMemUint8Array, TASK_DATA_PTR);
-        dlistStack[dlistStackPointer].countdown = MAX_DL_COUNT;
+        dlistStack[dlistStackPointer].pc = core.memory.getInt32(core.memory.spMemUint8Array, core.memory.spMemUint8Array, consts.TASK_DATA_PTR);
+        dlistStack[dlistStackPointer].countdown = consts.MAX_DL_COUNT;
 
         this.vertices = [];
         this.trivertices = [];
@@ -323,11 +323,11 @@ var C1964jsVideoHLE = function(core, glx) {
         
         var param = this.getGbi0DlistParam(pc);
         
-        if (param === RSP_DLIST_PUSH)
+        if (param === consts.RSP_DLIST_PUSH)
             dlistStackPointer++;
             
         dlistStack[dlistStackPointer].pc = addr;
-        dlistStack[dlistStackPointer].countdown = MAX_DL_COUNT;
+        dlistStack[dlistStackPointer].countdown = consts.MAX_DL_COUNT;
     }
 
     this.DLParser_SetCombine = function(pc)
@@ -341,17 +341,17 @@ var C1964jsVideoHLE = function(core, glx) {
         
         switch (this.getGbi0MoveWordType(pc))
     	{
-    	case RSP_MOVE_WORD_MATRIX:
+    	case consts.RSP_MOVE_WORD_MATRIX:
     		this.RSP_RDP_InsertMatrix();
     		break;
-    	case RSP_MOVE_WORD_NUMLIGHT:
+    	case consts.RSP_MOVE_WORD_NUMLIGHT:
     		{
     //			uint32 dwNumLights = (((gfx->gbi0moveword.value)-0x80000000)/32)-1;
     //			gRSP.ambientLightIndex = dwNumLights;
     //			SetNumLights(dwNumLights);
     		}
     		break;
-    	case RSP_MOVE_WORD_CLIP:
+    	case consts.RSP_MOVE_WORD_CLIP:
     		{
     //			switch (gfx->gbi0moveword.offset)
     //			{
@@ -366,14 +366,14 @@ var C1964jsVideoHLE = function(core, glx) {
     //			}
     		}
     		break;
-    	case RSP_MOVE_WORD_SEGMENT:
+    	case consts.RSP_MOVE_WORD_SEGMENT:
     		{
                 var dwSegment = (this.getGbi0MoveWordOffset(pc) >> 2) & 0x0F;
                 var dwBase = this.getGbi0MoveWordValue(pc)&0x00FFFFFF;
                 this.segments[dwSegment] = dwBase;
     		}
     		break;
-    	case RSP_MOVE_WORD_FOG:
+    	case consts.RSP_MOVE_WORD_FOG:
     //		{
     //			uint16 wMult = (uint16)(((gfx->gbi0moveword.value) >> 16) & 0xFFFF);
     //			uint16 wOff  = (uint16)(((gfx->gbi0moveword.value)      ) & 0xFFFF);
@@ -398,7 +398,7 @@ var C1964jsVideoHLE = function(core, glx) {
     //			SetFogMinMax(fMin, fMax, fMult, fOff);
     //		}
     		break;
-    	case RSP_MOVE_WORD_LIGHTCOL:
+    	case consts.RSP_MOVE_WORD_LIGHTCOL:
     /*		{
     			uint32 dwLight = gfx->gbi0moveword.offset / 0x20;
     			uint32 dwField = (gfx->gbi0moveword.offset & 0x7);
@@ -424,14 +424,14 @@ var C1964jsVideoHLE = function(core, glx) {
     			}
     		}
     */		break;
-    	case RSP_MOVE_WORD_POINTS:
+    	case consts.RSP_MOVE_WORD_POINTS:
     /*		{
     			uint32 vtx = gfx->gbi0moveword.offset/40;
     			uint32 where = gfx->gbi0moveword.offset - vtx*40;
     			ModifyVertexInfo(where, vtx, gfx->gbi0moveword.value);
     		}
     */		break;
-    	case RSP_MOVE_WORD_PERSPNORM:
+    	case consts.RSP_MOVE_WORD_PERSPNORM:
     		break;
     	default:
     		break;
@@ -742,10 +742,10 @@ if (true) {
 
     this.initVertex = function(dwV, vtxIndex, bTexture) {
         
-        if (vtxIndex >= MAX_VERTS)
+        if (vtxIndex >= consts.MAX_VERTS)
             return false;
         
-        if (vtxProjected5[vtxIndex] === undefined && vtxIndex < MAX_VERTS)
+        if (vtxProjected5[vtxIndex] === undefined && vtxIndex < consts.MAX_VERTS)
             vtxProjected5[vtxIndex] = new Array(4);
             
         if (vtxTransformed[dwV] === undefined)

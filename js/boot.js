@@ -17,11 +17,13 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-C1964jsEmulator.prototype.getTVSystem = function(countryCode)
-{
+/*globals C1964jsEmulator*/
+
+C1964jsEmulator.prototype.getTVSystem = function (countryCode) {
+	"use strict";
+
 	var system;
-	switch(countryCode)
-	{
+	switch (countryCode) {
 	case 0: // Demo
 		system = this.TV_SYSTEM_NTSC;
 		break;
@@ -73,18 +75,18 @@ C1964jsEmulator.prototype.getTVSystem = function(countryCode)
 	}
 
 	return system;
-}
+};
 
-C1964jsEmulator.prototype.getCIC = function() {
-	var CIC_CRC = 0;
-    var cic = 0;
-	var i;
+C1964jsEmulator.prototype.getCIC = function () {
+	"use strict";
 
-	for(i = 0; i < 0xFC0; i++)
+	var i, cic = 0, CIC_CRC = 0;
+
+	for (i = 0; i < 0xFC0; i += 1) {
 		CIC_CRC = CIC_CRC + this.memory.romUint8Array[0x40 + i];
+	}
 
-	switch(CIC_CRC)
-	{
+	switch (CIC_CRC) {
 	case 0x33a27: //CIC-NUS-6101 (starfox)
 	case 0x3421e:
 		this.log("Using CIC-NUS-6101 for starfox\n");
@@ -104,7 +106,7 @@ C1964jsEmulator.prototype.getCIC = function() {
 		break;
 	case 0x47a81: //CIC-NUS-6105 (Zelda)
 		this.log("Using CIC-NUS-6105 for Zelda\n");
-		rominfo.CIC = 0x91;
+		cic = 0x91;
 	//	rominfo.RDRam_Size_Hack = (uint32) 0x3F0;
 	//	ROM_CheckSumZelda();
 		break;
@@ -127,5 +129,5 @@ C1964jsEmulator.prototype.getCIC = function() {
 
 //	Init_VI_Counter(game_country_tvsystem);
     return cic;
-}
+};
 

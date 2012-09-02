@@ -51,7 +51,7 @@ var C1964jsPif = function(pifUint8Array) {
     var DOWN_MAX = 0x00000080
 
     this.processPif = function() {
-        var pifRamStart = MEMORY_START_PIF_RAM - MEMORY_START_PIF;
+        var pifRamStart = consts.MEMORY_START_PIF_RAM - consts.MEMORY_START_PIF;
         var count = 0;
         var device = 0;
 

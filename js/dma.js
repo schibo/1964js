@@ -21,6 +21,8 @@ function log(message) {
     //console.log(message);
 }
 
+/*globals consts*/
+
 C1964jsEmulator.prototype.flushDynaCache = function()
 {
     if (this.writeToDom === false)
@@ -75,9 +77,9 @@ var C1964jsDMA = function(memory, interrupts, pif) {
     this.interrupts = interrupts;
 
     this.copyCartToDram = function(pc, isDelaySlot) {
-    	var end = this.memory.getInt32(this.memory.piUint8Array, this.memory.piUint8Array, PI_WR_LEN_REG);
-    	var to = this.memory.getInt32(this.memory.piUint8Array, this.memory.piUint8Array, PI_DRAM_ADDR_REG);
-        var from = this.memory.getInt32(this.memory.piUint8Array, this.memory.piUint8Array, PI_CART_ADDR_REG);
+    	var end = this.memory.getInt32(this.memory.piUint8Array, this.memory.piUint8Array, consts.PI_WR_LEN_REG);
+    	var to = this.memory.getInt32(this.memory.piUint8Array, this.memory.piUint8Array, consts.PI_DRAM_ADDR_REG);
+        var from = this.memory.getInt32(this.memory.piUint8Array, this.memory.piUint8Array, consts.PI_CART_ADDR_REG);
 
         log('pi dma write ' + (end+1) + ' bytes from ' + dec2hex(from) + ' to ' + dec2hex(to));
 
@@ -118,14 +120,14 @@ var C1964jsDMA = function(memory, interrupts, pif) {
 
        // clrFlag(spReg1Uint8Array, SP_STATUS_REG, SP_STATUS_HALT);
 
-    	this.interrupts.clrFlag(this.memory.piUint8Array, PI_STATUS_REG, PI_STATUS_IO_BUSY|PI_STATUS_DMA_BUSY);
+    	this.interrupts.clrFlag(this.memory.piUint8Array, consts.PI_STATUS_REG, consts.PI_STATUS_IO_BUSY|consts.PI_STATUS_DMA_BUSY);
         this.interrupts.triggerPIInterrupt(pc, isDelaySlot);
     }
 
     this.copySiToDram = function(pc, isDelaySlot) {
         var end = 63; //read 64 bytes. Is there an si_wr_len_reg?
-        var to = this.memory.getInt32(this.memory.siUint8Array, this.memory.siUint8Array, SI_DRAM_ADDR_REG);
-        var from = this.memory.getInt32(this.memory.siUint8Array, this.memory.siUint8Array, SI_PIF_ADDR_RD64B_REG);
+        var to = this.memory.getInt32(this.memory.siUint8Array, this.memory.siUint8Array, consts.SI_DRAM_ADDR_REG);
+        var from = this.memory.getInt32(this.memory.siUint8Array, this.memory.siUint8Array, consts.SI_PIF_ADDR_RD64B_REG);
 
     	if (from !== 0x1FC007C0 )
     		throw 'Unhandled: SI_DRAM_ADDR_RD64B_REG = ' + from;
@@ -144,14 +146,14 @@ var C1964jsDMA = function(memory, interrupts, pif) {
             from++;
         }
 
-        this.interrupts.setFlag(this.memory.siUint8Array, SI_STATUS_REG, SI_STATUS_INTERRUPT);
+        this.interrupts.setFlag(this.memory.siUint8Array, consts.SI_STATUS_REG, consts.SI_STATUS_INTERRUPT);
         this.interrupts.triggerSIInterrupt(pc, isDelaySlot);
     }
 
     this.copyDramToAi = function(pc, isDelaySlot)
     {
-        var length = this.memory.getInt32(this.memory.aiUint8Array, this.memory.aiUint8Array, AI_LEN_REG);
-        var from = this.memory.getInt32(this.memory.aiUint8Array, this.memory.aiUint8Array, AI_DRAM_ADDR_REG);
+        var length = this.memory.getInt32(this.memory.aiUint8Array, this.memory.aiUint8Array, consts.AI_LEN_REG);
+        var from = this.memory.getInt32(this.memory.aiUint8Array, this.memory.aiUint8Array, consts.AI_DRAM_ADDR_REG);
 
         //log('ai dma write ' + length + ' bytes from ' + dec2hex(from));
 
@@ -160,7 +162,7 @@ var C1964jsDMA = function(memory, interrupts, pif) {
         
         this.processAudio(from, length);
 
-        this.interrupts.clrFlag(this.memory.aiUint8Array, AI_STATUS_REG, AI_STATUS_FIFO_FULL);
+        this.interrupts.clrFlag(this.memory.aiUint8Array, consts.AI_STATUS_REG, consts.AI_STATUS_FIFO_FULL);
     }
 
     //this function doesn't belong in dma
@@ -175,7 +177,7 @@ var C1964jsDMA = function(memory, interrupts, pif) {
         } catch(error) {
             log("Your browser doesn't support Web Audio.");
             audioContext = "unsupported";
-            this.interrupts.clrFlag(this.memory.aiUint8Array, AI_STATUS_REG, AI_STATUS_FIFO_FULL);
+            this.interrupts.clrFlag(this.memory.aiUint8Array, consts.AI_STATUS_REG, consts.AI_STATUS_FIFO_FULL);
             return;
         }
 
@@ -206,8 +208,8 @@ var C1964jsDMA = function(memory, interrupts, pif) {
 
     this.copyDramToSi = function(pc, isDelaySlot) {
         var end = 63; //read 64 bytes. Is there an si_rd_len_reg?
-        var to = this.memory.getInt32(this.memory.siUint8Array, this.memory.siUint8Array, SI_PIF_ADDR_WR64B_REG);
-        var from = this.memory.getInt32(this.memory.siUint8Array, this.memory.siUint8Array, SI_DRAM_ADDR_REG);
+        var to = this.memory.getInt32(this.memory.siUint8Array, this.memory.siUint8Array, consts.SI_PIF_ADDR_WR64B_REG);
+        var from = this.memory.getInt32(this.memory.siUint8Array, this.memory.siUint8Array, consts.SI_DRAM_ADDR_REG);
         
     	if (to !== 0x1FC007C0 )
     		throw 'Unhandled: SI_DRAM_ADDR_RD64B_REG = ' + from;
@@ -225,7 +227,7 @@ var C1964jsDMA = function(memory, interrupts, pif) {
         }
 
         pif.processPif();
-        this.interrupts.setFlag(this.memory.siUint8Array, SI_STATUS_REG, SI_STATUS_INTERRUPT);
+        this.interrupts.setFlag(this.memory.siUint8Array, consts.SI_STATUS_REG, consts.SI_STATUS_INTERRUPT);
         this.interrupts.triggerSIInterrupt(pc, isDelaySlot);
     }
 
@@ -234,9 +236,9 @@ var C1964jsDMA = function(memory, interrupts, pif) {
     }
 
     this.copyDramToSp = function(pc, isDelaySlot) {
-        var end = this.memory.getInt32(this.memory.spReg1Uint8Array, this.memory.spReg1Uint8Array, SP_RD_LEN_REG);
-        var to = this.memory.getInt32(this.memory.spReg1Uint8Array, this.memory.spReg1Uint8Array, SP_MEM_ADDR_REG);
-        var from = this.memory.getInt32(this.memory.spReg1Uint8Array, this.memory.spReg1Uint8Array, SP_DRAM_ADDR_REG);
+        var end = this.memory.getInt32(this.memory.spReg1Uint8Array, this.memory.spReg1Uint8Array, consts.SP_RD_LEN_REG);
+        var to = this.memory.getInt32(this.memory.spReg1Uint8Array, this.memory.spReg1Uint8Array, consts.SP_MEM_ADDR_REG);
+        var from = this.memory.getInt32(this.memory.spReg1Uint8Array, this.memory.spReg1Uint8Array, consts.SP_DRAM_ADDR_REG);
 
         log('sp dma read ' + (end+1) + ' bytes from ' + dec2hex(from) + ' to ' + dec2hex(to));
 
@@ -250,11 +252,11 @@ var C1964jsDMA = function(memory, interrupts, pif) {
             from++;
         }
 
-        this.memory.setInt32(this.memory.spReg1Uint8Array, SP_DMA_BUSY_REG, 0);
-        if (this.memory.getInt32(this.memory.spReg1Uint8Array, this.memory.spReg1Uint8Array, SP_STATUS_REG) & (SP_STATUS_DMA_BUSY|SP_STATUS_IO_FULL|SP_STATUS_DMA_FULL))
+        this.memory.setInt32(this.memory.spReg1Uint8Array, consts.SP_DMA_BUSY_REG, 0);
+        if (this.memory.getInt32(this.memory.spReg1Uint8Array, this.memory.spReg1Uint8Array, consts.SP_STATUS_REG) & (consts.SP_STATUS_DMA_BUSY|consts.SP_STATUS_IO_FULL|consts.SP_STATUS_DMA_FULL))
             alert('hmm..todo: an sp fp status flag is blocking from continuing');
-        this.interrupts.clrFlag(this.memory.spReg1Uint8Array, SP_STATUS_REG, SP_STATUS_DMA_BUSY);
-        this.interrupts.setFlag(this.memory.spReg1Uint8Array, SP_STATUS_REG, SP_STATUS_HALT);
+        this.interrupts.clrFlag(this.memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_DMA_BUSY);
+        this.interrupts.setFlag(this.memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_HALT);
 
         //hack for now
         //triggerDPInterrupt(0, false);

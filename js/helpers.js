@@ -22,9 +22,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /////////////////
 
 /*jslint bitwise: true, devel: true, todo: true*/
-/*global CAUSE, STATUS, EXC_INT, COUNT, COMPARE, CAUSE_IP8, EXL, IE, BADVADDR, PREVID, RANDOM, INDEX*/
-/*global ENTRYLO0, ENTRYLO1, PAGEMASK, ENTRYHI, WIRED, goog, BigInt, bigint_mul, bigint_div, bigint_mod*/
-/*global COP1_CONDITION_BIT*/
+/*global consts*/
+/*global goog, BigInt, bigint_mul, bigint_div, bigint_mod*/
 
 //print out a hex number
 function dec2hex(u) {
@@ -331,38 +330,38 @@ var C1964jsHelpers = function (isLittleEndian) {
     this.inter_mtc0 = function (r, f, rt, isDelaySlot, pc, cp0, interrupts) {
         //incomplete:
         switch (f) {
-        case CAUSE:
+        case consts.CAUSE:
             cp0[f] &= ~0x300;
             cp0[f] |= r[rt] & 0x300;
             if (r[rt] & 0x300) {
           //      if (((r[rt] & 1)===1) && (cp0[f] & 1)===0) //possible fix over 1964cpp?
-                if ((cp0[CAUSE] & cp0[STATUS] & 0x0000FF00) !== 0) {
-                    interrupts.setException(EXC_INT, 0, pc, isDelaySlot);
+                if ((cp0[consts.CAUSE] & cp0[consts.STATUS] & 0x0000FF00) !== 0) {
+                    interrupts.setException(consts.EXC_INT, 0, pc, isDelaySlot);
                     //interrupts.processException(pc, isDelaySlot);
                 }
             }
             break;
-        case COUNT:
+        case consts.COUNT:
             cp0[f] = r[rt];
             break;
-        case COMPARE:
-            cp0[CAUSE] &= ~CAUSE_IP8;
+        case consts.COMPARE:
+            cp0[consts.CAUSE] &= ~consts.CAUSE_IP8;
             cp0[f] = r[rt];
             break;
-        case STATUS:
-            if (((r[rt] & EXL) === 0) && ((cp0[f] & EXL) === 1)) {
-                if ((cp0[CAUSE] & cp0[STATUS] & 0x0000FF00) !== 0) {
+        case consts.STATUS:
+            if (((r[rt] & consts.EXL) === 0) && ((cp0[f] & consts.EXL) === 1)) {
+                if ((cp0[consts.CAUSE] & cp0[consts.STATUS] & 0x0000FF00) !== 0) {
                     cp0[f] = r[rt];
-                    interrupts.setException(EXC_INT, 0, pc, isDelaySlot);
+                    interrupts.setException(consts.EXC_INT, 0, pc, isDelaySlot);
                     //interrupts.processException(pc, isDelaySlot);
                     return;
                 }
             }
 
-            if (((r[rt] & IE) === 1) && ((cp0[f] & IE) === 0)) {
-                if ((cp0[CAUSE] & cp0[STATUS] & 0x0000FF00) !== 0) {
+            if (((r[rt] & consts.IE) === 1) && ((cp0[f] & consts.IE) === 0)) {
+                if ((cp0[consts.CAUSE] & cp0[consts.STATUS] & 0x0000FF00) !== 0) {
                     cp0[f] = r[rt];
-                    interrupts.setException(EXC_INT, 0, pc, isDelaySlot);
+                    interrupts.setException(consts.EXC_INT, 0, pc, isDelaySlot);
                     //interrupts.processException(pc, isDelaySlot);
                     return;
                 }
@@ -371,30 +370,30 @@ var C1964jsHelpers = function (isLittleEndian) {
             cp0[f] = r[rt];
             break;
         //tlb:
-        case BADVADDR: //read-only
+        case consts.BADVADDR: //read-only
             break;
-        case PREVID: //read-only
+        case consts.PREVID: //read-only
             break;
-        case RANDOM: //read-only
+        case consts.RANDOM: //read-only
             break;
-        case INDEX:
+        case consts.INDEX:
             cp0[f] = r[rt] & 0x8000003F;
             break;
-        case ENTRYLO0:
+        case consts.ENTRYLO0:
             cp0[f] = r[rt] & 0x3FFFFFFF;
             break;
-        case ENTRYLO1:
+        case consts.ENTRYLO1:
             cp0[f] = r[rt] & 0x3FFFFFFF;
             break;
-        case ENTRYHI:
+        case consts.ENTRYHI:
             cp0[f] = r[rt] & 0xFFFFE0FF;
             break;
-        case PAGEMASK:
+        case consts.PAGEMASK:
             cp0[f] = r[rt] & 0x01FFE000;
             break;
-        case WIRED:
+        case consts.WIRED:
             cp0[f] = r[rt] & 0x1f;
-            cp0[RANDOM] = 0x1f;
+            cp0[consts.RANDOM] = 0x1f;
             break;
         default:
             cp0[f] = r[rt];
@@ -688,10 +687,10 @@ var C1964jsHelpers = function (isLittleEndian) {
 
         cond = ((cond0 && unordered) || (cond1 && equal) || (cond2 && less));
 
-        cp1Con[31] &= ~COP1_CONDITION_BIT;
+        cp1Con[31] &= ~consts.COP1_CONDITION_BIT;
 
         if (cond) {
-            cp1Con[31] |= COP1_CONDITION_BIT;
+            cp1Con[31] |= consts.COP1_CONDITION_BIT;
         }
     };
 
@@ -724,10 +723,10 @@ var C1964jsHelpers = function (isLittleEndian) {
 
         cond = ((cond0 && unordered) || (cond1 && equal) || (cond2 && less));
 
-        cp1Con[31] &= ~COP1_CONDITION_BIT;
+        cp1Con[31] &= ~consts.COP1_CONDITION_BIT;
 
         if (cond) {
-            cp1Con[31] |= COP1_CONDITION_BIT;
+            cp1Con[31] |= consts.COP1_CONDITION_BIT;
         }
     };
 };

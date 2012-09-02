@@ -62,76 +62,76 @@ var C1964jsMemory = function(core) {
         
         var a = addr & 0x1FFFFFFF;    
         
-        if (a >= MEMORY_START_RDRAM && a < MEMORY_START_RDRAM + MEMORY_SIZE_RDRAM) {
-            var off=a-MEMORY_START_RDRAM;
+        if (a >= consts.MEMORY_START_RDRAM && a < consts.MEMORY_START_RDRAM + consts.MEMORY_SIZE_RDRAM) {
+            var off=a-consts.MEMORY_START_RDRAM;
             return this.rdramUint8Array[off];
-        } else if (a >= MEMORY_START_RAMREGS4 && a < MEMORY_START_RAMREGS4 + MEMORY_SIZE_RAMREGS4) {
-            var off=a-MEMORY_START_RAMREGS4;
+        } else if (a >= consts.MEMORY_START_RAMREGS4 && a < consts.MEMORY_START_RAMREGS4 + consts.MEMORY_SIZE_RAMREGS4) {
+            var off=a-consts.MEMORY_START_RAMREGS4;
             return this.ramRegs4Uint8Array[off];
-        } else if (a >= MEMORY_START_SPMEM && a < MEMORY_START_SPMEM + MEMORY_SIZE_SPMEM) {
-            var off=a-MEMORY_START_SPMEM;
+        } else if (a >= consts.MEMORY_START_SPMEM && a < consts.MEMORY_START_SPMEM + consts.MEMORY_SIZE_SPMEM) {
+            var off=a-consts.MEMORY_START_SPMEM;
             return this.spMemUint8Array[off];        
-        } else if (a >= MEMORY_START_SPREG_1 && a < MEMORY_START_SPREG_1 + MEMORY_SIZE_SPREG_1) {
-            var off=a-MEMORY_START_SPREG_1;
+        } else if (a >= consts.MEMORY_START_SPREG_1 && a < consts.MEMORY_START_SPREG_1 + consts.MEMORY_SIZE_SPREG_1) {
+            var off=a-consts.MEMORY_START_SPREG_1;
             return core.interrupts.readSPReg1(off);
-        } else if (a >= MEMORY_START_SPREG_2 && a < MEMORY_START_SPREG_2 + MEMORY_SIZE_SPREG_2) {
-            var off=a-MEMORY_START_SPREG_2;
+        } else if (a >= consts.MEMORY_START_SPREG_2 && a < consts.MEMORY_START_SPREG_2 + consts.MEMORY_SIZE_SPREG_2) {
+            var off=a-consts.MEMORY_START_SPREG_2;
             return this.spReg2Uint8Array[off];        
-        } else if (a >= MEMORY_START_DPC && a < MEMORY_START_DPC + MEMORY_SIZE_DPC) {
-            var off=a-MEMORY_START_DPC;
+        } else if (a >= consts.MEMORY_START_DPC && a < consts.MEMORY_START_DPC + consts.MEMORY_SIZE_DPC) {
+            var off=a-consts.MEMORY_START_DPC;
             return this.dpcUint8Array[off];        
-        } else if (a >= MEMORY_START_DPS && a < MEMORY_START_DPS + MEMORY_SIZE_DPS) {
-            var off=a-MEMORY_START_DPS;
+        } else if (a >= consts.MEMORY_START_DPS && a < consts.MEMORY_START_DPS + consts.MEMORY_SIZE_DPS) {
+            var off=a-consts.MEMORY_START_DPS;
             return this.dpsUint8Array[off];        
-        } else if (a >= MEMORY_START_MI && a < MEMORY_START_MI + MEMORY_SIZE_MI) {
+        } else if (a >= consts.MEMORY_START_MI && a < consts.MEMORY_START_MI + consts.MEMORY_SIZE_MI) {
             //alert('load mi:' + dec2hex(addr));
-            var off=a-MEMORY_START_MI;
+            var off=a-consts.MEMORY_START_MI;
             return this.miUint8Array[off];        
-        } else if (a >= MEMORY_START_VI && a < MEMORY_START_VI + MEMORY_SIZE_VI) {
-            var off=a-MEMORY_START_VI;
+        } else if (a >= consts.MEMORY_START_VI && a < consts.MEMORY_START_VI + consts.MEMORY_SIZE_VI) {
+            var off=a-consts.MEMORY_START_VI;
             return core.interrupts.readVI(off);
-        } else if (a >= MEMORY_START_AI && a < MEMORY_START_AI + MEMORY_SIZE_AI) {
+        } else if (a >= consts.MEMORY_START_AI && a < consts.MEMORY_START_AI + consts.MEMORY_SIZE_AI) {
             //alert('load ai:' + dec2hex(addr));
-            var off=a-MEMORY_START_AI;
+            var off=a-consts.MEMORY_START_AI;
             return core.interrupts.readAI(off);
-        } else if (a >= MEMORY_START_PI && a < MEMORY_START_PI + MEMORY_SIZE_PI) {
+        } else if (a >= consts.MEMORY_START_PI && a < consts.MEMORY_START_PI + consts.MEMORY_SIZE_PI) {
            // alert('load pi:' + dec2hex(addr));
-            var off=a-MEMORY_START_PI;
+            var off=a-consts.MEMORY_START_PI;
             return this.piUint8Array[off];        
-        } else if (a >= MEMORY_START_SI && a < MEMORY_START_SI + MEMORY_SIZE_SI) {
+        } else if (a >= consts.MEMORY_START_SI && a < consts.MEMORY_START_SI + consts.MEMORY_SIZE_SI) {
            // alert('load si');
-            var off=a-MEMORY_START_SI;
+            var off=a-consts.MEMORY_START_SI;
             return core.interrupts.readSI(off);
-        } else if (a >= MEMORY_START_C2A1 && a < MEMORY_START_C2A1 + MEMORY_SIZE_C2A1) {
-            var off=a-MEMORY_START_C2A1;
+        } else if (a >= consts.MEMORY_START_C2A1 && a < consts.MEMORY_START_C2A1 + consts.MEMORY_SIZE_C2A1) {
+            var off=a-consts.MEMORY_START_C2A1;
             return this.c2a1Uint8Array[off];        
-        } else if (a >= MEMORY_START_C1A1 && a < MEMORY_START_C1A1 + MEMORY_SIZE_C1A1) {
-            var off=a-MEMORY_START_C1A1;
+        } else if (a >= consts.MEMORY_START_C1A1 && a < consts.MEMORY_START_C1A1 + consts.MEMORY_SIZE_C1A1) {
+            var off=a-consts.MEMORY_START_C1A1;
             return this.c1a1Uint8Array[off];        
-        } else if (a >= MEMORY_START_C2A2 && a < MEMORY_START_C2A2 + MEMORY_SIZE_C2A2) {
-            var off=a-MEMORY_START_C2A2;
+        } else if (a >= consts.MEMORY_START_C2A2 && a < consts.MEMORY_START_C2A2 + consts.MEMORY_SIZE_C2A2) {
+            var off=a-consts.MEMORY_START_C2A2;
             return this.c2a2Uint8Array[off];        
-        } else if (a >= MEMORY_START_ROM_IMAGE && a < MEMORY_START_ROM_IMAGE + romLength) { //todo: could be a problem to use romLength
+        } else if (a >= consts.MEMORY_START_ROM_IMAGE && a < consts.MEMORY_START_ROM_IMAGE + romLength) { //todo: could be a problem to use romLength
           //  alert('load rom');
-            var off=a-MEMORY_START_ROM_IMAGE;
+            var off=a-consts.MEMORY_START_ROM_IMAGE;
             return this.romUint8Array[off];        
-        } else if (a >= MEMORY_START_C1A3 && a < MEMORY_START_C1A3 + MEMORY_SIZE_C1A3) {
-            var off=a-MEMORY_START_C1A3;
+        } else if (a >= consts.MEMORY_START_C1A3 && a < consts.MEMORY_START_C1A3 + consts.MEMORY_SIZE_C1A3) {
+            var off=a-consts.MEMORY_START_C1A3;
             return this.c1a3Uint8Array[off];        
-        } else if (a >= MEMORY_START_RI && a < MEMORY_START_RI + MEMORY_SIZE_RI) {
-            var off=a-MEMORY_START_RI;
+        } else if (a >= consts.MEMORY_START_RI && a < consts.MEMORY_START_RI + consts.MEMORY_SIZE_RI) {
+            var off=a-consts.MEMORY_START_RI;
             return this.riUint8Array[off];        
-        } else if(a >= MEMORY_START_PIF && a < MEMORY_START_PIF + MEMORY_SIZE_PIF) {
-            var off=a-MEMORY_START_PIF;
+        } else if(a >= consts.MEMORY_START_PIF && a < consts.MEMORY_START_PIF + consts.MEMORY_SIZE_PIF) {
+            var off=a-consts.MEMORY_START_PIF;
             return this.pifUint8Array[off];        
-    	} else if(a >= MEMORY_START_GIO && a < MEMORY_START_GIO + MEMORY_SIZE_GIO_REG) {
-            var off=a-MEMORY_START_GIO;
+    	} else if(a >= consts.MEMORY_START_GIO && a < consts.MEMORY_START_GIO + consts.MEMORY_SIZE_GIO_REG) {
+            var off=a-consts.MEMORY_START_GIO;
             return this.gioUint8Array[off];        
-    	} else if(a >= MEMORY_START_RAMREGS0 && a < MEMORY_START_RAMREGS0 + MEMORY_SIZE_RAMREGS0) {
-            var off=a-MEMORY_START_RAMREGS0;
+    	} else if(a >= consts.MEMORY_START_RAMREGS0 && a < consts.MEMORY_START_RAMREGS0 + consts.MEMORY_SIZE_RAMREGS0) {
+            var off=a-consts.MEMORY_START_RAMREGS0;
             return this.ramRegs0Uint8Array[off];        
-    	} else if(a >= MEMORY_START_RAMREGS8 && a < MEMORY_START_RAMREGS8 + MEMORY_SIZE_RAMREGS8) {
-            var off=a-MEMORY_START_RAMREGS8;
+    	} else if(a >= consts.MEMORY_START_RAMREGS8 && a < consts.MEMORY_START_RAMREGS8 + consts.MEMORY_SIZE_RAMREGS8) {
+            var off=a-consts.MEMORY_START_RAMREGS8;
             return this.ramRegs8Uint8Array[off];        
     	} else {
             log( 'reading from invalid memory at ' + dec2hex(addr));
@@ -147,76 +147,76 @@ var C1964jsMemory = function(core) {
         
         var a = addr & 0x1FFFFFFF;
         
-        if (a >= MEMORY_START_RDRAM && a < MEMORY_START_RDRAM + MEMORY_SIZE_RDRAM) {
-            var off=a-MEMORY_START_RDRAM;
+        if (a >= consts.MEMORY_START_RDRAM && a < consts.MEMORY_START_RDRAM + consts.MEMORY_SIZE_RDRAM) {
+            var off=a-consts.MEMORY_START_RDRAM;
             return this.rdramUint8Array[off]<<8 | this.rdramUint8Array[off+1];
-        } else if (a >= MEMORY_START_RAMREGS4 && a < MEMORY_START_RAMREGS4 + MEMORY_SIZE_RAMREGS4) {
-            var off=a-MEMORY_START_RAMREGS4;
+        } else if (a >= consts.MEMORY_START_RAMREGS4 && a < consts.MEMORY_START_RAMREGS4 + consts.MEMORY_SIZE_RAMREGS4) {
+            var off=a-consts.MEMORY_START_RAMREGS4;
             return this.ramRegs4Uint8Array[off]<<8 | this.ramRegs4Uint8Array[off+1];
-        } else if (a >= MEMORY_START_SPMEM && a < MEMORY_START_SPMEM + MEMORY_SIZE_SPMEM) {
-            var off=a-MEMORY_START_SPMEM;
+        } else if (a >= consts.MEMORY_START_SPMEM && a < consts.MEMORY_START_SPMEM + consts.MEMORY_SIZE_SPMEM) {
+            var off=a-consts.MEMORY_START_SPMEM;
             return this.spMemUint8Array[off]<<8 | this.spMemUint8Array[off+1];        
-        } else if (a >= MEMORY_START_SPREG_1 && a < MEMORY_START_SPREG_1 + MEMORY_SIZE_SPREG_1) {
-            var off=a-MEMORY_START_SPREG_1;
+        } else if (a >= consts.MEMORY_START_SPREG_1 && a < consts.MEMORY_START_SPREG_1 + consts.MEMORY_SIZE_SPREG_1) {
+            var off=a-consts.MEMORY_START_SPREG_1;
             return core.interrupts.readSPReg1(off);
-        } else if (a >= MEMORY_START_SPREG_2 && a < MEMORY_START_SPREG_2 + MEMORY_SIZE_SPREG_2) {
-            var off=a-MEMORY_START_SPREG_2;
+        } else if (a >= consts.MEMORY_START_SPREG_2 && a < consts.MEMORY_START_SPREG_2 + consts.MEMORY_SIZE_SPREG_2) {
+            var off=a-consts.MEMORY_START_SPREG_2;
             return this.spReg2Uint8Array[off]<<8 | this.spReg2Uint8Array[off+1];        
-        } else if (a >= MEMORY_START_DPC && a < MEMORY_START_DPC + MEMORY_SIZE_DPC) {
-            var off=a-MEMORY_START_DPC;
+        } else if (a >= consts.MEMORY_START_DPC && a < consts.MEMORY_START_DPC + consts.MEMORY_SIZE_DPC) {
+            var off=a-consts.MEMORY_START_DPC;
             return this.dpcUint8Array[off]<<8 | this.dpcUint8Array[off+1];        
-        } else if (a >= MEMORY_START_DPS && a < MEMORY_START_DPS + MEMORY_SIZE_DPS) {
-            var off=a-MEMORY_START_DPS;
+        } else if (a >= consts.MEMORY_START_DPS && a < consts.MEMORY_START_DPS + consts.MEMORY_SIZE_DPS) {
+            var off=a-consts.MEMORY_START_DPS;
             return this.dpsUint8Array[off]<<8 | this.dpsUint8Array[off+1];        
-        } else if (a >= MEMORY_START_MI && a < MEMORY_START_MI + MEMORY_SIZE_MI) {
+        } else if (a >= consts.MEMORY_START_MI && a < consts.MEMORY_START_MI + consts.MEMORY_SIZE_MI) {
             //alert('load mi:' + dec2hex(addr));
-            var off=a-MEMORY_START_MI;
+            var off=a-consts.MEMORY_START_MI;
             return this.miUint8Array[off]<<8 | this.miUint8Array[off+1];
-        } else if (a >= MEMORY_START_VI && a < MEMORY_START_VI + MEMORY_SIZE_VI) {
-            var off=a-MEMORY_START_VI;
+        } else if (a >= consts.MEMORY_START_VI && a < consts.MEMORY_START_VI + consts.MEMORY_SIZE_VI) {
+            var off=a-consts.MEMORY_START_VI;
             return core.interrupts.readVI(off);
-        } else if (a >= MEMORY_START_AI && a < MEMORY_START_AI + MEMORY_SIZE_AI) {
+        } else if (a >= consts.MEMORY_START_AI && a < consts.MEMORY_START_AI + consts.MEMORY_SIZE_AI) {
             //alert('load ai:' + dec2hex(addr));
-            var off=a-MEMORY_START_AI;
+            var off=a-consts.MEMORY_START_AI;
             return core.interrupts.readAI(off);
-        } else if (a >= MEMORY_START_PI && a < MEMORY_START_PI + MEMORY_SIZE_PI) {
+        } else if (a >= consts.MEMORY_START_PI && a < consts.MEMORY_START_PI + consts.MEMORY_SIZE_PI) {
            // alert('load pi:' + dec2hex(addr));
-            var off=a-MEMORY_START_PI;
+            var off=a-consts.MEMORY_START_PI;
             return this.piUint8Array[off]<<8 | this.piUint8Array[off+1];        
-        } else if (a >= MEMORY_START_SI && a < MEMORY_START_SI + MEMORY_SIZE_SI) {
+        } else if (a >= consts.MEMORY_START_SI && a < consts.MEMORY_START_SI + consts.MEMORY_SIZE_SI) {
            // alert('load si');
-            var off=a-MEMORY_START_SI;
+            var off=a-consts.MEMORY_START_SI;
             return core.interrupts.readSI(off);
-        } else if (a >= MEMORY_START_C2A1 && a < MEMORY_START_C2A1 + MEMORY_SIZE_C2A1) {
-            var off=a-MEMORY_START_C2A1;
+        } else if (a >= consts.MEMORY_START_C2A1 && a < consts.MEMORY_START_C2A1 + consts.MEMORY_SIZE_C2A1) {
+            var off=a-consts.MEMORY_START_C2A1;
             return this.c2a1Uint8Array[off]<<8 | this.c2a1Uint8Array[off+1];        
-        } else if (a >= MEMORY_START_C1A1 && a < MEMORY_START_C1A1 + MEMORY_SIZE_C1A1) {
-            var off=a-MEMORY_START_C1A1;
+        } else if (a >= consts.MEMORY_START_C1A1 && a < consts.MEMORY_START_C1A1 + consts.MEMORY_SIZE_C1A1) {
+            var off=a-consts.MEMORY_START_C1A1;
             return this.c1a1Uint8Array[off]<<8 | this.c1a1Uint8Array[off+1];
-        } else if (a >= MEMORY_START_C2A2 && a < MEMORY_START_C2A2 + MEMORY_SIZE_C2A2) {
-            var off=a-MEMORY_START_C2A2;
+        } else if (a >= consts.MEMORY_START_C2A2 && a < consts.MEMORY_START_C2A2 + consts.MEMORY_SIZE_C2A2) {
+            var off=a-consts.MEMORY_START_C2A2;
             return this.c2a2Uint8Array[off]<<8 | this.c2a2Uint8Array[off+1];
-        } else if (a >= MEMORY_START_ROM_IMAGE && a < MEMORY_START_ROM_IMAGE + romLength) {
+        } else if (a >= consts.MEMORY_START_ROM_IMAGE && a < consts.MEMORY_START_ROM_IMAGE + romLength) {
             //alert('load rom');
-            var off=a-MEMORY_START_ROM_IMAGE;
+            var off=a-consts.MEMORY_START_ROM_IMAGE;
             return this.romUint8Array[off]<<8 | this.romUint8Array[off+1];
-        } else if (a >= MEMORY_START_C1A3 && a < MEMORY_START_C1A3 + MEMORY_SIZE_C1A3) {
-            var off=a-MEMORY_START_C1A3;
+        } else if (a >= consts.MEMORY_START_C1A3 && a < consts.MEMORY_START_C1A3 + consts.MEMORY_SIZE_C1A3) {
+            var off=a-consts.MEMORY_START_C1A3;
             return this.c1a3Uint8Array[off]<<8 | this.c1a3Uint8Array[off+1];
-        } else if (a >= MEMORY_START_RI && a < MEMORY_START_RI + MEMORY_SIZE_RI) {
-            var off=a-MEMORY_START_RI;
+        } else if (a >= consts.MEMORY_START_RI && a < consts.MEMORY_START_RI + consts.MEMORY_SIZE_RI) {
+            var off=a-consts.MEMORY_START_RI;
             return this.riUint8Array[off]<<8 | this.riUint8Array[off+1];
-        } else if(a >= MEMORY_START_PIF && a < MEMORY_START_PIF + MEMORY_SIZE_PIF) {
-            var off=a-MEMORY_START_PIF;
+        } else if(a >= consts.MEMORY_START_PIF && a < consts.MEMORY_START_PIF + consts.MEMORY_SIZE_PIF) {
+            var off=a-consts.MEMORY_START_PIF;
             return this.pifUint8Array[off]<<8 | this.pifUint8Array[off+1];
-    	} else if(a >= MEMORY_START_GIO && a < MEMORY_START_GIO + MEMORY_SIZE_GIO_REG) {
-            var off=a-MEMORY_START_GIO;
+    	} else if(a >= consts.MEMORY_START_GIO && a < consts.MEMORY_START_GIO + consts.MEMORY_SIZE_GIO_REG) {
+            var off=a-consts.MEMORY_START_GIO;
             return this.gioUint8Array[off]<<8 | this.gioUint8Array[off+1];
-    	} else if(a >= MEMORY_START_RAMREGS0 && a < MEMORY_START_RAMREGS0 + MEMORY_SIZE_RAMREGS0) {
-            var off=a-MEMORY_START_RAMREGS0;
+    	} else if(a >= consts.MEMORY_START_RAMREGS0 && a < consts.MEMORY_START_RAMREGS0 + consts.MEMORY_SIZE_RAMREGS0) {
+            var off=a-consts.MEMORY_START_RAMREGS0;
             return this.ramRegs0Uint8Array[off]<<8 | this.ramRegs0Uint8Array[off+1];
-    	} else if(a >= MEMORY_START_RAMREGS8 && a < MEMORY_START_RAMREGS8 + MEMORY_SIZE_RAMREGS8) {
-            var off=a-MEMORY_START_RAMREGS8;
+    	} else if(a >= consts.MEMORY_START_RAMREGS8 && a < consts.MEMORY_START_RAMREGS8 + consts.MEMORY_SIZE_RAMREGS8) {
+            var off=a-consts.MEMORY_START_RAMREGS8;
             return this.ramRegs8Uint8Array[off]<<8 | this.ramRegs8Uint8Array[off+1];
     	} else {
             log( 'reading from invalid memory at ' + dec2hex(addr));
@@ -232,79 +232,79 @@ var C1964jsMemory = function(core) {
         
         var a = addr & 0x1FFFFFFF;    
         
-        if (a >= MEMORY_START_RDRAM && a < MEMORY_START_RDRAM + MEMORY_SIZE_RDRAM) {
-            var off=a-MEMORY_START_RDRAM;
+        if (a >= consts.MEMORY_START_RDRAM && a < consts.MEMORY_START_RDRAM + consts.MEMORY_SIZE_RDRAM) {
+            var off=a-consts.MEMORY_START_RDRAM;
             return this.rdramUint8Array[off]<<24 | this.rdramUint8Array[off+1]<<16 | this.rdramUint8Array[off+2]<<8 | this.rdramUint8Array[off+3];
-            //return getInt32(rdramUint8Array, rdramUint8Array, a-MEMORY_START_RDRAM);
-        } else if (a >= MEMORY_START_RAMREGS4 && a < MEMORY_START_RAMREGS4 + MEMORY_SIZE_RAMREGS4) {
-            var off=a-MEMORY_START_RAMREGS4;
+            //return getInt32(rdramUint8Array, rdramUint8Array, a-consts.MEMORY_START_RDRAM);
+        } else if (a >= consts.MEMORY_START_RAMREGS4 && a < consts.MEMORY_START_RAMREGS4 + consts.MEMORY_SIZE_RAMREGS4) {
+            var off=a-consts.MEMORY_START_RAMREGS4;
             return this.ramRegs4Uint8Array[off]<<24 | this.ramRegs4Uint8Array[off+1]<<16 | this.ramRegs4Uint8Array[off+2]<<8 | this.ramRegs4Uint8Array[off+3];
-        } else if (a >= MEMORY_START_SPMEM && a < MEMORY_START_SPMEM + MEMORY_SIZE_SPMEM) {
-            var off=a-MEMORY_START_SPMEM;
+        } else if (a >= consts.MEMORY_START_SPMEM && a < consts.MEMORY_START_SPMEM + consts.MEMORY_SIZE_SPMEM) {
+            var off=a-consts.MEMORY_START_SPMEM;
             return this.spMemUint8Array[off]<<24 | this.spMemUint8Array[off+1]<<16 | this.spMemUint8Array[off+2]<<8 | this.spMemUint8Array[off+3];        
-        } else if (a >= MEMORY_START_SPREG_1 && a < MEMORY_START_SPREG_1 + MEMORY_SIZE_SPREG_1) {
-            var off=a-MEMORY_START_SPREG_1;
+        } else if (a >= consts.MEMORY_START_SPREG_1 && a < consts.MEMORY_START_SPREG_1 + consts.MEMORY_SIZE_SPREG_1) {
+            var off=a-consts.MEMORY_START_SPREG_1;
             return core.interrupts.readSPReg1(off);
-        } else if (a >= MEMORY_START_SPREG_2 && a < MEMORY_START_SPREG_2 + MEMORY_SIZE_SPREG_2) {
-            var off=a-MEMORY_START_SPREG_2;
+        } else if (a >= consts.MEMORY_START_SPREG_2 && a < consts.MEMORY_START_SPREG_2 + consts.MEMORY_SIZE_SPREG_2) {
+            var off=a-consts.MEMORY_START_SPREG_2;
             return this.spReg2Uint8Array[off]<<24 | this.spReg2Uint8Array[off+1]<<16 | this.spReg2Uint8Array[off+2]<<8 | this.spReg2Uint8Array[off+3];        
-        } else if (a >= MEMORY_START_DPC && a < MEMORY_START_DPC + MEMORY_SIZE_DPC) {
-            var off=a-MEMORY_START_DPC;
+        } else if (a >= consts.MEMORY_START_DPC && a < consts.MEMORY_START_DPC + consts.MEMORY_SIZE_DPC) {
+            var off=a-consts.MEMORY_START_DPC;
             return this.dpcUint8Array[off]<<24 | this.dpcUint8Array[off+1]<<16 | this.dpcUint8Array[off+2]<<8 | this.dpcUint8Array[off+3];        
-        } else if (a >= MEMORY_START_DPS && a < MEMORY_START_DPS + MEMORY_SIZE_DPS) {
-            var off=a-MEMORY_START_DPS;
+        } else if (a >= consts.MEMORY_START_DPS && a < consts.MEMORY_START_DPS + consts.MEMORY_SIZE_DPS) {
+            var off=a-consts.MEMORY_START_DPS;
             return this.dpsUint8Array[off]<<24 | this.dpsUint8Array[off+1]<<16 | this.dpsUint8Array[off+2]<<8 | this.dpsUint8Array[off+3];        
-        } else if (a >= MEMORY_START_MI && a < MEMORY_START_MI + MEMORY_SIZE_MI) {
+        } else if (a >= consts.MEMORY_START_MI && a < consts.MEMORY_START_MI + consts.MEMORY_SIZE_MI) {
             //alert('load mi:' + dec2hex(addr));
-            var off=a-MEMORY_START_MI;
+            var off=a-consts.MEMORY_START_MI;
             //if (off === 8) //hack for read-only mi_intr_reg
             //    return -1;
             return this.miUint8Array[off]<<24 | this.miUint8Array[off+1]<<16 | this.miUint8Array[off+2]<<8 | this.miUint8Array[off+3];        
-        } else if (a >= MEMORY_START_VI && a < MEMORY_START_VI + MEMORY_SIZE_VI) {
-            var off=a-MEMORY_START_VI;
+        } else if (a >= consts.MEMORY_START_VI && a < consts.MEMORY_START_VI + consts.MEMORY_SIZE_VI) {
+            var off=a-consts.MEMORY_START_VI;
             return core.interrupts.readVI(off);
-        } else if (a >= MEMORY_START_AI && a < MEMORY_START_AI + MEMORY_SIZE_AI) {
+        } else if (a >= consts.MEMORY_START_AI && a < consts.MEMORY_START_AI + consts.MEMORY_SIZE_AI) {
             //alert('load ai:' + dec2hex(addr));
-            var off=a-MEMORY_START_AI;
+            var off=a-consts.MEMORY_START_AI;
             return core.interrupts.readAI(off);
-        } else if (a >= MEMORY_START_PI && a < MEMORY_START_PI + MEMORY_SIZE_PI) {
+        } else if (a >= consts.MEMORY_START_PI && a < consts.MEMORY_START_PI + consts.MEMORY_SIZE_PI) {
            // alert('load pi:' + dec2hex(addr));
-            var off=a-MEMORY_START_PI;
+            var off=a-consts.MEMORY_START_PI;
             return this.piUint8Array[off]<<24 | this.piUint8Array[off+1]<<16 | this.piUint8Array[off+2]<<8 | this.piUint8Array[off+3];        
-        } else if (a >= MEMORY_START_SI && a < MEMORY_START_SI + MEMORY_SIZE_SI) {
+        } else if (a >= consts.MEMORY_START_SI && a < consts.MEMORY_START_SI + consts.MEMORY_SIZE_SI) {
            // alert('load si');
-            var off=a-MEMORY_START_SI;
+            var off=a-consts.MEMORY_START_SI;
             return core.interrupts.readSI(off);
-        } else if (a >= MEMORY_START_C2A1 && a < MEMORY_START_C2A1 + MEMORY_SIZE_C2A1) {
-            var off=a-MEMORY_START_C2A1;
+        } else if (a >= consts.MEMORY_START_C2A1 && a < consts.MEMORY_START_C2A1 + consts.MEMORY_SIZE_C2A1) {
+            var off=a-consts.MEMORY_START_C2A1;
             return this.c2a1Uint8Array[off]<<24 | this.c2a1Uint8Array[off+1]<<16 | this.c2a1Uint8Array[off+2]<<8 | this.c2a1Uint8Array[off+3];        
-        } else if (a >= MEMORY_START_C1A1 && a < MEMORY_START_C1A1 + MEMORY_SIZE_C1A1) {
-            var off=a-MEMORY_START_C1A1;
+        } else if (a >= consts.MEMORY_START_C1A1 && a < consts.MEMORY_START_C1A1 + consts.MEMORY_SIZE_C1A1) {
+            var off=a-consts.MEMORY_START_C1A1;
             return this.c1a1Uint8Array[off]<<24 | this.c1a1Uint8Array[off+1]<<16 | this.c1a1Uint8Array[off+2]<<8 | this.c1a1Uint8Array[off+3];        
-        } else if (a >= MEMORY_START_C2A2 && a < MEMORY_START_C2A2 + MEMORY_SIZE_C2A2) {
-            var off=a-MEMORY_START_C2A2;
+        } else if (a >= consts.MEMORY_START_C2A2 && a < consts.MEMORY_START_C2A2 + consts.MEMORY_SIZE_C2A2) {
+            var off=a-consts.MEMORY_START_C2A2;
             return this.c2a2Uint8Array[off]<<24 | this.c2a2Uint8Array[off+1]<<16 | this.c2a2Uint8Array[off+2]<<8 | this.c2a2Uint8Array[off+3];        
-        } else if (a >= MEMORY_START_ROM_IMAGE && a < MEMORY_START_ROM_IMAGE + romLength) {
+        } else if (a >= consts.MEMORY_START_ROM_IMAGE && a < consts.MEMORY_START_ROM_IMAGE + romLength) {
             //alert('load rom');
-            var off=a-MEMORY_START_ROM_IMAGE;
+            var off=a-consts.MEMORY_START_ROM_IMAGE;
             return this.romUint8Array[off]<<24 | this.romUint8Array[off+1]<<16 | this.romUint8Array[off+2]<<8 | this.romUint8Array[off+3];        
-        } else if (a >= MEMORY_START_C1A3 && a < MEMORY_START_C1A3 + MEMORY_SIZE_C1A3) {
-            var off=a-MEMORY_START_C1A3;
+        } else if (a >= consts.MEMORY_START_C1A3 && a < consts.MEMORY_START_C1A3 + consts.MEMORY_SIZE_C1A3) {
+            var off=a-consts.MEMORY_START_C1A3;
             return this.c1a3Uint8Array[off]<<24 | this.c1a3Uint8Array[off+1]<<16 | this.c1a3Uint8Array[off+2]<<8 | this.c1a3Uint8Array[off+3];        
-        } else if (a >= MEMORY_START_RI && a < MEMORY_START_RI + MEMORY_SIZE_RI) {
-            var off=a-MEMORY_START_RI;
+        } else if (a >= consts.MEMORY_START_RI && a < consts.MEMORY_START_RI + consts.MEMORY_SIZE_RI) {
+            var off=a-consts.MEMORY_START_RI;
             return this.riUint8Array[off]<<24 | this.riUint8Array[off+1]<<16 | this.riUint8Array[off+2]<<8 | this.riUint8Array[off+3];        
-        } else if(a >= MEMORY_START_PIF && a < MEMORY_START_PIF + MEMORY_SIZE_PIF) {
-            var off=a-MEMORY_START_PIF;
+        } else if(a >= consts.MEMORY_START_PIF && a < consts.MEMORY_START_PIF + consts.MEMORY_SIZE_PIF) {
+            var off=a-consts.MEMORY_START_PIF;
             return this.pifUint8Array[off]<<24 | this.pifUint8Array[off+1]<<16 | this.pifUint8Array[off+2]<<8 | this.pifUint8Array[off+3];        
-    	} else if(a >= MEMORY_START_GIO && a < MEMORY_START_GIO + MEMORY_SIZE_GIO_REG) {
-            var off=a-MEMORY_START_GIO;
+    	} else if(a >= consts.MEMORY_START_GIO && a < consts.MEMORY_START_GIO + consts.MEMORY_SIZE_GIO_REG) {
+            var off=a-consts.MEMORY_START_GIO;
             return this.gioUint8Array[off]<<24 | this.gioUint8Array[off+1]<<16 | this.gioUint8Array[off+2]<<8 | this.gioUint8Array[off+3];        
-    	} else if(a >= MEMORY_START_RAMREGS0 && a < MEMORY_START_RAMREGS0 + MEMORY_SIZE_RAMREGS0) {
-            var off=a-MEMORY_START_RAMREGS0;
+    	} else if(a >= consts.MEMORY_START_RAMREGS0 && a < consts.MEMORY_START_RAMREGS0 + consts.MEMORY_SIZE_RAMREGS0) {
+            var off=a-consts.MEMORY_START_RAMREGS0;
             return this.ramRegs0Uint8Array[off]<<24 | this.ramRegs0Uint8Array[off+1]<<16 | this.ramRegs0Uint8Array[off+2]<<8 | this.ramRegs0Uint8Array[off+3];        
-    	} else if(a >= MEMORY_START_RAMREGS8 && a < MEMORY_START_RAMREGS8 + MEMORY_SIZE_RAMREGS8) {
-            var off=a-MEMORY_START_RAMREGS8;
+    	} else if(a >= consts.MEMORY_START_RAMREGS8 && a < consts.MEMORY_START_RAMREGS8 + consts.MEMORY_SIZE_RAMREGS8) {
+            var off=a-consts.MEMORY_START_RAMREGS8;
             return this.ramRegs8Uint8Array[off]<<24 | this.ramRegs8Uint8Array[off+1]<<16 | this.ramRegs8Uint8Array[off+2]<<8 | this.ramRegs8Uint8Array[off+3];        
     	} else {
             log( 'reading from invalid memory at ' + dec2hex(addr));
@@ -317,93 +317,93 @@ var C1964jsMemory = function(core) {
     this.storeWord = function(val, addr, pc, isDelaySlot) {
         var a = addr & 0x1FFFFFFF;
 
-        if (a >= MEMORY_START_RDRAM && a < MEMORY_START_RDRAM + MEMORY_SIZE_RDRAM) {
-            var off=a-MEMORY_START_RDRAM;
+        if (a >= consts.MEMORY_START_RDRAM && a < consts.MEMORY_START_RDRAM + consts.MEMORY_SIZE_RDRAM) {
+            var off=a-consts.MEMORY_START_RDRAM;
             this.rdramUint8Array[off] = val>>24; this.rdramUint8Array[off+1] = val>>16; this.rdramUint8Array[off+2] = val>>8; this.rdramUint8Array[off+3] = val;
             return;    
-        } else if (a >= MEMORY_START_SPMEM && a < MEMORY_START_SPMEM + MEMORY_SIZE_SPMEM) {
-            var off=a-MEMORY_START_SPMEM;
+        } else if (a >= consts.MEMORY_START_SPMEM && a < consts.MEMORY_START_SPMEM + consts.MEMORY_SIZE_SPMEM) {
+            var off=a-consts.MEMORY_START_SPMEM;
             this.spMemUint8Array[off] = val>>24; this.spMemUint8Array[off+1] = val>>16; this.spMemUint8Array[off+2] = val>>8; this.spMemUint8Array[off+3] = val;
             return;
-        } else if (a >= MEMORY_START_RI && a < MEMORY_START_RI + MEMORY_SIZE_RI) {
-            var off=a-MEMORY_START_RI;
+        } else if (a >= consts.MEMORY_START_RI && a < consts.MEMORY_START_RI + consts.MEMORY_SIZE_RI) {
+            var off=a-consts.MEMORY_START_RI;
             this.riUint8Array[off] = val>>24; this.riUint8Array[off+1] = val>>16; this.riUint8Array[off+2] = val>>8; this.riUint8Array[off+3] = val;
             return;
-        } else if (a >= MEMORY_START_MI && a < MEMORY_START_MI + MEMORY_SIZE_MI) {
-            var off=a-MEMORY_START_MI;
+        } else if (a >= consts.MEMORY_START_MI && a < consts.MEMORY_START_MI + consts.MEMORY_SIZE_MI) {
+            var off=a-consts.MEMORY_START_MI;
             core.interrupts.writeMI(off, val, pc, isDelaySlot);
             return;
-        } else if(a >= MEMORY_START_RAMREGS8 && a < MEMORY_START_RAMREGS8 + MEMORY_SIZE_RAMREGS8) {
-            var off=a-MEMORY_START_RAMREGS8;
+        } else if(a >= consts.MEMORY_START_RAMREGS8 && a < consts.MEMORY_START_RAMREGS8 + consts.MEMORY_SIZE_RAMREGS8) {
+            var off=a-consts.MEMORY_START_RAMREGS8;
             this.ramRegs8Uint8Array[off] = val>>24; this.ramRegs8Uint8Array[off+1] = val>>16; this.ramRegs8Uint8Array[off+2] = val>>8; this.ramRegs8Uint8Array[off+3] = val;
             return;
-    	} else if (a >= MEMORY_START_RAMREGS4 && a < MEMORY_START_RAMREGS4 + MEMORY_SIZE_RAMREGS4) {
-            var off=a-MEMORY_START_RAMREGS4;
+    	} else if (a >= consts.MEMORY_START_RAMREGS4 && a < consts.MEMORY_START_RAMREGS4 + consts.MEMORY_SIZE_RAMREGS4) {
+            var off=a-consts.MEMORY_START_RAMREGS4;
             this.ramRegs4Uint8Array[off] = val>>24; this.ramRegs4Uint8Array[off+1] = val>>16; this.ramRegs4Uint8Array[off+2] = val>>8; this.ramRegs4Uint8Array[off+3] = val;
             return;
-        } else if(a >= MEMORY_START_RAMREGS0 && a < MEMORY_START_RAMREGS0 + MEMORY_SIZE_RAMREGS0) {
-            var off=a-MEMORY_START_RAMREGS0;
+        } else if(a >= consts.MEMORY_START_RAMREGS0 && a < consts.MEMORY_START_RAMREGS0 + consts.MEMORY_SIZE_RAMREGS0) {
+            var off=a-consts.MEMORY_START_RAMREGS0;
             this.ramRegs0Uint8Array[off] = val>>24; this.ramRegs0Uint8Array[off+1] = val>>16; this.ramRegs0Uint8Array[off+2] = val>>8; this.ramRegs0Uint8Array[off+3] = val;
             return;
-    	} else if (a >= MEMORY_START_SPREG_1 && a < MEMORY_START_SPREG_1 + MEMORY_SIZE_SPREG_1) {
-            var off=a-MEMORY_START_SPREG_1;
+    	} else if (a >= consts.MEMORY_START_SPREG_1 && a < consts.MEMORY_START_SPREG_1 + consts.MEMORY_SIZE_SPREG_1) {
+            var off=a-consts.MEMORY_START_SPREG_1;
             core.interrupts.writeSPReg1(off, val, pc, isDelaySlot);
             return;
-        } else if (a >= MEMORY_START_PI && a < MEMORY_START_PI + MEMORY_SIZE_PI) {
-            var off=a-MEMORY_START_PI;
+        } else if (a >= consts.MEMORY_START_PI && a < consts.MEMORY_START_PI + consts.MEMORY_SIZE_PI) {
+            var off=a-consts.MEMORY_START_PI;
             core.interrupts.writePI(off, val, pc, isDelaySlot);
             return; 
-        } else if (a >= MEMORY_START_SI && a < MEMORY_START_SI + MEMORY_SIZE_SI) {
-            var off=a-MEMORY_START_SI;
+        } else if (a >= consts.MEMORY_START_SI && a < consts.MEMORY_START_SI + consts.MEMORY_SIZE_SI) {
+            var off=a-consts.MEMORY_START_SI;
             core.interrupts.writeSI(off, val, pc, isDelaySlot);
             return;
-        } else if (a >= MEMORY_START_AI && a < MEMORY_START_AI + MEMORY_SIZE_AI) {
-            var off=a-MEMORY_START_AI;
+        } else if (a >= consts.MEMORY_START_AI && a < consts.MEMORY_START_AI + consts.MEMORY_SIZE_AI) {
+            var off=a-consts.MEMORY_START_AI;
             core.interrupts.writeAI(off, val, pc, isDelaySlot);
             return;
-        } else if (a >= MEMORY_START_VI && a < MEMORY_START_VI + MEMORY_SIZE_VI) {
-            var off=a-MEMORY_START_VI;
+        } else if (a >= consts.MEMORY_START_VI && a < consts.MEMORY_START_VI + consts.MEMORY_SIZE_VI) {
+            var off=a-consts.MEMORY_START_VI;
             core.interrupts.writeVI(off, val, pc, isDelaySlot);
             return;
-        } else if (a >= MEMORY_START_SPREG_2 && a < MEMORY_START_SPREG_2 + MEMORY_SIZE_SPREG_2) {
-            var off=a-MEMORY_START_SPREG_2;
+        } else if (a >= consts.MEMORY_START_SPREG_2 && a < consts.MEMORY_START_SPREG_2 + consts.MEMORY_SIZE_SPREG_2) {
+            var off=a-consts.MEMORY_START_SPREG_2;
             core.interrupts.writeSPReg2(off, val, pc, isDelaySlot);
             return;
-        } else if (a >= MEMORY_START_DPC && a < MEMORY_START_DPC + MEMORY_SIZE_DPC) {
-            var off=a-MEMORY_START_DPC;
+        } else if (a >= consts.MEMORY_START_DPC && a < consts.MEMORY_START_DPC + consts.MEMORY_SIZE_DPC) {
+            var off=a-consts.MEMORY_START_DPC;
             core.interrupts.writeDPC(off, val, pc, isDelaySlot);
             return;
-        } else if (a >= MEMORY_START_DPS && a < MEMORY_START_DPS + MEMORY_SIZE_DPS) {
-            var off=a-MEMORY_START_DPS;
+        } else if (a >= consts.MEMORY_START_DPS && a < consts.MEMORY_START_DPS + consts.MEMORY_SIZE_DPS) {
+            var off=a-consts.MEMORY_START_DPS;
             this.dpsUint8Array[off] = val>>24; this.dpsUint8Array[off+1] = val>>16; this.dpsUint8Array[off+2] = val>>8; this.dpsUint8Array[off+3] = val;
             return;
-        } else if (a >= MEMORY_START_C2A1 && a < MEMORY_START_C2A1 + MEMORY_SIZE_C2A1) {
-            var off=a-MEMORY_START_C2A1;
+        } else if (a >= consts.MEMORY_START_C2A1 && a < consts.MEMORY_START_C2A1 + consts.MEMORY_SIZE_C2A1) {
+            var off=a-consts.MEMORY_START_C2A1;
             this.c2a1Uint8Array[off] = val>>24; this.c2a1Uint8Array[off+1] = val>>16; this.c2a1Uint8Array[off+2] = val>>8; this.c2a1Uint8Array[off+3] = val;
             return;
-        } else if (a >= MEMORY_START_C1A1 && a < MEMORY_START_C1A1 + MEMORY_SIZE_C1A1) {
-            var off=a-MEMORY_START_C1A1;
+        } else if (a >= consts.MEMORY_START_C1A1 && a < consts.MEMORY_START_C1A1 + consts.MEMORY_SIZE_C1A1) {
+            var off=a-consts.MEMORY_START_C1A1;
             this.c1a1Uint8Array[off] = val>>24; this.c1a1Uint8Array[off+1] = val>>16; this.c1a1Uint8Array[off+2] = val>>8; this.c1a1Uint8Array[off+3] = val;
             return;
-        } else if (a >= MEMORY_START_C2A2 && a < MEMORY_START_C2A2 + MEMORY_SIZE_C2A2) {
-            var off=a-MEMORY_START_C2A2;
+        } else if (a >= consts.MEMORY_START_C2A2 && a < consts.MEMORY_START_C2A2 + consts.MEMORY_SIZE_C2A2) {
+            var off=a-consts.MEMORY_START_C2A2;
             this.c2a2Uint8Array[off] = val>>24; this.c2a2Uint8Array[off+1] = val>>16; this.c2a2Uint8Array[off+2] = val>>8; this.c2a2Uint8Array[off+3] = val;
             return;
-        } else if (a >= MEMORY_START_ROM_IMAGE && a < MEMORY_START_ROM_IMAGE + romLength) {
+        } else if (a >= consts.MEMORY_START_ROM_IMAGE && a < consts.MEMORY_START_ROM_IMAGE + romLength) {
             alert('attempt to overwrite rom!');
-            var off=a-MEMORY_START_ROM_IMAGE;
+            var off=a-consts.MEMORY_START_ROM_IMAGE;
             this.romUint8Array[off] = val>>24; this.romUint8Array[off+1] = val>>16; this.romUint8Array[off+2] = val>>8; this.romUint8Array[off+3] = val;
             return;
-        } else if (a >= MEMORY_START_C1A3 && a < MEMORY_START_C1A3 + MEMORY_SIZE_C1A3) {
-            var off=a-MEMORY_START_C1A3;
+        } else if (a >= consts.MEMORY_START_C1A3 && a < consts.MEMORY_START_C1A3 + consts.MEMORY_SIZE_C1A3) {
+            var off=a-consts.MEMORY_START_C1A3;
             this.c1a3Uint8Array[off] = val>>24; this.c1a3Uint8Array[off+1] = val>>16; this.c1a3Uint8Array[off+2] = val>>8; this.c1a3Uint8Array[off+3] = val;
             return;
-        } else if(a >= MEMORY_START_PIF && a < MEMORY_START_PIF + MEMORY_SIZE_PIF) {
-            var off=a-MEMORY_START_PIF;
+        } else if(a >= consts.MEMORY_START_PIF && a < consts.MEMORY_START_PIF + consts.MEMORY_SIZE_PIF) {
+            var off=a-consts.MEMORY_START_PIF;
             this.pifUint8Array[off] = val>>24; this.pifUint8Array[off+1] = val>>16; this.pifUint8Array[off+2] = val>>8; this.pifUint8Array[off+3] = val;
             return;
-    	} else if(a >= MEMORY_START_GIO && a < MEMORY_START_GIO + MEMORY_SIZE_GIO_REG) {
-            var off=a-MEMORY_START_GIO;
+    	} else if(a >= consts.MEMORY_START_GIO && a < consts.MEMORY_START_GIO + consts.MEMORY_SIZE_GIO_REG) {
+            var off=a-consts.MEMORY_START_GIO;
             this.gioUint8Array[off] = val>>24; this.gioUint8Array[off+1] = val>>16; this.gioUint8Array[off+2] = val>>8; this.gioUint8Array[off+3] = val;
             return;
     	} else {
@@ -419,93 +419,93 @@ var C1964jsMemory = function(core) {
     this.storeByte = function(val, addr, pc, isDelaySlot) {
         var a = addr & 0x1FFFFFFF;
 
-        if (a >= MEMORY_START_RDRAM && a < MEMORY_START_RDRAM + MEMORY_SIZE_RDRAM) {
-            var off=a-MEMORY_START_RDRAM;
+        if (a >= consts.MEMORY_START_RDRAM && a < consts.MEMORY_START_RDRAM + consts.MEMORY_SIZE_RDRAM) {
+            var off=a-consts.MEMORY_START_RDRAM;
             this.rdramUint8Array[off] = val;
             return;    
-        } else if (a >= MEMORY_START_SPMEM && a < MEMORY_START_SPMEM + MEMORY_SIZE_SPMEM) {
-            var off=a-MEMORY_START_SPMEM;
+        } else if (a >= consts.MEMORY_START_SPMEM && a < consts.MEMORY_START_SPMEM + consts.MEMORY_SIZE_SPMEM) {
+            var off=a-consts.MEMORY_START_SPMEM;
             this.spMemUint8Array[off] = val;
             return;
-        } else if (a >= MEMORY_START_RI && a < MEMORY_START_RI + MEMORY_SIZE_RI) {
-            var off=a-MEMORY_START_RI;
+        } else if (a >= consts.MEMORY_START_RI && a < consts.MEMORY_START_RI + consts.MEMORY_SIZE_RI) {
+            var off=a-consts.MEMORY_START_RI;
             this.riUint8Array[off] = val;
             return;
-        } else if (a >= MEMORY_START_MI && a < MEMORY_START_MI + MEMORY_SIZE_MI) {
-            var off=a-MEMORY_START_MI;
+        } else if (a >= consts.MEMORY_START_MI && a < consts.MEMORY_START_MI + consts.MEMORY_SIZE_MI) {
+            var off=a-consts.MEMORY_START_MI;
             core.interrupts.writeMI(off, val, pc, isDelaySlot);
             return;
-        } else if(a >= MEMORY_START_RAMREGS8 && a < MEMORY_START_RAMREGS8 + MEMORY_SIZE_RAMREGS8) {
-            var off=a-MEMORY_START_RAMREGS8;
+        } else if(a >= consts.MEMORY_START_RAMREGS8 && a < consts.MEMORY_START_RAMREGS8 + consts.MEMORY_SIZE_RAMREGS8) {
+            var off=a-consts.MEMORY_START_RAMREGS8;
             this.ramRegs8Uint8Array[off] = val;
             return;
-    	} else if (a >= MEMORY_START_RAMREGS4 && a < MEMORY_START_RAMREGS4 + MEMORY_SIZE_RAMREGS4) {
-            var off=a-MEMORY_START_RAMREGS4;
+    	} else if (a >= consts.MEMORY_START_RAMREGS4 && a < consts.MEMORY_START_RAMREGS4 + consts.MEMORY_SIZE_RAMREGS4) {
+            var off=a-consts.MEMORY_START_RAMREGS4;
             this.ramRegs4Uint8Array[off] = val;
             return;
-        } else if(a >= MEMORY_START_RAMREGS0 && a < MEMORY_START_RAMREGS0 + MEMORY_SIZE_RAMREGS0) {
-            var off=a-MEMORY_START_RAMREGS0;
+        } else if(a >= consts.MEMORY_START_RAMREGS0 && a < consts.MEMORY_START_RAMREGS0 + consts.MEMORY_SIZE_RAMREGS0) {
+            var off=a-consts.MEMORY_START_RAMREGS0;
             this.ramRegs0Uint8Array[off] = val;
             return;
-    	} else if (a >= MEMORY_START_SPREG_1 && a < MEMORY_START_SPREG_1 + MEMORY_SIZE_SPREG_1) {
-            var off=a-MEMORY_START_SPREG_1;
+    	} else if (a >= consts.MEMORY_START_SPREG_1 && a < consts.MEMORY_START_SPREG_1 + consts.MEMORY_SIZE_SPREG_1) {
+            var off=a-consts.MEMORY_START_SPREG_1;
             core.interrupts.writeSPReg1(off, val, pc, isDelaySlot);
             return;
-        } else if (a >= MEMORY_START_PI && a < MEMORY_START_PI + MEMORY_SIZE_PI) {
-            var off=a-MEMORY_START_PI;
+        } else if (a >= consts.MEMORY_START_PI && a < consts.MEMORY_START_PI + consts.MEMORY_SIZE_PI) {
+            var off=a-consts.MEMORY_START_PI;
             core.interrupts.writePI(off, val, pc, isDelaySlot);
             return; 
-        } else if (a >= MEMORY_START_SI && a < MEMORY_START_SI + MEMORY_SIZE_SI) {
-            var off=a-MEMORY_START_SI;
+        } else if (a >= consts.MEMORY_START_SI && a < consts.MEMORY_START_SI + consts.MEMORY_SIZE_SI) {
+            var off=a-consts.MEMORY_START_SI;
             core.interrupts.writeSI(off, val, pc, isDelaySlot);
             return;
-        } else if (a >= MEMORY_START_AI && a < MEMORY_START_AI + MEMORY_SIZE_AI) {
-            var off=a-MEMORY_START_AI;
+        } else if (a >= consts.MEMORY_START_AI && a < consts.MEMORY_START_AI + consts.MEMORY_SIZE_AI) {
+            var off=a-consts.MEMORY_START_AI;
             core.interrupts.writeAI(off, val, pc, isDelaySlot);
             return;
-        } else if (a >= MEMORY_START_VI && a < MEMORY_START_VI + MEMORY_SIZE_VI) {
-            var off=a-MEMORY_START_VI;
+        } else if (a >= consts.MEMORY_START_VI && a < consts.MEMORY_START_VI + consts.MEMORY_SIZE_VI) {
+            var off=a-consts.MEMORY_START_VI;
             core.interrupts.writeVI(off, val, pc, isDelaySlot);
             return;
-        } else if (a >= MEMORY_START_SPREG_2 && a < MEMORY_START_SPREG_2 + MEMORY_SIZE_SPREG_2) {
-            var off=a-MEMORY_START_SPREG_2;
+        } else if (a >= consts.MEMORY_START_SPREG_2 && a < consts.MEMORY_START_SPREG_2 + consts.MEMORY_SIZE_SPREG_2) {
+            var off=a-consts.MEMORY_START_SPREG_2;
             core.interrupts.writeSPReg2(off, val, pc, isDelaySlot);
             return;
-        } else if (a >= MEMORY_START_DPC && a < MEMORY_START_DPC + MEMORY_SIZE_DPC) {
-            var off=a-MEMORY_START_DPC;
+        } else if (a >= consts.MEMORY_START_DPC && a < consts.MEMORY_START_DPC + consts.MEMORY_SIZE_DPC) {
+            var off=a-consts.MEMORY_START_DPC;
             core.interrupts.writeDPC(off, val, pc, isDelaySlot);
             return;
-        } else if (a >= MEMORY_START_DPS && a < MEMORY_START_DPS + MEMORY_SIZE_DPS) {
-            var off=a-MEMORY_START_DPS;
+        } else if (a >= consts.MEMORY_START_DPS && a < consts.MEMORY_START_DPS + consts.MEMORY_SIZE_DPS) {
+            var off=a-consts.MEMORY_START_DPS;
             this.dpsUint8Array[off] = val;
             return;
-        } else if (a >= MEMORY_START_C2A1 && a < MEMORY_START_C2A1 + MEMORY_SIZE_C2A1) {
-            var off=a-MEMORY_START_C2A1;
+        } else if (a >= consts.MEMORY_START_C2A1 && a < consts.MEMORY_START_C2A1 + consts.MEMORY_SIZE_C2A1) {
+            var off=a-consts.MEMORY_START_C2A1;
             this.c2a1Uint8Array[off] = val;
             return;
-        } else if (a >= MEMORY_START_C1A1 && a < MEMORY_START_C1A1 + MEMORY_SIZE_C1A1) {
-            var off=a-MEMORY_START_C1A1;
+        } else if (a >= consts.MEMORY_START_C1A1 && a < consts.MEMORY_START_C1A1 + consts.MEMORY_SIZE_C1A1) {
+            var off=a-consts.MEMORY_START_C1A1;
             this.c1a1Uint8Array[off] = val;
             return;
-        } else if (a >= MEMORY_START_C2A2 && a < MEMORY_START_C2A2 + MEMORY_SIZE_C2A2) {
-            var off=a-MEMORY_START_C2A2;
+        } else if (a >= consts.MEMORY_START_C2A2 && a < consts.MEMORY_START_C2A2 + consts.MEMORY_SIZE_C2A2) {
+            var off=a-consts.MEMORY_START_C2A2;
             this.c2a2Uint8Array[off] = val;
             return;
-        } else if (a >= MEMORY_START_ROM_IMAGE && a < MEMORY_START_ROM_IMAGE + romLength) {
+        } else if (a >= consts.MEMORY_START_ROM_IMAGE && a < consts.MEMORY_START_ROM_IMAGE + romLength) {
             alert('attempt to overwrite rom!');
-            var off=a-MEMORY_START_ROM_IMAGE;
+            var off=a-consts.MEMORY_START_ROM_IMAGE;
             this.romUint8Array[off] = val;
             return;
-        } else if (a >= MEMORY_START_C1A3 && a < MEMORY_START_C1A3 + MEMORY_SIZE_C1A3) {
-            var off=a-MEMORY_START_C1A3;
+        } else if (a >= consts.MEMORY_START_C1A3 && a < consts.MEMORY_START_C1A3 + consts.MEMORY_SIZE_C1A3) {
+            var off=a-consts.MEMORY_START_C1A3;
             this.c1a3Uint8Array[off] = val;
             return;
-        } else if(a >= MEMORY_START_PIF && a < MEMORY_START_PIF + MEMORY_SIZE_PIF) {
-            var off=a-MEMORY_START_PIF;
+        } else if(a >= consts.MEMORY_START_PIF && a < consts.MEMORY_START_PIF + consts.MEMORY_SIZE_PIF) {
+            var off=a-consts.MEMORY_START_PIF;
             this.pifUint8Array[off] = val;
             return;
-    	} else if(a >= MEMORY_START_GIO && a < MEMORY_START_GIO + MEMORY_SIZE_GIO_REG) {
-            var off=a-MEMORY_START_GIO;
+    	} else if(a >= consts.MEMORY_START_GIO && a < consts.MEMORY_START_GIO + consts.MEMORY_SIZE_GIO_REG) {
+            var off=a-consts.MEMORY_START_GIO;
             this.gioUint8Array[off] = val;
             return;
     	} else {
@@ -520,93 +520,93 @@ var C1964jsMemory = function(core) {
     this.storeHalf = function(val, addr, pc, isDelaySlot) {
         var a = addr & 0x1FFFFFFF;
 
-        if (a >= MEMORY_START_RDRAM && a < MEMORY_START_RDRAM + MEMORY_SIZE_RDRAM) {
-            var off=a-MEMORY_START_RDRAM;
+        if (a >= consts.MEMORY_START_RDRAM && a < consts.MEMORY_START_RDRAM + consts.MEMORY_SIZE_RDRAM) {
+            var off=a-consts.MEMORY_START_RDRAM;
             this.rdramUint8Array[off] = val>>8; this.rdramUint8Array[off+1] = val;
             return;    
-        } else if (a >= MEMORY_START_SPMEM && a < MEMORY_START_SPMEM + MEMORY_SIZE_SPMEM) {
-            var off=a-MEMORY_START_SPMEM;
+        } else if (a >= consts.MEMORY_START_SPMEM && a < consts.MEMORY_START_SPMEM + consts.MEMORY_SIZE_SPMEM) {
+            var off=a-consts.MEMORY_START_SPMEM;
             this.spMemUint8Array[off] = val>>8; this.spMemUint8Array[off+1] = val;
             return;
-        } else if (a >= MEMORY_START_RI && a < MEMORY_START_RI + MEMORY_SIZE_RI) {
-            var off=a-MEMORY_START_RI;
+        } else if (a >= consts.MEMORY_START_RI && a < consts.MEMORY_START_RI + consts.MEMORY_SIZE_RI) {
+            var off=a-consts.MEMORY_START_RI;
             this.riUint8Array[off] = val>>8; this.riUint8Array[off+1] = val;
             return;
-        } else if (a >= MEMORY_START_MI && a < MEMORY_START_MI + MEMORY_SIZE_MI) {
-            var off=a-MEMORY_START_MI;
+        } else if (a >= consts.MEMORY_START_MI && a < consts.MEMORY_START_MI + consts.MEMORY_SIZE_MI) {
+            var off=a-consts.MEMORY_START_MI;
             core.interrupts.writeMI(off, val, pc, isDelaySlot);
             return;
-        } else if(a >= MEMORY_START_RAMREGS8 && a < MEMORY_START_RAMREGS8 + MEMORY_SIZE_RAMREGS8) {
-            var off=a-MEMORY_START_RAMREGS8;
+        } else if(a >= consts.MEMORY_START_RAMREGS8 && a < consts.MEMORY_START_RAMREGS8 + consts.MEMORY_SIZE_RAMREGS8) {
+            var off=a-consts.MEMORY_START_RAMREGS8;
             this.ramRegs8Uint8Array[off] = val>>8; this.ramRegs8Uint8Array[off+1] = val;
             return;
-    	} else if (a >= MEMORY_START_RAMREGS4 && a < MEMORY_START_RAMREGS4 + MEMORY_SIZE_RAMREGS4) {
-            var off=a-MEMORY_START_RAMREGS4;
+    	} else if (a >= consts.MEMORY_START_RAMREGS4 && a < consts.MEMORY_START_RAMREGS4 + consts.MEMORY_SIZE_RAMREGS4) {
+            var off=a-consts.MEMORY_START_RAMREGS4;
             this.ramRegs4Uint8Array[off] = val>>8; this.ramRegs4Uint8Array[off+1] = val;
             return;
-        } else if(a >= MEMORY_START_RAMREGS0 && a < MEMORY_START_RAMREGS0 + MEMORY_SIZE_RAMREGS0) {
-            var off=a-MEMORY_START_RAMREGS0;
+        } else if(a >= consts.MEMORY_START_RAMREGS0 && a < consts.MEMORY_START_RAMREGS0 + consts.MEMORY_SIZE_RAMREGS0) {
+            var off=a-consts.MEMORY_START_RAMREGS0;
             this.ramRegs0Uint8Array[off] = val>>8; this.ramRegs0Uint8Array[off+1] = val;
             return;
-    	} else if (a >= MEMORY_START_SPREG_1 && a < MEMORY_START_SPREG_1 + MEMORY_SIZE_SPREG_1) {
-            var off=a-MEMORY_START_SPREG_1;
+    	} else if (a >= consts.MEMORY_START_SPREG_1 && a < consts.MEMORY_START_SPREG_1 + consts.MEMORY_SIZE_SPREG_1) {
+            var off=a-consts.MEMORY_START_SPREG_1;
             core.interrupts.writeSPReg1(off, val, pc, isDelaySlot);
             return;
-        } else if (a >= MEMORY_START_PI && a < MEMORY_START_PI + MEMORY_SIZE_PI) {
-            var off=a-MEMORY_START_PI;
+        } else if (a >= consts.MEMORY_START_PI && a < consts.MEMORY_START_PI + consts.MEMORY_SIZE_PI) {
+            var off=a-consts.MEMORY_START_PI;
             core.interrupts.writePI(off, val, pc, isDelaySlot);
             return; 
-        } else if (a >= MEMORY_START_SI && a < MEMORY_START_SI + MEMORY_SIZE_SI) {
-            var off=a-MEMORY_START_SI;
+        } else if (a >= consts.MEMORY_START_SI && a < consts.MEMORY_START_SI + consts.MEMORY_SIZE_SI) {
+            var off=a-consts.MEMORY_START_SI;
             core.interrupts.writeSI(off, val, pc, isDelaySlot);
             return;
-        } else if (a >= MEMORY_START_AI && a < MEMORY_START_AI + MEMORY_SIZE_AI) {
-            var off=a-MEMORY_START_AI;
+        } else if (a >= consts.MEMORY_START_AI && a < consts.MEMORY_START_AI + consts.MEMORY_SIZE_AI) {
+            var off=a-consts.MEMORY_START_AI;
             core.interrupts.writeAI(off, val, pc, isDelaySlot);
             return;
-        } else if (a >= MEMORY_START_VI && a < MEMORY_START_VI + MEMORY_SIZE_VI) {
-            var off=a-MEMORY_START_VI;
+        } else if (a >= consts.MEMORY_START_VI && a < consts.MEMORY_START_VI + consts.MEMORY_SIZE_VI) {
+            var off=a-consts.MEMORY_START_VI;
             core.interrupts.writeVI(off, val, pc, isDelaySlot);
             return;
-        } else if (a >= MEMORY_START_SPREG_2 && a < MEMORY_START_SPREG_2 + MEMORY_SIZE_SPREG_2) {
-            var off=a-MEMORY_START_SPREG_2;
+        } else if (a >= consts.MEMORY_START_SPREG_2 && a < consts.MEMORY_START_SPREG_2 + consts.MEMORY_SIZE_SPREG_2) {
+            var off=a-consts.MEMORY_START_SPREG_2;
             core.interrupts.writeSPReg2(off, val, pc, isDelaySlot);
             return;
-        } else if (a >= MEMORY_START_DPC && a < MEMORY_START_DPC + MEMORY_SIZE_DPC) {
-            var off=a-MEMORY_START_DPC;
+        } else if (a >= consts.MEMORY_START_DPC && a < consts.MEMORY_START_DPC + consts.MEMORY_SIZE_DPC) {
+            var off=a-consts.MEMORY_START_DPC;
             core.interrupts.writeDPC(off, val, pc, isDelaySlot);
             return;
-        } else if (a >= MEMORY_START_DPS && a < MEMORY_START_DPS + MEMORY_SIZE_DPS) {
-            var off=a-MEMORY_START_DPS;
+        } else if (a >= consts.MEMORY_START_DPS && a < consts.MEMORY_START_DPS + consts.MEMORY_SIZE_DPS) {
+            var off=a-consts.MEMORY_START_DPS;
             this.dpsUint8Array[off] = val>>8; this.dpsUint8Array[off+1] = val;
             return;
-        } else if (a >= MEMORY_START_C2A1 && a < MEMORY_START_C2A1 + MEMORY_SIZE_C2A1) {
-            var off=a-MEMORY_START_C2A1;
+        } else if (a >= consts.MEMORY_START_C2A1 && a < consts.MEMORY_START_C2A1 + consts.MEMORY_SIZE_C2A1) {
+            var off=a-consts.MEMORY_START_C2A1;
             this.c2a1Uint8Array[off] = val>>8; this.c2a1Uint8Array[off+1] = val;
             return;
-        } else if (a >= MEMORY_START_C1A1 && a < MEMORY_START_C1A1 + MEMORY_SIZE_C1A1) {
-            var off=a-MEMORY_START_C1A1;
+        } else if (a >= consts.MEMORY_START_C1A1 && a < consts.MEMORY_START_C1A1 + consts.MEMORY_SIZE_C1A1) {
+            var off=a-consts.MEMORY_START_C1A1;
             this.c1a1Uint8Array[off] = val>>8; this.c1a1Uint8Array[off+1] = val;
             return;
-        } else if (a >= MEMORY_START_C2A2 && a < MEMORY_START_C2A2 + MEMORY_SIZE_C2A2) {
-            var off=a-MEMORY_START_C2A2;
+        } else if (a >= consts.MEMORY_START_C2A2 && a < consts.MEMORY_START_C2A2 + consts.MEMORY_SIZE_C2A2) {
+            var off=a-consts.MEMORY_START_C2A2;
             this.c2a2Uint8Array[off] = val>>8; this.c2a2Uint8Array[off+1] = val;
             return;
-        } else if (a >= MEMORY_START_ROM_IMAGE && a < MEMORY_START_ROM_IMAGE + romLength) {
+        } else if (a >= consts.MEMORY_START_ROM_IMAGE && a < consts.MEMORY_START_ROM_IMAGE + romLength) {
             alert('attempt to overwrite rom!');
-            var off=a-MEMORY_START_ROM_IMAGE;
+            var off=a-consts.MEMORY_START_ROM_IMAGE;
             this.romUint8Array[off] = val>>8; this.romUint8Array[off+1] = val;
             return;
-        } else if (a >= MEMORY_START_C1A3 && a < MEMORY_START_C1A3 + MEMORY_SIZE_C1A3) {
-            var off=a-MEMORY_START_C1A3;
+        } else if (a >= consts.MEMORY_START_C1A3 && a < consts.MEMORY_START_C1A3 + consts.MEMORY_SIZE_C1A3) {
+            var off=a-consts.MEMORY_START_C1A3;
             this.c1a3Uint8Array[off] = val>>8; this.c1a3Uint8Array[off+1] = val;
             return;
-        } else if(a >= MEMORY_START_PIF && a < MEMORY_START_PIF + MEMORY_SIZE_PIF) {
-            var off=a-MEMORY_START_PIF;
+        } else if(a >= consts.MEMORY_START_PIF && a < consts.MEMORY_START_PIF + consts.MEMORY_SIZE_PIF) {
+            var off=a-consts.MEMORY_START_PIF;
             this.pifUint8Array[off] = val>>8; this.pifUint8Array[off+1] = val;
             return;
-    	} else if(a >= MEMORY_START_GIO && a < MEMORY_START_GIO + MEMORY_SIZE_GIO_REG) {
-            var off=a-MEMORY_START_GIO;
+    	} else if(a >= consts.MEMORY_START_GIO && a < consts.MEMORY_START_GIO + consts.MEMORY_SIZE_GIO_REG) {
+            var off=a-consts.MEMORY_START_GIO;
             this.gioUint8Array[off] = val>>8; this.gioUint8Array[off+1] = val;
             return;
     	} else {

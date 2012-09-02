@@ -1,9 +1,8 @@
 /*jslint bitwise: true, evil: true, undef: false, todo: true, browser: true, devel: true*/
 /*globals Int32Array, ArrayBuffer, Float32Array, C1964jsMemory, C1964jsInterrupts */
-/*globals C1964jsPif, C1964jsDMA, Float64Array, C1964jsWebGL, cancelAnimFrame, C1964jsHelpers*/
-/*globals STATUS, CONFIG, RANDOM, PREVID, MI_VERSION_REG, RI_CONFIG_REG, VI_V_SYNC_REG*/
-/*globals VI_H_SYNC_REG, dec2hex, Uint8Array, VI_INTR_REG, Uint16Array, COUNT, CAUSE, EXC_INT*/
-/*globals VI_ORIGIN_REG, CPU_instruction, requestAnimFrame, ERROREPC, ERL, EXL, EPC*/
+/*globals C1964jsConstants, C1964jsPif, C1964jsDMA, Float64Array, C1964jsWebGL, cancelAnimFrame, C1964jsHelpers*/
+/*globals dec2hex, Uint8Array, Uint16Array*/
+/*globals CPU_instruction, requestAnimFrame*/
 
 /*
 1964js - JavaScript/HTML5 port of 1964 - N64 emulator
@@ -66,6 +65,8 @@ Convention:
  The hope is that the compiler will optimimize the pattern
  with a swap or bswap.
 */
+
+var consts = new C1964jsConstants();
 
 var C1964jsEmulator = function (userSettings) {
 
@@ -217,20 +218,20 @@ var C1964jsEmulator = function (userSettings) {
         r[20] = this.getTVSystem(this.memory.romUint8Array[0x3D]);
         r[22] = this.getCIC();
 
-        this.cp0[STATUS] = 0x70400004;
-        this.cp0[RANDOM] = 0x0000001f;
-        this.cp0[CONFIG] = 0x0006e463;
-        this.cp0[PREVID] = 0x00000b00;
+        this.cp0[consts.STATUS] = 0x70400004;
+        this.cp0[consts.RANDOM] = 0x0000001f;
+        this.cp0[consts.CONFIG] = 0x0006e463;
+        this.cp0[consts.PREVID] = 0x00000b00;
         this.cp1Con[0] = 0x00000511;
 
         //set programCounter to start of SP_MEM and after the 64 byte ROM header.
         this.programCounter = 0xA4000040;
 
-        this.memory.setInt32(this.memory.miUint8Array, MI_VERSION_REG, 0x01010101);
-        this.memory.setInt32(this.memory.riUint8Array, RI_CONFIG_REG, 0x00000001);
-        this.memory.setInt32(this.memory.viUint8Array, VI_INTR_REG, 0x000003FF);
-        this.memory.setInt32(this.memory.viUint8Array, VI_V_SYNC_REG, 0x000000D1);
-        this.memory.setInt32(this.memory.viUint8Array, VI_H_SYNC_REG, 0x000D2047);
+        this.memory.setInt32(this.memory.miUint8Array, consts.MI_VERSION_REG, 0x01010101);
+        this.memory.setInt32(this.memory.riUint8Array, consts.RI_CONFIG_REG, 0x00000001);
+        this.memory.setInt32(this.memory.viUint8Array, consts.VI_INTR_REG, 0x000003FF);
+        this.memory.setInt32(this.memory.viUint8Array, consts.VI_V_SYNC_REG, 0x000000D1);
+        this.memory.setInt32(this.memory.viUint8Array, consts.VI_H_SYNC_REG, 0x000D2047);
 
         //this.memory.setInt32(this.memory.spReg1Uint8Array, SP_STATUS_REG, SP_STATUS_HALT);
         //1964cpp sets this then clears it in RCP_Reset() ! 
@@ -327,12 +328,12 @@ var C1964jsEmulator = function (userSettings) {
         if (this.magic_number >= 0) {
             this.repaintWrapper();
             this.magic_number = -625000;
-            this.cp0[COUNT] += 625000;
+            this.cp0[consts.COUNT] += 625000;
             this.interrupts.triggerCompareInterrupt(0, false);
             this.interrupts.triggerVIInterrupt(0, false);
             this.interrupts.processException(this.programCounter);
-        } else if ((this.cp0[CAUSE] & this.cp0[STATUS] & 0x0000FF00) !== 0) {
-            this.interrupts.setException(EXC_INT, 0, this.programCounter, false);
+        } else if ((this.cp0[consts.CAUSE] & this.cp0[consts.STATUS] & 0x0000FF00) !== 0) {
+            this.interrupts.setException(consts.EXC_INT, 0, this.programCounter, false);
             this.interrupts.processException(this.programCounter);
         }
 
@@ -356,7 +357,7 @@ var C1964jsEmulator = function (userSettings) {
     };
 
     this.repaintWrapper = function () {
-        this.repaint(this.ctx, this.ImDat, this.memory.getInt32(this.memory.viUint8Array, this.memory.viUint8Array, VI_ORIGIN_REG) & 0x00FFFFFF);
+        this.repaint(this.ctx, this.ImDat, this.memory.getInt32(this.memory.viUint8Array, this.memory.viUint8Array, consts.VI_ORIGIN_REG) & 0x00FFFFFF);
     };
 
     this.startEmulator = function (r, h) {
@@ -724,8 +725,8 @@ var C1964jsEmulator = function (userSettings) {
     this.r4300i_COP0_eret = function (i) {
         this.stopCompiling = true;
 
-        var string = '{if((t.cp0[' + STATUS + ']&' + ERL + ')!==0){alert("error epc");t.programCounter=t.cp0[' + ERROREPC + '];';
-        string += 't.cp0[' + STATUS + ']&=~' + ERL + ';}else{t.programCounter=t.cp0[' + EPC + '];t.cp0[' + STATUS + ']&=~' + EXL + ';}';
+        var string = '{if((t.cp0[' + consts.STATUS + ']&' + consts.ERL + ')!==0){alert("error epc");t.programCounter=t.cp0[' + consts.ERROREPC + '];';
+        string += 't.cp0[' + consts.STATUS + ']&=~' + consts.ERL + ';}else{t.programCounter=t.cp0[' + consts.EPC + '];t.cp0[' + consts.STATUS + ']&=~' + consts.EXL + ';}';
         string += 't.LLbit=0;return t.code[t.getFnName(t.programCounter)];}';
 
         return string;
@@ -849,10 +850,10 @@ var C1964jsEmulator = function (userSettings) {
         var string = '{';
 
         switch (this.helpers.fs(i)) {
-        case RANDOM:
+        case consts.RANDOM:
             alert('RANDOM');
             break;
-        case COUNT:
+        case consts.COUNT:
             //string += 't.cp0[' + this.helpers.fs(i) + ']=getCountRegister();';
             break;
         default:
