@@ -17,8 +17,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-var CPU_instruction =
-[
+/*jslint browser: true*/
+/*globals C1964jsEmulator*/
+
+var CPU_instruction = [
 	'instr', //0
 	'REGIMM_instr', //1
 	'r4300i_j', //2
@@ -85,8 +87,7 @@ var CPU_instruction =
 	'r4300i_sd'		//63
 ];
 
-var r4300i_Instruction =
-[
+var r4300i_Instruction = [
 	'r4300i_sll',		//0
 	'UNUSED',			//1
 	'r4300i_srl',		//2
@@ -153,8 +154,7 @@ var r4300i_Instruction =
 	'r4300i_dsra32'	//63
 ];
 
-var REGIMM_Instruction =
-[
+var REGIMM_Instruction = [
 	'r4300i_bltz',
 	'r4300i_bgez',
 	'r4300i_bltzl',
@@ -189,8 +189,7 @@ var REGIMM_Instruction =
 	'UNUSED'
 ];
 
-var COP0_Instruction =
-[
+var COP0_Instruction = [
 	'r4300i_COP0_mfc0',
 	'UNUSED',
 	'UNUSED',
@@ -225,8 +224,7 @@ var COP0_Instruction =
 	'UNUSED'
 ];
 
-var TLB_Instruction =
-[
+var TLB_Instruction = [
 	'UNUSED',				//0
 	'r4300i_COP0_tlbr',	//1
 	'r4300i_COP0_tlbwi',	//2
@@ -290,11 +288,10 @@ var TLB_Instruction =
 	'UNUSED',				//60
 	'UNUSED',				//61
 	'UNUSED',				//62
-	'UNUSED' 				//63
+	'UNUSED'				//63
 ];
 
-var COP1_Instruction =
-[
+var COP1_Instruction = [
 	'r4300i_COP1_mfc1',
 	'r4300i_COP1_dmfc1',
 	'r4300i_COP1_cfc1',
@@ -329,16 +326,14 @@ var COP1_Instruction =
 	'UNUSED'
 ];
 
-var COP1_BC_Instruction =
-[
+var COP1_BC_Instruction = [
 	'r4300i_COP1_bc1f', 'r4300i_COP1_bc1t', 'r4300i_COP1_bc1fl', 'r4300i_COP1_bc1tl', 'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED',
 	'UNUSED',           'UNUSED',           'UNUSED',            'UNUSED',            'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED',
 	'UNUSED',           'UNUSED',           'UNUSED',            'UNUSED',            'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED',
 	'UNUSED',           'UNUSED',           'UNUSED',            'UNUSED',            'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED'
 ];
 
-var COP1_S_Instruction =
-[
+var COP1_S_Instruction = [
 	'r4300i_COP1_add_s',
 	'r4300i_COP1_sub_s',
 	'r4300i_COP1_mul_s',
@@ -405,8 +400,7 @@ var COP1_S_Instruction =
 	'r4300i_C_NGT_S'
 ];
 
-var COP1_D_Instruction =
-[
+var COP1_D_Instruction = [
 	'r4300i_COP1_add_d',
 	'r4300i_COP1_sub_d',
 	'r4300i_COP1_mul_d',
@@ -473,8 +467,7 @@ var COP1_D_Instruction =
 	'r4300i_C_NGT_D'
 ];
 
-var COP1_W_Instruction =
-[
+var COP1_W_Instruction = [
 	'UNUSED',
 	'UNUSED',
 	'UNUSED',
@@ -541,8 +534,7 @@ var COP1_W_Instruction =
 	'UNUSED'
 ];
 
-var COP1_L_Instruction =
-[
+var COP1_L_Instruction = [
 	'UNUSED',
 	'UNUSED',
 	'UNUSED',
@@ -609,48 +601,57 @@ var COP1_L_Instruction =
 	'UNUSED'
 ];
 
-C1964jsEmulator.prototype.instr = function(i, isDelay) {
+C1964jsEmulator.prototype.instr = function (i, isDelay) {
+	"use strict";
 	return this[r4300i_Instruction[this.helpers.fn(i)]](i, isDelay);
-}
+};
 
-C1964jsEmulator.prototype.REGIMM_instr = function(i, isDelay) {
+C1964jsEmulator.prototype.REGIMM_instr = function (i, isDelay) {
+	"use strict";
 	return this[REGIMM_Instruction[this.helpers.rt(i)]](i, isDelay);
-}
+};
 
-C1964jsEmulator.prototype.COP0_instr = function(i, isDelay) {
+C1964jsEmulator.prototype.COP0_instr = function (i, isDelay) {
+	"use strict";
 	return this[COP0_Instruction[this.helpers.rs(i)]](i, isDelay);
-}
+};
 
-C1964jsEmulator.prototype.COP1_instr = function(i, isDelay) {
+C1964jsEmulator.prototype.COP1_instr = function (i, isDelay) {
+	"use strict";
 	return this[COP1_Instruction[this.helpers.rs(i)]](i, isDelay);
-}
+};
 
-C1964jsEmulator.prototype.TLB_instr = function(i, isDelay) {
+C1964jsEmulator.prototype.TLB_instr = function (i, isDelay) {
+	"use strict";
 	return this[TLB_Instruction[this.helpers.fn(i)]](i, isDelay);
-}
+};
 
-C1964jsEmulator.prototype.COP1_BC_instr = function(i, isDelay) {
+C1964jsEmulator.prototype.COP1_BC_instr = function (i, isDelay) {
+	"use strict";
 	return this[COP1_BC_Instruction[this.helpers.rt(i)]](i, isDelay);
-}
+};
 
-C1964jsEmulator.prototype.COP1_S_instr = function(i, isDelay) {
+C1964jsEmulator.prototype.COP1_S_instr = function (i, isDelay) {
+	"use strict";
 	return this[COP1_S_Instruction[this.helpers.fn(i)]](i, isDelay);
-}
+};
 
-C1964jsEmulator.prototype.COP1_D_instr = function(i, isDelay) {
+C1964jsEmulator.prototype.COP1_D_instr = function (i, isDelay) {
+	"use strict";
 	return this[COP1_D_Instruction[this.helpers.fn(i)]](i, isDelay);
-}
+};
 
-C1964jsEmulator.prototype.COP1_W_instr = function(i, isDelay) {
+C1964jsEmulator.prototype.COP1_W_instr = function (i, isDelay) {
+	"use strict";
 	return this[COP1_W_Instruction[this.helpers.fn(i)]](i, isDelay);
-}
+};
 
-C1964jsEmulator.prototype.COP1_L_instr = function(i, isDelay) {
+C1964jsEmulator.prototype.COP1_L_instr = function (i, isDelay) {
+	"use strict";
 	return window[COP1_L_Instruction[this.helpers.fn(i)]](i, isDelay);
-}
+};
 
-var microcodeMap0 =
-[
+var microcodeMap0 = [
 	'RSP_GBI1_SpNoop', 'RSP_GBI0_Mtx', 'RSP_GBI1_Reserved', 'RSP_GBI1_MoveMem',
 	'RSP_GBI0_Vtx', 'RSP_GBI1_Reserved', 'RSP_GBI0_DL', 'RSP_GBI1_Reserved',
 	'RSP_GBI1_Reserved', 'RSP_GBI0_Sprite2DBase', 'RSP_RDP_Nothing', 'RSP_RDP_Nothing',
