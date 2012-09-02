@@ -17,11 +17,11 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+/*globals consts*/
+
 function log(message) {
     //console.log(message);
 }
-
-/*globals consts*/
 
 C1964jsEmulator.prototype.flushDynaCache = function()
 {

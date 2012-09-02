@@ -794,10 +794,10 @@ var C1964jsEmulator = function (userSettings) {
 
     this.r4300i_slti = function (i) {
         var uoffset_imm_lo, soffset_imm_hi = (this.helpers.soffset_imm(i)) >> 31;
-        uoffset_imm_lo = (this.helpers.soffset_imm(i)) >>> 0;
+        var uoffset_imm_lo = (this.helpers.soffset_imm(i)) >>> 0;
 
-        return '{if(' + this.helpers.RSH(i) + '>' + this.helpers.soffset_imm_hi + ')' + this.helpers.tRT(i) + '=0;'
-            + 'else if(' + this.helpers.RSH(i) + '<' + this.helpers.soffset_imm_hi + ')' + this.helpers.tRT(i) + '=1;'
+        return '{if(' + this.helpers.RSH(i) + '>' + soffset_imm_hi + ')' + this.helpers.tRT(i) + '=0;'
+            + 'else if(' + this.helpers.RSH(i) + '<' + soffset_imm_hi + ')' + this.helpers.tRT(i) + '=1;'
             + 'else if(' + this.helpers.uRS(i) + '<' + uoffset_imm_lo + ')' + this.helpers.tRT(i) + '=1;'
             + 'else ' + this.helpers.tRT(i) + '=0;' + this.helpers.tRTH(i) + '=0;}';
     };
@@ -1005,7 +1005,7 @@ var C1964jsEmulator = function (userSettings) {
 
     this.r4300i_sra = function (i) {
         //optimization: sra's r[hi] can safely right-shift RT.
-        return '{' + this.helpers.tRD(i) + '=' + this.helpers.RT(i) + '>>' + this.helpers.sa(i) + ';' + this.helpers.tRDH(i) + '=' + this.helpers.RT(i) + '>>31}';
+        return '{' + this.helpers.tRD(i) + '=' + this.helpers.RT(i) + '>>' + this.helpers.sa(i) + ';' + this.helpers.tRDH(i) + '=' + this.helpers.RT(i) + '>>31;}';
     };
 
     this.r4300i_COP0_tlbp = function (i) {
