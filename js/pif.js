@@ -19,52 +19,36 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 var _1964buttons = 0x00000000; //todo: don't depend on global buttons!
 
-var C1964jsPif = function(pifUint8Array) {
+var C1964jsPif = function (pifUint8Array) {
+    "use strict";
 
+    this.pifUint8Array = pifUint8Array;
     this.EEProm_Status_Byte = 0;
     this.controlsPresent = new Array(4);
     this.controlsPresent[0] = true;
     this.controlsPresent[1] = false;
     this.controlsPresent[2] = false;
     this.controlsPresent[3] = false;
+};
 
-    //reordered
-    var R_PAD = 0x00010000
-    var L_PAD = 0x00020000
-    var D_PAD = 0x00040000
-    var U_PAD = 0x00080000
-    var START_BUTTON = 0x10000000
-    var Z_TRIG = 0x00200000
-    var B_BUTTON = 0x00400000
-    var A_BUTTON = 0x00800000
-    var R_CBUTTON = 0x01000000
-    var L_CBUTTON = 0x02000000
-    var D_CBUTTON = 0x04000000
-    var U_CBUTTON = 0x08000000
-    var R_TRIG = 0x80000000|0
-    var L_TRIG = 0x20000000
-    var Y_AXIS = 0x000000FF
-    var X_AXIS = 0x0000FF00
-    var LEFT_MAX = 0x000008000
-    var RIGHT_MAX = 0x00007F00
-    var UP_MAX = 0x00000007F
-    var DOWN_MAX = 0x00000080
+(function () {
+    "use strict";
 
-    this.processPif = function() {
+    C1964jsPif.prototype.processPif = function () {
         var pifRamStart = consts.MEMORY_START_PIF_RAM - consts.MEMORY_START_PIF;
         var count = 0;
         var device = 0;
 
         //todo: pif ram decryption
 
-        if ((pifUint8Array[pifRamStart] === 0xff)
-        && (pifUint8Array[pifRamStart+1] === 0xff)
-        && (pifUint8Array[pifRamStart+2] === 0xff)
-        && (pifUint8Array[pifRamStart+3] === 0xff))
+        if ((this.pifUint8Array[pifRamStart] === 0xff)
+        && (this.pifUint8Array[pifRamStart+1] === 0xff)
+        && (this.pifUint8Array[pifRamStart+2] === 0xff)
+        && (this.pifUint8Array[pifRamStart+3] === 0xff))
             throw 'todo: decrypt'; //see iPif.cpp. the first 4 dwords will be -1, not just the first 4 bytes. Make pifUint32Array and use it 4 times.
 
         for (count=0; count<64; count++) {
-            var cmd = pifUint8Array[pifRamStart+count];
+            var cmd = this.pifUint8Array[pifRamStart+count];
             
             if (cmd === 0xFE) //Command block ready
                 break;
@@ -83,23 +67,23 @@ var C1964jsPif = function(pifUint8Array) {
 
                 device++;
                 //size of Command-Bytes + size of Answer-Bytes + 2 for the 2 size Bytes (1 is in count++)
-                count += cmd + (pifUint8Array[pifRamStart+count+1] & 0x3F) + 1;
+                count += cmd + (this.pifUint8Array[pifRamStart+count+1] & 0x3F) + 1;
             } else {
                 log('Device > 4. Device = ' + device);
                 break;
             }
         }
 
-        pifUint8Array[pifRamStart+63] = 0; //Set the last bit to 0 (successful return)
-    }
+        this.pifUint8Array[pifRamStart+63] = 0; //Set the last bit to 0 (successful return)
+    };
 
-    this.processEeprom = function(pifRamStart, count) {
-    	switch(pifUint8Array[pifRamStart+count+2]) {
+    C1964jsPif.prototype.processEeprom = function (pifRamStart, count) {
+    	switch(this.pifUint8Array[pifRamStart+count+2]) {
     	case 0xFF:
     	case 0x00:
-    		pifUint8Array[pifRamStart+count+3] = 0x00;
-    		pifUint8Array[pifRamStart+count+4] = this.EEProm_Status_Byte;
-    		pifUint8Array[pifRamStart+count+5] = 0x00;
+    		this.pifUint8Array[pifRamStart+count+3] = 0x00;
+    		this.pifUint8Array[pifRamStart+count+4] = this.EEProm_Status_Byte;
+    		this.pifUint8Array[pifRamStart+count+5] = 0x00;
     		break;
     	case 0x04: //Read from Eeprom 
             alert('read eeprom');
@@ -115,34 +99,34 @@ var C1964jsPif = function(pifUint8Array) {
     	}
 
     	return false;
-    }
+    };
 
-    this.processController = function(count, device, pifRamStart) {
+    C1964jsPif.prototype.processController = function (count, device, pifRamStart) {
         if (this.controlsPresent[device] === false) {
-            pifUint8Array[pifRamStart+count+1] |= 0x80;
-            pifUint8Array[pifRamStart+count+3] = 0;
-            pifUint8Array[pifRamStart+count+4] = 0;
-            pifUint8Array[pifRamStart+count+5] = 0;
+            this.pifUint8Array[pifRamStart+count+1] |= 0x80;
+            this.pifUint8Array[pifRamStart+count+3] = 0;
+            this.pifUint8Array[pifRamStart+count+4] = 0;
+            this.pifUint8Array[pifRamStart+count+5] = 0;
             return true;     
         }
 
-        var cmd = pifUint8Array[pifRamStart+count+2];
+        var cmd = this.pifUint8Array[pifRamStart+count+2];
 
         switch (cmd) {
             case 0xFF: //0xFF could be something like Reset Controller and return the status
             case 0: //0x00 return the status
-                pifUint8Array[pifRamStart+count+3] = 5; //For Adaptoid
-                pifUint8Array[pifRamStart+count+4] = 0; //For Adaptoid
+                this.pifUint8Array[pifRamStart+count+3] = 5; //For Adaptoid
+                this.pifUint8Array[pifRamStart+count+4] = 0; //For Adaptoid
                 //todo: mempak, sram, eeprom save save & rumblepak
-                pifUint8Array[pifRamStart+count+5] = 0; //no mempak (For Adaptoid)
+                this.pifUint8Array[pifRamStart+count+5] = 0; //no mempak (For Adaptoid)
             break;
 
             case 1: 
                 var buttons = this.readControllerData();
-                pifUint8Array[pifRamStart+count+3] = buttons >> 24;
-                pifUint8Array[pifRamStart+count+4] = buttons >> 16;
-                pifUint8Array[pifRamStart+count+5] = buttons >> 8;
-                pifUint8Array[pifRamStart+count+6] = buttons;
+                this.pifUint8Array[pifRamStart+count+3] = buttons >> 24;
+                this.pifUint8Array[pifRamStart+count+4] = buttons >> 16;
+                this.pifUint8Array[pifRamStart+count+5] = buttons >> 8;
+                this.pifUint8Array[pifRamStart+count+6] = buttons;
             break;
 
             case 2:
@@ -157,13 +141,40 @@ var C1964jsPif = function(pifUint8Array) {
         }
 
         return true;
-    }
+    };
 
-    this.readControllerData = function() {
+    C1964jsPif.prototype.readControllerData = function () {
         return _1964buttons;
-    }
+    };
+}());
 
-    window.onkeydown = function(e) {
+//keyboard event handlers
+(function () {
+    "use strict";
+
+    //reordered
+    var R_PAD = 0x00010000;
+    var L_PAD = 0x00020000;
+    var D_PAD = 0x00040000;
+    var U_PAD = 0x00080000;
+    var START_BUTTON = 0x10000000;
+    var Z_TRIG = 0x00200000;
+    var B_BUTTON = 0x00400000;
+    var A_BUTTON = 0x00800000;
+    var R_CBUTTON = 0x01000000;
+    var L_CBUTTON = 0x02000000;
+    var D_CBUTTON = 0x04000000;
+    var U_CBUTTON = 0x08000000;
+    var R_TRIG = 0x80000000 | 0;
+    var L_TRIG = 0x20000000;
+    var Y_AXIS = 0x000000FF;
+    var X_AXIS = 0x0000FF00;
+    var LEFT_MAX = 0x000008000;
+    var RIGHT_MAX = 0x00007F00;
+    var UP_MAX = 0x00000007F;
+    var DOWN_MAX = 0x00000080;
+
+    window.onkeydown = function (e) {
         var keyCode;
 
         if (e) {
@@ -206,9 +217,9 @@ var C1964jsPif = function(pifUint8Array) {
             else if (keyCode === 48) //0
                 _1964buttons |= R_TRIG;
         }
-    }
+    };
 
-    window.onkeyup = function(e) {
+    window.onkeyup = function (e) {
         var keyCode;
         
         if (e) {
@@ -251,5 +262,5 @@ var C1964jsPif = function(pifUint8Array) {
             else if (keyCode === 48) //2
                 _1964buttons &= ~R_TRIG;
         }
-    }
-}
+    };
+}());

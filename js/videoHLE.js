@@ -17,76 +17,84 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-var C1964jsVideoHLE = function(core, glx) {
+var C1964jsVideoHLE = function (core, glx) {
+    "use strict";
+    var i;
 
     this.core = core; //only needed for gfxHelpers prototypes to access.
-    var gl = glx;
+    this.gl = glx;
 
     //todo: make gRSP a class object.
-    var RICE_MATRIX_STACK = 60
-    var MAX_TEXTURES = 8
-    var vtxTransformed = new Array(consts.MAX_VERTS);
-    var vtxNonTransformed = new Array(consts.MAX_VERTS);
-    var vecProjected = new Array(consts.MAX_VERTS);
-    var	vtxProjected5 = new Array(1000);
-    var gRSP = new Object();
-    var matToLoad = mat4.create();
-    var gRSPworldProject = mat4.create();
-    var triangleVertexPositionBuffer;
-    var dlistStackPointer = 0;
-    var dlistStack = new Array(consts.MAX_DL_STACK_SIZE);
-    var renderer = new C1964jsRenderer(core.settings, core.webGL.gl, core.webGL);
-    var texImg = new Object();
+    this.RICE_MATRIX_STACK = 60;
+    this.MAX_TEXTURES = 8;
+    this.vtxTransformed = new Array(consts.MAX_VERTS);
+    this.vtxNonTransformed = new Array(consts.MAX_VERTS);
+    this.vecProjected = new Array(consts.MAX_VERTS);
+    this.vtxProjected5 = new Array(1000);
+    this.gRSP = new Object();
+    this.matToLoad = mat4.create();
+    this.gRSPworldProject = mat4.create();
+    this.triangleVertexPositionBuffer;
+    this.dlistStackPointer = 0;
+    this.dlistStack = new Array(consts.MAX_DL_STACK_SIZE);
+    this.renderer = new C1964jsRenderer(this.core.settings, this.core.webGL.gl, this.core.webGL);
+    this.texImg = new Object();
     this.segments = new Array(16);
     //todo: different microcodes support
-    var currentMicrocodeMap = microcodeMap0;
+    this.currentMicrocodeMap = microcodeMap0;
 
-    for (var i=0; i<consts.MAX_DL_STACK_SIZE; i++)
-        dlistStack[i] = new Object();
-    for (var i=0; i<this.segments.length; i++)
-        this.segments[i] = 0;
-
-
-    gRSP.projectionMtxs = new Array(RICE_MATRIX_STACK);
-    gRSP.modelviewMtxs = new Array(RICE_MATRIX_STACK);
- 
-    //todo: allocate on-demand
-    for (var i=0; i<RICE_MATRIX_STACK; i++) {
-        gRSP.projectionMtxs[i] = mat4.create();
-        gRSP.modelviewMtxs[i] = mat4.create();
+    for (i = 0; i < consts.MAX_DL_STACK_SIZE; i += 1) {
+        this.dlistStack[i] = new Object();
     }
 
-    gRSP.vertexMult = 10;
+    for (i = 0; i < this.segments.length; i += 1) {
+        this.segments[i] = 0;
+    }
 
-    this.processDisplayList = function() {
-        if (core.showFB === true) {
+    this.gRSP.projectionMtxs = new Array(this.RICE_MATRIX_STACK);
+    this.gRSP.modelviewMtxs = new Array(this.RICE_MATRIX_STACK);
+ 
+    //todo: allocate on-demand
+    for (i = 0; i < this.RICE_MATRIX_STACK; i++) {
+        this.gRSP.projectionMtxs[i] = mat4.create();
+        this.gRSP.modelviewMtxs[i] = mat4.create();
+    }
+
+    this.gRSP.vertexMult = 10;
+
+    this.triangleVertexTextureCoordBuffer = undefined;
+};
+
+(function () {
+    "use strict";
+    C1964jsVideoHLE.prototype.processDisplayList = function () {
+        if (this.core.showFB === true) {
             this.initBuffers();
-            core.webGL.show3D();
-            core.showFB = false;
+            this.core.webGL.show3D();
+            this.core.showFB = false;
         }
 
-        core.webGL.beginDList();
-
+        this.core.webGL.beginDList();
 
         this.dlParserProcess();
 
-        //core.interrupts.triggerDPInterrupt(0, false);
-        core.interrupts.triggerSPInterrupt(0, false);
-    }
+        //this.core.interrupts.triggerDPInterrupt(0, false);
+        this.core.interrupts.triggerSPInterrupt(0, false);
+    };
 
-    this.videoLog = function(msg) {
+    C1964jsVideoHLE.prototype.videoLog = function (msg) {
         //alert(msg);
-    }
+    };
 
-    this.dlParserProcess = function() {
-        dlistStackPointer = 0;
-        dlistStack[dlistStackPointer].pc = core.memory.getInt32(core.memory.spMemUint8Array, core.memory.spMemUint8Array, consts.TASK_DATA_PTR);
-        dlistStack[dlistStackPointer].countdown = consts.MAX_DL_COUNT;
+    C1964jsVideoHLE.prototype.dlParserProcess = function () {
+        this.dlistStackPointer = 0;
+        this.dlistStack[this.dlistStackPointer].pc = this.core.memory.getInt32(this.core.memory.spMemUint8Array, this.core.memory.spMemUint8Array, consts.TASK_DATA_PTR);
+        this.dlistStack[this.dlistStackPointer].countdown = consts.MAX_DL_COUNT;
 
         this.vertices = [];
         this.trivertices = [];
-        triangleVertexPositionBuffer.numItems = 0;
-        gRSP.numVertices = 0;
+        this.triangleVertexPositionBuffer.numItems = 0;
+        this.gRSP.numVertices = 0;
 
         //see RSP_Parser.cpp
         //TODO: purge old textures
@@ -99,118 +107,118 @@ var C1964jsVideoHLE = function(core, glx) {
         //TODO: set viewport
         //TODO: set fill mode
 
-        while (dlistStackPointer >= 0) {
-            var pc = dlistStack[dlistStackPointer].pc;
+        while (this.dlistStackPointer >= 0) {
+            var pc = this.dlistStack[this.dlistStackPointer].pc;
             var cmd = this.getCommand(pc);
 
-            dlistStack[dlistStackPointer].pc += 8;
+            this.dlistStack[this.dlistStackPointer].pc += 8;
 
-            var func = currentMicrocodeMap[cmd];
+            var func = this.currentMicrocodeMap[cmd];
             
             this[func](pc);
 
-            if (dlistStackPointer >= 0 && --dlistStack[dlistStackPointer].countdown < 0 )
-                dlistStackPointer--;
+            if (this.dlistStackPointer >= 0 && --this.dlistStack[this.dlistStackPointer].countdown < 0 )
+                this.dlistStackPointer--;
         }
         
         this.videoLog('finished dlist');
         
-        core.interrupts.triggerSPInterrupt(0, false);
+        this.core.interrupts.triggerSPInterrupt(0, false);
         
         //TODO: end rendering
-    }
+    };
 
-    this.RDP_GFX_PopDL = function() {
-        dlistStackPointer--;
-    }
+    C1964jsVideoHLE.prototype.RDP_GFX_PopDL = function () {
+        this.dlistStackPointer--;
+    };
 
-    this.RSP_RDP_Nothing = function(pc) {
+    C1964jsVideoHLE.prototype.RSP_RDP_Nothing = function (pc) {
         this.videoLog('RSP RDP NOTHING');
-        dlistStackPointer--;
-    }
+        this.dlistStackPointer--;
+    };
 
-    this.RSP_GBI1_MoveMem = function(pc) {
+    C1964jsVideoHLE.prototype.RSP_GBI1_MoveMem = function (pc) {
         var type = this.getGbi1Type(pc);
         var length = this.getGbi1Length(pc);
         var addr = this.getGbi1RspSegmentAddr(pc);
         
         this.videoLog('movemem type=' + type + ', length=' + length + ' addr=' + addr);
-    }
+    };
 
-    this.RSP_GBI1_SpNoop = function(pc) {
+    C1964jsVideoHLE.prototype.RSP_GBI1_SpNoop = function (pc) {
         this.videoLog('RSP_GBI1_SpNoop');
-    }
+    };
 
-    this.RSP_GBI1_Reserved = function(pc) {
+    C1964jsVideoHLE.prototype.RSP_GBI1_Reserved = function (pc) {
         this.videoLog('RSP_GBI1_Reserved');
-    }
+    };
 
-    this.setProjection = function(mat, bPush, bReplace) {
+    C1964jsVideoHLE.prototype.setProjection = function (mat, bPush, bReplace) {
     	if (bPush) {
-    		if (gRSP.projectionMtxTop >= (RICE_MATRIX_STACK-1)) {}
+    		if (this.gRSP.projectionMtxTop >= (this.RICE_MATRIX_STACK-1)) {}
     		else
-    			gRSP.projectionMtxTop++;
+    			this.gRSP.projectionMtxTop++;
 
     		if (bReplace) {
     			// Load projection matrix
-    			mat4.set(mat, gRSP.projectionMtxs[gRSP.projectionMtxTop]);
+    			mat4.set(mat, this.gRSP.projectionMtxs[this.gRSP.projectionMtxTop]);
     		} else {
-    			mat4.multiply(gRSP.projectionMtxs[gRSP.projectionMtxTop-1], mat, gRSP.projectionMtxs[gRSP.projectionMtxTop]);
+    			mat4.multiply(this.gRSP.projectionMtxs[this.gRSP.projectionMtxTop-1], mat, this.gRSP.projectionMtxs[this.gRSP.projectionMtxTop]);
     		}
     	} else {
     		if (bReplace) {
     			// Load projection matrix
-    			mat4.set(mat, gRSP.projectionMtxs[gRSP.projectionMtxTop]);
+    			mat4.set(mat, this.gRSP.projectionMtxs[this.gRSP.projectionMtxTop]);
     		} else {
-    			mat4.multiply(gRSP.projectionMtxs[gRSP.projectionMtxTop], mat, gRSP.projectionMtxs[gRSP.projectionMtxTop]);
+    			mat4.multiply(this.gRSP.projectionMtxs[this.gRSP.projectionMtxTop], mat, this.gRSP.projectionMtxs[this.gRSP.projectionMtxTop]);
     		}
     	}
     	
-    	gRSP.bMatrixIsUpdated = true;
-    }
+    	this.gRSP.bMatrixIsUpdated = true;
+    };
 
-    this.setWorldView = function(mat, bPush, bReplace) {
+    C1964jsVideoHLE.prototype.setWorldView = function (mat, bPush, bReplace) {
     	if (bPush === true) {
-    		if (gRSP.modelViewMtxTop >= (RICE_MATRIX_STACK-1)) ;
+    		if (this.gRSP.modelViewMtxTop >= (this.RICE_MATRIX_STACK-1)) ;
     		else
-    			gRSP.modelViewMtxTop++;
+    			this.gRSP.modelViewMtxTop++;
 
     		// We should store the current projection matrix...
     		if (bReplace) {
     			// Load projection matrix
-    			mat4.set(mat, gRSP.modelviewMtxs[gRSP.modelViewMtxTop]);
+    			mat4.set(mat, this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop]);
     		} else { // Multiply projection matrix
-    			mat4.multiply(gRSP.modelviewMtxs[gRSP.modelViewMtxTop-1], mat, gRSP.modelviewMtxs[gRSP.modelViewMtxTop]);
-              //  gRSP.modelviewMtxs[gRSP.modelViewMtxTop] = mat * gRSP.modelviewMtxs[gRSP.modelViewMtxTop-1];
+    			mat4.multiply(this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop-1], mat, this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop]);
+              //  this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop] = mat * this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop-1];
     		}
     	} else { // NoPush
     		if (bReplace) {
     			// Load projection matrix
-    			mat4.set(mat, gRSP.modelviewMtxs[gRSP.modelViewMtxTop]);
+    			mat4.set(mat, this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop]);
     		} else {
     			// Multiply projection matrix
-    			mat4.multiply(gRSP.modelviewMtxs[gRSP.modelViewMtxTop], mat, gRSP.modelviewMtxs[gRSP.modelViewMtxTop]);
-    			//gRSP.modelviewMtxs[gRSP.modelViewMtxTop] = mat * gRSP.modelviewMtxs[gRSP.modelViewMtxTop];
+    			mat4.multiply(this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop], mat, this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop]);
+    			//this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop] = mat * this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop];
     		}
     	}
 
-    	gRSPmodelViewTop = gRSP.modelviewMtxs[gRSP.modelViewMtxTop];
-    	gRSP.bMatrixIsUpdated = true;
-    }
+    	//gRSPmodelViewTop = this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop];
+    	this.gRSP.bMatrixIsUpdated = true;
+    };
 
-    this.RSP_GBI0_Mtx = function(pc) {
+    C1964jsVideoHLE.prototype.RSP_GBI0_Mtx = function (pc) {
         var seg = this.getGbi0DlistAddr(pc);
         var addr = this.getRspSegmentAddr(seg);
         this.videoLog('RSP_GBI0_Mtx addr: ' + dec2hex(addr));
         this.loadMatrix(addr);
 
         if (this.gbi0isProjectionMatrix(pc))
-            this.setProjection(matToLoad, this.gbi0PushMatrix(pc), this.gbi0LoadMatrix(pc));
+            this.setProjection(this.matToLoad, this.gbi0PushMatrix(pc), this.gbi0LoadMatrix(pc));
         else
-            this.setWorldView(matToLoad, this.gbi0PushMatrix(pc), this.gbi0LoadMatrix(pc));
-    }
+            this.setWorldView(this.matToLoad, this.gbi0PushMatrix(pc), this.gbi0LoadMatrix(pc));
+    };
 
-    this.loadMatrix = function(addr) {
+    C1964jsVideoHLE.prototype.loadMatrix = function (addr) {
         //  todo: port and probably log warning message if true
         //	if (addr + 64 > g_dwRamSize)
         //	{
@@ -223,29 +231,29 @@ var C1964jsVideoHLE = function(core, glx) {
     	for (i=0; i<4; i++) {
     		for (j=0; j<4; j++) {
                 var a = addr+(i<<3)+(j<<1);
-                var hi = (core.memory.rdramUint8Array[a]<<8 | core.memory.rdramUint8Array[a+1])<<16>>16; 
-                var lo = (core.memory.rdramUint8Array[a+32]<<8 | core.memory.rdramUint8Array[a+32+1])&0x0000FFFF; 
-    			matToLoad[k++] = ((hi<<16) | lo)/ 65536.0;
+                var hi = (this.core.memory.rdramUint8Array[a]<<8 | this.core.memory.rdramUint8Array[a+1])<<16>>16; 
+                var lo = (this.core.memory.rdramUint8Array[a+32]<<8 | this.core.memory.rdramUint8Array[a+32+1])&0x0000FFFF; 
+    			this.matToLoad[k++] = ((hi<<16) | lo)/ 65536.0;
     		}
     	}
-    }
+    };
 
     //tile info.
-    this.DLParser_SetTImg = function(pc) {
-        texImg.format = this.getTImgFormat(pc);
-        texImg.size = this.getTImgSize(pc);
-        texImg.width = this.getTImgWidth(pc);
-        texImg.addr = this.getTImgAddr(pc);
-        texImg.bpl = texImg.width << texImg.size >> 1;
+    C1964jsVideoHLE.prototype.DLParser_SetTImg = function (pc) {
+        this.texImg.format = this.getTImgFormat(pc);
+        this.texImg.size = this.getTImgSize(pc);
+        this.texImg.width = this.getTImgWidth(pc);
+        this.texImg.addr = this.getTImgAddr(pc);
+        this.texImg.bpl = this.texImg.width << this.texImg.size >> 1;
 
-        texImg.changed = true; //no texture cache
+        this.texImg.changed = true; //no texture cache
 
 
         this.videoLog('TODO: DLParser_SetTImg');
-        //this.videoLog('Texture: format=' + texImg.format + ' size=' + texImg.size + ' ' + 'width=' + texImg.width + ' addr=' + texImg.addr + ' bpl=' + texImg.bpl);
-    }
+        //this.videoLog('Texture: format=' + this.texImg.format + ' size=' + this.texImg.size + ' ' + 'width=' + this.texImg.width + ' addr=' + this.texImg.addr + ' bpl=' + this.texImg.bpl);
+    };
 
-    this.RSP_GBI0_Vtx = function(pc) {
+    C1964jsVideoHLE.prototype.RSP_GBI0_Vtx = function (pc) {
         var num = this.getGbi0NumVertices(pc) + 1;
         var v0 = this.getGbi0Vertex0(pc);
         var seg = this.getGbi0DlistAddr(pc);
@@ -257,64 +265,59 @@ var C1964jsVideoHLE = function(core, glx) {
         //TODO: check that address is valid
 
         this.processVertexData(addr, v0, num);
-    }
+    };
 
-    this.updateCombinedMatrix = function() {
-    	if(gRSP.bMatrixIsUpdated) {
-    		var vmtx = gRSP.modelviewMtxs[gRSP.modelViewMtxTop];
-            var pmtx = gRSP.projectionMtxs[gRSP.projectionMtxTop];
+    C1964jsVideoHLE.prototype.updateCombinedMatrix = function () {
+    	if(this.gRSP.bMatrixIsUpdated) {
+    		var vmtx = this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop];
+            var pmtx = this.gRSP.projectionMtxs[this.gRSP.projectionMtxTop];
             
-            mat4.multiply(pmtx, vmtx, gRSPworldProject); 
-            
-            //gRSPworldProject = gRSP.modelviewMtxs[gRSP.modelViewMtxTop] * gRSP.projectionMtxs[gRSP.projectionMtxTop];
-    		gRSP.bMatrixIsUpdated = false;
-    		gRSP.bCombinedMatrixIsUpdated = true;
+            mat4.multiply(pmtx, vmtx, this.gRSPworldProject); 
+
+            //this.gRSPworldProject = this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop] * this.gRSP.projectionMtxs[this.gRSP.projectionMtxTop];
+    		this.gRSP.bMatrixIsUpdated = false;
+    		this.gRSP.bCombinedMatrixIsUpdated = true;
     	}
         
-        gRSP.bCombinedMatrixIsUpdated = false;
-    }
+        this.gRSP.bCombinedMatrixIsUpdated = false;
+    };
 
-    this.processVertexData = function(addr, v0, num)
-    {    
+    C1964jsVideoHLE.prototype.processVertexData = function (addr, v0, num) {
+        var a, i = v0;
         this.updateCombinedMatrix();
-        
-        for (var i=v0; i<v0+num; i++)
-        {
-            var a = addr + 16*(i-v0);
-            vtxNonTransformed[i] = new Object();
-            vtxNonTransformed[i].x = this.getFiddledVertexX(a);
-            vtxNonTransformed[i].y = this.getFiddledVertexY(a);
-            vtxNonTransformed[i].z = this.getFiddledVertexZ(a);
 
-            vtxTransformed[i] = new Object();
+        for (i = v0; i < v0 + num; i += 1) {
+            a = addr + 16*(i-v0);
+            this.vtxNonTransformed[i] = new Object();
+            this.vtxNonTransformed[i].x = this.getFiddledVertexX(a);
+            this.vtxNonTransformed[i].y = this.getFiddledVertexY(a);
+            this.vtxNonTransformed[i].z = this.getFiddledVertexZ(a);
 
-            vtxTransformed[i].x = vtxNonTransformed[i].x*(gRSPworldProject[0]) + vtxNonTransformed[i].y*(gRSPworldProject[4]) + vtxNonTransformed[i].z*(gRSPworldProject[8]) + 1*(gRSPworldProject[12]);
-            vtxTransformed[i].y = vtxNonTransformed[i].x*(gRSPworldProject[1]) + vtxNonTransformed[i].y*(gRSPworldProject[5]) + vtxNonTransformed[i].z*(gRSPworldProject[9]) + 1*(gRSPworldProject[13]);
-            vtxTransformed[i].z = vtxNonTransformed[i].x*(gRSPworldProject[2]) + vtxNonTransformed[i].y*(gRSPworldProject[6]) + vtxNonTransformed[i].z*(gRSPworldProject[10]) + 1*(gRSPworldProject[14]);
-            vtxTransformed[i].w = vtxNonTransformed[i].x*(gRSPworldProject[3]) + vtxNonTransformed[i].y*(gRSPworldProject[7]) + vtxNonTransformed[i].z*(gRSPworldProject[11]) + 1*(gRSPworldProject[15]);
+            this.vtxTransformed[i] = new Object();
+            this.vtxTransformed[i].x = this.vtxNonTransformed[i].x*(this.gRSPworldProject[0]) + this.vtxNonTransformed[i].y*(this.gRSPworldProject[4]) + this.vtxNonTransformed[i].z*(this.gRSPworldProject[8]) + 1*(this.gRSPworldProject[12]);
+            this.vtxTransformed[i].y = this.vtxNonTransformed[i].x*(this.gRSPworldProject[1]) + this.vtxNonTransformed[i].y*(this.gRSPworldProject[5]) + this.vtxNonTransformed[i].z*(this.gRSPworldProject[9]) + 1*(this.gRSPworldProject[13]);
+            this.vtxTransformed[i].z = this.vtxNonTransformed[i].x*(this.gRSPworldProject[2]) + this.vtxNonTransformed[i].y*(this.gRSPworldProject[6]) + this.vtxNonTransformed[i].z*(this.gRSPworldProject[10]) + 1*(this.gRSPworldProject[14]);
+            this.vtxTransformed[i].w = this.vtxNonTransformed[i].x*(this.gRSPworldProject[3]) + this.vtxNonTransformed[i].y*(this.gRSPworldProject[7]) + this.vtxNonTransformed[i].z*(this.gRSPworldProject[11]) + 1*(this.gRSPworldProject[15]);
 
-        
-        vecProjected[i] = new Object();
-        vecProjected[i].w = 1.0 / vtxTransformed[i].w;
-        vecProjected[i].x = vtxTransformed[i].x * vecProjected[i].w;
-        vecProjected[i].y = vtxTransformed[i].y * vecProjected[i].w;
-        vecProjected[i].z = vtxTransformed[i].z * vecProjected[i].w;
+            this.vecProjected[i] = new Object();
+            this.vecProjected[i].w = 1.0 / this.vtxTransformed[i].w;
+            this.vecProjected[i].x = this.vtxTransformed[i].x * this.vecProjected[i].w;
+            this.vecProjected[i].y = this.vtxTransformed[i].y * this.vecProjected[i].w;
+            this.vecProjected[i].z = this.vtxTransformed[i].z * this.vecProjected[i].w;
 
-        //temp
-        vtxTransformed[i].x = vecProjected[i].x;
-        vtxTransformed[i].y = vecProjected[i].y;
-        vtxTransformed[i].z = vecProjected[i].z;
+            //temp
+            this.vtxTransformed[i].x = this.vecProjected[i].x;
+            this.vtxTransformed[i].y = this.vecProjected[i].y;
+            this.vtxTransformed[i].z = this.vecProjected[i].z;
         }
-    }
+    };
 
-    this.DLParser_SetCImg = function(pc)
-    {
+    C1964jsVideoHLE.prototype.DLParser_SetCImg = function (pc) {
         this.videoLog('TODO: DLParser_SetCImg');
-    }
+    };
 
     //Gets new display list address
-    this.RSP_GBI0_DL = function(pc)
-    {
+    C1964jsVideoHLE.prototype.RSP_GBI0_DL = function (pc) {
         var seg = this.getGbi0DlistAddr(pc);
         var addr = this.getRspSegmentAddr(seg);
         this.videoLog('dlist address = ' + dec2hex(addr));
@@ -324,21 +327,19 @@ var C1964jsVideoHLE = function(core, glx) {
         var param = this.getGbi0DlistParam(pc);
         
         if (param === consts.RSP_DLIST_PUSH)
-            dlistStackPointer++;
+            this.dlistStackPointer++;
             
-        dlistStack[dlistStackPointer].pc = addr;
-        dlistStack[dlistStackPointer].countdown = consts.MAX_DL_COUNT;
-    }
+        this.dlistStack[this.dlistStackPointer].pc = addr;
+        this.dlistStack[this.dlistStackPointer].countdown = consts.MAX_DL_COUNT;
+    };
 
-    this.DLParser_SetCombine = function(pc)
-    {
+    C1964jsVideoHLE.prototype.DLParser_SetCombine = function (pc) {
         this.videoLog('TODO: DLParser_SetCombine');
-    }
+    };
 
-    this.RSP_GBI1_MoveWord = function(pc)
-    {
+    C1964jsVideoHLE.prototype.RSP_GBI1_MoveWord = function (pc) {
         this.videoLog('RSP_GBI1_MoveWord');
-        
+
         switch (this.getGbi0MoveWordType(pc))
     	{
     	case consts.RSP_MOVE_WORD_MATRIX:
@@ -347,7 +348,7 @@ var C1964jsVideoHLE = function(core, glx) {
     	case consts.RSP_MOVE_WORD_NUMLIGHT:
     		{
     //			uint32 dwNumLights = (((gfx->gbi0moveword.value)-0x80000000)/32)-1;
-    //			gRSP.ambientLightIndex = dwNumLights;
+    //			this.gRSP.ambientLightIndex = dwNumLights;
     //			SetNumLights(dwNumLights);
     		}
     		break;
@@ -406,7 +407,7 @@ var C1964jsVideoHLE = function(core, glx) {
     			switch (dwField)
     			{
     			case 0:
-    				if (dwLight == gRSP.ambientLightIndex)
+    				if (dwLight == this.gRSP.ambientLightIndex)
     				{
     					SetAmbientLight( ((gfx->gbi0moveword.value)>>8) );
     				}
@@ -438,83 +439,83 @@ var C1964jsVideoHLE = function(core, glx) {
     	}
     }
 
-    this.renderReset = function() {
+    C1964jsVideoHLE.prototype.renderReset = function () {
     //	UpdateClipRectangle();
     	this.resetMatrices();
     //	SetZBias(0);
-    	gRSP.numVertices = 0;
-    	gRSP.curTile = 0;
-    	gRSP.fTexScaleX = 1/32.0;
-    	gRSP.fTexScaleY = 1/32.0;
+    	this.gRSP.numVertices = 0;
+    	this.gRSP.curTile = 0;
+    	this.gRSP.fTexScaleX = 1/32.0;
+    	this.gRSP.fTexScaleY = 1/32.0;
     }
 
-    this.resetMatrices  = function() {
-    	gRSP.projectionMtxTop = 0;
-    	gRSP.modelViewMtxTop = 0;
-    	gRSP.projectionMtxs[0] = mat4.create();
-    	gRSP.modelviewMtxs[0] = mat4.create();
-        mat4.identity(gRSP.modelviewMtxs[0]);
-        mat4.identity(gRSP.projectionMtxs[0]);
+    C1964jsVideoHLE.prototype.resetMatrices  = function () {
+    	this.gRSP.projectionMtxTop = 0;
+    	this.gRSP.modelViewMtxTop = 0;
+    	this.gRSP.projectionMtxs[0] = mat4.create();
+    	this.gRSP.modelviewMtxs[0] = mat4.create();
+        mat4.identity(this.gRSP.modelviewMtxs[0]);
+        mat4.identity(this.gRSP.projectionMtxs[0]);
 
-    	gRSP.bMatrixIsUpdated = true;
+    	this.gRSP.bMatrixIsUpdated = true;
     	this.updateCombinedMatrix();
     }
 
-    this.RSP_RDP_InsertMatrix = function() {
+    C1964jsVideoHLE.prototype.RSP_RDP_InsertMatrix = function () {
     	this.updateCombinedMatrix();
         
-        gRSP.bMatrixIsUpdated = false;
-    	gRSP.bCombinedMatrixIsUpdated = true;
+        this.gRSP.bMatrixIsUpdated = false;
+    	this.gRSP.bCombinedMatrixIsUpdated = true;
     }
 
-    this.DLParser_SetScissor = function(pc) {
+    C1964jsVideoHLE.prototype.DLParser_SetScissor = function (pc) {
         this.videoLog('TODO: DLParser_SetScissor');
     }
 
-    this.RSP_GBI1_SetOtherModeH = function(pc) {
+    C1964jsVideoHLE.prototype.RSP_GBI1_SetOtherModeH = function (pc) {
         this.videoLog('TODO: DLParser_GBI1_SetOtherModeH');
     }
 
-    this.RSP_GBI1_SetOtherModeL = function(pc) {
+    C1964jsVideoHLE.prototype.RSP_GBI1_SetOtherModeL = function (pc) {
         this.videoLog('TODO: DLParser_GBI1_SetOtherModeL');
     }
 
-    this.RSP_GBI0_Sprite2DBase = function(pc) {
+    C1964jsVideoHLE.prototype.RSP_GBI0_Sprite2DBase = function (pc) {
         this.videoLog('TODO: RSP_GBI0_Sprite2DBase');
     }
 
-    this.RSP_GBI0_Tri4 = function(pc) {
+    C1964jsVideoHLE.prototype.RSP_GBI0_Tri4 = function (pc) {
         this.videoLog('TODO: RSP_GBI0_Tri4');
     }
 
-    this.RSP_GBI1_RDPHalf_Cont = function(pc) {
+    C1964jsVideoHLE.prototype.RSP_GBI1_RDPHalf_Cont = function (pc) {
         this.videoLog('TODO: RSP_GBI1_RDPHalf_Cont');
     }
 
-    this.RSP_GBI1_RDPHalf_2 = function(pc) {
+    C1964jsVideoHLE.prototype.RSP_GBI1_RDPHalf_2 = function (pc) {
         this.videoLog('TODO: RSP_GBI1_RDPHalf_2');
     }
 
-    this.RSP_GBI1_RDPHalf_1 = function(pc) {
+    C1964jsVideoHLE.prototype.RSP_GBI1_RDPHalf_1 = function (pc) {
         this.videoLog('TODO: RSP_GBI1_RDPHalf_1');
     }
 
-    this.RSP_GBI1_Line3D = function(pc) {
+    C1964jsVideoHLE.prototype.RSP_GBI1_Line3D = function (pc) {
         this.videoLog('TODO: RSP_GBI1_Line3D');
-    }
+    };
 
-    this.RSP_GBI1_ClearGeometryMode = function(pc) {
+    C1964jsVideoHLE.prototype.RSP_GBI1_ClearGeometryMode = function (pc) {
         this.videoLog('TODO: RSP_GBI1_ClearGeometryMode');
-    }
+    };
 
-    this.RSP_GBI1_SetGeometryMode = function(pc) {
+    C1964jsVideoHLE.prototype.RSP_GBI1_SetGeometryMode = function (pc) {
         this.videoLog('TODO: RSP_GBI1_SetGeometryMode');
-    }
+    };
 
-    this.RSP_GBI1_EndDL = function(pc) {
+    C1964jsVideoHLE.prototype.RSP_GBI1_EndDL = function (pc) {
         this.videoLog('RSP_GBI1_EndDL');
         this.RDP_GFX_PopDL();
-    }
+    };
 
 if (false) {
     //create a heap of dummy texture mem.
@@ -523,43 +524,43 @@ if (false) {
     for (var k=0; k<1024*1024; k++)
         testTextureMem[k] = 128;
    
-   this.RSP_GBI1_Texture = function(pc) {
+   C1964jsVideoHLE.prototype.RSP_GBI1_Texture = function (pc) {
         //hack: experimenting.
         
-        texImg.format = this.getTImgFormat(pc+4);
-        texImg.size = this.getTImgSize(pc+4);
-        texImg.width = this.getTImgWidth(pc+4);
-        texImg.addr = 0;
-        renderer.texTri(0, 0, 256, 256, 0, 0, 0, 0, 7, testTextureMem, texImg);
+        this.texImg.format = this.getTImgFormat(pc+4);
+        this.texImg.size = this.getTImgSize(pc+4);
+        this.texImg.width = this.getTImgWidth(pc+4);
+        this.texImg.addr = 0;
+        this.renderer.texTri(0, 0, 256, 256, 0, 0, 0, 0, 7, testTextureMem, this.texImg);
         this.videoLog('TODO: RSP_GBI1_Texture');
-    }  
+    };
 } else {
-    this.RSP_GBI1_Texture = function(pc) {
+    C1964jsVideoHLE.prototype.RSP_GBI1_Texture = function (pc) {
         //hack: experimenting.
         
-        texImg.format = this.getTImgFormat(pc);
-        texImg.size = this.getTImgSize(pc);
-        texImg.width = this.getTImgWidth(pc);
-        texImg.addr = this.getTImgAddr(pc+4);
-        texImg.changed = true;
-        //texImg.addr = 0;
-        renderer.texTri(0, 0, 256, 256, 0, 0, 0, 0, 7, core.memory.rdramUint8Array, texImg);
+        this.texImg.format = this.getTImgFormat(pc);
+        this.texImg.size = this.getTImgSize(pc);
+        this.texImg.width = this.getTImgWidth(pc);
+        this.texImg.addr = this.getTImgAddr(pc+4);
+        this.texImg.changed = true;
+        //this.texImg.addr = 0;
+        this.renderer.texTri(0, 0, 256, 256, 0, 0, 0, 0, 7, this.core.memory.rdramUint8Array, this.texImg);
         this.videoLog('TODO: RSP_GBI1_Texture');
-    }
+    };
 }
 
-    this.RSP_GBI1_PopMtx = function(pc) {
+    C1964jsVideoHLE.prototype.RSP_GBI1_PopMtx = function (pc) {
         this.videoLog('TODO: RSP_GBI1_PopMtx');
-    }
+    };
 
-    this.RSP_GBI1_CullDL = function(pc) {
+    C1964jsVideoHLE.prototype.RSP_GBI1_CullDL = function (pc) {
         this.videoLog('TODO: RSP_GBI1_CullDL');
-    }
+    };
 
-    this.RSP_GBI1_Tri1 = function(pc) {
-        var v0 = this.getGbi0Tri1V0(pc) / gRSP.vertexMult;
-        var v1 = this.getGbi0Tri1V1(pc) / gRSP.vertexMult;
-        var v2 = this.getGbi0Tri1V2(pc) / gRSP.vertexMult;
+    C1964jsVideoHLE.prototype.RSP_GBI1_Tri1 = function (pc) {
+        var v0 = this.getGbi0Tri1V0(pc) / this.gRSP.vertexMult;
+        var v1 = this.getGbi0Tri1V1(pc) / this.gRSP.vertexMult;
+        var v2 = this.getGbi0Tri1V2(pc) / this.gRSP.vertexMult;
 
         this.prepareTriangle(v2, v1, v0);
 
@@ -568,47 +569,47 @@ if (false) {
         //clear vertices for another shape
         this.vertices = [];
         this.trivertices = [];
-        triangleVertexPositionBuffer.numItems = 0;
-        gRSP.numVertices = 0;
-    }
+        this.triangleVertexPositionBuffer.numItems = 0;
+        this.gRSP.numVertices = 0;
+    };
 
-    this.RSP_GBI1_Noop = function(pc) {
+    C1964jsVideoHLE.prototype.RSP_GBI1_Noop = function (pc) {
         this.videoLog('TODO: RSP_GBI1_Noop');
-    }
+    };
 
-    this.RDP_TriFill = function(pc) {
+    C1964jsVideoHLE.prototype.RDP_TriFill = function (pc) {
         this.videoLog('TODO: RDP_TriFill');
-    }
+    };
 
-    this.RDP_TriFillZ = function(pc) {
+    C1964jsVideoHLE.prototype.RDP_TriFillZ = function (pc) {
         this.videoLog('RDP_TriFillZ');
-    }
+    };
 
-    this.RDP_TriTxtr = function(pc) {
+    C1964jsVideoHLE.prototype.RDP_TriTxtr = function (pc) {
         this.videoLog('TODO: RDP_TriTxtr');
-    }
+    };
 
-    this.RDP_TriTxtrZ = function(pc) {
+    C1964jsVideoHLE.prototype.RDP_TriTxtrZ = function (pc) {
         this.videoLog('TODO: RDP_TriTxtrZ');
-    }
+    };
 
-    this.RDP_TriShade = function(pc) {
+    C1964jsVideoHLE.prototype.RDP_TriShade = function (pc) {
         this.videoLog('TODO: RDP_TriShade');
-    }
+    };
 
-    this.RDP_TriShadeZ = function(pc) {
+    C1964jsVideoHLE.prototype.RDP_TriShadeZ = function (pc) {
         this.videoLog('TODO: RDP_TriShadeZ');
-    }
+    };
 
-    this.RDP_TriShadeTxtr = function(pc) {
+    C1964jsVideoHLE.prototype.RDP_TriShadeTxtr = function (pc) {
         this.videoLog('TODO: RDP_TriShadeTxtr');
-    }
+    };
 
-    this.RDP_TriShadeTxtrZ = function(pc) {
+    C1964jsVideoHLE.prototype.RDP_TriShadeTxtrZ = function (pc) {
         this.videoLog('TODO: RDP_TriShadeTxtrZ');
-    }
+    };
 
-    this.DLParser_TexRect = function(pc) {
+    C1964jsVideoHLE.prototype.DLParser_TexRect = function (pc) {
         this.videoLog('TODO: DLParser_TexRect');
         
     	var xh = this.getTexRectXh(pc);
@@ -621,214 +622,208 @@ if (false) {
     	var dsdx = this.getTexRectDsDx(pc);
     	var dtdy = this.getTexRectDtDy(pc);
         
-        renderer.texRect(xl, yl, xh, yh, s, t, dsdx, dtdy, tileno, core.memory.rdramUint8Array, texImg);
+        this.renderer.texRect(xl, yl, xh, yh, s, t, dsdx, dtdy, tileno, this.core.memory.rdramUint8Array, this.texImg);
 
-        dlistStack[dlistStackPointer].pc += 8;
-    }
+        this.dlistStack[this.dlistStackPointer].pc += 8;
+    };
 
-    this.DLParser_TexRectFlip = function(pc) {
-        dlistStack[dlistStackPointer].pc += 8;
+    C1964jsVideoHLE.prototype.DLParser_TexRectFlip = function (pc) {
+        this.dlistStack[this.dlistStackPointer].pc += 8;
         this.videoLog('TODO: DLParser_TexRectFlip');
-    }
+    };
 
-    this.DLParser_RDPLoadSync = function(pc) {
+    C1964jsVideoHLE.prototype.DLParser_RDPLoadSync = function (pc) {
         this.videoLog('TODO: DLParser_RDPLoadSync');
-    }
+    };
 
-    this.DLParser_RDPPipeSync = function(pc) {
+    C1964jsVideoHLE.prototype.DLParser_RDPPipeSync = function (pc) {
         this.videoLog('TODO: DLParser_RDPPipeSync');
-    }
+    };
 
-    this.DLParser_RDPTileSync = function(pc) {
+    C1964jsVideoHLE.prototype.DLParser_RDPTileSync = function (pc) {
         this.videoLog('TODO: DLParser_RDPTileSync');
-    }
+    };
 
-    this.DLParser_RDPFullSync = function(pc) {
+    C1964jsVideoHLE.prototype.DLParser_RDPFullSync = function (pc) {
         this.videoLog('TODO: DLParser_RDPFullSync');
-        core.interrupts.triggerDPInterrupt(0, false);
-    }
+        this.core.interrupts.triggerDPInterrupt(0, false);
+    };
 
-    this.DLParser_SetKeyGB = function(pc) {
+    C1964jsVideoHLE.prototype.DLParser_SetKeyGB = function (pc) {
         this.videoLog('TODO: DLParser_SetKeyGB');
-    }
+    };
 
-    this.DLParser_SetKeyR = function(pc) {
+    C1964jsVideoHLE.prototype.DLParser_SetKeyR = function (pc) {
         this.videoLog('TODO: DLParser_SetKeyR');
-    }
+    };
 
-    this.DLParser_SetConvert = function(pc) {
+    C1964jsVideoHLE.prototype.DLParser_SetConvert = function (pc) {
         this.videoLog('TODO: DLParser_SetConvert');
-    }
+    };
 
-    this.DLParser_SetPrimDepth = function(pc) {
+    C1964jsVideoHLE.prototype.DLParser_SetPrimDepth = function (pc) {
         this.videoLog('TODO: DLParser_SetPrimDepth');
-    }
+    };
 
-    this.DLParser_RDPSetOtherMode = function(pc) {
+    C1964jsVideoHLE.prototype.DLParser_RDPSetOtherMode = function (pc) {
         this.videoLog('TODO: DLParser_RDPSetOtherMode');
-    }
+    };
 
-    this.DLParser_LoadTLut = function(pc) {
+    C1964jsVideoHLE.prototype.DLParser_LoadTLut = function (pc) {
         this.videoLog('TODO: DLParser_LoadTLut');
-    }
+    };
 
-    this.DLParser_SetTileSize = function(pc) {
+    C1964jsVideoHLE.prototype.DLParser_SetTileSize = function (pc) {
         this.videoLog('TODO: DLParser_SetTileSize');
-    }
+    };
 
-    var map = new Object();
-    this.DLParser_LoadBlock = function(pc) {
-       // texImg.changed = true;
-            
+    C1964jsVideoHLE.prototype.DLParser_LoadBlock = function (pc) {
+       // this.texImg.changed = true;      
         this.videoLog('TODO: DLParser_LoadBlock');
-    }
+    };
 
-    this.DLParser_LoadTile = function(pc) {
+    C1964jsVideoHLE.prototype.DLParser_LoadTile = function (pc) {
 
         this.videoLog('TODO: DLParser_LoadTile');
-    }
+    };
 
-    this.DLParser_SetTile = function(pc) {
+    C1964jsVideoHLE.prototype.DLParser_SetTile = function (pc) {
         this.videoLog('TODO: DLParser_SetTile');
+    };
 
-    }
-
-    this.DLParser_FillRect = function(pc) {
+    C1964jsVideoHLE.prototype.DLParser_FillRect = function (pc) {
         this.videoLog('TODO: DLParser_FillRect');
-    }
+    };
 
-    this.DLParser_SetFillColor = function(pc) {
+    C1964jsVideoHLE.prototype.DLParser_SetFillColor = function (pc) {
         this.videoLog('TODO: DLParser_SetFillColor');
-    }
+    };
 
-    this.DLParser_SetFogColor = function(pc) {
+    C1964jsVideoHLE.prototype.DLParser_SetFogColor = function (pc) {
         this.videoLog('TODO: DLParser_SetFogColor');
-    }
+    };
 
-    this.DLParser_SetBlendColor = function(pc) {
+    C1964jsVideoHLE.prototype.DLParser_SetBlendColor = function (pc) {
         this.videoLog('TODO: DLParser_SetBlendColor');
-    }
+    };
 
-    this.DLParser_SetPrimColor = function(pc) {
+    C1964jsVideoHLE.prototype.DLParser_SetPrimColor = function (pc) {
         this.videoLog('TODO: DLParser_SetPrimColor');
-    }
+    };
 
-    this.DLParser_SetEnvColor = function(pc) {
+    C1964jsVideoHLE.prototype.DLParser_SetEnvColor = function (pc) {
         this.videoLog('TODO: DLParser_SetEnvColor');
-    }
+    };
 
-    this.DLParser_SetZImg = function(pc) {
+    C1964jsVideoHLE.prototype.DLParser_SetZImg = function (pc) {
         this.videoLog('TODO: DLParser_SetZImg');
-    }
+    };
 
-    this.prepareTriangle = function(dwV0, dwV1, dwV2) {
+    C1964jsVideoHLE.prototype.prepareTriangle = function (dwV0, dwV1, dwV2) {
     	//SP_Timing(SP_Each_Triangle);
 
-    	var textureFlag = false;//(CRender::g_pRender->IsTextureEnabled() || gRSP.ucode == 6 );
+    	var textureFlag = false;//(CRender::g_pRender->IsTextureEnabled() || this.gRSP.ucode == 6 );
 
-    	var didSucceed = this.initVertex(dwV0, gRSP.numVertices, textureFlag);
+    	var didSucceed = this.initVertex(dwV0, this.gRSP.numVertices, textureFlag);
     	
         if (didSucceed)
-            didSucceed = this.initVertex(dwV1, gRSP.numVertices+1, textureFlag);
+            didSucceed = this.initVertex(dwV1, this.gRSP.numVertices+1, textureFlag);
     	
         if (didSucceed)
-            didSucceed = this.initVertex(dwV2, gRSP.numVertices+2, textureFlag);
+            didSucceed = this.initVertex(dwV2, this.gRSP.numVertices+2, textureFlag);
 
         if (didSucceed)
-            gRSP.numVertices += 3;
+            this.gRSP.numVertices += 3;
             
         return didSucceed;
-    }
+    };
 
-    this.initVertex = function(dwV, vtxIndex, bTexture) {
+    C1964jsVideoHLE.prototype.initVertex = function (dwV, vtxIndex, bTexture) {
         
         if (vtxIndex >= consts.MAX_VERTS)
             return false;
         
-        if (vtxProjected5[vtxIndex] === undefined && vtxIndex < consts.MAX_VERTS)
-            vtxProjected5[vtxIndex] = new Array(4);
+        if (this.vtxProjected5[vtxIndex] === undefined && vtxIndex < consts.MAX_VERTS)
+            this.vtxProjected5[vtxIndex] = new Array(4);
             
-        if (vtxTransformed[dwV] === undefined)
+        if (this.vtxTransformed[dwV] === undefined)
             return false;
               
-        vtxProjected5[vtxIndex][0] = vtxTransformed[dwV].x;
-        vtxProjected5[vtxIndex][1] = vtxTransformed[dwV].y;
-        vtxProjected5[vtxIndex][2] = vtxTransformed[dwV].z;
-        vtxProjected5[vtxIndex][3] = vtxTransformed[dwV].w;
-        vtxProjected5[vtxIndex][4] = vecProjected[dwV].z;
-        if( vtxTransformed[dwV].w < 0 )	vtxProjected5[vtxIndex][4] = 0;
+        this.vtxProjected5[vtxIndex][0] = this.vtxTransformed[dwV].x;
+        this.vtxProjected5[vtxIndex][1] = this.vtxTransformed[dwV].y;
+        this.vtxProjected5[vtxIndex][2] = this.vtxTransformed[dwV].z;
+        this.vtxProjected5[vtxIndex][3] = this.vtxTransformed[dwV].w;
+        this.vtxProjected5[vtxIndex][4] = this.vecProjected[dwV].z;
+        if( this.vtxTransformed[dwV].w < 0 )	this.vtxProjected5[vtxIndex][4] = 0;
     		vtxIndex[vtxIndex] = vtxIndex;
 
-            //gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
+            //this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.triangleVertexPositionBuffer);
 
-        var offset = 3*(triangleVertexPositionBuffer.numItems);
-        this.trivertices[offset] = vtxProjected5[vtxIndex][0];
-        this.trivertices[offset+1] = vtxProjected5[vtxIndex][1];
-        this.trivertices[offset+2] = vtxProjected5[vtxIndex][2];
+        var offset = 3*(this.triangleVertexPositionBuffer.numItems);
+        this.trivertices[offset] = this.vtxProjected5[vtxIndex][0];
+        this.trivertices[offset+1] = this.vtxProjected5[vtxIndex][1];
+        this.trivertices[offset+2] = this.vtxProjected5[vtxIndex][2];
 
-        triangleVertexPositionBuffer.itemSize = 3;
-        triangleVertexPositionBuffer.numItems += 1;
+        this.triangleVertexPositionBuffer.itemSize = 3;
+        this.triangleVertexPositionBuffer.numItems += 1;
 
         return true;
-    }
+    };
 
-    this.drawScene = function(useTexture, tileno) {
+    C1964jsVideoHLE.prototype.drawScene = function (useTexture, tileno) {
 
-        core.webGL.switchShader(core.webGL.triangleShaderProgram);
-        gl.disable(gl.DEPTH_TEST);
-        gl.enable(gl.BLEND);
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+        this.core.webGL.switchShader(this.core.webGL.triangleShaderProgram);
+        this.gl.disable(this.gl.DEPTH_TEST);
+        this.gl.enable(this.gl.BLEND);
+        this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE);
         //simple lighting. Get the normal matrix of the model-view matrix
         
-        gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.trivertices), gl.STATIC_DRAW);
-        gl.vertexAttribPointer(core.webGL.triangleShaderProgram.vertexPositionAttribute, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.triangleVertexPositionBuffer);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(this.trivertices), this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(this.core.webGL.triangleShaderProgram.vertexPositionAttribute, this.triangleVertexPositionBuffer.itemSize, this.gl.FLOAT, false, 0, 0);
 
         if (useTexture === true) {
-            gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexTextureCoordBuffer);
-            gl.vertexAttribPointer(core.webGL.triangleShaderProgram.textureCoordAttribute, triangleVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.triangleVertexTextureCoordBuffer);
+            this.gl.vertexAttribPointer(this.core.webGL.triangleShaderProgram.textureCoordAttribute, this.triangleVertexTextureCoordBuffer.itemSize, this.gl.FLOAT, false, 0, 0);
 
-            gl.activeTexture(gl.TEXTURE0);
-            gl.bindTexture(gl.TEXTURE_2D, window['neheTexture'+tileno]);
-            gl.uniform1i(core.webGL.triangleShaderProgram.samplerUniform, 0);
+            this.gl.activeTexture(this.gl.TEXTURE0);
+            this.gl.bindTexture(this.gl.TEXTURE_2D, window['neheTexture'+tileno]);
+            this.gl.uniform1i(this.core.webGL.triangleShaderProgram.samplerUniform, 0);
         }
-      //  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
+      //  this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
 
-        core.webGL.setMatrixUniforms(core.webGL.triangleShaderProgram);
+        this.core.webGL.setMatrixUniforms(this.core.webGL.triangleShaderProgram);
 
-        if (core.settings.wireframe === true)
-            gl.drawArrays(gl.LINE_LOOP, 0, triangleVertexPositionBuffer.numItems);
+        if (this.core.settings.wireframe === true)
+            this.gl.drawArrays(this.gl.LINE_LOOP, 0, this.triangleVertexPositionBuffer.numItems);
         else
-            gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
+            this.gl.drawArrays(this.gl.TRIANGLES, 0, this.triangleVertexPositionBuffer.numItems);
 
       //  mvPopMatrix();
-    }
+    };
 
-    this.initBuffers = function() {
-    
-        triangleVertexPositionBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
+    C1964jsVideoHLE.prototype.initBuffers = function () {
+        this.triangleVertexPositionBuffer = this.gl.createBuffer();
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.triangleVertexPositionBuffer);
         this.trivertices = [
              0.0,  1.0,  0.0,
             -1.0, -1.0,  0.0,
              1.0, -1.0,  0.0
         ];
-        triangleVertexPositionBuffer.itemSize = 3;
-        triangleVertexPositionBuffer.numItems = this.trivertices.length/3;
+        this.triangleVertexPositionBuffer.itemSize = 3;
+        this.triangleVertexPositionBuffer.numItems = this.trivertices.length/3;
 
-        triangleVertexTextureCoordBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexTextureCoordBuffer);
+        this.triangleVertexTextureCoordBuffer = this.gl.createBuffer();
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.triangleVertexTextureCoordBuffer);
         this.triTextureCoords = [
         //front face
         1.0, 0.0, 1.0,
         0.0, 1.0, 1.0,
         0.0, 0.0, 1.0
         ];
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.triTextureCoords), gl.STATIC_DRAW);
-        gl.vertexAttribPointer(core.webGL.triangleShaderProgram.vertexPositionAttribute, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-        triangleVertexTextureCoordBuffer.itemSize = 3;
-        triangleVertexTextureCoordBuffer.numItems = this.triTextureCoords.length/3;
-    }
-
-
-}
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(this.triTextureCoords), this.gl.STATIC_DRAW);
+        this.gl.vertexAttribPointer(this.core.webGL.triangleShaderProgram.vertexPositionAttribute, this.triangleVertexPositionBuffer.itemSize, this.gl.FLOAT, false, 0, 0);
+        this.triangleVertexTextureCoordBuffer.itemSize = 3;
+        this.triangleVertexTextureCoordBuffer.numItems = this.triTextureCoords.length/3;
+    };
+}());

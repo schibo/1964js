@@ -47,7 +47,6 @@ C1964jsEmulator.prototype.flushDynaCache = function () {
 };
 
 C1964jsEmulator.prototype.deleteFunction = function (k) {
-    "use strict";
     //log('cleanup');
     var fnName, splitResult, s = document.getElementsByTagName('script')[k];
     splitResult = s.text.split('_');
@@ -57,6 +56,9 @@ C1964jsEmulator.prototype.deleteFunction = function (k) {
  
     s.parentNode.removeChild(s);
    
+    //allow deletion of this function        
+    eval(fnName + '= function (r, s, t, v){}; delete ' + fnName + ';');
+
     window[fnName] = null;
  
     if (window[fnName])
