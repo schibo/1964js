@@ -70,16 +70,11 @@ var consts = new C1964jsConstants();
 
 var C1964jsEmulator = function (userSettings) {
     "use strict";
-
-//private:
     var i;
 
-//public:
     this.settings = userSettings;
-
     this.request = undefined;
     this.debug = false;
-
     this.writeToDom = true;
 
     if (this.writeToDom === true) {
@@ -103,7 +98,6 @@ var C1964jsEmulator = function (userSettings) {
 
     //var docElement, errorElement, g, s, interval, keepRunning, stopCompiling, offset, programCounter, romLength, redrawDebug=0;
     this.terminate = false;
-
     this.NUM_CHANNELS = 1;
     this.NUM_SAMPLES = 40000;
     this.SAMPLE_RATE = 40000;
@@ -136,8 +130,20 @@ var C1964jsEmulator = function (userSettings) {
     "use strict";
     var offset;
 
+    /* function init() 
+        r[32] = LO for mult
+        r[33] = HI for mult
+        r[34] = write-only. to protect r0, write here.
+    */
     C1964jsEmulator.prototype.init = function (buffer) {
-        var k, x, i, y, r = new Int32Array(35 * 4), h = new Int32Array(35 * 4);
+        var k, x, i, y, r = new Int32Array([
+            0, 0, 0xd1731be9, 0xd1731be9, 0x001be9, 0xf45231e5, 0xa4001f0c, 0xa4001f08,
+            0x070, 0, 0x040, 0xA4000040, 0xd1330bc3, 0xd1330bc3, 0x025613a26, 0x02ea04317,
+            0, 0, 0, 0, 0, 0, 0, 0x06,
+            0, 0xd73f2993, 0, 0, 0, 0xa4001ff0, 0, 0xa4001554, 0, 0, 0]),
+            h = new Int32Array(35 * 4);
+
+        //todo: verity that r[8] is 0x070
 
         cancelAnimFrame(this.request);
         this.currentHack = 0;
@@ -152,42 +158,6 @@ var C1964jsEmulator = function (userSettings) {
         this.helpers = new C1964jsHelpers(this.isLittleEndian);
 
         //runTest();
-
-        r[0] = 0;
-        r[1] = 0;
-        r[2] = 0xd1731be9;
-        r[3] = 0xd1731be9;
-        r[4] = 0x001be9;
-        r[5] = 0xf45231e5;
-        r[6] = 0xa4001f0c;
-        r[7] = 0xa4001f08;
-        r[8] = 0x070; //check
-        r[9] = 0;
-        r[10] = 0x040;
-        r[11] = 0xA4000040;
-        r[12] = 0xd1330bc3;
-        r[13] = 0xd1330bc3;
-        r[14] = 0x025613a26;
-        r[15] = 0x02ea04317;
-        r[16] = 0;
-        r[17] = 0;
-        r[18] = 0;
-        r[19] = 0;
-        r[20] = 0;//TV System
-        r[21] = 0;
-        r[22] = 0;//CIC
-        r[23] = 0x06;
-        r[24] = 0;
-        r[25] = 0xd73f2993;
-        r[26] = 0;
-        r[27] = 0;
-        r[28] = 0;
-        r[29] = 0xa4001ff0;
-        r[30] = 0;
-        r[31] = 0xa4001554;
-        r[32] = 0; //LO for mult
-        r[33] = 0; //HI for mult
-        r[34] = 0; //to protect r0, write here. (r[34])
 
         this.memory.rom = buffer;
         //rom = new Uint8Array(buffer);
@@ -221,7 +191,7 @@ var C1964jsEmulator = function (userSettings) {
 
         r[20] = this.getTVSystem(this.memory.romUint8Array[0x3D]);
         r[22] = this.getCIC();
-
+ 
         this.cp0[consts.STATUS] = 0x70400004;
         this.cp0[consts.RANDOM] = 0x0000001f;
         this.cp0[consts.CONFIG] = 0x0006e463;

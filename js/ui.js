@@ -218,11 +218,11 @@ function handleFileSelect(evt) {
         progress.style.width = '100%';
         progress.textContent = '100%';
     }
-    
+
     if (progressBar != undefined)
         setTimeout("document.getElementById('progress_bar').className='';document.getElementById('user_panel').className='';", 1000);
       //todo: add zip support (from index.html)
-      
+
       uncompressAndRun(fileName, reader.result, i1964js);
     }
 
