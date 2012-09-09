@@ -146,7 +146,7 @@ var C1964jsPif = function (pifUint8Array) {
     C1964jsPif.prototype.readControllerData = function () {
         return _1964buttons;
     };
-}());
+}).call(this);
 
 //keyboard event handlers
 (function () {

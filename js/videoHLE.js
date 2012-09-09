@@ -17,6 +17,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+/*jslint todo: true, bitwise: true*/
+/*globals window, mat4, C1964jsRenderer, consts, dec2hex, Float32Array*/
+
 var C1964jsVideoHLE = function (core, glx) {
     "use strict";
     var i;
@@ -27,35 +30,35 @@ var C1964jsVideoHLE = function (core, glx) {
     //todo: make gRSP a class object.
     this.RICE_MATRIX_STACK = 60;
     this.MAX_TEXTURES = 8;
-    this.vtxTransformed = new Array(consts.MAX_VERTS);
-    this.vtxNonTransformed = new Array(consts.MAX_VERTS);
-    this.vecProjected = new Array(consts.MAX_VERTS);
-    this.vtxProjected5 = new Array(1000);
-    this.gRSP = new Object();
+    this.vtxTransformed = [];
+    this.vtxNonTransformed = [];
+    this.vecProjected = [];
+    this.vtxProjected5 = [];
+    this.gRSP = {};
     this.matToLoad = mat4.create();
     this.gRSPworldProject = mat4.create();
-    this.triangleVertexPositionBuffer;
+    this.triangleVertexPositionBuffer = undefined;
     this.dlistStackPointer = 0;
-    this.dlistStack = new Array(consts.MAX_DL_STACK_SIZE);
+    this.dlistStack = [];
     this.renderer = new C1964jsRenderer(this.core.settings, this.core.webGL.gl, this.core.webGL);
-    this.texImg = new Object();
-    this.segments = new Array(16);
+    this.texImg = {};
+    this.segments = [];
     //todo: different microcodes support
-    this.currentMicrocodeMap = microcodeMap0;
+    this.currentMicrocodeMap = this.microcodeMap0;
 
     for (i = 0; i < consts.MAX_DL_STACK_SIZE; i += 1) {
-        this.dlistStack[i] = new Object();
+        this.dlistStack[i] = {};
     }
 
     for (i = 0; i < this.segments.length; i += 1) {
         this.segments[i] = 0;
     }
 
-    this.gRSP.projectionMtxs = new Array(this.RICE_MATRIX_STACK);
-    this.gRSP.modelviewMtxs = new Array(this.RICE_MATRIX_STACK);
- 
+    this.gRSP.projectionMtxs = [];
+    this.gRSP.modelviewMtxs = [];
+
     //todo: allocate on-demand
-    for (i = 0; i < this.RICE_MATRIX_STACK; i++) {
+    for (i = 0; i < this.RICE_MATRIX_STACK; i += 1) {
         this.gRSP.projectionMtxs[i] = mat4.create();
         this.gRSP.modelviewMtxs[i] = mat4.create();
     }
@@ -108,40 +111,44 @@ var C1964jsVideoHLE = function (core, glx) {
         //TODO: set fill mode
 
         while (this.dlistStackPointer >= 0) {
-            var pc = this.dlistStack[this.dlistStackPointer].pc;
-            var cmd = this.getCommand(pc);
+            var func, cmd, pc = this.dlistStack[this.dlistStackPointer].pc;
+            cmd = this.getCommand(pc);
 
             this.dlistStack[this.dlistStackPointer].pc += 8;
 
-            var func = this.currentMicrocodeMap[cmd];
-            
+            func = this.currentMicrocodeMap[cmd];
+
             this[func](pc);
 
-            if (this.dlistStackPointer >= 0 && --this.dlistStack[this.dlistStackPointer].countdown < 0 )
-                this.dlistStackPointer--;
+            if (this.dlistStackPointer >= 0) {
+                this.dlistStack[this.dlistStackPointer].countdown -= 1;
+                if (this.dlistStack[this.dlistStackPointer].countdown < 0) {
+                    this.dlistStackPointer -= 1;
+                }
+            }
         }
-        
+
         this.videoLog('finished dlist');
-        
+
         this.core.interrupts.triggerSPInterrupt(0, false);
-        
+
         //TODO: end rendering
     };
 
     C1964jsVideoHLE.prototype.RDP_GFX_PopDL = function () {
-        this.dlistStackPointer--;
+        this.dlistStackPointer -= 1;
     };
 
     C1964jsVideoHLE.prototype.RSP_RDP_Nothing = function (pc) {
         this.videoLog('RSP RDP NOTHING');
-        this.dlistStackPointer--;
+        this.dlistStackPointer -= 1;
     };
 
     C1964jsVideoHLE.prototype.RSP_GBI1_MoveMem = function (pc) {
-        var type = this.getGbi1Type(pc);
-        var length = this.getGbi1Length(pc);
-        var addr = this.getGbi1RspSegmentAddr(pc);
-        
+        var addr, length, type = this.getGbi1Type(pc);
+        length = this.getGbi1Length(pc);
+        addr = this.getGbi1RspSegmentAddr(pc);
+
         this.videoLog('movemem type=' + type + ', length=' + length + ' addr=' + addr);
     };
 
@@ -154,88 +161,90 @@ var C1964jsVideoHLE = function (core, glx) {
     };
 
     C1964jsVideoHLE.prototype.setProjection = function (mat, bPush, bReplace) {
-    	if (bPush) {
-    		if (this.gRSP.projectionMtxTop >= (this.RICE_MATRIX_STACK-1)) {}
-    		else
-    			this.gRSP.projectionMtxTop++;
+        if (bPush) {
+            if (this.gRSP.projectionMtxTop < (this.RICE_MATRIX_STACK - 1)) {
+                this.gRSP.projectionMtxTop += 1;
+            }
 
-    		if (bReplace) {
-    			// Load projection matrix
-    			mat4.set(mat, this.gRSP.projectionMtxs[this.gRSP.projectionMtxTop]);
-    		} else {
-    			mat4.multiply(this.gRSP.projectionMtxs[this.gRSP.projectionMtxTop-1], mat, this.gRSP.projectionMtxs[this.gRSP.projectionMtxTop]);
-    		}
-    	} else {
-    		if (bReplace) {
-    			// Load projection matrix
-    			mat4.set(mat, this.gRSP.projectionMtxs[this.gRSP.projectionMtxTop]);
-    		} else {
-    			mat4.multiply(this.gRSP.projectionMtxs[this.gRSP.projectionMtxTop], mat, this.gRSP.projectionMtxs[this.gRSP.projectionMtxTop]);
-    		}
-    	}
-    	
-    	this.gRSP.bMatrixIsUpdated = true;
+            if (bReplace) {
+                // Load projection matrix
+                mat4.set(mat, this.gRSP.projectionMtxs[this.gRSP.projectionMtxTop]);
+            } else {
+                mat4.multiply(this.gRSP.projectionMtxs[this.gRSP.projectionMtxTop - 1], mat, this.gRSP.projectionMtxs[this.gRSP.projectionMtxTop]);
+            }
+        } else {
+            if (bReplace) {
+                // Load projection matrix
+                mat4.set(mat, this.gRSP.projectionMtxs[this.gRSP.projectionMtxTop]);
+            } else {
+                mat4.multiply(this.gRSP.projectionMtxs[this.gRSP.projectionMtxTop], mat, this.gRSP.projectionMtxs[this.gRSP.projectionMtxTop]);
+            }
+        }
+
+        this.gRSP.bMatrixIsUpdated = true;
     };
 
     C1964jsVideoHLE.prototype.setWorldView = function (mat, bPush, bReplace) {
-    	if (bPush === true) {
-    		if (this.gRSP.modelViewMtxTop >= (this.RICE_MATRIX_STACK-1)) ;
-    		else
-    			this.gRSP.modelViewMtxTop++;
+        if (bPush === true) {
+            if (this.gRSP.modelViewMtxTop < (this.RICE_MATRIX_STACK - 1)) {
+                this.gRSP.modelViewMtxTop += 1;
+            }
 
-    		// We should store the current projection matrix...
-    		if (bReplace) {
-    			// Load projection matrix
-    			mat4.set(mat, this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop]);
-    		} else { // Multiply projection matrix
-    			mat4.multiply(this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop-1], mat, this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop]);
-              //  this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop] = mat * this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop-1];
-    		}
-    	} else { // NoPush
-    		if (bReplace) {
-    			// Load projection matrix
-    			mat4.set(mat, this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop]);
-    		} else {
-    			// Multiply projection matrix
-    			mat4.multiply(this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop], mat, this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop]);
-    			//this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop] = mat * this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop];
-    		}
-    	}
+            // We should store the current projection matrix...
+            if (bReplace) {
+                // Load projection matrix
+                mat4.set(mat, this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop]);
+            } else { // Multiply projection matrix
+                mat4.multiply(this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop - 1], mat, this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop]);
+                //  this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop] = mat * this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop-1];
+            }
+        } else { // NoPush
+            if (bReplace) {
+                // Load projection matrix
+                mat4.set(mat, this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop]);
+            } else {
+                // Multiply projection matrix
+                mat4.multiply(this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop], mat, this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop]);
+                //this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop] = mat * this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop];
+            }
+        }
 
-    	//gRSPmodelViewTop = this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop];
-    	this.gRSP.bMatrixIsUpdated = true;
+        //gRSPmodelViewTop = this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop];
+        this.gRSP.bMatrixIsUpdated = true;
     };
 
     C1964jsVideoHLE.prototype.RSP_GBI0_Mtx = function (pc) {
-        var seg = this.getGbi0DlistAddr(pc);
-        var addr = this.getRspSegmentAddr(seg);
+        var addr, seg = this.getGbi0DlistAddr(pc);
+        addr = this.getRspSegmentAddr(seg);
+
         this.videoLog('RSP_GBI0_Mtx addr: ' + dec2hex(addr));
         this.loadMatrix(addr);
 
-        if (this.gbi0isProjectionMatrix(pc))
+        if (this.gbi0isProjectionMatrix(pc)) {
             this.setProjection(this.matToLoad, this.gbi0PushMatrix(pc), this.gbi0LoadMatrix(pc));
-        else
+        } else {
             this.setWorldView(this.matToLoad, this.gbi0PushMatrix(pc), this.gbi0LoadMatrix(pc));
+        }
     };
 
     C1964jsVideoHLE.prototype.loadMatrix = function (addr) {
         //  todo: port and probably log warning message if true
-        //	if (addr + 64 > g_dwRamSize)
-        //	{
-        //		return;
-        //	}
+        //    if (addr + 64 > g_dwRamSize)
+        //    {
+        //        return;
+        //    }
 
-    	var i, j, k;
-        k = 0;
+        var i, j, lo, hi, a, k = 0;
 
-    	for (i=0; i<4; i++) {
-    		for (j=0; j<4; j++) {
-                var a = addr+(i<<3)+(j<<1);
-                var hi = (this.core.memory.rdramUint8Array[a]<<8 | this.core.memory.rdramUint8Array[a+1])<<16>>16; 
-                var lo = (this.core.memory.rdramUint8Array[a+32]<<8 | this.core.memory.rdramUint8Array[a+32+1])&0x0000FFFF; 
-    			this.matToLoad[k++] = ((hi<<16) | lo)/ 65536.0;
-    		}
-    	}
+        for (i = 0; i < 4; i += 1) {
+            for (j = 0; j < 4; j += 1) {
+                a = addr + (i << 3) + (j << 1);
+                hi = (this.core.memory.rdramUint8Array[a] << 8 | this.core.memory.rdramUint8Array[a + 1]) << 16 >> 16;
+                lo = (this.core.memory.rdramUint8Array[a + 32] << 8 | this.core.memory.rdramUint8Array[a + 32 + 1]) & 0x0000FFFF;
+                this.matToLoad[k] = ((hi << 16) | lo) / 65536.0;
+                k += 1;
+            }
+        }
     };
 
     //tile info.
@@ -248,37 +257,36 @@ var C1964jsVideoHLE = function (core, glx) {
 
         this.texImg.changed = true; //no texture cache
 
-
         this.videoLog('TODO: DLParser_SetTImg');
         //this.videoLog('Texture: format=' + this.texImg.format + ' size=' + this.texImg.size + ' ' + 'width=' + this.texImg.width + ' addr=' + this.texImg.addr + ' bpl=' + this.texImg.bpl);
     };
 
     C1964jsVideoHLE.prototype.RSP_GBI0_Vtx = function (pc) {
-        var num = this.getGbi0NumVertices(pc) + 1;
-        var v0 = this.getGbi0Vertex0(pc);
-        var seg = this.getGbi0DlistAddr(pc);
-        var addr = this.getRspSegmentAddr(seg);
+        var v0, seg, addr, num = this.getGbi0NumVertices(pc) + 1;
+        v0 = this.getGbi0Vertex0(pc);
+        seg = this.getGbi0DlistAddr(pc);
+        addr = this.getRspSegmentAddr(seg);
 
-        if ((v0 + num) > 80)
+        if ((v0 + num) > 80) {
             num = 32 - v0;
+        }
 
         //TODO: check that address is valid
-
         this.processVertexData(addr, v0, num);
     };
 
     C1964jsVideoHLE.prototype.updateCombinedMatrix = function () {
-    	if(this.gRSP.bMatrixIsUpdated) {
-    		var vmtx = this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop];
-            var pmtx = this.gRSP.projectionMtxs[this.gRSP.projectionMtxTop];
-            
-            mat4.multiply(pmtx, vmtx, this.gRSPworldProject); 
+        if (this.gRSP.bMatrixIsUpdated) {
+            var pmtx, vmtx = this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop];
+            pmtx = this.gRSP.projectionMtxs[this.gRSP.projectionMtxTop];
+
+            mat4.multiply(pmtx, vmtx, this.gRSPworldProject);
 
             //this.gRSPworldProject = this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop] * this.gRSP.projectionMtxs[this.gRSP.projectionMtxTop];
-    		this.gRSP.bMatrixIsUpdated = false;
-    		this.gRSP.bCombinedMatrixIsUpdated = true;
-    	}
-        
+            this.gRSP.bMatrixIsUpdated = false;
+            this.gRSP.bCombinedMatrixIsUpdated = true;
+        }
+
         this.gRSP.bCombinedMatrixIsUpdated = false;
     };
 
@@ -287,19 +295,19 @@ var C1964jsVideoHLE = function (core, glx) {
         this.updateCombinedMatrix();
 
         for (i = v0; i < v0 + num; i += 1) {
-            a = addr + 16*(i-v0);
-            this.vtxNonTransformed[i] = new Object();
+            a = addr + 16 * (i - v0);
+            this.vtxNonTransformed[i] = {};
             this.vtxNonTransformed[i].x = this.getFiddledVertexX(a);
             this.vtxNonTransformed[i].y = this.getFiddledVertexY(a);
             this.vtxNonTransformed[i].z = this.getFiddledVertexZ(a);
 
-            this.vtxTransformed[i] = new Object();
-            this.vtxTransformed[i].x = this.vtxNonTransformed[i].x*(this.gRSPworldProject[0]) + this.vtxNonTransformed[i].y*(this.gRSPworldProject[4]) + this.vtxNonTransformed[i].z*(this.gRSPworldProject[8]) + 1*(this.gRSPworldProject[12]);
-            this.vtxTransformed[i].y = this.vtxNonTransformed[i].x*(this.gRSPworldProject[1]) + this.vtxNonTransformed[i].y*(this.gRSPworldProject[5]) + this.vtxNonTransformed[i].z*(this.gRSPworldProject[9]) + 1*(this.gRSPworldProject[13]);
-            this.vtxTransformed[i].z = this.vtxNonTransformed[i].x*(this.gRSPworldProject[2]) + this.vtxNonTransformed[i].y*(this.gRSPworldProject[6]) + this.vtxNonTransformed[i].z*(this.gRSPworldProject[10]) + 1*(this.gRSPworldProject[14]);
-            this.vtxTransformed[i].w = this.vtxNonTransformed[i].x*(this.gRSPworldProject[3]) + this.vtxNonTransformed[i].y*(this.gRSPworldProject[7]) + this.vtxNonTransformed[i].z*(this.gRSPworldProject[11]) + 1*(this.gRSPworldProject[15]);
+            this.vtxTransformed[i] = {};
+            this.vtxTransformed[i].x = this.vtxNonTransformed[i].x * this.gRSPworldProject[0] + this.vtxNonTransformed[i].y * this.gRSPworldProject[4] + this.vtxNonTransformed[i].z * this.gRSPworldProject[8] + this.gRSPworldProject[12];
+            this.vtxTransformed[i].y = this.vtxNonTransformed[i].x * this.gRSPworldProject[1] + this.vtxNonTransformed[i].y * this.gRSPworldProject[5] + this.vtxNonTransformed[i].z * this.gRSPworldProject[9] + this.gRSPworldProject[13];
+            this.vtxTransformed[i].z = this.vtxNonTransformed[i].x * this.gRSPworldProject[2] + this.vtxNonTransformed[i].y * this.gRSPworldProject[6] + this.vtxNonTransformed[i].z * this.gRSPworldProject[10] + this.gRSPworldProject[14];
+            this.vtxTransformed[i].w = this.vtxNonTransformed[i].x * this.gRSPworldProject[3] + this.vtxNonTransformed[i].y * this.gRSPworldProject[7] + this.vtxNonTransformed[i].z * this.gRSPworldProject[11] + this.gRSPworldProject[15];
 
-            this.vecProjected[i] = new Object();
+            this.vecProjected[i] = {};
             this.vecProjected[i].w = 1.0 / this.vtxTransformed[i].w;
             this.vecProjected[i].x = this.vtxTransformed[i].x * this.vecProjected[i].w;
             this.vecProjected[i].y = this.vtxTransformed[i].y * this.vecProjected[i].w;
@@ -318,17 +326,18 @@ var C1964jsVideoHLE = function (core, glx) {
 
     //Gets new display list address
     C1964jsVideoHLE.prototype.RSP_GBI0_DL = function (pc) {
-        var seg = this.getGbi0DlistAddr(pc);
-        var addr = this.getRspSegmentAddr(seg);
+        var param, addr, seg = this.getGbi0DlistAddr(pc);
+        addr = this.getRspSegmentAddr(seg);
         this.videoLog('dlist address = ' + dec2hex(addr));
-        
+
         //TODO: address adjust
-        
-        var param = this.getGbi0DlistParam(pc);
-        
-        if (param === consts.RSP_DLIST_PUSH)
-            this.dlistStackPointer++;
-            
+
+        param = this.getGbi0DlistParam(pc);
+
+        if (param === consts.RSP_DLIST_PUSH) {
+            this.dlistStackPointer += 1;
+        }
+
         this.dlistStack[this.dlistStackPointer].pc = addr;
         this.dlistStack[this.dlistStackPointer].countdown = consts.MAX_DL_COUNT;
     };
@@ -340,165 +349,160 @@ var C1964jsVideoHLE = function (core, glx) {
     C1964jsVideoHLE.prototype.RSP_GBI1_MoveWord = function (pc) {
         this.videoLog('RSP_GBI1_MoveWord');
 
-        switch (this.getGbi0MoveWordType(pc))
-    	{
-    	case consts.RSP_MOVE_WORD_MATRIX:
-    		this.RSP_RDP_InsertMatrix();
-    		break;
-    	case consts.RSP_MOVE_WORD_NUMLIGHT:
-    		{
-    //			uint32 dwNumLights = (((gfx->gbi0moveword.value)-0x80000000)/32)-1;
-    //			this.gRSP.ambientLightIndex = dwNumLights;
-    //			SetNumLights(dwNumLights);
-    		}
-    		break;
-    	case consts.RSP_MOVE_WORD_CLIP:
-    		{
-    //			switch (gfx->gbi0moveword.offset)
-    //			{
-    //			case RSP_MV_WORD_OFFSET_CLIP_RNX:
-    //			case RSP_MV_WORD_OFFSET_CLIP_RNY:
-    //			case RSP_MV_WORD_OFFSET_CLIP_RPX:
-    //			case RSP_MV_WORD_OFFSET_CLIP_RPY:
-    //				CRender::g_pRender->SetClipRatio(gfx->gbi0moveword.offset, gfx->gbi0moveword.value);
-    //				break;
-    //			default:
-    //				break;
-    //			}
-    		}
-    		break;
-    	case consts.RSP_MOVE_WORD_SEGMENT:
-    		{
-                var dwSegment = (this.getGbi0MoveWordOffset(pc) >> 2) & 0x0F;
-                var dwBase = this.getGbi0MoveWordValue(pc)&0x00FFFFFF;
-                this.segments[dwSegment] = dwBase;
-    		}
-    		break;
-    	case consts.RSP_MOVE_WORD_FOG:
-    //		{
-    //			uint16 wMult = (uint16)(((gfx->gbi0moveword.value) >> 16) & 0xFFFF);
-    //			uint16 wOff  = (uint16)(((gfx->gbi0moveword.value)      ) & 0xFFFF);
+        switch (this.getGbi0MoveWordType(pc)) {
+        case consts.RSP_MOVE_WORD_MATRIX:
+            this.RSP_RDP_InsertMatrix();
+            break;
+        case consts.RSP_MOVE_WORD_NUMLIGHT:
+            //uint32 dwNumLights = (((gfx->gbi0moveword.value)-0x80000000)/32)-1;
+            //this.gRSP.ambientLightIndex = dwNumLights;
+            //SetNumLights(dwNumLights);
+            break;
+        case consts.RSP_MOVE_WORD_CLIP:
+            //switch (gfx->gbi0moveword.offset)
+            //{
+            //case RSP_MV_WORD_OFFSET_CLIP_RNX:
+            //case RSP_MV_WORD_OFFSET_CLIP_RNY:
+            //case RSP_MV_WORD_OFFSET_CLIP_RPX:
+            //case RSP_MV_WORD_OFFSET_CLIP_RPY:
+                //CRender::g_pRender->SetClipRatio(gfx->gbi0moveword.offset, gfx->gbi0moveword.value);
+                //break;
+            //default:
+                //break;
+            //}
+            break;
+        case consts.RSP_MOVE_WORD_SEGMENT:
+            var dwBase, dwSegment = (this.getGbi0MoveWordOffset(pc) >> 2) & 0x0F;
+            dwBase = this.getGbi0MoveWordValue(pc) & 0x00FFFFFF;
+            this.segments[dwSegment] = dwBase;
+            break;
+        case consts.RSP_MOVE_WORD_FOG:
+    //        {
+    //            uint16 wMult = (uint16)(((gfx->gbi0moveword.value) >> 16) & 0xFFFF);
+    //            uint16 wOff  = (uint16)(((gfx->gbi0moveword.value)      ) & 0xFFFF);
 
-    //			float fMult = (float)(short)wMult;
-    //			float fOff = (float)(short)wOff;
+    //            float fMult = (float)(short)wMult;
+    //            float fOff = (float)(short)wOff;
 
-    //			float rng = 128000.0f / fMult;
-    //			float fMin = 500.0f - (fOff*rng/256.0f);
-    //			float fMax = rng + fMin;
+    //            float rng = 128000.0f / fMult;
+    //            float fMin = 500.0f - (fOff*rng/256.0f);
+    //            float fMax = rng + fMin;
 
-    //			//if( fMult <= 0 || fMin > fMax || fMax < 0 || fMin > 1000 )
-    //			if( fMult <= 0 || fMax < 0 )
-    //			{
-    //				// Hack
-    //				fMin = 996;
-    //				fMax = 1000;
-    //				fMult = 0;
-    //				fOff = 1;
-    //			}
+    //            //if( fMult <= 0 || fMin > fMax || fMax < 0 || fMin > 1000 )
+    //            if( fMult <= 0 || fMax < 0 )
+    //            {
+    //                // Hack
+    //                fMin = 996;
+    //                fMax = 1000;
+    //                fMult = 0;
+    //                fOff = 1;
+    //            }
 
-    //			SetFogMinMax(fMin, fMax, fMult, fOff);
-    //		}
-    		break;
-    	case consts.RSP_MOVE_WORD_LIGHTCOL:
-    /*		{
-    			uint32 dwLight = gfx->gbi0moveword.offset / 0x20;
-    			uint32 dwField = (gfx->gbi0moveword.offset & 0x7);
+    //            SetFogMinMax(fMin, fMax, fMult, fOff);
+    //        }
+            break;
+        case consts.RSP_MOVE_WORD_LIGHTCOL:
+    /*        {
+                uint32 dwLight = gfx->gbi0moveword.offset / 0x20;
+                uint32 dwField = (gfx->gbi0moveword.offset & 0x7);
 
-    			switch (dwField)
-    			{
-    			case 0:
-    				if (dwLight == this.gRSP.ambientLightIndex)
-    				{
-    					SetAmbientLight( ((gfx->gbi0moveword.value)>>8) );
-    				}
-    				else
-    				{
-    					SetLightCol(dwLight, gfx->gbi0moveword.value);
-    				}
-    				break;
+                switch (dwField)
+                {
+                case 0:
+                    if (dwLight == this.gRSP.ambientLightIndex)
+                    {
+                        SetAmbientLight( ((gfx->gbi0moveword.value)>>8) );
+                    }
+                    else
+                    {
+                        SetLightCol(dwLight, gfx->gbi0moveword.value);
+                    }
+                    break;
 
-    			case 4:
-    				break;
+                case 4:
+                    break;
 
-    			default:
-    				break;
-    			}
-    		}
-    */		break;
-    	case consts.RSP_MOVE_WORD_POINTS:
-    /*		{
-    			uint32 vtx = gfx->gbi0moveword.offset/40;
-    			uint32 where = gfx->gbi0moveword.offset - vtx*40;
-    			ModifyVertexInfo(where, vtx, gfx->gbi0moveword.value);
-    		}
-    */		break;
-    	case consts.RSP_MOVE_WORD_PERSPNORM:
-    		break;
-    	default:
-    		break;
-    	}
-    }
+                default:
+                    break;
+                }
+            }
+    */
+            break;
+        case consts.RSP_MOVE_WORD_POINTS:
+    /*        {
+                uint32 vtx = gfx->gbi0moveword.offset/40;
+                uint32 where = gfx->gbi0moveword.offset - vtx*40;
+                ModifyVertexInfo(where, vtx, gfx->gbi0moveword.value);
+            }
+    */
+            break;
+        case consts.RSP_MOVE_WORD_PERSPNORM:
+            break;
+        default:
+            break;
+        }
+    };
 
     C1964jsVideoHLE.prototype.renderReset = function () {
-    //	UpdateClipRectangle();
-    	this.resetMatrices();
-    //	SetZBias(0);
-    	this.gRSP.numVertices = 0;
-    	this.gRSP.curTile = 0;
-    	this.gRSP.fTexScaleX = 1/32.0;
-    	this.gRSP.fTexScaleY = 1/32.0;
-    }
+    //    UpdateClipRectangle();
+        this.resetMatrices();
+    //    SetZBias(0);
+        this.gRSP.numVertices = 0;
+        this.gRSP.curTile = 0;
+        this.gRSP.fTexScaleX = 1 / 32.0;
+        this.gRSP.fTexScaleY = 1 / 32.0;
+    };
 
     C1964jsVideoHLE.prototype.resetMatrices  = function () {
-    	this.gRSP.projectionMtxTop = 0;
-    	this.gRSP.modelViewMtxTop = 0;
-    	this.gRSP.projectionMtxs[0] = mat4.create();
-    	this.gRSP.modelviewMtxs[0] = mat4.create();
+        this.gRSP.projectionMtxTop = 0;
+        this.gRSP.modelViewMtxTop = 0;
+        this.gRSP.projectionMtxs[0] = mat4.create();
+        this.gRSP.modelviewMtxs[0] = mat4.create();
         mat4.identity(this.gRSP.modelviewMtxs[0]);
         mat4.identity(this.gRSP.projectionMtxs[0]);
 
-    	this.gRSP.bMatrixIsUpdated = true;
-    	this.updateCombinedMatrix();
-    }
+        this.gRSP.bMatrixIsUpdated = true;
+        this.updateCombinedMatrix();
+    };
 
     C1964jsVideoHLE.prototype.RSP_RDP_InsertMatrix = function () {
-    	this.updateCombinedMatrix();
-        
+        this.updateCombinedMatrix();
+
         this.gRSP.bMatrixIsUpdated = false;
-    	this.gRSP.bCombinedMatrixIsUpdated = true;
-    }
+        this.gRSP.bCombinedMatrixIsUpdated = true;
+    };
 
     C1964jsVideoHLE.prototype.DLParser_SetScissor = function (pc) {
         this.videoLog('TODO: DLParser_SetScissor');
-    }
+    };
 
     C1964jsVideoHLE.prototype.RSP_GBI1_SetOtherModeH = function (pc) {
         this.videoLog('TODO: DLParser_GBI1_SetOtherModeH');
-    }
+    };
 
     C1964jsVideoHLE.prototype.RSP_GBI1_SetOtherModeL = function (pc) {
         this.videoLog('TODO: DLParser_GBI1_SetOtherModeL');
-    }
+    };
 
     C1964jsVideoHLE.prototype.RSP_GBI0_Sprite2DBase = function (pc) {
         this.videoLog('TODO: RSP_GBI0_Sprite2DBase');
-    }
+    };
 
     C1964jsVideoHLE.prototype.RSP_GBI0_Tri4 = function (pc) {
         this.videoLog('TODO: RSP_GBI0_Tri4');
-    }
+    };
 
     C1964jsVideoHLE.prototype.RSP_GBI1_RDPHalf_Cont = function (pc) {
         this.videoLog('TODO: RSP_GBI1_RDPHalf_Cont');
-    }
+    };
 
     C1964jsVideoHLE.prototype.RSP_GBI1_RDPHalf_2 = function (pc) {
         this.videoLog('TODO: RSP_GBI1_RDPHalf_2');
-    }
+    };
 
     C1964jsVideoHLE.prototype.RSP_GBI1_RDPHalf_1 = function (pc) {
         this.videoLog('TODO: RSP_GBI1_RDPHalf_1');
-    }
+    };
 
     C1964jsVideoHLE.prototype.RSP_GBI1_Line3D = function (pc) {
         this.videoLog('TODO: RSP_GBI1_Line3D');
@@ -517,16 +521,30 @@ var C1964jsVideoHLE = function (core, glx) {
         this.RDP_GFX_PopDL();
     };
 
-if (false) {
+    C1964jsVideoHLE.prototype.RSP_GBI1_Texture = function (pc) {
+        //hack: experimenting.
+
+        this.texImg.format = this.getTImgFormat(pc);
+        this.texImg.size = this.getTImgSize(pc);
+        this.texImg.width = this.getTImgWidth(pc);
+        this.texImg.addr = this.getTImgAddr(pc + 4);
+        this.texImg.changed = true;
+        //this.texImg.addr = 0;
+        this.renderer.texTri(0, 0, 256, 256, 0, 0, 0, 0, 7, this.core.memory.rdramUint8Array, this.texImg);
+        this.videoLog('TODO: RSP_GBI1_Texture');
+    };
+
+//test for dummy gray textures
+/*
     //create a heap of dummy texture mem.
     var testTextureMem = new Array(256*256*4);
     testTextureMem = new Uint8Array(testTextureMem);
     for (var k=0; k<1024*1024; k++)
         testTextureMem[k] = 128;
-   
+
    C1964jsVideoHLE.prototype.RSP_GBI1_Texture = function (pc) {
         //hack: experimenting.
-        
+
         this.texImg.format = this.getTImgFormat(pc+4);
         this.texImg.size = this.getTImgSize(pc+4);
         this.texImg.width = this.getTImgWidth(pc+4);
@@ -534,20 +552,7 @@ if (false) {
         this.renderer.texTri(0, 0, 256, 256, 0, 0, 0, 0, 7, testTextureMem, this.texImg);
         this.videoLog('TODO: RSP_GBI1_Texture');
     };
-} else {
-    C1964jsVideoHLE.prototype.RSP_GBI1_Texture = function (pc) {
-        //hack: experimenting.
-        
-        this.texImg.format = this.getTImgFormat(pc);
-        this.texImg.size = this.getTImgSize(pc);
-        this.texImg.width = this.getTImgWidth(pc);
-        this.texImg.addr = this.getTImgAddr(pc+4);
-        this.texImg.changed = true;
-        //this.texImg.addr = 0;
-        this.renderer.texTri(0, 0, 256, 256, 0, 0, 0, 0, 7, this.core.memory.rdramUint8Array, this.texImg);
-        this.videoLog('TODO: RSP_GBI1_Texture');
-    };
-}
+*/
 
     C1964jsVideoHLE.prototype.RSP_GBI1_PopMtx = function (pc) {
         this.videoLog('TODO: RSP_GBI1_PopMtx');
@@ -558,9 +563,9 @@ if (false) {
     };
 
     C1964jsVideoHLE.prototype.RSP_GBI1_Tri1 = function (pc) {
-        var v0 = this.getGbi0Tri1V0(pc) / this.gRSP.vertexMult;
-        var v1 = this.getGbi0Tri1V1(pc) / this.gRSP.vertexMult;
-        var v2 = this.getGbi0Tri1V2(pc) / this.gRSP.vertexMult;
+        var v2, v1, v0 = this.getGbi0Tri1V0(pc) / this.gRSP.vertexMult;
+        v1 = this.getGbi0Tri1V1(pc) / this.gRSP.vertexMult;
+        v2 = this.getGbi0Tri1V2(pc) / this.gRSP.vertexMult;
 
         this.prepareTriangle(v2, v1, v0);
 
@@ -611,17 +616,17 @@ if (false) {
 
     C1964jsVideoHLE.prototype.DLParser_TexRect = function (pc) {
         this.videoLog('TODO: DLParser_TexRect');
-        
-    	var xh = this.getTexRectXh(pc);
-    	var yh = this.getTexRectYh(pc);
-    	var tileno = this.getTexRectTileNo(pc);
-    	var xl = this.getTexRectXl(pc);
-    	var yl = this.getTexRectYl(pc);
-    	var s = this.getTexRectS(pc);
-    	var t = this.getTexRectT(pc);
-    	var dsdx = this.getTexRectDsDx(pc);
-    	var dtdy = this.getTexRectDtDy(pc);
-        
+
+        var xl, yl, s, t, dsdx, dtdy, yh, tileno, xh = this.getTexRectXh(pc);
+        yh = this.getTexRectYh(pc);
+        tileno = this.getTexRectTileNo(pc);
+        xl = this.getTexRectXl(pc);
+        yl = this.getTexRectYl(pc);
+        s = this.getTexRectS(pc);
+        t = this.getTexRectT(pc);
+        dsdx = this.getTexRectDsDx(pc);
+        dtdy = this.getTexRectDtDy(pc);
+
         this.renderer.texRect(xl, yl, xh, yh, s, t, dsdx, dtdy, tileno, this.core.memory.rdramUint8Array, this.texImg);
 
         this.dlistStack[this.dlistStackPointer].pc += 8;
@@ -632,20 +637,20 @@ if (false) {
         this.videoLog('TODO: DLParser_TexRectFlip');
     };
 
-    C1964jsVideoHLE.prototype.DLParser_RDPLoadSync = function (pc) {
-        this.videoLog('TODO: DLParser_RDPLoadSync');
+    C1964jsVideoHLE.prototype.DLParser_RDPLoadSynch = function (pc) {
+        this.videoLog('TODO: DLParser_RDPLoadSynch');
     };
 
-    C1964jsVideoHLE.prototype.DLParser_RDPPipeSync = function (pc) {
-        this.videoLog('TODO: DLParser_RDPPipeSync');
+    C1964jsVideoHLE.prototype.DLParser_RDPPipeSynch = function (pc) {
+        this.videoLog('TODO: DLParser_RDPPipeSynch');
     };
 
-    C1964jsVideoHLE.prototype.DLParser_RDPTileSync = function (pc) {
-        this.videoLog('TODO: DLParser_RDPTileSync');
+    C1964jsVideoHLE.prototype.DLParser_RDPTileSynch = function (pc) {
+        this.videoLog('TODO: DLParser_RDPTileSynch');
     };
 
-    C1964jsVideoHLE.prototype.DLParser_RDPFullSync = function (pc) {
-        this.videoLog('TODO: DLParser_RDPFullSync');
+    C1964jsVideoHLE.prototype.DLParser_RDPFullSynch = function (pc) {
+        this.videoLog('TODO: DLParser_RDPFullSynch');
         this.core.interrupts.triggerDPInterrupt(0, false);
     };
 
@@ -720,49 +725,56 @@ if (false) {
     };
 
     C1964jsVideoHLE.prototype.prepareTriangle = function (dwV0, dwV1, dwV2) {
-    	//SP_Timing(SP_Each_Triangle);
+        //SP_Timing(SP_Each_Triangle);
+        var didSucceed, textureFlag = false;//(CRender::g_pRender->IsTextureEnabled() || this.gRSP.ucode == 6 );
 
-    	var textureFlag = false;//(CRender::g_pRender->IsTextureEnabled() || this.gRSP.ucode == 6 );
+        didSucceed = this.initVertex(dwV0, this.gRSP.numVertices, textureFlag);
 
-    	var didSucceed = this.initVertex(dwV0, this.gRSP.numVertices, textureFlag);
-    	
-        if (didSucceed)
-            didSucceed = this.initVertex(dwV1, this.gRSP.numVertices+1, textureFlag);
-    	
-        if (didSucceed)
-            didSucceed = this.initVertex(dwV2, this.gRSP.numVertices+2, textureFlag);
+        if (didSucceed) {
+            didSucceed = this.initVertex(dwV1, this.gRSP.numVertices + 1, textureFlag);
+        }
 
-        if (didSucceed)
+        if (didSucceed) {
+            didSucceed = this.initVertex(dwV2, this.gRSP.numVertices + 2, textureFlag);
+        }
+
+        if (didSucceed) {
             this.gRSP.numVertices += 3;
-            
+        }
+
         return didSucceed;
     };
 
     C1964jsVideoHLE.prototype.initVertex = function (dwV, vtxIndex, bTexture) {
-        
-        if (vtxIndex >= consts.MAX_VERTS)
+        if (vtxIndex >= consts.MAX_VERTS) {
             return false;
-        
-        if (this.vtxProjected5[vtxIndex] === undefined && vtxIndex < consts.MAX_VERTS)
-            this.vtxProjected5[vtxIndex] = new Array(4);
-            
-        if (this.vtxTransformed[dwV] === undefined)
+        }
+
+        if (this.vtxProjected5[vtxIndex] === undefined && vtxIndex < consts.MAX_VERTS) {
+            this.vtxProjected5[vtxIndex] = [];
+        }
+
+        if (this.vtxTransformed[dwV] === undefined) {
             return false;
-              
+        }
+
         this.vtxProjected5[vtxIndex][0] = this.vtxTransformed[dwV].x;
         this.vtxProjected5[vtxIndex][1] = this.vtxTransformed[dwV].y;
         this.vtxProjected5[vtxIndex][2] = this.vtxTransformed[dwV].z;
         this.vtxProjected5[vtxIndex][3] = this.vtxTransformed[dwV].w;
         this.vtxProjected5[vtxIndex][4] = this.vecProjected[dwV].z;
-        if( this.vtxTransformed[dwV].w < 0 )	this.vtxProjected5[vtxIndex][4] = 0;
-    		vtxIndex[vtxIndex] = vtxIndex;
+        if (this.vtxTransformed[dwV].w < 0) {
+            this.vtxProjected5[vtxIndex][4] = 0;
+        }
 
-            //this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.triangleVertexPositionBuffer);
+        vtxIndex[vtxIndex] = vtxIndex;
 
-        var offset = 3*(this.triangleVertexPositionBuffer.numItems);
+        //this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.triangleVertexPositionBuffer);
+
+        var offset = 3 * (this.triangleVertexPositionBuffer.numItems);
         this.trivertices[offset] = this.vtxProjected5[vtxIndex][0];
-        this.trivertices[offset+1] = this.vtxProjected5[vtxIndex][1];
-        this.trivertices[offset+2] = this.vtxProjected5[vtxIndex][2];
+        this.trivertices[offset + 1] = this.vtxProjected5[vtxIndex][1];
+        this.trivertices[offset + 2] = this.vtxProjected5[vtxIndex][2];
 
         this.triangleVertexPositionBuffer.itemSize = 3;
         this.triangleVertexPositionBuffer.numItems += 1;
@@ -777,7 +789,7 @@ if (false) {
         this.gl.enable(this.gl.BLEND);
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE);
         //simple lighting. Get the normal matrix of the model-view matrix
-        
+
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.triangleVertexPositionBuffer);
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(this.trivertices), this.gl.STATIC_DRAW);
         this.gl.vertexAttribPointer(this.core.webGL.triangleShaderProgram.vertexPositionAttribute, this.triangleVertexPositionBuffer.itemSize, this.gl.FLOAT, false, 0, 0);
@@ -787,18 +799,18 @@ if (false) {
             this.gl.vertexAttribPointer(this.core.webGL.triangleShaderProgram.textureCoordAttribute, this.triangleVertexTextureCoordBuffer.itemSize, this.gl.FLOAT, false, 0, 0);
 
             this.gl.activeTexture(this.gl.TEXTURE0);
-            this.gl.bindTexture(this.gl.TEXTURE_2D, window['neheTexture'+tileno]);
+            this.gl.bindTexture(this.gl.TEXTURE_2D, window['neheTexture' + tileno]);
             this.gl.uniform1i(this.core.webGL.triangleShaderProgram.samplerUniform, 0);
         }
       //  this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
 
         this.core.webGL.setMatrixUniforms(this.core.webGL.triangleShaderProgram);
 
-        if (this.core.settings.wireframe === true)
+        if (this.core.settings.wireframe === true) {
             this.gl.drawArrays(this.gl.LINE_LOOP, 0, this.triangleVertexPositionBuffer.numItems);
-        else
+        } else {
             this.gl.drawArrays(this.gl.TRIANGLES, 0, this.triangleVertexPositionBuffer.numItems);
-
+        }
       //  mvPopMatrix();
     };
 
@@ -806,24 +818,24 @@ if (false) {
         this.triangleVertexPositionBuffer = this.gl.createBuffer();
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.triangleVertexPositionBuffer);
         this.trivertices = [
-             0.0,  1.0,  0.0,
-            -1.0, -1.0,  0.0,
-             1.0, -1.0,  0.0
+            0.0, 1.0, 0.0,
+            -1.0, -1.0, 0.0,
+            1.0, -1.0, 0.0
         ];
         this.triangleVertexPositionBuffer.itemSize = 3;
-        this.triangleVertexPositionBuffer.numItems = this.trivertices.length/3;
+        this.triangleVertexPositionBuffer.numItems = this.trivertices.length / 3;
 
         this.triangleVertexTextureCoordBuffer = this.gl.createBuffer();
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.triangleVertexTextureCoordBuffer);
         this.triTextureCoords = [
         //front face
-        1.0, 0.0, 1.0,
-        0.0, 1.0, 1.0,
-        0.0, 0.0, 1.0
+            1.0, 0.0, 1.0,
+            0.0, 1.0, 1.0,
+            0.0, 0.0, 1.0
         ];
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(this.triTextureCoords), this.gl.STATIC_DRAW);
         this.gl.vertexAttribPointer(this.core.webGL.triangleShaderProgram.vertexPositionAttribute, this.triangleVertexPositionBuffer.itemSize, this.gl.FLOAT, false, 0, 0);
         this.triangleVertexTextureCoordBuffer.itemSize = 3;
-        this.triangleVertexTextureCoordBuffer.numItems = this.triTextureCoords.length/3;
+        this.triangleVertexTextureCoordBuffer.numItems = this.triTextureCoords.length / 3;
     };
 }());

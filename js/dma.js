@@ -263,4 +263,4 @@ var C1964jsDMA = function (memory, interrupts, pif) {
         //hack for now
         //triggerDPInterrupt(0, false);
     };
-}());
+}).call(this);

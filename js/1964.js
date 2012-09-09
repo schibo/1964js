@@ -2,7 +2,7 @@
 /*globals Int32Array, ArrayBuffer, Float32Array, C1964jsMemory, C1964jsInterrupts */
 /*globals C1964jsConstants, C1964jsPif, C1964jsDMA, Float64Array, C1964jsWebGL, cancelAnimFrame, C1964jsHelpers*/
 /*globals dec2hex, Uint8Array, Uint16Array*/
-/*globals CPU_instruction, requestAnimFrame*/
+/*globals requestAnimFrame*/
 
 /*
 1964js - JavaScript/HTML5 port of 1964 - N64 emulator
@@ -393,7 +393,7 @@ var C1964jsEmulator = function (userSettings) {
 
         while (!this.stopCompiling) {
             instruction = this.memory.loadWord(pc + offset);
-            opcode = this[CPU_instruction[instruction >> 26 & 0x3f]](instruction);
+            opcode = this[this.CPU_instruction[instruction >> 26 & 0x3f]](instruction);
 
             string += 't.magic_number+=1.0;';
             string += opcode;
@@ -486,7 +486,7 @@ var C1964jsEmulator = function (userSettings) {
 
         pc = (this.programCounter + offset + 4 + (this.helpers.soffset_imm(i) << 2)) | 0;
         instruction = this.memory.loadWord((this.programCounter + offset + 4) | 0);
-        opcode = this[CPU_instruction[instruction >> 26 & 0x3f]](instruction, true);
+        opcode = this[this.CPU_instruction[instruction >> 26 & 0x3f]](instruction, true);
         string = opcode;
 
         string += 't.magic_number+=1.0;t.programCounter=' + pc + ';return t.code["' + this.getFnName(pc) + '"];}';
@@ -666,7 +666,7 @@ var C1964jsEmulator = function (userSettings) {
             string += 't.magic_number=0;t.keepRunning=0;';
         }
 
-        opcode = this[CPU_instruction[instruction >> 26 & 0x3f]](instruction, true);
+        opcode = this[this.CPU_instruction[instruction >> 26 & 0x3f]](instruction, true);
         string += opcode;
         string += 't.programCounter=' + instr_index + ';return t.code["' + this.getFnName(instr_index) + '"];}';
 
@@ -679,7 +679,7 @@ var C1964jsEmulator = function (userSettings) {
         var pc, opcode, instruction, string = '{', instr_index = (((((this.programCounter + offset + 4) & 0xF0000000)) | ((i & 0x03FFFFFF) << 2)) | 0);
         //delay slot
         instruction = this.memory.loadWord((this.programCounter + offset + 4) | 0);
-        opcode = this[CPU_instruction[instruction >> 26 & 0x3f]](instruction, true);
+        opcode = this[this.CPU_instruction[instruction >> 26 & 0x3f]](instruction, true);
         string += opcode;
         pc = (this.programCounter + offset + 8) | 0;
         string += 't.magic_number+=1.0;';
@@ -698,7 +698,7 @@ var C1964jsEmulator = function (userSettings) {
 
         //delay slot
         instruction = this.memory.loadWord((this.programCounter + offset + 4) | 0);
-        opcode = this[CPU_instruction[instruction >> 26 & 0x3f]](instruction, true);
+        opcode = this[this.CPU_instruction[instruction >> 26 & 0x3f]](instruction, true);
         string += opcode;
         string += 't.magic_number+=1.0;';
         string += 't.programCounter=temp;return t.code[t.getFnName(temp)];}';
@@ -712,7 +712,7 @@ var C1964jsEmulator = function (userSettings) {
         var instruction, opcode, string = '{var temp=' + this.helpers.RS(i) + ';';
         //delay slot
         instruction = this.memory.loadWord((this.programCounter + offset + 4) | 0);
-        opcode = this[CPU_instruction[instruction >> 26 & 0x3f]](instruction, true);
+        opcode = this[this.CPU_instruction[instruction >> 26 & 0x3f]](instruction, true);
         string += opcode;
         string += 't.magic_number+=1.0;';
         string += 't.programCounter=temp;return t.code[t.getFnName(temp)];}';
