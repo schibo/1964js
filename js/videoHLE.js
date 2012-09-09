@@ -535,7 +535,7 @@ var C1964jsVideoHLE = function (core, glx) {
     };
 
 //test for dummy gray textures
-/*
+
     //create a heap of dummy texture mem.
     var testTextureMem = new Array(256*256*4);
     testTextureMem = new Uint8Array(testTextureMem);
@@ -552,7 +552,7 @@ var C1964jsVideoHLE = function (core, glx) {
         this.renderer.texTri(0, 0, 256, 256, 0, 0, 0, 0, 7, testTextureMem, this.texImg);
         this.videoLog('TODO: RSP_GBI1_Texture');
     };
-*/
+
 
     C1964jsVideoHLE.prototype.RSP_GBI1_PopMtx = function (pc) {
         this.videoLog('TODO: RSP_GBI1_PopMtx');
