@@ -17,7 +17,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-/*jslint browser: true*/
 /*globals C1964jsEmulator*/
 
 C1964jsEmulator.prototype.CPU_instruction = [
@@ -75,10 +74,10 @@ C1964jsEmulator.prototype.COP1_Instruction = [
 ];
 
 C1964jsEmulator.prototype.COP1_BC_Instruction = [
- 'r4300i_COP1_bc1f', 'r4300i_COP1_bc1t', 'r4300i_COP1_bc1fl', 'r4300i_COP1_bc1tl', 'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED',
- 'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED',
- 'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED',
- 'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED'
+	'r4300i_COP1_bc1f', 'r4300i_COP1_bc1t', 'r4300i_COP1_bc1fl', 'r4300i_COP1_bc1tl', 'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED',
+	'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED',
+	'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED',
+	'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED', 'UNUSED'
 ];
 
 C1964jsEmulator.prototype.COP1_S_Instruction = [

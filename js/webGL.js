@@ -17,11 +17,13 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-//TODO: parameterize "Canvas3D" so this dom id can be arbitrary.
 /*globals log, document, alert, mat4*/
+/*jslint bitwise: true, todo: true*/
+
+//TODO: parameterize "Canvas3D" so this dom id can be arbitrary.
 
 var C1964jsWebGL = function () {
-    "use strict";   
+    "use strict";
     this.gl = undefined;
     this.tileShaderProgram = undefined;
     this.triangleShaderProgram = undefined;
@@ -53,7 +55,7 @@ var C1964jsWebGL = function () {
         }
     };
 
-    C1964jsWebGL.prototype.getShader = function (gl, id) {
+    C1964jsWebGL.prototype.getShader = function (id) {
         var k, shaderScript, shader, str = "";
 
         shaderScript = document.getElementById(id);
@@ -63,7 +65,7 @@ var C1964jsWebGL = function () {
 
         k = shaderScript.firstChild;
         while (k) {
-            if (k.nodeType == 3) {
+            if (k.nodeType === 3) {
                 str += k.textContent;
             }
             k = k.nextSibling;
@@ -88,9 +90,9 @@ var C1964jsWebGL = function () {
         return shader;
     };
 
-    C1964jsWebGL.prototype.initShaders = function (fs, vs) {  
-        var shaderProgram, vertexShader, fragmentShader = this.getShader(this.gl, fs);
-        vertexShader = this.getShader(this.gl, vs);
+    C1964jsWebGL.prototype.initShaders = function (fs, vs) {
+        var shaderProgram, vertexShader, fragmentShader = this.getShader(fs);
+        vertexShader = this.getShader(vs);
 
         shaderProgram = this.gl.createProgram();
         this.gl.attachShader(shaderProgram, vertexShader);
@@ -124,7 +126,7 @@ var C1964jsWebGL = function () {
         this.gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
     };
 
-    C1964jsWebGL.prototype.beginDList = function() {
+    C1964jsWebGL.prototype.beginDList = function () {
         this.gl.viewport(0, 0, this.gl.viewportWidth, this.gl.viewportHeight);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
@@ -134,7 +136,7 @@ var C1964jsWebGL = function () {
         mat4.set(mvMatrix, nMatrix);
         mat4.inverse(nMatrix, nMatrix);
         mat4.transpose(nMatrix);
-                
+
        // mvPushMatrix();
         mat4.translate(mvMatrix, [0.0, 0.0, -1.0]);
     };
@@ -175,12 +177,12 @@ var C1964jsWebGL = function () {
     C1964jsWebGL.prototype.show3D = function () {
         var canvas3D = document.getElementById("Canvas3D");
 
-        canvas3D.style.visibility = "visible";    
+        canvas3D.style.visibility = "visible";
     };
 
     C1964jsWebGL.prototype.hide3D = function () {
         var canvas3D = document.getElementById("Canvas3D");
 
-        canvas3D.style.visibility = "hidden";    
+        canvas3D.style.visibility = "hidden";
     };
 }());
