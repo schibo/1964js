@@ -138,27 +138,44 @@ function start1964(settings) {
   function abortRead() {
     reader.abort();
   }
-  
-  var intervalVariable;
-  
+
   document.getElementById("user_panel").onmousemove = function() {
-    document.getElementById("user_panel").className = 'show';
-    clearTimeout(intervalVariable);
+      document.getElementById("user_panel").className = 'show';
   }
 
-  document.getElementById("user_panel").ontouchstart=function(e) { 
+  document.getElementById("user_panel").ontouchend=function(event) { 
     document.getElementById("user_panel").className = 'show';
-    clearTimeout(intervalVariable);
+    event.cancelBubble = true;
+    if (event.stopPropagation)
+      event.stopPropagation();  
   }
 
-  document.getElementById("user_panel").onmouseout = function(event) {
+  document.getElementById("user_panel").onmouseup = function(event) {
     //don't fade out if one of the child divs makes caused this event.
-    if ((event.relatedTarget || event.toElement) == this.parentNode)
-        intervalVariable = setTimeout(function(){document.getElementById('user_panel').className='';}, 1000);  
+    //if ((event.relatedTarget || event.toElement) == this.parentNode)
+    event.cancelBubble = true;
+    if (event.stopPropagation)
+      event.stopPropagation();  
   }
 
-  document.getElementById("user_panel").ontouchend=function() { 
-    intervalVariable = setTimeout(function(){document.getElementById('user_panel').className='';}, 1000);  
+  document.onmouseup = function(event) {
+    //don't fade out if one of the child divs makes caused this event.
+    //if ((event.relatedTarget || event.toElement) == this.parentNode)
+    document.getElementById('user_panel').className='';  
+  }
+
+  document.ontouchend=function(event) { 
+    document.getElementById('user_panel').className='';  
+  }
+
+  function toggleUi() {
+    var el = document.getElementById('user_panel');
+    
+    if (el.className === '') {
+      el.className = 'show_fast';
+    } else {
+      el.className = '';
+    }     
   }
 
   function errorHandler(evt) {

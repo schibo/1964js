@@ -159,7 +159,6 @@ var C1964jsPif = function (pifUint8Array) {
         LEFT_MAX = 0x000008000, RIGHT_MAX = 0x00007F00, UP_MAX = 0x00000007F, DOWN_MAX = 0x00000080;
 
     window.onkeydown = function (e) {
-
         if (e) {
             switch (e.which) {
             case 40:
@@ -276,6 +275,9 @@ var C1964jsPif = function (pifUint8Array) {
                 break;
             case 48: //2
                 g1964buttons &= ~R_TRIG;
+                break;
+            case 27: //escape
+                toggleUi();
                 break;
             }
         }
