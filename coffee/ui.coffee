@@ -1,0 +1,200 @@
+#
+#1964js - JavaScript/HTML5 port of 1964 - N64 emulator
+#Copyright (C) 2012 Joel Middendorf
+#
+#This program is free software; you can redistribute it and/or
+#modify it under the terms of the GNU General Public License
+#as published by the Free Software Foundation; either version 2
+#of the License, or (at your option) any later version.
+#
+#This program is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU General Public License for more details.
+#
+#You should have received a copy of the GNU General Public License
+#along with this program; if not, write to the Free Software
+#Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+
+#todo: refactor ui.coffee to remove @ globals.
+
+document.getElementById("user_panel").className = "show"
+reader = undefined
+@progress = document.querySelector(".percent")
+alertMessage = ""
+unless window.File
+  alertMessage += " window.File"
+else unless window.FileReader
+  alertMessage += " window.FileReader"
+else unless window.FileList
+  alertMessage += " window.FileList"
+else alertMessge += " window.Blob"  unless window.Blob
+log "Unsupported in this browser: " + alertMessage  if alertMessage.length > 0
+@i1964js = undefined
+
+showValue = (newValue) ->
+  document.getElementById("range").innerHTML = newValue
+  c = document.getElementById("DebugCanvas")
+  ctx = c.getContext("2d")
+  repaint ctx, ImDat2, newValue | 0  if ImDat2
+  return
+
+# Read a page's GET URL variables and return them as an associative array.
+getUrlVars = ->
+  vars = []
+  hash = undefined
+  hashes = window.location.href.slice(window.location.href.indexOf("?") + 1).split("&")
+  i = 0
+  while i < hashes.length
+    hash = hashes[i].split("=")
+    vars.push hash[0]
+    vars[hash[0]] = unescape(hash[1])
+    i++
+  vars
+
+initTryCatch = (buffer) ->
+  try
+    @i1964js.init buffer
+  catch e
+    if @i1964js isnt `undefined` and @i1964js?
+      @i1964js.terminate = true
+      throw e
+  return
+
+uncompressAndRun = (romPath, response) ->
+  if romPath.split(".").pop().toLowerCase() isnt "zip"
+    buffer = new Uint8Array(response)
+    @romLength = buffer.byteLength
+    initTryCatch buffer
+  else 
+    #This zip library seems to only work if there is one file in the root of the zip's filesystem.
+    #Compressing with MacOS causes problems.
+    unzipper = new bitjs.archive.Unzipper(response, "js/lib/bitjs/")
+    unzipper.addEventListener bitjs.archive.UnarchiveEvent.Type.EXTRACT, (e) ->
+      if e.unarchivedFile
+        console.log "extracted: " + e.unarchivedFile.filename
+        buffer = new Uint8Array(e.unarchivedFile.fileData)
+        @romLength = buffer.byteLength
+        initTryCatch buffer
+    unzipper.addEventListener bitjs.archive.UnarchiveEvent.Type.INFO, (e) ->
+      console.log "zip info: " + e.msg
+    unzipper.addEventListener bitjs.archive.UnarchiveEvent.Type.PROGRESS, (e) ->
+    #for (var i in e)
+    #    console.log(i +': '+ e[i]);
+    unzipper.addEventListener bitjs.archive.UnarchiveEvent.Type.FINISH, (e) ->
+      console.log "finish: " + e.msg
+    unzipper.addEventListener bitjs.archive.UnarchiveEvent.Type.ERROR, (e) ->
+      console.log "ERROR: " + e.msg
+    unzipper.start()
+  return
+
+@start1964 = (settings) ->
+  @i1964js = new C1964jsEmulator(settings)  if not @i1964js? or @i1964js is `undefined`
+  vars = getUrlVars()
+  romPath = undefined
+  i = 0
+  while i < vars.length
+    romPath = vars[vars[i]]  if vars[i] is "rom"
+    i++
+  if romPath isnt `undefined` and romPath?
+    xhr = new XMLHttpRequest()
+    xhr.open "GET", romPath, true
+    xhr.responseType = "arraybuffer"
+    xhr.send()
+    xhr.onload = (e) ->
+      uncompressAndRun romPath, e.target.response, @i1964js
+  return
+
+#Check for the various File API support.
+abortRead = ->
+  reader.abort()
+  return
+
+#don't fade out if one of the child divs makes caused this event.
+#if ((event.relatedTarget || event.toElement) == this.parentNode)
+#don't fade out if one of the child divs makes caused this event.
+#if ((event.relatedTarget || event.toElement) == this.parentNode)
+toggleUi = ->
+  el = document.getElementById("user_panel")
+  if el.className is ""
+    el.className = "show_fast"
+  else
+    el.className = ""
+  return
+
+errorHandler = (evt) ->
+  switch evt.target.error.code
+    when evt.target.error.NOT_FOUND_ERR
+      alert "File Not Found!"
+    when evt.target.error.NOT_READABLE_ERR
+      alert "File is not readable"
+    when evt.target.error.ABORT_ERR
+    # noop
+    else
+      alert "An error occurred reading this file."
+  return
+
+updateProgress = (evt) ->
+  # evt is a ProgressEvent.
+  if evt.lengthComputable
+    percentLoaded = Math.round((evt.loaded / evt.total) * 100)    
+    # Increase the progress bar length.
+    if percentLoaded < 100
+      unless @progress is `undefined`
+        @progress.style.width = percentLoaded + "%"
+        @progress.textContent = percentLoaded + "%"
+  return
+
+handleFileSelect = (evt) ->
+  fileName = evt.target.files[0].name
+  progressBar = document.getElementById("progress_bar")
+
+  # Reset progress indicator on new file selection.
+  unless @progress is `undefined`
+    @progress.style.width = "0%"
+    @progress.textContent = "0%"
+  reader = new FileReader()
+  reader.onerror = errorHandler
+  reader.onprogress = updateProgress
+  reader.onabort = (e) ->
+    alert "File read cancelled"
+    return
+
+  reader.onloadstart = (e) ->
+    document.getElementById("progress_bar").className = "loading"  unless progressBar is `undefined`
+    return
+
+  reader.onload = (e) ->
+    # Ensure that the progress bar displays 100% at the end.
+    unless @progress is `undefined`
+      @progress.style.width = "100%"
+      @progress.textContent = "100%"
+    setTimeout "document.getElementById('progress_bar').className='';document.getElementById('user_panel').className='';", 1000  unless progressBar is `undefined`
+    #todo: add zip support (from index.html)
+    uncompressAndRun fileName, reader.result, @i1964js
+    return
+  
+  # Read in the file as an array buffer.
+  reader.readAsArrayBuffer evt.target.files[0]
+  return
+
+document.getElementById("user_panel").onmousemove = ->
+  document.getElementById("user_panel").className = "show"
+
+document.getElementById("user_panel").ontouchend = (event) ->
+  document.getElementById("user_panel").className = "show"
+  event.cancelBubble = true
+  event.stopPropagation()  if event.stopPropagation
+
+document.getElementById("user_panel").onmouseup = (event) ->
+  event.cancelBubble = true
+  event.stopPropagation()  if event.stopPropagation
+
+document.onmouseup = (event) ->
+  document.getElementById("user_panel").className = ""
+
+document.ontouchend = (event) ->
+  document.getElementById("user_panel").className = ""
+
+document.getElementById("files").addEventListener "change", handleFileSelect, false
