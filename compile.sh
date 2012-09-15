@@ -4,6 +4,8 @@ minified="1964js-0.0.9.min.js"
 
 haml index.haml index.html $@
 mkdir obj/
+mkdir css/
+sass sass/style.sass:css/style.css
 echo Compiling coffee files ...
 coffee -c -o obj/ coffee/ 
 echo done.
