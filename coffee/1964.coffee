@@ -59,10 +59,7 @@
 # with a swap or bswap.
 #
 ###jslint bitwise: true, evil: true, undef: false, todo: true, browser: true, devel: true###
-###globals Int32Array, ArrayBuffer, Float32Array, C1964jsMemory, C1964jsInterrupts###
-###globals C1964jsConstants, C1964jsPif, C1964jsDMA, Float64Array, C1964jsWebGL, cancelAnimFrame, C1964jsHelpers###
-###globals dec2hex, Uint8Array, Uint16Array###
-###globals requestAnimFrame###
+###globals Int32Array, ArrayBuffer, Float32Array, C1964jsMemory, C1964jsInterrupts, C1964jsConstants, C1964jsPif, C1964jsDMA, Float64Array, C1964jsWebGL, cancelAnimFrame, C1964jsHelpers, dec2hex, Uint8Array, Uint16Array, requestAnimFrame###
 
 "use strict"
 consts = new C1964jsConstants()

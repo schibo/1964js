@@ -1,10 +1,14 @@
 #!/bin/sh
 
-minified="1964js-0.0.7.min.js"
+minified="1964js-0.0.9.min.js"
 
+
+#delete old object code
+#rm -rf obj/
+mkdir obj/
 echo Compiling coffee files ...
-coffee -c -o js/ js/ 
+coffee -c -o obj/ coffee/ 
 echo done.
 echo minifying as $minified ...
-java -jar compiler.jar --js js/lib/BigInt.js --js js/lib/closure/goog/base.js  --js js/constants.js --js js/1964.js --js js/helpers.js --js js/opcodeMap.js --js js/boot.js --js js/lib/closure/goog/math/long.js --js js/pif.js --js js/memory.js --js js/dma.js --js js/interrupts.js --js js/lib/glMatrix-0.9.5.min.js --js js/lib/webgl-utils.js --js js/renderer.js --js js/videoHLE.js --js js/gfxHelpers.js --js js/webGL.js --js js/lib/bitjs/io.js --js js/lib/bitjs/archive.js --js js/ui.js --js_output_file js/$minified
+java -jar compiler.jar --js lib/BigInt.js --js lib/closure/goog/base.js  --js obj/constants.js --js obj/1964.js --js obj/helpers.js --js obj/opcodeMap.js --js obj/boot.js --js lib/closure/goog/math/long.js --js obj/pif.js --js obj/memory.js --js obj/dma.js --js obj/interrupts.js --js lib/glMatrix-0.9.5.min.js --js lib/webgl-utils.js --js obj/renderer.js --js obj/videoHLE.js --js obj/gfxHelpers.js --js obj/webGL.js --js lib/bitjs/io.js --js lib/bitjs/archive.js --js obj/ui.js --js_output_file lib/$minified
 echo done.
