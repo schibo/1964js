@@ -147,8 +147,10 @@ updateProgress = (evt) ->
   return
 
 handleFileSelect = (evt) ->
+  if (evt.target.files == undefined || evt.target.files[0] == undefined)
+    return
   fileName = evt.target.files[0].name
-  progressBar = document.getElementById("progress_bar")
+  @progressBar = document.getElementById("progress_bar")
 
   # Reset progress indicator on new file selection.
   unless @progress is `undefined`
@@ -162,7 +164,7 @@ handleFileSelect = (evt) ->
     return
 
   reader.onloadstart = (e) ->
-    document.getElementById("progress_bar").className = "loading"  unless progressBar is `undefined`
+    document.getElementById("progress_bar").className = "loading"  unless @progressBar is `undefined`
     return
 
   reader.onload = (e) ->
@@ -170,7 +172,7 @@ handleFileSelect = (evt) ->
     unless @progress is `undefined`
       @progress.style.width = "100%"
       @progress.textContent = "100%"
-    setTimeout "document.getElementById('progress_bar').className='';document.getElementById('user_panel').className='';", 1000  unless progressBar is `undefined`
+    setTimeout "document.getElementById('progress_bar').className='';document.getElementById('user_panel').className='';", 1000  unless @progressBar is `undefined`
     #todo: add zip support (from index.html)
     uncompressAndRun fileName, reader.result, @i1964js
     return
