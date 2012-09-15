@@ -3,8 +3,6 @@
 minified="1964js-0.0.9.min.js"
 
 haml index.haml index.html $@
-#delete old object code
-rm -rf obj/
 mkdir obj/
 echo Compiling coffee files ...
 coffee -c -o obj/ coffee/ 
