@@ -57,13 +57,22 @@
     font-weight: bold;
 }
 
+h1 {
+    font-size: 35px;
+    font-weight: bold;
+    font-family: "Arial";
+}
+
 #user_panel .story {
-    border: 2px solid #303030;
+    border: 3px solid #303030;
+    font-size: 12px;
+    font-weight: bold;
+    font-family: "Arial";
 }
 
 #user_panel .footer {
     background-color: #303030;
-    border: 10px solid #303030;
+    border: 13px solid #303030;
 }
 
 #user_panel.show_fast {

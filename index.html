@@ -11,7 +11,7 @@
 <meta property="og:site_name" content="1964js" />
 <meta property="fb:admins" content="1397141558" />
 </head>
-<body bgcolor="#000000" text="#ffffff" link="#ffa953" vlink="#ffa953" alink="#ff0000" onload="start1964({wireframe:document.getElementById('wireframe').checked})">
+<body bgcolor="#000000" text="#ffffff" link="#ffa953" vlink="#ffa953" alink="#ff0000" onload="start1964({wireframe:false})">
 
 <div id="fb-root"></div>
 <script>
@@ -153,23 +153,10 @@
 
 <canvas id="Canvas" width="320" height="240">I'm sorry your browser does not support the HTML5 canvas element.</canvas>
 <canvas id="Canvas3D" width="1024" height="1024"></canvas>
-
-
 <div id="user_panel">
-    <div class="header"><a href="blog">1964js news</a>
-    </div>
-    <div class="dropShadow">
-        <div class="story">
-            <!--<div id="progress_bar">
-                <div class="percent">0%</div>
-            </div>-->
-            <br/>
-            <input id="files" name="file" type="file" />*.v64; *.n64; *.z64<!-- <button onclick="abortRead();">Cancel read</button> -->
-            <br/><br/>
-        </div>
-        <div class="story">
-            <br/>
-            <select onchange="if (this.value !== 'Demos') window.open(this.value, '_self');">
+    <div class="header"><a href="blog">[Blog]</a>  <a href="http://code.google.com/p/1964js">[Code]</a>  <a href="http://hulkholden.github.com/n64js/">[Try n64js too!]</a>
+        <h1>1964js
+            <select style="vertical-align: middle;" onchange="if (this.value !== 'Demos') window.open(this.value, '_self');">
                 <option value="Demos">Demos</option>
                 <option value="?rom=unofficial_roms/rotate.zip">Rotate</option>
                 <option value="?rom=unofficial_roms/chrome.zip">Chrome</option>
@@ -180,11 +167,24 @@
                 <option value="?rom=unofficial_roms/sp_crap.zip">Absolute Crap</option>
                 <option value="?rom=unofficial_roms/DynamixReadme.zip">Dynamix</option>
             </select>
-        <input id="wireframe" name="wireframe" onchange="if (i1964js != undefined &amp;&amp; i1964js.settings != undefined) i1964js.settings.wireframe = this.checked;" type="checkbox" />wireframe<br/><br/>
+        </h1>
+    </div>
+    <div class="dropShadow"> 
+        <div class="story">
+            <!--<div id="progress_bar">
+                <div class="percent">0%</div>
+            </div>-->
+            <br/>
+            <input id="files" name="file" type="file" />*.v64; *.n64; *.z64<!-- <button onclick="abortRead();">Cancel read</button> -->
+            <br/><br/>
         </div>
+        <!--<div class="story">
+            <br/>
+        <input id="wireframe" name="wireframe" onchange="if (i1964js != undefined &amp;&amp; i1964js.settings != undefined) i1964js.settings.wireframe = this.checked;" type="checkbox" />wireframe<br/><br/>
+        </div>-->
     </div>
     <div class="footer">
-        <div class="fb-like" data-send="false" data-width="300" data-show-faces="true" data-colorscheme="dark"></div>
+        <div class="fb-like" data-send="false" data-width="300" data-show-faces="false" data-colorscheme="dark"></div>
     </div>
 </div>
 
@@ -194,9 +194,9 @@
 <!-- minification for deployment follows: -->
 
 <!--when developing, comment out this script: -->
-<script src="lib/1964js-0.0.9.min.js"></script>
-
-<!--when developing, uncomment the following scripts:
+<!--<script src="lib/1964js-0.0.9.min.js"></script>
+-->
+<!--when developing, uncomment the following scripts:-->
     <script src="lib/BigInt.js"></script>
     <script src="lib/closure/goog/base.js"></script>
     <script src="obj/constants.js"></script>
@@ -216,7 +216,7 @@
     <script src="obj/gfxHelpers.js"></script>
     <script src="obj/ui.js"></script>
     <script src="obj/webGL.js"></script>
--->
+
 </body>
 
 </html>

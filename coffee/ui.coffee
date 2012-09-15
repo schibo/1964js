@@ -70,7 +70,7 @@ uncompressAndRun = (romPath, response) ->
   else 
     #This zip library seems to only work if there is one file in the root of the zip's filesystem.
     #Compressing with MacOS causes problems.
-    unzipper = new bitjs.archive.Unzipper(response, "js/lib/bitjs/")
+    unzipper = new bitjs.archive.Unzipper(response, "lib/bitjs/")
     unzipper.addEventListener bitjs.archive.UnarchiveEvent.Type.EXTRACT, (e) ->
       if e.unarchivedFile
         console.log "extracted: " + e.unarchivedFile.filename
