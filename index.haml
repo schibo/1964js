@@ -132,8 +132,6 @@
           %br/
       .footer
         .fb-like{"data-colorscheme" => "dark", "data-send" => "false", "data-show-faces" => "false", "data-width" => "300"}
-    %script{:src => "lib/bitjs/io.js"}
-    %script{:src => "lib/bitjs/archive.js"}
     :ruby
       outputMode = "release"
       ARGV.each do|a|
@@ -142,8 +140,12 @@
         end
       end
       if outputMode != "develop"
+        puts "<script src = 'lib/bitjs/io.min.js'></script>"
+        puts "<script src = 'lib/bitjs/archive.min.js'></script>"
         puts "<script src = 'lib/1964js-0.0.9.min.js'></script>"
       else
+        puts "<script src = 'lib/bitjs/io.js'></script>"
+        puts "<script src = 'lib/bitjs/archive.js'></script>"
         puts "<script src = 'lib/BigInt.js'></script>"
         puts "<script src = 'lib/closure/goog/base.js'></script>"
         puts "<script src = 'obj/constants.js'></script>"
