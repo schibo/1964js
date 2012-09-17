@@ -1,6 +1,6 @@
 #!/bin/sh
 
-minified="1964js-0.0.9.min.js"
+minified="1964js-0.0.11.min.js"
 
 haml index.haml index.html $@
 
@@ -18,11 +18,11 @@ java -jar compiler.jar --js lib/bitjs/io.js --js_output_file lib/bitjs/io.min.js
 echo done.
 
 echo minifyig archive js as archive.min.js ...
-java -jar compiler.jar --js lib/bitjs/archive-modded-to-point-to-unzip-minified.js --js_output_file lib/bitjs/archive.min.js
+java -jar compiler.jar --js lib/bitjs/archive-modded-to-point-to-minified.js --js_output_file lib/bitjs/archive.min.js
 echo done.
 
 echo minifyig unzip.js as unzip.min.js ...
-java -jar compiler.jar --js lib/bitjs/unzip.js --js_output_file lib/bitjs/unzip.min.js
+java -jar compiler.jar --js lib/bitjs/unzip-modded-to-point-to-minified.js --js_output_file lib/bitjs/unzip.min.js
 echo done.
 
 echo minifying as $minified ...
