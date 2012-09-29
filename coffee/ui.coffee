@@ -67,7 +67,7 @@ uncompressAndRun = (romPath, response) ->
     buffer = new Uint8Array(response)
     @romLength = buffer.byteLength
     initTryCatch buffer
-  else 
+  else
     #This zip library seems to only work if there is one file in the root of the zip's filesystem.
     #Compressing with MacOS causes problems.
     unzipper = new bitjs.archive.Unzipper(response, "lib/bitjs/")
@@ -138,7 +138,7 @@ errorHandler = (evt) ->
 updateProgress = (evt) ->
   # evt is a ProgressEvent.
   if evt.lengthComputable
-    percentLoaded = Math.round((evt.loaded / evt.total) * 100)    
+    percentLoaded = Math.round((evt.loaded / evt.total) * 100)
     # Increase the progress bar length.
     if percentLoaded < 100
       unless @progress is `undefined`

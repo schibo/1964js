@@ -204,7 +204,7 @@ C1964jsVideoHLE = (core, glx) ->
       @setWorldView @matToLoad, @gbi0PushMatrix(pc), @gbi0LoadMatrix(pc)
     return
 
-  C1964jsVideoHLE::loadMatrix = (addr) ->   
+  C1964jsVideoHLE::loadMatrix = (addr) ->
     #  todo: port and probably log warning message if true
     #    if (addr + 64 > g_dwRamSize)
     #    {
@@ -411,7 +411,7 @@ C1964jsVideoHLE = (core, glx) ->
     @RDP_GFX_PopDL()
     return
 
-  C1964jsVideoHLE::RSP_GBI1_Texture = (pc) ->    
+  C1964jsVideoHLE::RSP_GBI1_Texture = (pc) ->
     #hack: experimenting.
     @texImg.format = @getTImgFormat(pc)
     @texImg.size = @getTImgSize(pc)
@@ -422,7 +422,7 @@ C1964jsVideoHLE = (core, glx) ->
     @renderer.texTri 0, 0, 256, 256, 0, 0, 0, 0, 7, @core.memory.rdramUint8Array, @texImg
     @videoLog "TODO: RSP_GBI1_Texture"
 
-  #test for dummy gray textures  
+  #test for dummy gray textures
   #create a heap of dummy texture mem.
   testTextureMem = new Array(256 * 256 * 4)
   testTextureMem = new Uint8Array(testTextureMem)
@@ -573,8 +573,8 @@ C1964jsVideoHLE = (core, glx) ->
     @videoLog "TODO: DLParser_SetTileSize"
     return
 
-  C1964jsVideoHLE::DLParser_LoadBlock = (pc) ->  
-    # this.texImg.changed = true;      
+  C1964jsVideoHLE::DLParser_LoadBlock = (pc) ->
+    # this.texImg.changed = true;
     @videoLog "TODO: DLParser_LoadBlock"
     return
 
@@ -614,7 +614,7 @@ C1964jsVideoHLE = (core, glx) ->
     @videoLog "TODO: DLParser_SetZImg"
     return
 
-  C1964jsVideoHLE::prepareTriangle = (dwV0, dwV1, dwV2) ->   
+  C1964jsVideoHLE::prepareTriangle = (dwV0, dwV1, dwV2) ->
     #SP_Timing(SP_Each_Triangle);
     didSucceed = undefined #(CRender::g_pRender->IsTextureEnabled() || this.gRSP.ucode == 6 );
     textureFlag = false

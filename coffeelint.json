@@ -1,0 +1,13 @@
+{
+  "max_line_length" : {
+    "value": 80,
+    "level" : "ignore"
+  },
+  
+  "no_backticks" : {
+    "level" : "ignore"
+  },
+  "no_throwing_strings" : {
+    "level" : "ignore"
+  }
+}

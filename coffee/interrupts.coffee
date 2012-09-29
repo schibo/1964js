@@ -317,7 +317,7 @@ C1964jsInterrupts = (core, cp0) ->
     else @clrFlag core.memory.miUint8Array, consts.MI_INIT_MODE_REG, consts.MI_MODE_EBUS  if value & consts.MI_CLR_EBUS
 
     #this.clrFlag(miUint8Array, consts.MI_INTR_REG, consts.MI_INTR_DP);
-    #setInt32(miUint8Array, MI_INIT_MODE_REG, core.memory.getUint32(miUint8Array, MI_INIT_MODE_REG)|(value&0x7f)); 
+    #setInt32(miUint8Array, MI_INIT_MODE_REG, core.memory.getUint32(miUint8Array, MI_INIT_MODE_REG)|(value&0x7f));
     @clearMIInterrupt consts.MI_INTR_DP  if value & consts.MI_CLR_DP_INTR
     return
 
@@ -416,7 +416,7 @@ C1964jsInterrupts = (core, cp0) ->
   #if(value & DPC_CLR_PIPEBUSY_REG) (DPC_PIPEBUSY_REG) = 0;
   #if(value & DPC_CLR_BUFBUSY_REG) (DPC_BUFBUSY_REG) = 0;
   #if(value & DPC_CLR_CLOCK_REG) (DPC_CLOCK_REG) = 0;
-  #        
+  #
   @writeDPC = (offset, value, pc, isFromDelaySlot) ->
     switch offset
       when consts.DPC_STATUS_REG
@@ -435,7 +435,7 @@ C1964jsInterrupts = (core, cp0) ->
 
   @writePIStatusReg = (value, pc, isFromDelaySlot) ->
     @clearMIInterrupt consts.MI_INTR_PI  if value & consts.PI_STATUS_CLR_INTR
-    if value & consts.PI_STATUS_RESET  
+    if value & consts.PI_STATUS_RESET
       #When PIC is reset, if PIC happens to be busy, an interrupt will be generated
       #as PIC returns to idle. Otherwise, no interrupt will be generated and PIC
       #remains idle.
@@ -445,7 +445,7 @@ C1964jsInterrupts = (core, cp0) ->
         
         #Reset finished, set PI Interrupt
         @triggerPIInterrupt pc, isFromDelaySlot
-      else        
+      else
         #Reset the PIC
         core.memory.setInt32 core.memory.piUint8Array, consts.PI_STATUS_REG, 0
     return

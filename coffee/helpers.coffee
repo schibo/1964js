@@ -386,7 +386,7 @@ C1964jsHelpers = (isLittleEndian) ->
     return
   
   #alert('divu: '+r[this.rs(i)]+'/'+r[this.rt(i)]+'='+dec2hex(h[33]) +' '+dec2hex(r[33])+' '+dec2hex(h[32])+' '+dec2hex(r[32]));
-  @inter_dmult = (r, h, i) ->  
+  @inter_dmult = (r, h, i) ->
     #this is wrong..i think BigInt it will treat hex as unsigned?
     delim = undefined
     x = undefined
@@ -428,7 +428,7 @@ C1964jsHelpers = (isLittleEndian) ->
     return
 
   #alert('dmult: '+rs64+'*'+rt64+'='+dec2hex(h[33]) +' '+dec2hex(r[33])+' '+dec2hex(h[32])+' '+dec2hex(r[32]));
-  @inter_dmultu = (r, h, i) ->  
+  @inter_dmultu = (r, h, i) ->
     #Attax demo
     delim = undefined
     x = undefined

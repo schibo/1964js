@@ -137,7 +137,7 @@ C1964jsVideoHLE::getGbi1RspSegmentAddr = (pc) ->
 #    return this.core.memory.rdramView.getInt32(pc, false);
 C1964jsVideoHLE::getRspSegmentAddr = (seg) ->
   
-  #TODO: May need to mask with rdram size - 1    
+  #TODO: May need to mask with rdram size - 1
   @segments[seg >> 24 & 0x0F] + (seg & 0x00FFFFFF)
 
 

@@ -164,14 +164,14 @@ C1964jsMemory = (core) ->
     else if a >= consts.MEMORY_START_DPS and a < consts.MEMORY_START_DPS + consts.MEMORY_SIZE_DPS
       off_ = a - consts.MEMORY_START_DPS
       @dpsUint8Array[off_] << 8 | @dpsUint8Array[off_ + 1]
-    else if a >= consts.MEMORY_START_MI and a < consts.MEMORY_START_MI + consts.MEMORY_SIZE_MI  
+    else if a >= consts.MEMORY_START_MI and a < consts.MEMORY_START_MI + consts.MEMORY_SIZE_MI
       #alert('load mi:' + dec2hex(addr));
       off_ = a - consts.MEMORY_START_MI
       @miUint8Array[off_] << 8 | @miUint8Array[off_ + 1]
     else if a >= consts.MEMORY_START_VI and a < consts.MEMORY_START_VI + consts.MEMORY_SIZE_VI
       off_ = a - consts.MEMORY_START_VI
       core.interrupts.readVI off_
-    else if a >= consts.MEMORY_START_AI and a < consts.MEMORY_START_AI + consts.MEMORY_SIZE_AI 
+    else if a >= consts.MEMORY_START_AI and a < consts.MEMORY_START_AI + consts.MEMORY_SIZE_AI
       #alert('load ai:' + dec2hex(addr));
       off_ = a - consts.MEMORY_START_AI
       core.interrupts.readAI off_
@@ -192,7 +192,7 @@ C1964jsMemory = (core) ->
     else if a >= consts.MEMORY_START_C2A2 and a < consts.MEMORY_START_C2A2 + consts.MEMORY_SIZE_C2A2
       off_ = a - consts.MEMORY_START_C2A2
       @c2a2Uint8Array[off_] << 8 | @c2a2Uint8Array[off_ + 1]
-    else if a >= consts.MEMORY_START_ROM_IMAGE and a < consts.MEMORY_START_ROM_IMAGE + romLength  
+    else if a >= consts.MEMORY_START_ROM_IMAGE and a < consts.MEMORY_START_ROM_IMAGE + romLength
       #alert('load rom');
       off_ = a - consts.MEMORY_START_ROM_IMAGE
       @romUint8Array[off_] << 8 | @romUint8Array[off_ + 1]
@@ -215,7 +215,7 @@ C1964jsMemory = (core) ->
       off_ = a - consts.MEMORY_START_RAMREGS8
       @ramRegs8Uint8Array[off_] << 8 | @ramRegs8Uint8Array[off_ + 1]
     else
-      log "reading from invalid memory at " + dec2hex(addr)  
+      log "reading from invalid memory at " + dec2hex(addr)
       #stopEmulator();
       off_ = a & 0x0000fffc
       @dummyReadWriteUint8Array[off_] << 8 | @dummyReadWriteUint8Array[off_ + 1]
@@ -225,7 +225,7 @@ C1964jsMemory = (core) ->
     a = addr & 0x1FFFFFFF
     if a >= consts.MEMORY_START_RDRAM and a < consts.MEMORY_START_RDRAM + consts.MEMORY_SIZE_RDRAM
       off_ = a - consts.MEMORY_START_RDRAM
-      @rdramUint8Array[off_] << 24 | @rdramUint8Array[off_ + 1] << 16 | @rdramUint8Array[off_ + 2] << 8 | @rdramUint8Array[off_ + 3] 
+      @rdramUint8Array[off_] << 24 | @rdramUint8Array[off_ + 1] << 16 | @rdramUint8Array[off_ + 2] << 8 | @rdramUint8Array[off_ + 3]
     #return getInt32(rdramUint8Array, rdramUint8Array, a-consts.MEMORY_START_RDRAM);
     else if a >= consts.MEMORY_START_RAMREGS4 and a < consts.MEMORY_START_RAMREGS4 + consts.MEMORY_SIZE_RAMREGS4
       off_ = a - consts.MEMORY_START_RAMREGS4
@@ -275,7 +275,7 @@ C1964jsMemory = (core) ->
     else if a >= consts.MEMORY_START_C2A2 and a < consts.MEMORY_START_C2A2 + consts.MEMORY_SIZE_C2A2
       off_ = a - consts.MEMORY_START_C2A2
       @c2a2Uint8Array[off_] << 24 | @c2a2Uint8Array[off_ + 1] << 16 | @c2a2Uint8Array[off_ + 2] << 8 | @c2a2Uint8Array[off_ + 3]
-    else if a >= consts.MEMORY_START_ROM_IMAGE and a < consts.MEMORY_START_ROM_IMAGE + romLength 
+    else if a >= consts.MEMORY_START_ROM_IMAGE and a < consts.MEMORY_START_ROM_IMAGE + romLength
       #alert('load rom');
       off_ = a - consts.MEMORY_START_ROM_IMAGE
       @romUint8Array[off_] << 24 | @romUint8Array[off_ + 1] << 16 | @romUint8Array[off_ + 2] << 8 | @romUint8Array[off_ + 3]
@@ -445,8 +445,8 @@ C1964jsMemory = (core) ->
       @rdramUint8Array[off_ + 2] = val >> 8
       @rdramUint8Array[off_ + 3] = val
       return
-  
-  #Same routine as storeWord, but store a byte 
+
+  #Same routine as storeWord, but store a byte
   @storeByte = (val, addr, pc, isDelaySlot) ->
     a = addr & 0x1FFFFFFF
     if a >= consts.MEMORY_START_RDRAM and a < consts.MEMORY_START_RDRAM + consts.MEMORY_SIZE_RDRAM
@@ -539,7 +539,7 @@ C1964jsMemory = (core) ->
       @gioUint8Array[off_] = val
       return
     else
-      log "writing to invalid memory at " + dec2hex(addr)  
+      log "writing to invalid memory at " + dec2hex(addr)
       #stopEmulator();
       off_ = a & 0x0000fffc
       @rdramUint8Array[off_] = val
@@ -651,7 +651,7 @@ C1964jsMemory = (core) ->
       @gioUint8Array[off_ + 1] = val
       return
     else
-      log "writing to invalid memory at " + dec2hex(addr) 
+      log "writing to invalid memory at " + dec2hex(addr)
       #stopEmulator();
       off_ = a & 0x0000fffc
       @rdramUint8Array[off_] = val >> 8

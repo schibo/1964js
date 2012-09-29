@@ -33,7 +33,7 @@
 # 1964 Masked loads and store addresses to make them aligned in load/store opcodes.
 # Check_SW, setting DPC_END_REG equal to DPC_START_REG is risky initialization:
 # setInt32(spReg1Uint8Array, SP_STATUS_REG, SP_STATUS_HALT);
-# 1964cpp's init sets SP_STATUS_REG to SP_STATUS_HALT but then clears it in RCP_Reset() ! 
+# 1964cpp's init sets SP_STATUS_REG to SP_STATUS_HALT but then clears it in RCP_Reset() !
 #
 # Use a typed-array but access it a byte at a time for endian-safety.
 # Do not use the DataView .getInt16, getInt32, etc functions. These will ensure endian
@@ -49,7 +49,7 @@
 # dmult, and ddiv don't handle negative correctly. BigInt.js
 # - Where are dadd and dmult?
 #
-# - Should handle exceptions in delay slots by catching thrown exceptions. 
+# - Should handle exceptions in delay slots by catching thrown exceptions.
 #
 #Convention:
 # When loading/storing registers back into n64 memory,
@@ -115,11 +115,10 @@ class C1964jsEmulator
     @log = (message) ->
       console.log message
 
-  # function init() 
-  #        r[32] = LO for mult
-  #        r[33] = HI for mult
-  #        r[34] = write-only. to protect r0, write here.
-  #    
+  # function init()
+  #   r[32] = LO for mult
+  #   r[33] = HI for mult
+  #   r[34] = write-only. to protect r0, write here.
   init: (buffer) ->
     k = undefined
     x = undefined
@@ -190,7 +189,7 @@ class C1964jsEmulator
     @memory.setInt32 @memory.viUint8Array, consts.VI_H_SYNC_REG, 0x000D2047
 
     #this.memory.setInt32(this.memory.spReg1Uint8Array, SP_STATUS_REG, SP_STATUS_HALT);
-    #1964cpp sets this then clears it in RCP_Reset() ! 
+    #1964cpp sets this then clears it in RCP_Reset() !
 
     #set hi vals
     i = 0
@@ -655,14 +654,14 @@ class C1964jsEmulator
   r4300i_sllv: (i) ->
     "{" + @helpers.tRD(i) + "=" + @helpers.RT(i) + "<<(" + @helpers.RS(i) + "&0x1f);" + @helpers.tRDH(i) + "=" + @helpers.RD(i) + ">>31;}"
 
-  r4300i_srav: (i) -> 
+  r4300i_srav: (i) ->
     #optimization: r[hi] can safely right-shift rt
     "{" + @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>(" + @helpers.RS(i) + "&0x1f);" + @helpers.tRDH(i) + "=" + @helpers.RT(i) + ">>31;}"
 
   r4300i_COP1_cfc1: (i) ->
     "{" + @helpers.tRT(i) + "=t.cp1Con[" + @helpers.fs(i) + "];" + @helpers.tRTH(i) + "=t.cp1Con[" + @helpers.fs(i) + "]>>31;}"  if @helpers.fs(i) is 0 or @helpers.fs(i) is 31
 
-  r4300i_COP1_ctc1: (i) -> 
+  r4300i_COP1_ctc1: (i) ->
     #incomplete:
     "t.cp1Con[31]=" + @helpers.RT(i) + ";"  if @helpers.fs(i) is 31
 
@@ -672,10 +671,10 @@ class C1964jsEmulator
   r4300i_lld: (i) ->
     "{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=m.loadWord((t.vAddr+4)|0);" + @helpers.tRTH(i) + "=m.loadWord(t.vAddr);t.LLbit=1;}"
 
-  #address error exceptions in ld and sd are weird since this is split up 
+  #address error exceptions in ld and sd are weird since this is split up
   #into 2 reads or writes. i guess they're fatal exceptions, so
-  #doesn't matter. 
-  r4300i_sd: (i, isDelaySlot) -> 
+  #doesn't matter.
+  r4300i_sd: (i, isDelaySlot) ->
     #lo
     a = undefined
     string = "{" + @helpers.setVAddr(i) + "m.storeWord(" + @helpers.RT(i) + ",(t.vAddr+4)|0"
@@ -723,7 +722,7 @@ class C1964jsEmulator
     @log "todo: break"
     ""
 
-  r4300i_COP0_tlbwi: (i) ->  
+  r4300i_COP0_tlbwi: (i) ->
     #var index = t.cp0[INDEX] & NTLBENTRIES;
     @log "todo: tlbwi"
     ""
@@ -734,7 +733,7 @@ class C1964jsEmulator
   r4300i_divu: (i) ->
     "t.helpers.inter_divu(r,h," + i + ");"
 
-  r4300i_sra: (i) -> 
+  r4300i_sra: (i) ->
     #optimization: sra's r[hi] can safely right-shift RT.
     "{" + @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>" + @helpers.sa(i) + ";" + @helpers.tRDH(i) + "=" + @helpers.RT(i) + ">>31;}"
 

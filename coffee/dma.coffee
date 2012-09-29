@@ -50,7 +50,7 @@ C1964jsEmulator::deleteFunction = (k) ->
   fnName = "_" + splitResult[0]
   s.parentNode.removeChild s
 
-  #allow deletion of this function        
+  #allow deletion of this function
   eval fnName + "= function (r, s, t, v){}; delete " + fnName + ";"
   window[fnName] = null
   alert "blah"  if window[fnName]

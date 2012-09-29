@@ -27,12 +27,12 @@ C1964jsRenderer = (settings, glx, webGL) ->
   cubeVertexPositionBuffer = undefined
   cubeVertexTextureCoordBuffer = undefined
   cubeVertexIndexBuffer = undefined
-  #hack: getting width and height of texture by vertices 
+  #hack: getting width and height of texture by vertices
   #temp: ortho to [-1, 1]. assuming 320x240. todo: ortho projection based on screen res
   #inits a quad. good for tiles
   #initQuad(xl, yl, xh, yh ); //inits a quad. good for tiles
   #hack: getting width and height of texture by vertices
-  #if (texImg.changed == true) {                
+  #if (texImg.changed == true) {
   #}
   #var textureWidth = document.getElementById(textureName).width;
   #var textureHeight = document.getElementById(textureName).height;
@@ -42,7 +42,7 @@ C1964jsRenderer = (settings, glx, webGL) ->
   #initQuad(xl, yl, xh, yh ); //inits a quad. good for tiles
   #   this.draw(tileno, texImg.changed);
   # texImg.changed = false;
-  blitTexture = (ram, offset, idx, width, height) ->  
+  blitTexture = (ram, offset, idx, width, height) ->
     #test dummy textures
     textureName = "pow2Texture" + idx.toString()
     cc = document.getElementById(textureName)
