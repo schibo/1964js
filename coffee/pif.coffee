@@ -41,7 +41,7 @@ C1964jsPif = (pifUint8Array) ->
     pifRamStart = consts.MEMORY_START_PIF_RAM - consts.MEMORY_START_PIF
     
     #todo: pif ram decryption
-    throw "todo: decrypt"  if (@pifUint8Array[pifRamStart] is 0xff) and (@pifUint8Array[pifRamStart + 1] is 0xff) and (@pifUint8Array[pifRamStart + 2] is 0xff) and (@pifUint8Array[pifRamStart + 3] is 0xff) #see iPif.cpp. the first 4 dwords will be -1, not just the first 4 bytes. Make pifUint32Array and use it 4 times.
+    throw Error "todo: decrypt"  if (@pifUint8Array[pifRamStart] is 0xff) and (@pifUint8Array[pifRamStart + 1] is 0xff) and (@pifUint8Array[pifRamStart + 2] is 0xff) and (@pifUint8Array[pifRamStart + 3] is 0xff) #see iPif.cpp. the first 4 dwords will be -1, not just the first 4 bytes. Make pifUint32Array and use it 4 times.
     count = 0
     while count < 64
       cmd = @pifUint8Array[pifRamStart + count]

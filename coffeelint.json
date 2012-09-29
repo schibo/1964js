@@ -6,8 +6,5 @@
   
   "no_backticks" : {
     "level" : "ignore"
-  },
-  "no_throwing_strings" : {
-    "level" : "ignore"
   }
 }

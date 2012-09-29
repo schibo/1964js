@@ -111,7 +111,7 @@ C1964jsDMA = (memory, interrupts, pif) ->
     end = 63 #read 64 bytes. Is there an si_wr_len_reg?
     to = @memory.getInt32(@memory.siUint8Array, @memory.siUint8Array, consts.SI_DRAM_ADDR_REG)
     from = @memory.getInt32(@memory.siUint8Array, @memory.siUint8Array, consts.SI_PIF_ADDR_RD64B_REG)
-    throw "Unhandled: SI_DRAM_ADDR_RD64B_REG = " + from  if from isnt 0x1FC007C0
+    throw Error "Unhandled: SI_DRAM_ADDR_RD64B_REG = " + from  if from isnt 0x1FC007C0
     log "si dma write " + (end + 1) + " bytes from " + dec2hex(from) + " to " + dec2hex(to)
     end &= 0x00ffffff
     to &= 0x0fffffff
@@ -174,7 +174,7 @@ C1964jsDMA = (memory, interrupts, pif) ->
     end = 63 #read 64 bytes. Is there an si_rd_len_reg?
     to = @memory.getInt32(@memory.siUint8Array, @memory.siUint8Array, consts.SI_PIF_ADDR_WR64B_REG)
     from = @memory.getInt32(@memory.siUint8Array, @memory.siUint8Array, consts.SI_DRAM_ADDR_REG)
-    throw "Unhandled: SI_DRAM_ADDR_RD64B_REG = " + from  if to isnt 0x1FC007C0
+    throw Error "Unhandled: SI_DRAM_ADDR_RD64B_REG = " + from  if to isnt 0x1FC007C0
     log "si dma read " + (end + 1) + " bytes from " + dec2hex(from) + " to " + dec2hex(to)
     end &= 0x00ffffff
     to &= 0x0000ffff

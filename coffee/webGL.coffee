@@ -129,7 +129,7 @@ C1964jsWebGL = ->
     return
 
   C1964jsWebGL::mvPopMatrix = ->
-    throw "Invalid popMatrix!"  if mvMatrixStack.length is 0
+    throw Error "Invalid popMatrix!"  if mvMatrixStack.length is 0
     mvMatrix = mvMatrixStack.pop()
     return
 

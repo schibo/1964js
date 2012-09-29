@@ -57,7 +57,7 @@ C1964jsMemory = (core) ->
     return
 
   @loadByte = (addr) ->
-    throw "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
+    throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
     a = addr & 0x1FFFFFFF
     if a >= consts.MEMORY_START_RDRAM and a < consts.MEMORY_START_RDRAM + consts.MEMORY_SIZE_RDRAM
       off_ = a - consts.MEMORY_START_RDRAM
@@ -141,7 +141,7 @@ C1964jsMemory = (core) ->
       @dummyReadWriteUint8Array[off_]
 
   @loadHalf = (addr) ->
-    throw "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
+    throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
     a = addr & 0x1FFFFFFF
     if a >= consts.MEMORY_START_RDRAM and a < consts.MEMORY_START_RDRAM + consts.MEMORY_SIZE_RDRAM
       off_ = a - consts.MEMORY_START_RDRAM
@@ -221,7 +221,7 @@ C1964jsMemory = (core) ->
       @dummyReadWriteUint8Array[off_] << 8 | @dummyReadWriteUint8Array[off_ + 1]
 
   @loadWord = (addr) ->
-    throw "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
+    throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
     a = addr & 0x1FFFFFFF
     if a >= consts.MEMORY_START_RDRAM and a < consts.MEMORY_START_RDRAM + consts.MEMORY_SIZE_RDRAM
       off_ = a - consts.MEMORY_START_RDRAM

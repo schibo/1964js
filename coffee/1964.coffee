@@ -325,7 +325,7 @@ class C1964jsEmulator
       instruction = @memory.loadWord(pc + offset)
       string += "t.magic_number+=1.0;" + this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction)
       offset += 4
-      throw "too many instructions! bailing."  if offset > 10000
+      throw Error "too many instructions! bailing."  if offset > 10000
     @stopCompiling = false
     
     #close out the function
