@@ -187,16 +187,16 @@ document.getElementById("user_panel").onmousemove = ->
 document.getElementById("user_panel").ontouchend = (event) ->
   document.getElementById("user_panel").className = "show"
   event.cancelBubble = true
-  event.stopPropagation()  if event.stopPropagation
+  event.stopPropagation() if event.stopPropagation
 
 document.getElementById("user_panel").onmouseup = (event) ->
   event.cancelBubble = true
-  event.stopPropagation()  if event.stopPropagation
+  event.stopPropagation() if event.stopPropagation
 
 document.onmouseup = (event) ->
-  document.getElementById("user_panel").className = ""
+  document.getElementById("user_panel").className = if document.getElementById("user_panel").className is "" then "show" else ""
 
 document.ontouchend = (event) ->
-  document.getElementById("user_panel").className = ""
+  document.getElementById("user_panel").className = if document.getElementById("user_panel").className is "" then "show" else ""
 
 document.getElementById("files").addEventListener "change", handleFileSelect, false
