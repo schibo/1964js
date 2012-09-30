@@ -253,11 +253,16 @@ class C1964jsEmulator
       hi = @memory.rdramUint8Array[k]
       lo = @memory.rdramUint8Array[k + 1]
       out[i] = (hi & 0xF8)
-      k += 2
       out[i + 1] = (((hi << 5) | (lo >>> 3)) & 0xF8)
       out[i + 2] = (lo << 2 & 0xF8)
-      i += 4
-      y += 1
+      hi = @memory.rdramUint8Array[k + 2]
+      lo = @memory.rdramUint8Array[k + 3]
+      out[i + 4] = (hi & 0xF8)
+      out[i + 5] = (((hi << 5) | (lo >>> 3)) & 0xF8)
+      out[i + 6] = (lo << 2 & 0xF8)
+      k += 4
+      i += 8
+      y += 2
     ctx.putImageData ImDat, 0, 0
     return
 
