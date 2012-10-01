@@ -101,6 +101,10 @@ C1964jsMemory = (core) ->
       @region[start++] = region
     return
 
+  @readDummy = (that, a, getFn) ->
+    off_ = a & 0x0000FFFF
+    getFn that.dummyReadWriteUint8Array, off_
+
   @readRdram = (that, a, getFn) ->
     off_ = a-MEMORY_START_RDRAM
     getFn that.rdramUint8Array, off_
@@ -189,6 +193,7 @@ C1964jsMemory = (core) ->
     off_ = a - MEMORY_START_GIO
     getFn that.gioUint8Array, off_
 
+  @initRegion 0, 0x20000000, @readDummy
   @initRegion MEMORY_START_RDRAM, MEMORY_SIZE_RDRAM, @readRdram
   @initRegion MEMORY_START_RAMREGS4, MEMORY_START_RAMREGS4, @readRamRegs4
   @initRegion MEMORY_START_SPMEM, MEMORY_SIZE_SPMEM, @readSpMem
@@ -233,17 +238,17 @@ C1964jsMemory = (core) ->
     return
 
   @loadByte = (addr) ->
-    throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
+    #throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
     a = addr & 0x1FFFFFFF
     @region[a>>>14](this, a, @getInt8)
 
   @loadHalf = (addr) ->
-    throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
+    #throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
     a = addr & 0x1FFFFFFF
     @region[a>>>14](this, a, @getInt16)
 
   @loadWord = (addr) ->
-    throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
+    #throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
     a = addr & 0x1FFFFFFF
     @region[a>>>14](this, a, @getUint32)
 
