@@ -92,13 +92,15 @@ C1964jsMemory = (core) ->
   @dummyReadWriteUint8Array = new Uint8Array(0x10000)
 
   @region = []
+  @writeRegion = []
 
-  @initRegion = (start, size, region) ->
+  @initRegion = (start, size, region, writeRegion) ->
     end = (start + size) >>> 14
     start >>>= 14
 
     while start < end
-      @region[start++] = region
+      @region[start] = region
+      @writeRegion[start++] = writeRegion
     return
 
   @readDummy = (that, a, getFn) ->
@@ -193,29 +195,147 @@ C1964jsMemory = (core) ->
     off_ = a - MEMORY_START_GIO
     getFn that.gioUint8Array, off_
 
-  @initRegion 0, 0x20000000, @readDummy
-  @initRegion MEMORY_START_RDRAM, MEMORY_SIZE_RDRAM, @readRdram
-  @initRegion MEMORY_START_RAMREGS4, MEMORY_START_RAMREGS4, @readRamRegs4
-  @initRegion MEMORY_START_SPMEM, MEMORY_SIZE_SPMEM, @readSpMem
-  @initRegion MEMORY_START_SPREG_1, MEMORY_SIZE_SPREG_1, @readSpReg1
-  @initRegion MEMORY_START_SPREG_2, MEMORY_SIZE_SPREG_2, @readSpReg2
-  @initRegion MEMORY_START_DPC, MEMORY_SIZE_DPC, @readDpc
-  @initRegion MEMORY_START_DPS, MEMORY_SIZE_DPS, @readDps
-  @initRegion MEMORY_START_MI, MEMORY_SIZE_MI, @readMi
-  @initRegion MEMORY_START_VI, MEMORY_SIZE_VI, @readVi
-  @initRegion MEMORY_START_AI, MEMORY_SIZE_AI, @readAi
-  @initRegion MEMORY_START_PI, MEMORY_SIZE_PI, @readPi
-  @initRegion MEMORY_START_SI, MEMORY_SIZE_SI, @readSi
-  @initRegion MEMORY_START_C2A1, MEMORY_SIZE_C2A1, @readC2A1
-  @initRegion MEMORY_START_C1A1, MEMORY_SIZE_C1A1, @readC1A1
-  @initRegion MEMORY_START_C2A2, MEMORY_SIZE_C2A2, @readC2A2
-  @initRegion MEMORY_START_ROM_IMAGE, MEMORY_SIZE_ROM, @readRom #todo: could be a problem to use romLength
-  @initRegion MEMORY_START_C1A3, MEMORY_SIZE_C1A3, @readC1A3
-  @initRegion MEMORY_START_RI, MEMORY_SIZE_RI, @readRi
-  @initRegion MEMORY_START_PIF, MEMORY_SIZE_PIF, @readPif
-  @initRegion MEMORY_START_GIO, MEMORY_SIZE_GIO, @readGio
-  @initRegion MEMORY_START_RAMREGS0, MEMORY_SIZE_RAMREGS0, @readRamRegs0
-  @initRegion MEMORY_START_RAMREGS8, MEMORY_SIZE_RAMREGS8, @readRamRegs8
+  @writeRdram = (that, setFn, val, a) ->
+    off_ = a - MEMORY_START_RDRAM
+    setFn that.rdramUint8Array, off_, val
+    return
+
+  @writeSpMem = (that, setFn, val, a) ->
+    off_ = a - MEMORY_START_SPMEM
+    setFn that.spMemUint8Array, off_, val
+    return
+
+  @writeRi = (that, setFn, val, a) ->
+    off_ = a - MEMORY_START_RI
+    setFn that.riUint8Array, off_, val
+    return
+
+  @writeMi = (that, setFn, val, a, pc, isDelaySlot) ->
+    off_ = a - MEMORY_START_MI
+    that.core.interrupts.writeMI off_, val, pc, isDelaySlot
+    return
+
+  @writeRamRegs8 = (that, setFn, val, a) ->
+    off_ = a - MEMORY_START_RAMREGS8
+    setFn that.ramRegs8Uint8Array, off_, val
+    return
+
+  @writeRamRegs4 = (that, setFn, val, a) ->
+    off_ = a - MEMORY_START_RAMREGS4
+    setFn that.ramRegs4Uint8Array, off_, val
+    return
+
+  @writeRamRegs0 = (that, setFn, val, a) ->
+    off_ = a - MEMORY_START_RAMREGS0
+    setFn that.ramRegs0Uint8Array, off_, val
+    return
+
+  @writeSpReg1 = (that, setFn, val, a, pc, isDelaySlot) ->
+    off_ = a - MEMORY_START_SPREG_1
+    that.core.interrupts.writeSPReg1 off_, val, pc, isDelaySlot
+    return
+
+  @writePi = (that, setFn, val, a, pc, isDelaySlot) ->
+    off_ = a - MEMORY_START_PI
+    that.core.interrupts.writePI off_, val, pc, isDelaySlot
+    return
+
+  @writeSi = (that, setFn, val, a, pc, isDelaySlot) ->
+    off_ = a - MEMORY_START_SI
+    that.core.interrupts.writeSI off_, val, pc, isDelaySlot
+    return
+
+  @writeAi = (that, setFn, val, a, pc, isDelaySlot) ->
+    off_ = a - MEMORY_START_AI
+    that.core.interrupts.writeAI off_, val, pc, isDelaySlot
+    return
+
+  @writeVi = (that, setFn, val, a, pc, isDelaySlot) ->
+    off_ = a - MEMORY_START_VI
+    that.core.interrupts.writeVI off_, val, pc, isDelaySlot
+    return
+
+  @writeSpReg2 = (that, setFn, val, a, pc, isDelaySlot) ->
+    off_ = a - MEMORY_START_SPREG_2
+    that.core.interrupts.writeSPReg2 off_, val, pc, isDelaySlot
+    return
+
+  @writeDpc = (that, setFn, val, a, pc, isDelaySlot) ->
+    off_ = a - MEMORY_START_DPC
+    that.core.interrupts.writeDPC off_, val, pc, isDelaySlot
+    return
+
+  @writeDps = (that, setFn, val, a) ->
+    off_ = a - MEMORY_START_DPS
+    setFn that.dpsUint8Array, off_, val
+    return
+
+  @writeC2A1 = (that, setFn, val, a) ->
+    off_ = a - MEMORY_START_C2A1
+    setFn that.c2a1Uint8Array, off_, val
+    return
+
+  @writeC1A1 = (that, setFn, val, a) ->
+    off_ = a - MEMORY_START_C1A1
+    setFn that.c1a1Uint8Array, off_, val
+    return
+
+  @writeC2A2 = (that, setFn, val, a) ->
+    off_ = a - MEMORY_START_C2A2
+    setFn that.c2a2Uint8Array, off_, val
+    return
+
+  @writeRom = (that, setFn, val, a) ->
+    alert "attempt to overwrite rom!"
+    off_ = a - MEMORY_START_ROM_IMAGE
+    setFn that.romUint8Array, off_, val
+    return
+
+  @writeC1A3 = (that, setFn, val, a) ->
+    off_ = a - MEMORY_START_C1A3
+    setFn that.c1a3Uint8Array, off_, val
+    return
+
+  @writePif = (that, setFn, val, a) ->
+    off_ = a - MEMORY_START_PIF
+    setFn that.pifUint8Array, off_, val
+    return
+
+  @writeGio = (that, setFn, val, a) ->
+    off_ = a - MEMORY_START_GIO
+    setFn that.gioUint8Array, off_, val
+    return
+
+  @writeDummy = (that, setFn, val, a) ->
+    log "writing to invalid memory at " + dec2hex(a)
+    #stopEmulator();
+    off_ = a & 0x0000fffc
+    setFn that.dummyReadWriteUint8Array, off_, val
+    return
+
+  @initRegion 0, 0x20000000, @readDummy, @writeDummy
+  @initRegion MEMORY_START_RDRAM, MEMORY_SIZE_RDRAM, @readRdram, @writeRdram
+  @initRegion MEMORY_START_RAMREGS4, MEMORY_START_RAMREGS4, @readRamRegs4, @writeRamRegs4
+  @initRegion MEMORY_START_SPMEM, MEMORY_SIZE_SPMEM, @readSpMem, @writeSpMem
+  @initRegion MEMORY_START_SPREG_1, MEMORY_SIZE_SPREG_1, @readSpReg1, @writeSpReg1
+  @initRegion MEMORY_START_SPREG_2, MEMORY_SIZE_SPREG_2, @readSpReg2, @writeSpReg2
+  @initRegion MEMORY_START_DPC, MEMORY_SIZE_DPC, @readDpc, @writeDpc
+  @initRegion MEMORY_START_DPS, MEMORY_SIZE_DPS, @readDps, @writeDps
+  @initRegion MEMORY_START_MI, MEMORY_SIZE_MI, @readMi, @writeMi
+  @initRegion MEMORY_START_VI, MEMORY_SIZE_VI, @readVi, @writeVi
+  @initRegion MEMORY_START_AI, MEMORY_SIZE_AI, @readAi, @writeAi
+  @initRegion MEMORY_START_PI, MEMORY_SIZE_PI, @readPi, @writePi
+  @initRegion MEMORY_START_SI, MEMORY_SIZE_SI, @readSi, @writeSi
+  @initRegion MEMORY_START_C2A1, MEMORY_SIZE_C2A1, @readC2A1, @writeC2A1
+  @initRegion MEMORY_START_C1A1, MEMORY_SIZE_C1A1, @readC1A1, @writeC1A1
+  @initRegion MEMORY_START_C2A2, MEMORY_SIZE_C2A2, @readC2A2, @writeC2A2
+  @initRegion MEMORY_START_ROM_IMAGE, MEMORY_SIZE_ROM, @readRom, @writeRom #todo: could be a problem to use romLength
+  @initRegion MEMORY_START_C1A3, MEMORY_SIZE_C1A3, @readC1A3, @writeC1A3
+  @initRegion MEMORY_START_RI, MEMORY_SIZE_RI, @readRi, @writeRi
+  @initRegion MEMORY_START_PIF, MEMORY_SIZE_PIF, @readPif, @writePif
+  @initRegion MEMORY_START_GIO, MEMORY_SIZE_GIO, @readGio, @writeGio
+  @initRegion MEMORY_START_RAMREGS0, MEMORY_SIZE_RAMREGS0, @readRamRegs0, @writeRamRegs0
+  @initRegion MEMORY_START_RAMREGS8, MEMORY_SIZE_RAMREGS8, @readRamRegs8, @writeRamRegs8
 
   #getInt32 and getUint32 are identical. they both return signed.
   @getInt8 = (region, off_) ->
@@ -230,11 +350,20 @@ C1964jsMemory = (core) ->
   @getUint32 = (uregion, off_) ->
     uregion[off_] << 24 | uregion[off_ + 1] << 16 | uregion[off_ + 2] << 8 | uregion[off_ + 3]
 
+  @setInt8 = (uregion, off_, val) ->
+    uregion[off_] = val
+    return
+
   @setInt32 = (uregion, off_, val) ->
     uregion[off_] = val >> 24
     uregion[off_ + 1] = val >> 16
     uregion[off_ + 2] = val >> 8
     uregion[off_ + 3] = val
+    return
+
+  @setInt16 = (uregion, off_, val) ->
+    uregion[off_] = val >> 8
+    uregion[off_ + 1] = val
     return
 
   @loadByte = (addr) ->
@@ -254,358 +383,20 @@ C1964jsMemory = (core) ->
 
   @storeWord = (val, addr, pc, isDelaySlot) ->
     a = addr & 0x1FFFFFFF
-    if a >= MEMORY_START_RDRAM and a < MEMORY_START_RDRAM + MEMORY_SIZE_RDRAM
-      off_ = a - MEMORY_START_RDRAM
-      @rdramUint8Array[off_] = val >> 24
-      @rdramUint8Array[off_ + 1] = val >> 16
-      @rdramUint8Array[off_ + 2] = val >> 8
-      @rdramUint8Array[off_ + 3] = val
-      return
-    else if a >= MEMORY_START_SPMEM and a < MEMORY_START_SPMEM + MEMORY_SIZE_SPMEM
-      off_ = a - MEMORY_START_SPMEM
-      @spMemUint8Array[off_] = val >> 24
-      @spMemUint8Array[off_ + 1] = val >> 16
-      @spMemUint8Array[off_ + 2] = val >> 8
-      @spMemUint8Array[off_ + 3] = val
-      return
-    else if a >= MEMORY_START_RI and a < MEMORY_START_RI + MEMORY_SIZE_RI
-      off_ = a - MEMORY_START_RI
-      @riUint8Array[off_] = val >> 24
-      @riUint8Array[off_ + 1] = val >> 16
-      @riUint8Array[off_ + 2] = val >> 8
-      @riUint8Array[off_ + 3] = val
-      return
-    else if a >= MEMORY_START_MI and a < MEMORY_START_MI + MEMORY_SIZE_MI
-      off_ = a - MEMORY_START_MI
-      core.interrupts.writeMI off_, val, pc, isDelaySlot
-      return
-    else if a >= MEMORY_START_RAMREGS8 and a < MEMORY_START_RAMREGS8 + MEMORY_SIZE_RAMREGS8
-      off_ = a - MEMORY_START_RAMREGS8
-      @ramRegs8Uint8Array[off_] = val >> 24
-      @ramRegs8Uint8Array[off_ + 1] = val >> 16
-      @ramRegs8Uint8Array[off_ + 2] = val >> 8
-      @ramRegs8Uint8Array[off_ + 3] = val
-      return
-    else if a >= MEMORY_START_RAMREGS4 and a < MEMORY_START_RAMREGS4 + MEMORY_SIZE_RAMREGS4
-      off_ = a - MEMORY_START_RAMREGS4
-      @ramRegs4Uint8Array[off_] = val >> 24
-      @ramRegs4Uint8Array[off_ + 1] = val >> 16
-      @ramRegs4Uint8Array[off_ + 2] = val >> 8
-      @ramRegs4Uint8Array[off_ + 3] = val
-      return
-    else if a >= MEMORY_START_RAMREGS0 and a < MEMORY_START_RAMREGS0 + MEMORY_SIZE_RAMREGS0
-      off_ = a - MEMORY_START_RAMREGS0
-      @ramRegs0Uint8Array[off_] = val >> 24
-      @ramRegs0Uint8Array[off_ + 1] = val >> 16
-      @ramRegs0Uint8Array[off_ + 2] = val >> 8
-      @ramRegs0Uint8Array[off_ + 3] = val
-      return
-    else if a >= MEMORY_START_SPREG_1 and a < MEMORY_START_SPREG_1 + MEMORY_SIZE_SPREG_1
-      off_ = a - MEMORY_START_SPREG_1
-      core.interrupts.writeSPReg1 off_, val, pc, isDelaySlot
-      return
-    else if a >= MEMORY_START_PI and a < MEMORY_START_PI + MEMORY_SIZE_PI
-      off_ = a - MEMORY_START_PI
-      core.interrupts.writePI off_, val, pc, isDelaySlot
-      return
-    else if a >= MEMORY_START_SI and a < MEMORY_START_SI + MEMORY_SIZE_SI
-      off_ = a - MEMORY_START_SI
-      core.interrupts.writeSI off_, val, pc, isDelaySlot
-      return
-    else if a >= MEMORY_START_AI and a < MEMORY_START_AI + MEMORY_SIZE_AI
-      off_ = a - MEMORY_START_AI
-      core.interrupts.writeAI off_, val, pc, isDelaySlot
-      return
-    else if a >= MEMORY_START_VI and a < MEMORY_START_VI + MEMORY_SIZE_VI
-      off_ = a - MEMORY_START_VI
-      core.interrupts.writeVI off_, val, pc, isDelaySlot
-      return
-    else if a >= MEMORY_START_SPREG_2 and a < MEMORY_START_SPREG_2 + MEMORY_SIZE_SPREG_2
-      off_ = a - MEMORY_START_SPREG_2
-      core.interrupts.writeSPReg2 off_, val, pc, isDelaySlot
-      return
-    else if a >= MEMORY_START_DPC and a < MEMORY_START_DPC + MEMORY_SIZE_DPC
-      off_ = a - MEMORY_START_DPC
-      core.interrupts.writeDPC off_, val, pc, isDelaySlot
-      return
-    else if a >= MEMORY_START_DPS and a < MEMORY_START_DPS + MEMORY_SIZE_DPS
-      off_ = a - MEMORY_START_DPS
-      @dpsUint8Array[off_] = val >> 24
-      @dpsUint8Array[off_ + 1] = val >> 16
-      @dpsUint8Array[off_ + 2] = val >> 8
-      @dpsUint8Array[off_ + 3] = val
-      return
-    else if a >= MEMORY_START_C2A1 and a < MEMORY_START_C2A1 + MEMORY_SIZE_C2A1
-      off_ = a - MEMORY_START_C2A1
-      @c2a1Uint8Array[off_] = val >> 24
-      @c2a1Uint8Array[off_ + 1] = val >> 16
-      @c2a1Uint8Array[off_ + 2] = val >> 8
-      @c2a1Uint8Array[off_ + 3] = val
-      return
-    else if a >= MEMORY_START_C1A1 and a < MEMORY_START_C1A1 + MEMORY_SIZE_C1A1
-      off_ = a - MEMORY_START_C1A1
-      @c1a1Uint8Array[off_] = val >> 24
-      @c1a1Uint8Array[off_ + 1] = val >> 16
-      @c1a1Uint8Array[off_ + 2] = val >> 8
-      @c1a1Uint8Array[off_ + 3] = val
-      return
-    else if a >= MEMORY_START_C2A2 and a < MEMORY_START_C2A2 + MEMORY_SIZE_C2A2
-      off_ = a - MEMORY_START_C2A2
-      @c2a2Uint8Array[off_] = val >> 24
-      @c2a2Uint8Array[off_ + 1] = val >> 16
-      @c2a2Uint8Array[off_ + 2] = val >> 8
-      @c2a2Uint8Array[off_ + 3] = val
-      return
-    else if a >= MEMORY_START_ROM_IMAGE and a < MEMORY_START_ROM_IMAGE + romLength
-      alert "attempt to overwrite rom!"
-      off_ = a - MEMORY_START_ROM_IMAGE
-      @romUint8Array[off_] = val >> 24
-      @romUint8Array[off_ + 1] = val >> 16
-      @romUint8Array[off_ + 2] = val >> 8
-      @romUint8Array[off_ + 3] = val
-      return
-    else if a >= MEMORY_START_C1A3 and a < MEMORY_START_C1A3 + MEMORY_SIZE_C1A3
-      off_ = a - MEMORY_START_C1A3
-      @c1a3Uint8Array[off_] = val >> 24
-      @c1a3Uint8Array[off_ + 1] = val >> 16
-      @c1a3Uint8Array[off_ + 2] = val >> 8
-      @c1a3Uint8Array[off_ + 3] = val
-      return
-    else if a >= MEMORY_START_PIF and a < MEMORY_START_PIF + MEMORY_SIZE_PIF
-      off_ = a - MEMORY_START_PIF
-      @pifUint8Array[off_] = val >> 24
-      @pifUint8Array[off_ + 1] = val >> 16
-      @pifUint8Array[off_ + 2] = val >> 8
-      @pifUint8Array[off_ + 3] = val
-      return
-    else if a >= MEMORY_START_GIO and a < MEMORY_START_GIO + MEMORY_SIZE_GIO_REG
-      off_ = a - MEMORY_START_GIO
-      @gioUint8Array[off_] = val >> 24
-      @gioUint8Array[off_ + 1] = val >> 16
-      @gioUint8Array[off_ + 2] = val >> 8
-      @gioUint8Array[off_ + 3] = val
-      return
-    else
-      log "writing to invalid memory at " + dec2hex(addr)
-      #stopEmulator();
-      off_ = a & 0x0000fffc
-      @rdramUint8Array[off_] = val >> 24
-      @rdramUint8Array[off_ + 1] = val >> 16
-      @rdramUint8Array[off_ + 2] = val >> 8
-      @rdramUint8Array[off_ + 3] = val
-      return
+    @writeRegion[a>>14](this, @setInt32, val, a, pc, isDelaySlot)
+    return
 
   #Same routine as storeWord, but store a byte
   @storeByte = (val, addr, pc, isDelaySlot) ->
     a = addr & 0x1FFFFFFF
-    if a >= MEMORY_START_RDRAM and a < MEMORY_START_RDRAM + MEMORY_SIZE_RDRAM
-      off_ = a - MEMORY_START_RDRAM
-      @rdramUint8Array[off_] = val
-      return
-    else if a >= MEMORY_START_SPMEM and a < MEMORY_START_SPMEM + MEMORY_SIZE_SPMEM
-      off_ = a - MEMORY_START_SPMEM
-      @spMemUint8Array[off_] = val
-      return
-    else if a >= MEMORY_START_RI and a < MEMORY_START_RI + MEMORY_SIZE_RI
-      off_ = a - MEMORY_START_RI
-      @riUint8Array[off_] = val
-      return
-    else if a >= MEMORY_START_MI and a < MEMORY_START_MI + MEMORY_SIZE_MI
-      off_ = a - MEMORY_START_MI
-      core.interrupts.writeMI off_, val, pc, isDelaySlot
-      return
-    else if a >= MEMORY_START_RAMREGS8 and a < MEMORY_START_RAMREGS8 + MEMORY_SIZE_RAMREGS8
-      off_ = a - MEMORY_START_RAMREGS8
-      @ramRegs8Uint8Array[off_] = val
-      return
-    else if a >= MEMORY_START_RAMREGS4 and a < MEMORY_START_RAMREGS4 + MEMORY_SIZE_RAMREGS4
-      off_ = a - MEMORY_START_RAMREGS4
-      @ramRegs4Uint8Array[off_] = val
-      return
-    else if a >= MEMORY_START_RAMREGS0 and a < MEMORY_START_RAMREGS0 + MEMORY_SIZE_RAMREGS0
-      off_ = a - MEMORY_START_RAMREGS0
-      @ramRegs0Uint8Array[off_] = val
-      return
-    else if a >= MEMORY_START_SPREG_1 and a < MEMORY_START_SPREG_1 + MEMORY_SIZE_SPREG_1
-      off_ = a - MEMORY_START_SPREG_1
-      core.interrupts.writeSPReg1 off_, val, pc, isDelaySlot
-      return
-    else if a >= MEMORY_START_PI and a < MEMORY_START_PI + MEMORY_SIZE_PI
-      off_ = a - MEMORY_START_PI
-      core.interrupts.writePI off_, val, pc, isDelaySlot
-      return
-    else if a >= MEMORY_START_SI and a < MEMORY_START_SI + MEMORY_SIZE_SI
-      off_ = a - MEMORY_START_SI
-      core.interrupts.writeSI off_, val, pc, isDelaySlot
-      return
-    else if a >= MEMORY_START_AI and a < MEMORY_START_AI + MEMORY_SIZE_AI
-      off_ = a - MEMORY_START_AI
-      core.interrupts.writeAI off_, val, pc, isDelaySlot
-      return
-    else if a >= MEMORY_START_VI and a < MEMORY_START_VI + MEMORY_SIZE_VI
-      off_ = a - MEMORY_START_VI
-      core.interrupts.writeVI off_, val, pc, isDelaySlot
-      return
-    else if a >= MEMORY_START_SPREG_2 and a < MEMORY_START_SPREG_2 + MEMORY_SIZE_SPREG_2
-      off_ = a - MEMORY_START_SPREG_2
-      core.interrupts.writeSPReg2 off_, val, pc, isDelaySlot
-      return
-    else if a >= MEMORY_START_DPC and a < MEMORY_START_DPC + MEMORY_SIZE_DPC
-      off_ = a - MEMORY_START_DPC
-      core.interrupts.writeDPC off_, val, pc, isDelaySlot
-      return
-    else if a >= MEMORY_START_DPS and a < MEMORY_START_DPS + MEMORY_SIZE_DPS
-      off_ = a - MEMORY_START_DPS
-      @dpsUint8Array[off_] = val
-      return
-    else if a >= MEMORY_START_C2A1 and a < MEMORY_START_C2A1 + MEMORY_SIZE_C2A1
-      off_ = a - MEMORY_START_C2A1
-      @c2a1Uint8Array[off_] = val
-      return
-    else if a >= MEMORY_START_C1A1 and a < MEMORY_START_C1A1 + MEMORY_SIZE_C1A1
-      off_ = a - MEMORY_START_C1A1
-      @c1a1Uint8Array[off_] = val
-      return
-    else if a >= MEMORY_START_C2A2 and a < MEMORY_START_C2A2 + MEMORY_SIZE_C2A2
-      off_ = a - MEMORY_START_C2A2
-      @c2a2Uint8Array[off_] = val
-      return
-    else if a >= MEMORY_START_ROM_IMAGE and a < MEMORY_START_ROM_IMAGE + romLength
-      alert "attempt to overwrite rom!"
-      off_ = a - MEMORY_START_ROM_IMAGE
-      @romUint8Array[off_] = val
-      return
-    else if a >= MEMORY_START_C1A3 and a < MEMORY_START_C1A3 + MEMORY_SIZE_C1A3
-      off_ = a - MEMORY_START_C1A3
-      @c1a3Uint8Array[off_] = val
-      return
-    else if a >= MEMORY_START_PIF and a < MEMORY_START_PIF + MEMORY_SIZE_PIF
-      off_ = a - MEMORY_START_PIF
-      @pifUint8Array[off_] = val
-      return
-    else if a >= MEMORY_START_GIO and a < MEMORY_START_GIO + MEMORY_SIZE_GIO_REG
-      off_ = a - MEMORY_START_GIO
-      @gioUint8Array[off_] = val
-      return
-    else
-      log "writing to invalid memory at " + dec2hex(addr)
-      #stopEmulator();
-      off_ = a & 0x0000fffc
-      @rdramUint8Array[off_] = val
-      return
+    @writeRegion[a>>14](this, @setInt8, val, a, pc, isDelaySlot)
+    return
 
   @storeHalf = (val, addr, pc, isDelaySlot) ->
     a = addr & 0x1FFFFFFF
-    if a >= MEMORY_START_RDRAM and a < MEMORY_START_RDRAM + MEMORY_SIZE_RDRAM
-      off_ = a - MEMORY_START_RDRAM
-      @rdramUint8Array[off_] = val >> 8
-      @rdramUint8Array[off_ + 1] = val
-      return
-    else if a >= MEMORY_START_SPMEM and a < MEMORY_START_SPMEM + MEMORY_SIZE_SPMEM
-      off_ = a - MEMORY_START_SPMEM
-      @spMemUint8Array[off_] = val >> 8
-      @spMemUint8Array[off_ + 1] = val
-      return
-    else if a >= MEMORY_START_RI and a < MEMORY_START_RI + MEMORY_SIZE_RI
-      off_ = a - MEMORY_START_RI
-      @riUint8Array[off_] = val >> 8
-      @riUint8Array[off_ + 1] = val
-      return
-    else if a >= MEMORY_START_MI and a < MEMORY_START_MI + MEMORY_SIZE_MI
-      off_ = a - MEMORY_START_MI
-      core.interrupts.writeMI off_, val, pc, isDelaySlot
-      return
-    else if a >= MEMORY_START_RAMREGS8 and a < MEMORY_START_RAMREGS8 + MEMORY_SIZE_RAMREGS8
-      off_ = a - MEMORY_START_RAMREGS8
-      @ramRegs8Uint8Array[off_] = val >> 8
-      @ramRegs8Uint8Array[off_ + 1] = val
-      return
-    else if a >= MEMORY_START_RAMREGS4 and a < MEMORY_START_RAMREGS4 + MEMORY_SIZE_RAMREGS4
-      off_ = a - MEMORY_START_RAMREGS4
-      @ramRegs4Uint8Array[off_] = val >> 8
-      @ramRegs4Uint8Array[off_ + 1] = val
-      return
-    else if a >= MEMORY_START_RAMREGS0 and a < MEMORY_START_RAMREGS0 + MEMORY_SIZE_RAMREGS0
-      off_ = a - MEMORY_START_RAMREGS0
-      @ramRegs0Uint8Array[off_] = val >> 8
-      @ramRegs0Uint8Array[off_ + 1] = val
-      return
-    else if a >= MEMORY_START_SPREG_1 and a < MEMORY_START_SPREG_1 + MEMORY_SIZE_SPREG_1
-      off_ = a - MEMORY_START_SPREG_1
-      core.interrupts.writeSPReg1 off_, val, pc, isDelaySlot
-      return
-    else if a >= MEMORY_START_PI and a < MEMORY_START_PI + MEMORY_SIZE_PI
-      off_ = a - MEMORY_START_PI
-      core.interrupts.writePI off_, val, pc, isDelaySlot
-      return
-    else if a >= MEMORY_START_SI and a < MEMORY_START_SI + MEMORY_SIZE_SI
-      off_ = a - MEMORY_START_SI
-      core.interrupts.writeSI off_, val, pc, isDelaySlot
-      return
-    else if a >= MEMORY_START_AI and a < MEMORY_START_AI + MEMORY_SIZE_AI
-      off_ = a - MEMORY_START_AI
-      core.interrupts.writeAI off_, val, pc, isDelaySlot
-      return
-    else if a >= MEMORY_START_VI and a < MEMORY_START_VI + MEMORY_SIZE_VI
-      off_ = a - MEMORY_START_VI
-      core.interrupts.writeVI off_, val, pc, isDelaySlot
-      return
-    else if a >= MEMORY_START_SPREG_2 and a < MEMORY_START_SPREG_2 + MEMORY_SIZE_SPREG_2
-      off_ = a - MEMORY_START_SPREG_2
-      core.interrupts.writeSPReg2 off_, val, pc, isDelaySlot
-      return
-    else if a >= MEMORY_START_DPC and a < MEMORY_START_DPC + MEMORY_SIZE_DPC
-      off_ = a - MEMORY_START_DPC
-      core.interrupts.writeDPC off_, val, pc, isDelaySlot
-      return
-    else if a >= MEMORY_START_DPS and a < MEMORY_START_DPS + MEMORY_SIZE_DPS
-      off_ = a - MEMORY_START_DPS
-      @dpsUint8Array[off_] = val >> 8
-      @dpsUint8Array[off_ + 1] = val
-      return
-    else if a >= MEMORY_START_C2A1 and a < MEMORY_START_C2A1 + MEMORY_SIZE_C2A1
-      off_ = a - MEMORY_START_C2A1
-      @c2a1Uint8Array[off_] = val >> 8
-      @c2a1Uint8Array[off_ + 1] = val
-      return
-    else if a >= MEMORY_START_C1A1 and a < MEMORY_START_C1A1 + MEMORY_SIZE_C1A1
-      off_ = a - MEMORY_START_C1A1
-      @c1a1Uint8Array[off_] = val >> 8
-      @c1a1Uint8Array[off_ + 1] = val
-      return
-    else if a >= MEMORY_START_C2A2 and a < MEMORY_START_C2A2 + MEMORY_SIZE_C2A2
-      off_ = a - MEMORY_START_C2A2
-      @c2a2Uint8Array[off_] = val >> 8
-      @c2a2Uint8Array[off_ + 1] = val
-      return
-    else if a >= MEMORY_START_ROM_IMAGE and a < MEMORY_START_ROM_IMAGE + romLength
-      alert "attempt to overwrite rom!"
-      off_ = a - MEMORY_START_ROM_IMAGE
-      @romUint8Array[off_] = val >> 8
-      @romUint8Array[off_ + 1] = val
-      return
-    else if a >= MEMORY_START_C1A3 and a < MEMORY_START_C1A3 + MEMORY_SIZE_C1A3
-      off_ = a - MEMORY_START_C1A3
-      @c1a3Uint8Array[off_] = val >> 8
-      @c1a3Uint8Array[off_ + 1] = val
-      return
-    else if a >= MEMORY_START_PIF and a < MEMORY_START_PIF + MEMORY_SIZE_PIF
-      off_ = a - MEMORY_START_PIF
-      @pifUint8Array[off_] = val >> 8
-      @pifUint8Array[off_ + 1] = val
-      return
-    else if a >= MEMORY_START_GIO and a < MEMORY_START_GIO + MEMORY_SIZE_GIO_REG
-      off_ = a - MEMORY_START_GIO
-      @gioUint8Array[off_] = val >> 8
-      @gioUint8Array[off_ + 1] = val
-      return
-    else
-      log "writing to invalid memory at " + dec2hex(addr)
-      #stopEmulator();
-      off_ = a & 0x0000fffc
-      @rdramUint8Array[off_] = val >> 8
-      @rdramUint8Array[off_ + 1] = val
-      return
+    @writeRegion[a>>14](this, @setInt16, val, a, pc, isDelaySlot)
+    return
+
   return this
 #hack global space until we export classes properly
 #node.js uses exports; browser uses this (window)
