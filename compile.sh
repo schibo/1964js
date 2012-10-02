@@ -1,6 +1,6 @@
 #!/bin/sh
 
-minified="1964js-0.0.13.min.js"
+minified="1964js-0.0.14.min.js"
 
 haml index.haml index.html $@
 
