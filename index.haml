@@ -2,13 +2,31 @@
   %head
     %title 1964 and 1964js Home page
     %link{:href => "css/style.css", :rel => "stylesheet", :type => "text/css"}
-      %script{:src => "googleAnalytics.js"}
-      %meta{:content => "1964js - N64 emulator in JavaScript", :property => "og:title"}/
-      %meta{:content => "game", :property => "og:type"}/
-      %meta{:content => "http://www.1964js.com", :property => "og:url"}/
-      %meta{:content => "https://fbcdn-profile-a.akamaihd.net/hprofile-ak-snc4/373029_274941852620356_1206208449_n.jpg", :property => "og:image"}/
-      %meta{:content => "1964js", :property => "og:site_name"}/
-      %meta{:content => "1397141558", :property => "fb:admins"}/
+    :ruby
+      outputMode = "release"
+      ARGV.each do|a|
+        if a == "develop"
+          outputMode = "develop"
+        end
+      end
+      if outputMode != "develop"
+        puts "    <script type='text/javascript'>"
+        puts "    var _gaq = _gaq || [];"
+        puts "    _gaq.push(['_setAccount', 'UA-31090418-4']);"
+        puts "    _gaq.push(['_trackPageview']);"
+        puts "    (function() {"
+        puts "      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;"
+        puts "      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';"
+        puts "      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);"
+        puts "    })();"
+        puts "    </script>"
+      end
+    %meta{:content => "1964js - N64 emulator in JavaScript", :property => "og:title"}/
+    %meta{:content => "game", :property => "og:type"}/
+    %meta{:content => "http://www.1964js.com", :property => "og:url"}/
+    %meta{:content => "https://fbcdn-profile-a.akamaihd.net/hprofile-ak-snc4/373029_274941852620356_1206208449_n.jpg", :property => "og:image"}/
+    %meta{:content => "1964js", :property => "og:site_name"}/
+    %meta{:content => "1397141558", :property => "fb:admins"}/
   %body{:alink => "#ff0000", :bgcolor => "#000000", :link => "#ffa953", :onload => "start1964({wireframe:false})", :text => "#ffffff", :vlink => "#ffa953"}
     #fb-root
     :javascript
