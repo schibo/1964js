@@ -17,53 +17,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 #jslint devel: true
 #globals consts, C1964jsEmulator
 #console.log(message);
-C1964jsEmulator::flushDynaCache = ->
-  "use strict"
-  pc = undefined
-  if @writeToDom is false
-    for pc of @code
-      delete @code[pc]
-      #eval('code.'+ pc + '= function (r){alert("yo")}; delete code.' + pc + ';');
-      alert "crap"  if @code[pc]
-    delete @code
 
-    @code = {}
-  else
-    while @kk
-      @kk -= 1
-      @deleteFunction @kk
-  return
+"use strict"
+class C1964jsDMA
+  constructor: (memory, interrupts, pif) ->
+    @startTime = 0
+    @memory = memory
+    @interrupts = interrupts
+    @pif = pif
 
-C1964jsEmulator::deleteFunction = (k) ->
-
-  #log('cleanup');
-  fnName = undefined
-  splitResult = undefined
-  s = document.getElementsByTagName("script")[k]
-  splitResult = s.text.split("_")
-  splitResult = splitResult[1].split("(")
-  fnName = "_" + splitResult[0]
-  s.parentNode.removeChild s
-
-  #allow deletion of this function
-  eval fnName + "= function (r, s, t, v){}; delete " + fnName + ";"
-  window[fnName] = null
-  alert "blah"  if window[fnName]
-  return
-
-C1964jsDMA = (memory, interrupts, pif) ->
-  "use strict"
-  @startTime = 0
-  @memory = memory
-  @interrupts = interrupts
-  @pif = pif
-  return this
-
-(->
-  "use strict"
   audioContext = undefined
   audioBuffer = undefined
-  C1964jsDMA::copyCartToDram = (pc, isDelaySlot) ->
+
+  copyCartToDram: (pc, isDelaySlot) ->
     end = @memory.getInt32(@memory.piUint8Array, @memory.piUint8Array, consts.PI_WR_LEN_REG)
     to = @memory.getInt32(@memory.piUint8Array, @memory.piUint8Array, consts.PI_DRAM_ADDR_REG)
     from = @memory.getInt32(@memory.piUint8Array, @memory.piUint8Array, consts.PI_CART_ADDR_REG)
@@ -102,7 +68,7 @@ C1964jsDMA = (memory, interrupts, pif) ->
     @interrupts.triggerPIInterrupt pc, isDelaySlot
     return
 
-  C1964jsDMA::copySiToDram = (pc, isDelaySlot) ->
+  copySiToDram: (pc, isDelaySlot) ->
     end = 63 #read 64 bytes. Is there an si_wr_len_reg?
     to = @memory.getInt32(@memory.siUint8Array, @memory.siUint8Array, consts.SI_DRAM_ADDR_REG)
     from = @memory.getInt32(@memory.siUint8Array, @memory.siUint8Array, consts.SI_PIF_ADDR_RD64B_REG)
@@ -121,7 +87,7 @@ C1964jsDMA = (memory, interrupts, pif) ->
     @interrupts.triggerSIInterrupt pc, isDelaySlot
     return
 
-  C1964jsDMA::copyDramToAi = (pc, isDelaySlot) ->
+  copyDramToAi: (pc, isDelaySlot) ->
     length = @memory.getInt32(@memory.aiUint8Array, @memory.aiUint8Array, consts.AI_LEN_REG)
     from = @memory.getInt32(@memory.aiUint8Array, @memory.aiUint8Array, consts.AI_DRAM_ADDR_REG)
     
@@ -133,7 +99,7 @@ C1964jsDMA = (memory, interrupts, pif) ->
     return
   
   #this function doesn't belong in dma
-  C1964jsDMA::processAudio = (from, length) ->
+  processAudio: (from, length) ->
     try
       return  if audioContext is "unsupported"
       audioContext = new webkitAudioContext()  if audioContext is `undefined`
@@ -165,7 +131,7 @@ C1964jsDMA = (memory, interrupts, pif) ->
     source.noteOn @startTime
     return
 
-  C1964jsDMA::copyDramToSi = (pc, isDelaySlot) ->
+  copyDramToSi: (pc, isDelaySlot) ->
     end = 63 #read 64 bytes. Is there an si_rd_len_reg?
     to = @memory.getInt32(@memory.siUint8Array, @memory.siUint8Array, consts.SI_PIF_ADDR_WR64B_REG)
     from = @memory.getInt32(@memory.siUint8Array, @memory.siUint8Array, consts.SI_DRAM_ADDR_REG)
@@ -184,11 +150,11 @@ C1964jsDMA = (memory, interrupts, pif) ->
     @interrupts.triggerSIInterrupt pc, isDelaySlot
     return
 
-  C1964jsDMA::copySpToDram = (pc, isDelaySlot) ->
+  copySpToDram: (pc, isDelaySlot) ->
     alert "todo: copySpToDram"
     return
 
-  C1964jsDMA::copyDramToSp = (pc, isDelaySlot) ->
+  copyDramToSp: (pc, isDelaySlot) ->
     end = @memory.getInt32(@memory.spReg1Uint8Array, @memory.spReg1Uint8Array, consts.SP_RD_LEN_REG)
     to = @memory.getInt32(@memory.spReg1Uint8Array, @memory.spReg1Uint8Array, consts.SP_MEM_ADDR_REG)
     from = @memory.getInt32(@memory.spReg1Uint8Array, @memory.spReg1Uint8Array, consts.SP_DRAM_ADDR_REG)
@@ -209,7 +175,6 @@ C1964jsDMA = (memory, interrupts, pif) ->
 
 #hack for now
 #triggerDPInterrupt(0, false);
-)()
 
 #hack global space until we export classes properly
 #node.js uses exports; browser uses this (window)
