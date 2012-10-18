@@ -575,6 +575,11 @@ C1964jsHelpers = (isLittleEndian) ->
     cp1Con[31] &= ~consts.COP1_CONDITION_BIT
     cp1Con[31] |= consts.COP1_CONDITION_BIT  if cond
     return
+
+  @inter_tlbwi = (index) ->
+    console.log('tlbwi: index = ' + index)
+    return
+
   this
 
 #hack global space until we export classes properly

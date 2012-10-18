@@ -75,19 +75,14 @@ class C1964jsEmulator
       @code = window
     else
       @code = {}
-    @vAddr = new Int32Array(4)
-    @cp0 = new Int32Array(32 * 4)
-    @cp1Buffer = new ArrayBuffer(32 * 4)
+    @vAddr = new Int32Array(1)
+    @cp0 = new Int32Array(32)
+    @cp1Buffer = new ArrayBuffer(32 * 4) # *4 because ArrayBuffers are in bytes
     @cp1_i = new Int32Array(@cp1Buffer)
     @cp1_f = new Float32Array(@cp1Buffer)
     @cp1_f64 = new Float64Array(@cp1Buffer)
-    @cp1Con = new Int32Array(32 * 4)
+    @cp1Con = new Int32Array(32)
     @LLbit = 0
-    @tlb = new Array(32)
-    i = 0
-    while i < 32
-      @tlb[i] = {}
-      i += 1
   
     #var docElement, errorElement, g, s, interval, keepRunning, stopCompiling, offset, programCounter, romLength, redrawDebug=0;
     @terminate = false
@@ -125,7 +120,8 @@ class C1964jsEmulator
     i = undefined
     y = undefined
     r = new Int32Array([0, 0, 0xd1731be9, 0xd1731be9, 0x001be9, 0xf45231e5, 0xa4001f0c, 0xa4001f08, 0x070, 0, 0x040, 0xA4000040, 0xd1330bc3, 0xd1330bc3, 0x025613a26, 0x02ea04317, 0, 0, 0, 0, 0, 0, 0, 0x06, 0, 0xd73f2993, 0, 0, 0, 0xa4001ff0, 0, 0xa4001554, 0, 0, 0])
-    h = new Int32Array(35 * 4)
+    h = new Int32Array(35)
+    @initTLB()
 
     #todo: verity that r[8] is 0x070
     cancelAnimFrame @request
@@ -264,6 +260,32 @@ class C1964jsEmulator
       i += 8
       y += 2
     ctx.putImageData ImDat, 0, 0
+    return
+
+  initTLB: ->
+    @tlb = new Array(32)
+    i = 0
+    while i < 32
+      @tlb[i] = {
+        valid : false,
+        entryHi : new Int32Array(1),
+        entryLo1 : new Int32Array(1),
+        entryLo0 : new Int32Array(1),
+        pageMask : new Int32Array(1),
+        loCompare : new Int32Array(1),
+        myHiMask : new Int32Array(1)
+      }
+      i += 1
+
+    iTLBIndex = [0, 0]
+    dTLBIndex = [0, 0, 0]
+    lastITLBIndex = 0
+    lastDTLBIndex = 0
+
+    #Initialize the TLB Lookup Table
+    @directTLBLookupTable = new Int32Array(0x100000)
+    #for (i = 0; i < 0x100000; i++)
+      #TLB_sDWORD_R[i] = sDWord[i >> 4] + 0x1000 * (i & 0xf);
     return
 
   runLoop: (r, h) ->
@@ -728,9 +750,7 @@ class C1964jsEmulator
     ""
 
   r4300i_COP0_tlbwi: (i) ->
-    #var index = t.cp0[INDEX] & NTLBENTRIES;
-    @log "todo: tlbwi"
-    ""
+    "t.helpers.inter_tlbwi(t.cp0[" + consts.INDEX + "]&31);"
 
   r4300i_div: (i) ->
     "t.helpers.inter_div(r,h," + i + ");"
