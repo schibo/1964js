@@ -19,26 +19,26 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 "use strict"
 
 #reordered
-R_PAD = 0x00010000
-L_PAD = 0x00020000
-D_PAD = 0x00040000
-U_PAD = 0x00080000
-START_BUTTON = 0x10000000
-Z_TRIG = 0x00200000
-B_BUTTON = 0x00400000
-A_BUTTON = 0x00800000
-R_CBUTTON = 0x01000000
-L_CBUTTON = 0x02000000
-D_CBUTTON = 0x04000000
-U_CBUTTON = 0x08000000
-R_TRIG = 0x80000000 | 0
-L_TRIG = 0x20000000
-Y_AXIS = 0x000000FF
-X_AXIS = 0x0000FF00
-LEFT_MAX = 0x000008000
-RIGHT_MAX = 0x00007F00
-UP_MAX = 0x00000007F
-DOWN_MAX = 0x00000080
+`/** @const */ var R_PAD = 0x00010000`
+`/** @const */ var L_PAD = 0x00020000`
+`/** @const */ var D_PAD = 0x00040000`
+`/** @const */ var U_PAD = 0x00080000`
+`/** @const */ var START_BUTTON = 0x10000000`
+`/** @const */ var Z_TRIG = 0x00200000`
+`/** @const */ var B_BUTTON = 0x00400000`
+`/** @const */ var A_BUTTON = 0x00800000`
+`/** @const */ var R_CBUTTON = 0x01000000`
+`/** @const */ var L_CBUTTON = 0x02000000`
+`/** @const */ var D_CBUTTON = 0x04000000`
+`/** @const */ var U_CBUTTON = 0x08000000`
+`/** @const */ var R_TRIG = 0x80000000 | 0`
+`/** @const */ var L_TRIG = 0x20000000`
+`/** @const */ var Y_AXIS = 0x000000FF`
+`/** @const */ var X_AXIS = 0x0000FF00`
+`/** @const */ var LEFT_MAX = 0x000008000`
+`/** @const */ var RIGHT_MAX = 0x00007F00`
+`/** @const */ var UP_MAX = 0x00000007F`
+`/** @const */ var DOWN_MAX = 0x00000080`
 
 C1964jsPif::onKeyDown = (e) ->
   if e
