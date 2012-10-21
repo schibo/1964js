@@ -46,7 +46,7 @@ C1964jsInterrupts = (core, cp0) ->
     #throw 'interrupt';
     core.flushDynaCache()  if core.doOnce is 0
     core.doOnce = 1
-    core.programCounter = 0x80000180
+    core.p = 0x80000180
     true
 
   @triggerCompareInterrupt = (pc, isFromDelaySlot) ->
@@ -488,7 +488,7 @@ C1964jsInterrupts = (core, cp0) ->
 
     #if ((core.memory.getUint32(miUint8Array, consts.MI_INTR_REG) & consts.MI_INTR_VI) !== 0)
     #    this.triggerVIInterrupt(0, false);
-    @setException consts.EXC_INT, 0, core.programCounter, false  if (cp0[consts.CAUSE] & cp0[consts.STATUS] & 0x0000FF00) isnt 0
+    @setException consts.EXC_INT, 0, core.p, false  if (cp0[consts.CAUSE] & cp0[consts.STATUS] & 0x0000FF00) isnt 0
 
 #do not process interrupts here as we don't have support for
 #interrupts in delay slots. processs them in the main runLoop.
