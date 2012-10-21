@@ -576,10 +576,44 @@ C1964jsHelpers = (isLittleEndian) ->
     cp1Con[31] |= consts.COP1_CONDITION_BIT  if cond
     return
 
-  @inter_tlbwi = (index) ->
-    console.log('tlbwi: index = ' + index)
+  @writeTLBEntry = (tlb, cp0) ->
+    g = cp0[consts.ENTRYLO0] & cp0[consts.ENTRYLO1] & consts.TLBLO_G
+    tlb.valid = 0
+    tlb.valid = 1 if cp0[consts.ENTRYLO1] & consts.TLBLO_V or cp0[consts.ENTRYLO0] & consts.TLBLO_V
+
+    tlb.pageMask = cp0[consts.PAGEMASK]
+    tlb.entryLo1 = cp0[consts.ENTRYLO1] | g
+    tlb.entryLo0 = cp0[consts.ENTRYLO0] | g
+    tlb.myHiMask = ~tlb.pageMask & consts.TLBHI_VPN2MASK
+    tlb.entryHi = cp0[consts.ENTRYHI] & ~cp0[consts.PAGEMASK]
+
+    switch tlb.pageMask
+      when 0x00000000 then tlb.LoCompare = 0x00001000 #4k
+      when 0x00006000 then tlb.LoCompare = 0x00004000 #16k
+      when 0x0001E000 then tlb.LoCompare = 0x00010000 #64k
+      when 0x0007E000 then tlb.LoCompare = 0x00040000 #256k
+      when 0x001FE000 then tlb.LoCompare = 0x00100000 #1M
+      when 0x007FE000 then tlb.LoCompare = 0x00400000 #4M
+      when 0x01FFE000 then tlb.LoCompare = 0x01000000 #16M
+      else console.log "ERROR: tlbwi - invalid page size" + tlb.pageMask
+
+    @newtlb = true
     return
 
+  @refreshTLB = (tlb, cp0) ->
+    #todo: still a lot to do here.
+    @writeTLBEntry tlb, cp0
+    return
+
+  @inter_tlbwi = (index, tlb, cp0) ->
+    if index is -1 #please write to dummy tlb
+      return
+
+    if index > 31
+      return
+
+    @refreshTLB tlb[index], cp0
+    return
   this
 
 #hack global space until we export classes properly

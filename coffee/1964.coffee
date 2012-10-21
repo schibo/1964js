@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 # Check_SW, setting DPC_END_REG equal to DPC_START_REG is risky initialization:
 # setInt32(spReg1Uint8Array, SP_STATUS_REG, SP_STATUS_HALT);
 # 1964cpp's init sets SP_STATUS_REG to SP_STATUS_HALT but then clears it in RCP_Reset() !
+# call to tlbwi masked index with &31 .. (seems wrong)
 #
 # Use a typed-array but access it a byte at a time for endian-safety.
 # Do not use the DataView .getInt16, getInt32, etc functions. These will ensure endian
@@ -753,7 +754,7 @@ class C1964jsEmulator
     ""
 
   r4300i_COP0_tlbwi: (i) ->
-    "t.helpers.inter_tlbwi(t.cp0[" + consts.INDEX + "]&31);"
+    "t.helpers.inter_tlbwi(t.cp0[" + consts.INDEX + "], t.tlb, t.cp0);"
 
   r4300i_div: (i) ->
     "t.helpers.inter_div(r,h," + i + ");"
