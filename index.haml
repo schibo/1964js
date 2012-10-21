@@ -27,7 +27,7 @@
     %meta{:content => "https://fbcdn-profile-a.akamaihd.net/hprofile-ak-snc4/373029_274941852620356_1206208449_n.jpg", :property => "og:image"}/
     %meta{:content => "1964js", :property => "og:site_name"}/
     %meta{:content => "1397141558", :property => "fb:admins"}/
-  %body{:alink => "#ff0000", :bgcolor => "#000000", :link => "#ffa953", :onload => "start1964({wireframe:false})", :text => "#ffffff", :vlink => "#ffa953"}
+  %body{:alink => "#ff0000", :bgcolor => "#000000", :link => "#ffa953", :onload => "start1964({wireframe:true})", :text => "#ffffff", :vlink => "#ffa953"}
     #fb-root
     :javascript
       window.fbAsyncInit = function() {
@@ -65,7 +65,6 @@
       vec4 color = vec4(0.0, 1.0, 1.0, 1.0);
       
       void main(void) {
-      //color += vec4(0.1, 0.1, 0.1, 1.0);
       gl_FragColor = vec4(color.xyz, color.a);
       }
     %script#triangle-fragment-shader{:type => "x-shader/x-fragment"}
@@ -125,7 +124,7 @@
         %a{:href => "http://hulkholden.github.com/n64js/"} [Try n64js too!]
         %h1
           1964js
-          %div{:style => "font-size: 10px;"} v0.0.14
+          %div{:style => "font-size: 10px;"} v0.0.15
           %select{:onchange => "if (this.value !== 'Demos') window.open(this.value, '_self');", :style => "vertical-align: middle;"}
             %option{:value => "Demos"} Demos
             %option{:value => "?rom=unofficial_roms/rotate.zip"} Rotate
@@ -136,6 +135,7 @@
             %option{:value => "?rom=unofficial_roms/hardcode.zip"} Hard Coded
             %option{:value => "?rom=unofficial_roms/sp_crap.zip"} Absolute Crap
             %option{:value => "?rom=unofficial_roms/DynamixReadme.zip"} Dynamix
+        %input#wireframe{:type => "checkbox", :checked => "true"} wireframe
       .dropShadow
         .story
           /
@@ -159,7 +159,7 @@
         end
       end
       if outputMode != "develop"
-        puts "    <script src = 'lib/1964js-0.0.14.min.js'></script>"
+        puts "    <script src = 'lib/1964js-0.0.15.min.js'></script>"
       else
         puts "<script src = 'obj/constants.js'></script>"
         puts "<script src = 'lib/bitjs/io.js'></script>"

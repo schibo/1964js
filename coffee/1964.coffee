@@ -106,7 +106,7 @@ class C1964jsEmulator
     @interrupts = new C1964jsInterrupts(this, @cp0)
     @pif = new C1964jsPif(@memory.pifUint8Array)
     @dma = new C1964jsDMA(@memory, @interrupts, @pif)
-    @webGL = new C1964jsWebGL()
+    @webGL = new C1964jsWebGL(userSettings.wireframe)
     @log = (message) ->
       console.log message
 

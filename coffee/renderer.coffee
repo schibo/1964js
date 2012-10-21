@@ -138,8 +138,9 @@ C1964jsRenderer = (settings, glx, webGL) ->
     w /= 4
     h = yh - yl
     h /= 4
-    blitTexture ram, texImg.addr, tileno, w, h  if texImg.changed is true
-    textureName = "pow2Texture" + tileno
+    if settings.wireframe is false
+      blitTexture ram, texImg.addr, tileno, w, h  if texImg.changed is true
+      textureName = "pow2Texture" + tileno
     xh -= 160 * 4
     xh /= (160 * 4)
     xl -= 160 * 4
@@ -148,8 +149,13 @@ C1964jsRenderer = (settings, glx, webGL) ->
     yl /= (-120 * 4)
     yh -= 120 * 4
     yh /= (-120 * 4)
-    textureWidth = document.getElementById(textureName).width
-    textureHeight = document.getElementById(textureName).height
+    
+    if settings.wireframe is false
+      textureWidth = document.getElementById(textureName).width
+      textureHeight = document.getElementById(textureName).height
+    else
+      textureWidth = w
+      textureHeight = h
     scalex = (xh - xl) * ((textureWidth / w) - 1)
     scaley = (yh - yl) * ((textureHeight / h) - 1)
     initQuad xl, yl, xh + scalex, yh + scaley
@@ -158,16 +164,20 @@ C1964jsRenderer = (settings, glx, webGL) ->
     return
 
   @texTri = (xl, yl, xh, yh, s, t, dsdx, dtdy, tileno, ram, texImg) ->
-    w = 256
-    h = 256
-    blitTexture ram, texImg.addr, tileno, w, h
-    textureName = "pow2Texture" + tileno
-    error = initTexture(tileno, true)
+    if settings.wireframe is false
+      w = 256
+      h = 256
+      blitTexture ram, texImg.addr, tileno, w, h
+      textureName = "pow2Texture" + tileno
+      error = initTexture(tileno, true)
     return
 
   @draw = (tileno, changed) ->
-    webGL.switchShader webGL.tileShaderProgram
-    error = initTexture(tileno, changed)
+    webGL.switchShader webGL.tileShaderProgram, settings.wireframe
+
+    if settings.wireframe is false
+      error = initTexture(tileno, changed) #this is where things get really slow and we need a texture cache
+
     gl.disable gl.DEPTH_TEST
     gl.enable gl.BLEND
     gl.blendFunc gl.SRC_ALPHA, gl.ONE
@@ -175,15 +185,16 @@ C1964jsRenderer = (settings, glx, webGL) ->
     gl.vertexAttribPointer webGL.tileShaderProgram.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0
     gl.bindBuffer gl.ARRAY_BUFFER, cubeVertexTextureCoordBuffer
     gl.vertexAttribPointer webGL.tileShaderProgram.textureCoordAttribute, cubeVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0
-    gl.activeTexture gl.TEXTURE0
-    gl.bindTexture gl.TEXTURE_2D, window["neheTexture" + tileno]
+    if settings.wireframe is false
+      gl.activeTexture gl.TEXTURE0
+      gl.bindTexture gl.TEXTURE_2D, window["neheTexture" + tileno]
     gl.uniform1i webGL.tileShaderProgram.samplerUniform, 0
     gl.bindBuffer gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer
     webGL.setMatrixUniforms webGL.tileShaderProgram
     if settings.wireframe is false
       gl.drawElements gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0
     else
-      gl.drawElements gl.LINE_STRIP, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0
+      gl.drawElements gl.LINE_LOOP, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0
     return
   return this
 #hack global space until we export classes properly

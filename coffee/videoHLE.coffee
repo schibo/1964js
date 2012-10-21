@@ -643,7 +643,8 @@ C1964jsVideoHLE = (core, glx) ->
     true
 
   C1964jsVideoHLE::drawScene = (useTexture, tileno) ->
-    @core.webGL.switchShader @core.webGL.triangleShaderProgram
+    @core.webGL.switchShader @core.webGL.triangleShaderProgram, @core.settings.wireframe
+
     @gl.disable @gl.DEPTH_TEST
     @gl.enable @gl.BLEND
     @gl.blendFunc @gl.SRC_ALPHA, @gl.ONE

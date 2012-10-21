@@ -18,12 +18,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 #jslint bitwise: true, todo: true
 #TODO: parameterize "Canvas3D" so this dom id can be arbitrary.
 
-C1964jsWebGL = ->
+C1964jsWebGL = (wireframe) ->
   "use strict"
   @gl = `undefined`
+  @wireframeTileShaderProgram = `undefined`
+  @wireframeTriangleShaderProgram = `undefined`
   @tileShaderProgram = `undefined`
   @triangleShaderProgram = `undefined`
-  @webGLStart()
+  @normalTileShaderProgram = `undefined`
+  @normalTriangleShaderProgram = `undefined`
+  @webGLStart(wireframe)
   return this
 
 (->
@@ -91,7 +95,16 @@ C1964jsWebGL = ->
     shaderProgram.samplerUniform = @gl.getUniformLocation(shaderProgram, "uSampler")
     shaderProgram
 
-  C1964jsWebGL::switchShader = (shaderProgram) ->
+  C1964jsWebGL::switchShader = (shaderProgram, wireframe) ->
+
+    if wireframe is true
+      @tileShaderProgram = @wireframeTileShaderProgram
+      @triangleShaderProgram = @wireframeTriangleShaderProgram
+    else
+      @tileShaderProgram = @normalTileShaderProgram
+      @triangleShaderProgram = @normalTriangleShaderProgram
+
+
     @gl.useProgram shaderProgram
     
     #if (shaderProgram.vertexPositionAttribute !== -1)
@@ -99,6 +112,7 @@ C1964jsWebGL = ->
     
     #if (shaderProgram.textureCoordAttribute !== -1)
     @gl.enableVertexAttribArray shaderProgram.textureCoordAttribute
+
     return
 
   C1964jsWebGL::beginDList = ->
@@ -131,12 +145,23 @@ C1964jsWebGL = ->
     mvMatrix = mvMatrixStack.pop()
     return
 
-  C1964jsWebGL::webGLStart = ->
+  C1964jsWebGL::webGLStart = (wireframe) ->
     canvas = document.getElementById("Canvas3D")
     @initGL canvas
+
+    @wireframeTileShaderProgram = @initShaders("color-framebuffer-fragment-shader", "tile-vertex-shader")
+    @wireframeTriangleShaderProgram = @initShaders("color-framebuffer-fragment-shader", "triangle-vertex-shader")
+    @normalTileShaderProgram = @initShaders("tile-fragment-shader", "tile-vertex-shader")
+    @normalTriangleShaderProgram = @initShaders("triangle-fragment-shader", "triangle-vertex-shader")
+
+    if wireframe is true
+      @tileShaderProgram = @wireframeTileShaderProgram
+      @triangleShaderProgram = @wireframeTriangleShaderProgram
+    else
+      @tileShaderProgram = @normalTileShaderProgram
+      @triangleShaderProgram = @normalTriangleShaderProgram
+
     if @gl
-      @tileShaderProgram = @initShaders("tile-fragment-shader", "tile-vertex-shader")
-      @triangleShaderProgram = @initShaders("triangle-fragment-shader", "triangle-vertex-shader")
       @gl.clearColor 0.0, 0.0, 0.0, 1.0
     canvas.style.visibility = "hidden"
     return
