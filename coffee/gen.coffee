@@ -21,8 +21,7 @@ C1964jsEmulator::flushDynaCache = ->
   if @writeToDom is false
     for pc of @code
       delete @code[pc]
-      #eval('code.'+ pc + '= function (r){alert("yo")}; delete code.' + pc + ';');
-      alert "crap"  if @code[pc]
+      alert "@code[pc] failed to delete."  if @code[pc]
     delete @code
 
     @code = {}
@@ -47,5 +46,5 @@ C1964jsEmulator::deleteFunction = (k) ->
   #allow deletion of this function
   eval fnName + "= function (r, s, t, v){}; delete " + fnName + ";"
   window[fnName] = null
-  alert "blah"  if window[fnName]
+  alert "window[fnName] should have been null."  if window[fnName]
   return

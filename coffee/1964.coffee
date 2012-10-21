@@ -365,8 +365,12 @@ class C1964jsEmulator
       s.parentNode.insertBefore g, s
       g.text = string
     else
-      eval string
+      wrapEval string
     @code[fnName]
+
+  #purely so v8 can optimize decompileBlock
+  wrapEval: (string) ->
+    eval string
 
   r4300i_add: (i) ->
     @helpers.sLogic i, "+"

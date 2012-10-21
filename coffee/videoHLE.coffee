@@ -22,7 +22,7 @@ C1964jsVideoHLE = (core, glx) ->
   i = undefined
   @core = core #only needed for gfxHelpers prototypes to access.
   @gl = glx
-  
+ 
   #todo: make gRSP a class object.
   @RICE_MATRIX_STACK = 60
   @MAX_TEXTURES = 8
@@ -39,7 +39,7 @@ C1964jsVideoHLE = (core, glx) ->
   @renderer = new C1964jsRenderer(@core.settings, @core.webGL.gl, @core.webGL)
   @texImg = {}
   @segments = []
-  
+
   #todo: different microcodes support
   @currentMicrocodeMap = @microcodeMap0
   i = 0

@@ -17,11 +17,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 #jslint todo: true, bitwise: true, devel: true, browser: true
 #globals consts, log
 "use strict"
+
 class C1964jsPif
   constructor: (pifUint8Array) ->
     @pifUint8Array = pifUint8Array
-    @EEProm_Status_Byte = 0
+    @eepromStatusByte = 0x80
     @controlsPresent = new Array(4)
+    @eeprom = new Uint8Array(0x1000) #16KB
     @controlsPresent[0] = true
     @controlsPresent[1] = false
     @controlsPresent[2] = false
@@ -67,16 +69,36 @@ class C1964jsPif
     switch @pifUint8Array[pifRamStart + count + 2]
       when 0xFF, 0x00
         @pifUint8Array[pifRamStart + count + 3] = 0x00
-        @pifUint8Array[pifRamStart + count + 4] = @EEProm_Status_Byte
+        @pifUint8Array[pifRamStart + count + 4] = @eepromStatusByte
         @pifUint8Array[pifRamStart + count + 5] = 0x00
       when 0x04 #Read from Eeprom
-        alert "read eeprom"
-      #this.readEEprom(&cmd[4], cmd[3] * 8);
+        @readEeprom(pifRamStart, count + 4, @pifUint8Array[pifRamStart + count + 3] * 8)
       when 0x05 #Write to Eeprom
-        alert "write eeprom"
-      #this.writeEEprom((char*)&cmd[4], cmd[3] * 8);
+        @writeEeprom(pifRamStart, count + 4, @pifUint8Array[pifRamStart + count + 3] * 8)
       else
     false
+
+  readEeprom: (pifRamStart, count, offset) ->
+    @pifUint8Array[pifRamStart + count] = @eeprom[offset]
+    @pifUint8Array[pifRamStart + count + 1] = @eeprom[offset + 1]
+    @pifUint8Array[pifRamStart + count + 2] = @eeprom[offset + 2]
+    @pifUint8Array[pifRamStart + count + 3] = @eeprom[offset + 3]
+    @pifUint8Array[pifRamStart + count + 4] = @eeprom[offset + 4]
+    @pifUint8Array[pifRamStart + count + 5] = @eeprom[offset + 5]
+    @pifUint8Array[pifRamStart + count + 6] = @eeprom[offset + 6]
+    @pifUint8Array[pifRamStart + count + 7] = @eeprom[offset + 7]
+    return
+
+  writeEeprom: (pifRamStart, count, offset) ->
+    @eeprom[offset] = @pifUint8Array[pifRamStart + count]
+    @eeprom[offset + 1] = @pifUint8Array[pifRamStart + count + 1]
+    @eeprom[offset + 2] = @pifUint8Array[pifRamStart + count + 2]
+    @eeprom[offset + 3] = @pifUint8Array[pifRamStart + count + 3]
+    @eeprom[offset + 4] = @pifUint8Array[pifRamStart + count + 4]
+    @eeprom[offset + 5] = @pifUint8Array[pifRamStart + count + 5]
+    @eeprom[offset + 6] = @pifUint8Array[pifRamStart + count + 6]
+    @eeprom[offset + 7] = @pifUint8Array[pifRamStart + count + 7]
+    return
 
   processController: (count, device, pifRamStart) ->
     if @controlsPresent[device] is false
