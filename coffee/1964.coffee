@@ -356,7 +356,7 @@ class C1964jsEmulator
     
     #close out the function
     string += "t.p=" + ((pc + offset) >> 0)
-    string += ";return t.code[\"" + @getFnName((pc + offset) >> 0) + "\"];}"
+    string += ";return t.code." + @getFnName((pc + offset) >> 0) + "}"
     if @writeToDom is true
       g = document.createElement("script")
       s = document.getElementsByTagName("script")[@kk]
@@ -386,14 +386,14 @@ class C1964jsEmulator
     @helpers.dLogic i, "^"
 
   r4300i_nor: (i) ->
-    "{" + @helpers.tRD(i) + "=~(" + @helpers.RS(i) + "|" + @helpers.RT(i) + ");" + @helpers.tRDH(i) + "=~(" + @helpers.RSH(i) + "|" + @helpers.RTH(i) + ");}"
+    "{" + @helpers.tRD(i) + "=~(" + @helpers.RS(i) + "|" + @helpers.RT(i) + ");" + @helpers.tRDH(i) + "=~(" + @helpers.RSH(i) + "|" + @helpers.RTH(i) + ")}"
 
   r4300i_and: (i) ->
     @helpers.dLogic i, "&"
 
   r4300i_lui: (i) ->
     temp = ((i & 0x0000ffff) << 16)
-    "{" + @helpers.tRT(i) + "=" + temp + ";" + @helpers.tRTH(i) + "=" + (temp >> 31) + ";}"
+    "{" + @helpers.tRT(i) + "=" + temp + ";" + @helpers.tRTH(i) + "=" + (temp >> 31) + "}"
 
   r4300i_lw: (i) ->
     "{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=m.loadWord(vAddr);" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31}"
@@ -422,11 +422,11 @@ class C1964jsEmulator
     pc = (@p + offset + 4 + (@helpers.soffset_imm(i) << 2)) | 0
     instruction = @memory.loadWord((@p + offset + 4) | 0)
     opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
-    string = opcode + "t.m+=1.0;t.p=" + pc + ";return t.code[\"" + @getFnName(pc) + "\"];}"
+    string = opcode + "t.m++;t.p=" + pc + ";return t.code." + @getFnName(pc) + "}"
 
     #if likely and if branch not taken, skip delay slot
     if likely is false
-      string += opcode + "t.m+=1.0;"
+      string += opcode + "t.m++;"
     offset += 4
     string
 
@@ -519,7 +519,7 @@ class C1964jsEmulator
     else
       string += "t.m+=1.0;"
     string += this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
-    string += "t.p=" + instr_index + ";return t.code[\"" + @getFnName(instr_index) + "\"];}"
+    string += "t.p=" + instr_index + ";return t.code." + @getFnName(instr_index) + "}"
 
   r4300i_jal: (i) ->
     @stopCompiling = true
@@ -533,7 +533,7 @@ class C1964jsEmulator
     string += this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     pc = (@p + offset + 8) | 0
     string += "t.m+=1.0;"
-    string += "t.p=" + instr_index + ";r[31]=" + pc + ";h[31]=" + (pc >> 31) + ";return t.code[\"" + @getFnName(instr_index) + "\"];}"
+    string += "t.p=" + instr_index + ";r[31]=" + pc + ";h[31]=" + (pc >> 31) + ";return t.code." + @getFnName(instr_index) + "}"
 
   #should we set the programCounter after the delay slot or before it?
   r4300i_jalr: (i) ->
@@ -550,7 +550,7 @@ class C1964jsEmulator
     opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     string += opcode
     string += "t.m+=1.0;"
-    string += "t.p=temp;return t.code[t.getFnName(temp)];}"
+    string += "t.p=temp;return t.code[t.getFnName(temp)]}"
     string
 
   r4300i_jr: (i) ->
@@ -564,7 +564,7 @@ class C1964jsEmulator
     opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     string += opcode
     string += "t.m+=1.0;"
-    string += "t.p=temp;return t.code[t.getFnName(temp)];}"
+    string += "t.p=temp;return t.code[t.getFnName(temp)]}"
  
   UNUSED: (i) ->
     @log "warning: UNUSED"
@@ -573,8 +573,8 @@ class C1964jsEmulator
   r4300i_COP0_eret: (i) ->
     @stopCompiling = true
     string = "{if((t.cp0[" + consts.STATUS + "]&" + consts.ERL + ")!==0){alert(\"error epc\");t.p=t.cp0[" + consts.ERROREPC + "];"
-    string += "t.cp0[" + consts.STATUS + "]&=~" + consts.ERL + ";}else{t.p=t.cp0[" + consts.EPC + "];t.cp0[" + consts.STATUS + "]&=~" + consts.EXL + ";}"
-    string += "t.LLbit=0;return t.code[t.getFnName(t.p)];}"
+    string += "t.cp0[" + consts.STATUS + "]&=~" + consts.ERL + "}else{t.p=t.cp0[" + consts.EPC + "];t.cp0[" + consts.STATUS + "]&=~" + consts.EXL + "}"
+    string += "t.LLbit=0;return t.code[t.getFnName(t.p)]}"
  
   r4300i_COP0_mtc0: (i, isDelaySlot) ->
     delaySlot = undefined
@@ -595,37 +595,37 @@ class C1964jsEmulator
     "{" + @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>>" + @helpers.sa(i) + ";" + @helpers.tRDH(i) + "=" + @helpers.RD(i) + ">>31}"
 
   r4300i_ori: (i) ->
-    "{" + @helpers.tRT(i) + "=" + @helpers.RS(i) + "|" + @helpers.offset_imm(i) + ";" + @helpers.tRTH(i) + "=" + @helpers.RSH(i) + ";}"
+    "{" + @helpers.tRT(i) + "=" + @helpers.RS(i) + "|" + @helpers.offset_imm(i) + ";" + @helpers.tRTH(i) + "=" + @helpers.RSH(i) + "}"
 
   r4300i_xori: (i) ->
-    "{" + @helpers.tRT(i) + "=" + @helpers.RS(i) + "^" + @helpers.offset_imm(i) + ";" + @helpers.tRTH(i) + "=" + @helpers.RSH(i) + "^0;}"
+    "{" + @helpers.tRT(i) + "=" + @helpers.RS(i) + "^" + @helpers.offset_imm(i) + ";" + @helpers.tRTH(i) + "=" + @helpers.RSH(i) + "^0}"
 
   r4300i_andi: (i) ->
-    "{" + @helpers.tRT(i) + "=" + @helpers.RS(i) + "&" + @helpers.offset_imm(i) + ";" + @helpers.tRTH(i) + "=0;}"
+    "{" + @helpers.tRT(i) + "=" + @helpers.RS(i) + "&" + @helpers.offset_imm(i) + ";" + @helpers.tRTH(i) + "=0}"
 
   r4300i_addi: (i) ->
-    "{" + @helpers.tRT(i) + "=" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ";" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31;}"
+    "{" + @helpers.tRT(i) + "=" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ";" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31}"
 
   r4300i_addiu: (i) ->
-    "{" + @helpers.tRT(i) + "=" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ";" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31;}"
+    "{" + @helpers.tRT(i) + "=" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ";" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31}"
 
   r4300i_slt: (i) ->
-    "{if(" + @helpers.RSH(i) + ">" + @helpers.RTH(i) + ")" + @helpers.tRD(i) + "=0;" + "else if(" + @helpers.RSH(i) + "<" + @helpers.RTH(i) + ")" + @helpers.tRD(i) + "=1;" + "else if(" + @helpers.uRS(i) + "<" + @helpers.uRT(i) + ")" + @helpers.tRD(i) + "=1;" + "else " + @helpers.tRD(i) + "=0;" + @helpers.tRDH(i) + "=0;}"
+    "{if(" + @helpers.RSH(i) + ">" + @helpers.RTH(i) + ")" + @helpers.tRD(i) + "=0;" + "else if(" + @helpers.RSH(i) + "<" + @helpers.RTH(i) + ")" + @helpers.tRD(i) + "=1;" + "else if(" + @helpers.uRS(i) + "<" + @helpers.uRT(i) + ")" + @helpers.tRD(i) + "=1;" + "else " + @helpers.tRD(i) + "=0;" + @helpers.tRDH(i) + "=0}"
 
   r4300i_sltu: (i) ->
-    "{if(" + @helpers.uRSH(i) + ">" + @helpers.uRTH(i) + ")" + @helpers.tRD(i) + "=0;" + "else if(" + @helpers.uRSH(i) + "<" + @helpers.uRTH(i) + ")" + @helpers.tRD(i) + "=1;" + "else if(" + @helpers.uRS(i) + "<" + @helpers.uRT(i) + ")" + @helpers.tRD(i) + "=1;" + "else " + @helpers.tRD(i) + "=0;" + @helpers.tRDH(i) + "=0;}"
+    "{if(" + @helpers.uRSH(i) + ">" + @helpers.uRTH(i) + ")" + @helpers.tRD(i) + "=0;" + "else if(" + @helpers.uRSH(i) + "<" + @helpers.uRTH(i) + ")" + @helpers.tRD(i) + "=1;" + "else if(" + @helpers.uRS(i) + "<" + @helpers.uRT(i) + ")" + @helpers.tRD(i) + "=1;" + "else " + @helpers.tRD(i) + "=0;" + @helpers.tRDH(i) + "=0}"
 
   r4300i_slti: (i) ->
     uoffset_imm_lo = undefined
     soffset_imm_hi = (@helpers.soffset_imm(i)) >> 31
     uoffset_imm_lo = (@helpers.soffset_imm(i)) >>> 0
-    "{if(" + @helpers.RSH(i) + ">" + soffset_imm_hi + ")" + @helpers.tRT(i) + "=0;" + "else if(" + @helpers.RSH(i) + "<" + soffset_imm_hi + ")" + @helpers.tRT(i) + "=1;" + "else if(" + @helpers.uRS(i) + "<" + uoffset_imm_lo + ")" + @helpers.tRT(i) + "=1;" + "else " + @helpers.tRT(i) + "=0;" + @helpers.tRTH(i) + "=0;}"
+    "{if(" + @helpers.RSH(i) + ">" + soffset_imm_hi + ")" + @helpers.tRT(i) + "=0;" + "else if(" + @helpers.RSH(i) + "<" + soffset_imm_hi + ")" + @helpers.tRT(i) + "=1;" + "else if(" + @helpers.uRS(i) + "<" + uoffset_imm_lo + ")" + @helpers.tRT(i) + "=1;" + "else " + @helpers.tRT(i) + "=0;" + @helpers.tRTH(i) + "=0}"
 
   r4300i_sltiu: (i) ->
     uoffset_imm_lo = undefined
     uoffset_imm_hi = (@helpers.soffset_imm(i) >> 31) >>> 0
     uoffset_imm_lo = (@helpers.soffset_imm(i)) >>> 0
-    "{if(" + @helpers.uRSH(i) + ">" + uoffset_imm_hi + ")" + @helpers.tRT(i) + "=0;" + "else if(" + @helpers.uRSH(i) + "<" + uoffset_imm_hi + ")" + @helpers.tRT(i) + "=1;" + "else if(" + @helpers.uRS(i) + "<" + uoffset_imm_lo + ")" + @helpers.tRT(i) + "=1;" + "else " + @helpers.tRT(i) + "=0;" + @helpers.tRTH(i) + "=0;}"
+    "{if(" + @helpers.uRSH(i) + ">" + uoffset_imm_hi + ")" + @helpers.tRT(i) + "=0;" + "else if(" + @helpers.uRSH(i) + "<" + uoffset_imm_hi + ")" + @helpers.tRT(i) + "=1;" + "else if(" + @helpers.uRS(i) + "<" + uoffset_imm_lo + ")" + @helpers.tRT(i) + "=1;" + "else " + @helpers.tRT(i) + "=0;" + @helpers.tRTH(i) + "=0}"
 
   r4300i_cache: (i) ->
     @log "todo: r4300i_cache"
@@ -638,16 +638,16 @@ class C1964jsEmulator
     "t.helpers.inter_mult(r,h," + i + ");"
 
   r4300i_mflo: (i) ->
-    "{" + @helpers.tRD(i) + "=r[32];" + @helpers.tRDH(i) + "=h[32];}"
+    "{" + @helpers.tRD(i) + "=r[32];" + @helpers.tRDH(i) + "=h[32]}"
 
   r4300i_mfhi: (i) ->
-    "{" + @helpers.tRD(i) + "=r[33];" + @helpers.tRDH(i) + "=h[33];}"
+    "{" + @helpers.tRD(i) + "=r[33];" + @helpers.tRDH(i) + "=h[33]}"
 
   r4300i_mtlo: (i) ->
-    "{r[32]=" + @helpers.RS(i) + ";h[32]=" + @helpers.RSH(i) + ";}"
+    "{r[32]=" + @helpers.RS(i) + ";h[32]=" + @helpers.RSH(i) + "}"
 
   r4300i_mthi: (i) ->
-    "{r[33]=" + @helpers.RS(i) + ";h[33]=" + @helpers.RSH(i) + ";}"
+    "{r[33]=" + @helpers.RS(i) + ";h[33]=" + @helpers.RSH(i) + "}"
 
   r4300i_COP0_mfc0: (i) ->
     string = "{"
@@ -658,48 +658,48 @@ class C1964jsEmulator
       
       #string += 't.cp0[' + this.helpers.fs(i) + ']=getCountRegister();';
       else
-    string += @helpers.tRT(i) + "=t.cp0[" + @helpers.fs(i) + "];" + @helpers.tRTH(i) + "=t.cp0[" + @helpers.fs(i) + "]>>31;}"
+    string += @helpers.tRT(i) + "=t.cp0[" + @helpers.fs(i) + "];" + @helpers.tRTH(i) + "=t.cp0[" + @helpers.fs(i) + "]>>31}"
 
   r4300i_lb: (i) ->
     "{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=(m.loadByte(vAddr)<<24)>>24;" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31}"
 
   r4300i_lbu: (i) ->
-    "{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=(m.loadByte(vAddr))&0x000000ff;" + @helpers.tRTH(i) + "=0;}"
+    "{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=(m.loadByte(vAddr))&0x000000ff;" + @helpers.tRTH(i) + "=0}"
 
   r4300i_lh: (i) ->
     "{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=(m.loadHalf(vAddr)<<16)>>16;" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31}"
 
   r4300i_lhu: (i) ->
-    "{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=(m.loadHalf(vAddr))&0x0000ffff;" + @helpers.tRTH(i) + "=0;}"
+    "{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=(m.loadHalf(vAddr))&0x0000ffff;" + @helpers.tRTH(i) + "=0}"
 
   r4300i_sb: (i) ->
-    "{" + @helpers.setVAddr(i) + "m.storeByte(" + @helpers.RT(i) + ",vAddr);}"
+    "{" + @helpers.setVAddr(i) + "m.storeByte(" + @helpers.RT(i) + ",vAddr)}"
 
   r4300i_sh: (i) ->
-    "{" + @helpers.setVAddr(i) + "m.storeHalf(" + @helpers.RT(i) + ",vAddr);}"
+    "{" + @helpers.setVAddr(i) + "m.storeHalf(" + @helpers.RT(i) + ",vAddr)}"
 
   r4300i_srlv: (i) ->
-    "{" + @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>>(" + @helpers.RS(i) + "&0x1f);" + @helpers.tRDH(i) + "=" + @helpers.RD(i) + ">>31;}"
+    "{" + @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>>(" + @helpers.RS(i) + "&0x1f);" + @helpers.tRDH(i) + "=" + @helpers.RD(i) + ">>31}"
 
   r4300i_sllv: (i) ->
-    "{" + @helpers.tRD(i) + "=" + @helpers.RT(i) + "<<(" + @helpers.RS(i) + "&0x1f);" + @helpers.tRDH(i) + "=" + @helpers.RD(i) + ">>31;}"
+    "{" + @helpers.tRD(i) + "=" + @helpers.RT(i) + "<<(" + @helpers.RS(i) + "&0x1f);" + @helpers.tRDH(i) + "=" + @helpers.RD(i) + ">>31}"
 
   r4300i_srav: (i) ->
     #optimization: r[hi] can safely right-shift rt
-    "{" + @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>(" + @helpers.RS(i) + "&0x1f);" + @helpers.tRDH(i) + "=" + @helpers.RT(i) + ">>31;}"
+    "{" + @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>(" + @helpers.RS(i) + "&0x1f);" + @helpers.tRDH(i) + "=" + @helpers.RT(i) + ">>31}"
 
   r4300i_COP1_cfc1: (i) ->
-    "{" + @helpers.tRT(i) + "=t.cp1Con[" + @helpers.fs(i) + "];" + @helpers.tRTH(i) + "=t.cp1Con[" + @helpers.fs(i) + "]>>31;}"  if @helpers.fs(i) is 0 or @helpers.fs(i) is 31
+    "{" + @helpers.tRT(i) + "=t.cp1Con[" + @helpers.fs(i) + "];" + @helpers.tRTH(i) + "=t.cp1Con[" + @helpers.fs(i) + "]>>31}"  if @helpers.fs(i) is 0 or @helpers.fs(i) is 31
 
   r4300i_COP1_ctc1: (i) ->
     #incomplete:
     "t.cp1Con[31]=" + @helpers.RT(i) + ";"  if @helpers.fs(i) is 31
 
   r4300i_ld: (i) ->
-    "{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=m.loadWord((vAddr+4)|0);" + @helpers.tRTH(i) + "=m.loadWord(vAddr);}"
+    "{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=m.loadWord((vAddr+4)|0);" + @helpers.tRTH(i) + "=m.loadWord(vAddr)}"
 
   r4300i_lld: (i) ->
-    "{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=m.loadWord((vAddr+4)|0);" + @helpers.tRTH(i) + "=m.loadWord(vAddr);t.LLbit=1;}"
+    "{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=m.loadWord((vAddr+4)|0);" + @helpers.tRTH(i) + "=m.loadWord(vAddr);t.LLbit=1}"
 
   #address error exceptions in ld and sd are weird since this is split up
   #into 2 reads or writes. i guess they're fatal exceptions, so
@@ -719,24 +719,24 @@ class C1964jsEmulator
     
     #hi
     string += "m.storeWord(" + @helpers.RTH(i) + ",vAddr"
-    
+
     #So we can process exceptions
     if isDelaySlot is true
       a = (@p + offset + 4) | 0
-      string += ", " + a + ", true);"
+      string += ", " + a + ", true)}"
     else
       a = (@p + offset) | 0
-      string += ", " + a + ");"
-    string += "}"
+      string += ", " + a + ")}"
+    string
 
   r4300i_dmultu: (i) ->
     "t.helpers.inter_dmultu(r,h," + i + ");"
 
   r4300i_dsll32: (i) ->
-    "{" + @helpers.tRDH(i) + "=" + @helpers.RT(i) + "<<" + @helpers.sa(i) + ";" + @helpers.tRD(i) + "=0;}"
+    "{" + @helpers.tRDH(i) + "=" + @helpers.RT(i) + "<<" + @helpers.sa(i) + ";" + @helpers.tRD(i) + "=0}"
 
   r4300i_dsra32: (i) ->
-    "{" + @helpers.tRD(i) + "=" + @helpers.RTH(i) + ">>" + @helpers.sa(i) + ";" + @helpers.tRDH(i) + "=" + @helpers.RTH(i) + ">>31;}"
+    "{" + @helpers.tRD(i) + "=" + @helpers.RTH(i) + ">>" + @helpers.sa(i) + ";" + @helpers.tRDH(i) + "=" + @helpers.RTH(i) + ">>31}"
 
   r4300i_ddivu: (i) ->
     "t.helpers.inter_ddivu(r,h," + i + ");"
@@ -763,7 +763,7 @@ class C1964jsEmulator
 
   r4300i_sra: (i) ->
     #optimization: sra's r[hi] can safely right-shift RT.
-    "{" + @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>" + @helpers.sa(i) + ";" + @helpers.tRDH(i) + "=" + @helpers.RT(i) + ">>31;}"
+    "{" + @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>" + @helpers.sa(i) + ";" + @helpers.tRDH(i) + "=" + @helpers.RT(i) + ">>31}"
 
   r4300i_COP0_tlbp: (i) ->
     @log "todo: tlbp"
@@ -780,7 +780,7 @@ class C1964jsEmulator
     string += "case 1:" + @helpers.tRT(i) + "=(" + @helpers.RT(i) + "&0x000000ff)|((value<<8)>>>0);break;"
     string += "case 2:" + @helpers.tRT(i) + "=(" + @helpers.RT(i) + "&0x0000ffff)|((value<<16)>>>0);break;"
     string += "case 3:" + @helpers.tRT(i) + "=(" + @helpers.RT(i) + "&0x00ffffff)|((value<<24)>>>0);break;}"
-    string += @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31;}"
+    string += @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31}"
 
   r4300i_lwr: (i) ->
     string = "{" + @helpers.setVAddr(i)
@@ -789,7 +789,7 @@ class C1964jsEmulator
     string += "case 2:" + @helpers.tRT(i) + "=(" + @helpers.RT(i) + "&0xff000000)|(value>>>8);break;"
     string += "case 1:" + @helpers.tRT(i) + "=(" + @helpers.RT(i) + "&0xffff0000)|(value>>>16);break;"
     string += "case 0:" + @helpers.tRT(i) + "=(" + @helpers.RT(i) + "&0xffffff00)|(value>>>24);break;}"
-    string += @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31;}"
+    string += @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31}"
 
   r4300i_swl: (i) ->
     string = "{" + @helpers.setVAddr(i)
@@ -798,7 +798,7 @@ class C1964jsEmulator
     string += "case 1:value=((value&0xff000000)|(" + @helpers.RT(i) + ">>>8));break;"
     string += "case 2:value=((value&0xffff0000)|(" + @helpers.RT(i) + ">>>16));break;"
     string += "case 3:value=((value&0xffffff00)|(" + @helpers.RT(i) + ">>>24));break;}"
-    string += "m.storeWord(value,vAddrAligned,false);}"
+    string += "m.storeWord(value,vAddrAligned,false)}"
 
   r4300i_swr: (i) ->
     string = "{" + @helpers.setVAddr(i)
@@ -807,14 +807,14 @@ class C1964jsEmulator
     string += "case 2:value=((value & 0x000000FF)|((" + @helpers.RT(i) + "<<8)>>>0));break;"
     string += "case 1:value=((value & 0x0000FFFF)|((" + @helpers.RT(i) + "<<16)>>>0));break;"
     string += "case 0:value=((value & 0x00FFFFFF)|((" + @helpers.RT(i) + "<<24)>>>0));break;}"
-    string += "m.storeWord(value,vAddrAligned,false);}"
+    string += "m.storeWord(value,vAddrAligned,false)}"
 
   r4300i_lwc1: (i) ->
-    "{" + @helpers.setVAddr(i) + "t.cp1_i[" + @helpers.FT32ArrayView(i) + "]=m.loadWord(vAddr);}"
+    "{" + @helpers.setVAddr(i) + "t.cp1_i[" + @helpers.FT32ArrayView(i) + "]=m.loadWord(vAddr)}"
 
   r4300i_ldc1: (i) ->
     string = "{" + @helpers.setVAddr(i) + "t.cp1_i[" + @helpers.FT32ArrayView(i) + "]=m.loadWord((vAddr+4)|0);"
-    string += "t.cp1_i[" + @helpers.FT32HIArrayView(i) + "]=m.loadWord((vAddr)|0);}"
+    string += "t.cp1_i[" + @helpers.FT32HIArrayView(i) + "]=m.loadWord((vAddr)|0)}"
 
   r4300i_swc1: (i, isDelaySlot) ->
     a = undefined
@@ -845,17 +845,17 @@ class C1964jsEmulator
     #So we can process exceptions
     if isDelaySlot is true
       a = (@p + offset + 4) | 0
-      string += ", " + a + ", true);"
+      string += ", " + a + ", true)}"
     else
       a = (@p + offset) | 0
-      string += ", " + a + ");"
-    string += "}"
+      string += ", " + a + ")}"
+    string
 
   r4300i_COP1_mtc1: (i) ->
     "t.cp1_i[" + @helpers.FS32ArrayView(i) + "]=" + @helpers.RT(i) + ";"
 
   r4300i_COP1_mfc1: (i) ->
-    "{" + @helpers.tRT(i) + "=t.cp1_i[" + @helpers.FS32ArrayView(i) + "];" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31;}"
+    "{" + @helpers.tRT(i) + "=t.cp1_i[" + @helpers.FS32ArrayView(i) + "];" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31}"
 
   r4300i_COP1_cvts_w: (i) ->
     "t.cp1_f[" + @helpers.FD32ArrayView(i) + "]=t.cp1_i[" + @helpers.FS32ArrayView(i) + "];"

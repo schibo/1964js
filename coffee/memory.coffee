@@ -313,7 +313,31 @@ C1964jsMemory = (core) ->
     setFn that.dummyReadWriteUint8Array, off_, val
     return
 
-  @initRegion 0, 0x20000000, @readDummy, @writeDummy
+  @virtualToPhysical = (a) ->
+    return a
+
+  @readTLB = (that, a, getFn) ->
+    a = that.virtualToPhysical(a)
+
+    region = that.region[a>>>14]
+
+    if region is that.readTLB
+      region = that.readDummy
+
+    region(that, a, getFn)
+
+  @writeTLB = (that, setFn, val, a, pc, isDelaySlot) ->
+    a = that.virtualToPhysical(a)
+
+    region = that.writeRegion[a>>>14]
+
+    if region is that.writeTLB
+      region = that.writeDummy
+
+    region(that, setFn, val, a, pc, isDelaySlot)
+    return
+
+  @initRegion 0, 0x20000000, @readTLB, @writeTLB
   @initRegion MEMORY_START_RDRAM, MEMORY_SIZE_RDRAM, @readRdram, @writeRdram
   @initRegion MEMORY_START_RAMREGS4, MEMORY_START_RAMREGS4, @readRamRegs4, @writeRamRegs4
   @initRegion MEMORY_START_SPMEM, MEMORY_SIZE_SPMEM, @readSpMem, @writeSpMem
@@ -380,6 +404,7 @@ C1964jsMemory = (core) ->
     #throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
     a = addr & 0x1FFFFFFF
     @region[a>>>14](this, a, @getUint32)
+
 
   @storeWord = (val, addr, pc, isDelaySlot) ->
     a = addr & 0x1FFFFFFF
