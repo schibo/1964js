@@ -453,7 +453,11 @@ C1964jsVideoHLE = (core, glx) ->
     v1 = @getGbi0Tri1V1(pc) / @gRSP.vertexMult
     v2 = @getGbi0Tri1V2(pc) / @gRSP.vertexMult
     @prepareTriangle v2, v1, v0
-    @drawScene true, 7
+    if @core.settings.wireframe is true
+      @drawScene false, 7
+    else
+      @drawScene true, 7
+
     #clear vertices for another shape
     @vertices = []
     @trivertices = []
@@ -653,12 +657,12 @@ C1964jsVideoHLE = (core, glx) ->
     @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexPositionBuffer
     @gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(@trivertices), @gl.STATIC_DRAW
     @gl.vertexAttribPointer @core.webGL.triangleShaderProgram.vertexPositionAttribute, @triangleVertexPositionBuffer.itemSize, @gl.FLOAT, false, 0, 0
+    @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexTextureCoordBuffer
+    @gl.vertexAttribPointer @core.webGL.triangleShaderProgram.textureCoordAttribute, @triangleVertexTextureCoordBuffer.itemSize, @gl.FLOAT, false, 0, 0
     if useTexture is true
-      @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexTextureCoordBuffer
-      @gl.vertexAttribPointer @core.webGL.triangleShaderProgram.textureCoordAttribute, @triangleVertexTextureCoordBuffer.itemSize, @gl.FLOAT, false, 0, 0
       @gl.activeTexture @gl.TEXTURE0
       @gl.bindTexture @gl.TEXTURE_2D, window["neheTexture" + tileno]
-      @gl.uniform1i @core.webGL.triangleShaderProgram.samplerUniform, 0
+    @gl.uniform1i @core.webGL.triangleShaderProgram.samplerUniform, 0
     
     #  this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
     @core.webGL.setMatrixUniforms @core.webGL.triangleShaderProgram

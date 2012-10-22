@@ -55,7 +55,7 @@ class C1964jsPif
         else if device < 4 #Controllers 0-3
           break  if @processController(count, device, pifRamStart) is false
           device += 1
-          
+
           #size of Command-Bytes + size of Answer-Bytes + 2 for the 2 size Bytes (1 is in count++)
           count += cmd + (@pifUint8Array[pifRamStart + count + 1] & 0x3F) + 1
         else

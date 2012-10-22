@@ -85,7 +85,7 @@ class C1964jsEmulator
     @cp1Con = new Int32Array(32)
     @LLbit = 0
   
-    #var docElement, errorElement, g, s, interval, keepRunning, stopCompiling, offset, programCounter, romLength, redrawDebug=0;
+    #var docElement, errorElement, g, s, interval, stopCompiling, offset, programCounter, romLength, redrawDebug=0;
     @terminate = false
     @NUM_CHANNELS = 1
     @NUM_SAMPLES = 40000
@@ -161,7 +161,6 @@ class C1964jsEmulator
         x += 1
       y += 1
     @stopCompiling = false
-    @keepRunning = 65535
     @byteSwap @memory.rom
 
     #copy first 4096 bytes to sp_dmem and run from there.
@@ -290,14 +289,13 @@ class C1964jsEmulator
 
   runLoop: (r, h) ->
     @request = requestAnimFrame(@runLoop.bind(this, r, h))  if @terminate is false
-    @keepRunning = 180000
     pc = undefined
     fnName = undefined
     fn = undefined
     @interrupts.checkInterrupts()
     if @m >= 0
       @repaintWrapper()
-      @m = -625000
+      @m = -625000*2
       @cp0[consts.COUNT] += 625000
       @interrupts.triggerCompareInterrupt 0, false
       @interrupts.triggerVIInterrupt 0, false
@@ -308,11 +306,9 @@ class C1964jsEmulator
     pc = @p >>> 2
     fnName = "_" + pc
     fn = @code[fnName]
-    while @keepRunning > 0
-      @keepRunning -= 1
+    while @m < 0
       fn = @decompileBlock(@p) unless fn
       fn = fn(r, h, @memory, this)
-      break if @m >= 0
     this
 
   repaintWrapper: ->
@@ -517,10 +513,10 @@ class C1964jsEmulator
 
     #delay slot
     instruction = @memory.loadWord((@p + offset + 4) | 0)
-    
+
     #speed hack
     if ((instr_index >> 0) is (@p + offset) >> 0) and (instruction is 0)
-      string += "t.m=0;t.keepRunning=0;"
+      string += "t.m=0;"
     else
       string += "t.m+=1.0;"
     string += this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
