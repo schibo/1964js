@@ -667,6 +667,7 @@ C1964jsHelpers = (core, isLittleEndian) ->
     cp0[consts.ENTRYHI] &= ~tlb[index].pageMask
     cp0[consts.ENTRYLO1] = tlb[index].entryLo1
     cp0[consts.ENTRYLO0] = tlb[index].entryLo0
+    return
   this
 
 #hack global space until we export classes properly
