@@ -621,8 +621,8 @@ C1964jsHelpers = (core, isLittleEndian) ->
     middle = lowest + tlb.loCompare
     highest = lowest + tlb.loCompare * 2
 
-    @buildTLBHelper lowest, middle, tlb.entrylo0, tlb.myHiMask, clear
-    @buildTLBHelper middle, highest, tlb.entrylo1, tlb.myHiMask, clear
+    @buildTLBHelper lowest, middle, tlb.entryLo0, tlb.myHiMask, clear
+    @buildTLBHelper middle, highest, tlb.entryLo1, tlb.myHiMask, clear
     return
 
   @refreshTLB = (tlb, cp0) ->
