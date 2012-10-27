@@ -135,7 +135,7 @@ class C1964jsEmulator
     @showFB = true
     @webGL.hide3D()
     @endianTest()
-    @helpers = new C1964jsHelpers(@isLittleEndian)
+    @helpers = new C1964jsHelpers(this, @isLittleEndian)
 
     #runTest();
     @memory.rom = buffer
@@ -282,9 +282,12 @@ class C1964jsEmulator
     lastDTLBIndex = 0
 
     #Initialize the TLB Lookup Table
-    @directTLBLookupTable = new Int32Array(0x100000)
-    #for (i = 0; i < 0x100000; i++)
-      #TLB_sDWORD_R[i] = sDWord[i >> 4] + 0x1000 * (i & 0xf);
+    @physRegion = new Int32Array(0x100000)
+    i = 0
+    #todo: replace with call to buildTLBHelper clear
+    while i < 0x100000
+      @physRegion[i] = (i & 0x1ffff) >>> 4
+      i++
     return
 
   runLoop: (r, h) ->
@@ -753,9 +756,6 @@ class C1964jsEmulator
     @log "todo: break"
     ""
 
-  r4300i_COP0_tlbwi: (i) ->
-    "t.helpers.inter_tlbwi(t.cp0[" + consts.INDEX + "], t.tlb, t.cp0);"
-
   r4300i_div: (i) ->
     "t.helpers.inter_div(r,h," + i + ");"
 
@@ -766,13 +766,14 @@ class C1964jsEmulator
     #optimization: sra's r[hi] can safely right-shift RT.
     "{" + @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>" + @helpers.sa(i) + ";" + @helpers.tRDH(i) + "=" + @helpers.RT(i) + ">>31}"
 
+  r4300i_COP0_tlbwi: (i) ->
+    "t.helpers.inter_tlbwi(t.cp0[" + consts.INDEX + "], t.tlb, t.cp0);"
+
   r4300i_COP0_tlbp: (i) ->
-    @log "todo: tlbp"
-    ""
+    "t.helpers.inter_tlbp(t.tlb, t.cp0);"
 
   r4300i_COP0_tlbr: (i) ->
-    @log "todo: tlbr"
-    ""
+    "t.helpers.inter_tlbr(t.tlb, t.cp0);"
 
   r4300i_lwl: (i) ->
     string = "{" + @helpers.setVAddr(i)

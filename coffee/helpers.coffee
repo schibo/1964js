@@ -23,8 +23,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 #global consts
 #global goog, BigInt, bigint_mul, bigint_div, bigint_mod
 
-C1964jsHelpers = (isLittleEndian) ->
+C1964jsHelpers = (core, isLittleEndian) ->
   "use strict"
+  this.core = core
   @isLittleEndian = isLittleEndian
   @isBigEndian = (isLittleEndian is false)
   @fs = (i) ->
@@ -578,9 +579,6 @@ C1964jsHelpers = (isLittleEndian) ->
 
   @writeTLBEntry = (tlb, cp0) ->
     g = cp0[consts.ENTRYLO0] & cp0[consts.ENTRYLO1] & consts.TLBLO_G
-    oldValid = tlb.valid
-    tlb.valid = 0
-    tlb.valid = 1 if cp0[consts.ENTRYLO1] & consts.TLBLO_V or cp0[consts.ENTRYLO0] & consts.TLBLO_V
 
     tlb.pageMask = cp0[consts.PAGEMASK]
     tlb.entryLo1 = cp0[consts.ENTRYLO1] | g
@@ -591,30 +589,84 @@ C1964jsHelpers = (isLittleEndian) ->
     switch tlb.pageMask
       when 0x00000000 then tlb.loCompare = 0x00001000 #4k
       when 0x00006000 then tlb.loCompare = 0x00004000 #16k
-      when 0x0001E000 then tlb.loCompare = 0x00010000 #64k
-      when 0x0007E000 then tlb.loCompare = 0x00040000 #256k
-      when 0x001FE000 then tlb.loCompare = 0x00100000 #1M
-      when 0x007FE000 then tlb.loCompare = 0x00400000 #4M
-      when 0x01FFE000 then tlb.loCompare = 0x01000000 #16M
+      when 0x0001e000 then tlb.loCompare = 0x00010000 #64k
+      when 0x0007e000 then tlb.loCompare = 0x00040000 #256k
+      when 0x001fe000 then tlb.loCompare = 0x00100000 #1M
+      when 0x007fe000 then tlb.loCompare = 0x00400000 #4M
+      when 0x01ffe000 then tlb.loCompare = 0x01000000 #16M
       else console.log "ERROR: tlbwi - invalid page size" + tlb.pageMask
 
     @newtlb = true
     return
 
+  @buildTLBHelper = (start, end, entry, mask, clear) ->
+    if (entry & 0x3)
+      realAddress = 0x80000000 | ((entry << 6) & (mask >> 1))
+      lend = end>>>12
+      i = start>>>12
+
+      if (clear is true)
+        while i < lend
+          @core.physRegion[i] = (i & 0x1ffff) >>> 4
+          i++
+      else while i < lend
+        real = (realAddress + (i << 12) - start) & 0x1fffffff
+        @core.physRegion[i] = real >>> 12
+        i++
+    return
+
+  @buildTLB = (tlb, index, clear) ->
+    #calculate the mapped address range that this TLB entry is mapping
+    lowest = tlb.entryHi & 0xffffff00  #Don't support ASID field
+    middle = lowest + tlb.loCompare
+    highest = lowest + tlb.loCompare * 2
+
+    @buildTLBHelper lowest, middle, tlb.entrylo0, tlb.myHiMask, clear
+    @buildTLBHelper middle, highest, tlb.entrylo1, tlb.myHiMask, clear
+    return
+
   @refreshTLB = (tlb, cp0) ->
-    #todo: still a lot to do here.
-    @writeTLBEntry tlb, cp0
+    oldValid = tlb.valid
+    tlb.valid = 0
+    tlb.valid = 1 if cp0[consts.ENTRYLO1] & consts.TLBLO_V or cp0[consts.ENTRYLO0] & consts.TLBLO_V
+
+    if tlb.valid is 1
+      @buildTLB tlb, true if oldValid is 1 #clear old tlb
+      @writeTLBEntry tlb, cp0
+      @buildTLB tlb
     return
 
   @inter_tlbwi = (index, tlb, cp0) ->
-    if index is -1 #please write to dummy tlb
-      return
-
-    if index > 31
+    if index < 0 or index > 31
+      console.log "ERROR: tlbwi received an invalid index=%08X", index
       return
 
     @refreshTLB tlb[index], cp0
     return
+
+  @inter_tlbp = (tlb, cp0) ->
+    cp0[consts.INDEX] |= 0x80000000 #initially set high-order bit
+    idx = 0
+    while idx < 31
+      if (tlb[idx].entryHi & tlb[idx].myHiMask) is (cp0[consts.ENTRYHI] & tlb[idx].myHiMask)
+        if (tlb[idx].entryLo0 & consts.TLBLO_G & tlb[idx].entryLo1) or (tlb[idx].entryHi & consts.TLBHI_PIDMASK) is (cp0[consts.ENTRYHI] & consts.TLBHI_PIDMASK)
+          cp0[consts.INDEX] = idx
+          break
+      idx++
+    return
+
+  @inter_tlbr = (tlb, cp0) ->
+    index = cp0[consts.INDEX] & 0x7FFFFFFF
+
+    if index < 0 or index > 31
+      console.log "ERROR: tlbr received an invalid index=%08X", index
+      return
+
+    cp0[consts.PAGEMASK] = tlb[index].pageMask
+    cp0[consts.ENTRYHI] = tlb[index].entryHi
+    cp0[consts.ENTRYHI] &= ~tlb[index].pageMask
+    cp0[consts.ENTRYLO1] = tlb[index].entryLo1
+    cp0[consts.ENTRYLO0] = tlb[index].entryLo0
   this
 
 #hack global space until we export classes properly

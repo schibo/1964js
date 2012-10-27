@@ -104,7 +104,7 @@ C1964jsMemory = (core) ->
     return
 
   @readDummy = (that, a, getFn) ->
-    off_ = a & 0x0000FFFF
+    off_ = a & 0x0000FFFC
     getFn that.dummyReadWriteUint8Array, off_
 
   @readRdram = (that, a, getFn) ->
@@ -317,9 +317,13 @@ C1964jsMemory = (core) ->
     #uncomment to see where we're loading/storing
     #if ((((a & 0xF0000000)>>>0) isnt 0x80000000) and (((a & 0xF0000000)>>>0) isnt 0xA0000000))
     #  alert(dec2hex(a))
-   
+    
+    #uncomment to verify non-tlb lookup.
+    #if dec2hex(a) != dec2hex(((core.physRegion[a>>>12]<<16) | a&0x0000ffff))
+    #  alert dec2hex(a) + ' ' + dec2hex(((core.physRegion[a>>>12]<<16) | a&0x0000ffff))
+    
     #todo: tlb lookup
-    return a & 0x1fffffff
+    return ((core.physRegion[a>>>12]<<16) | a&0x0000ffff)
 
   @readTLB = (that, a, getFn) ->
     a = that.virtualToPhysical(a)
@@ -342,7 +346,9 @@ C1964jsMemory = (core) ->
     region(that, setFn, val, a, pc, isDelaySlot)
     return
 
-  @initRegion 0, 0x20000000, @readTLB, @writeTLB
+  @initRegion 0, 0x80000000, @readTLB, @writeTLB
+  @initRegion 0x80000000, 0x40000000, @readDummy, @writeDummy
+  @initRegion 0xC0000000, 0x40000000, @readTLB, @writeTLB
   @initRegion MEMORY_START_RDRAM, MEMORY_SIZE_RDRAM, @readRdram, @writeRdram
   @initRegion MEMORY_START_RAMREGS4, MEMORY_START_RAMREGS4, @readRamRegs4, @writeRamRegs4
   @initRegion MEMORY_START_SPMEM, MEMORY_SIZE_SPMEM, @readSpMem, @writeSpMem
