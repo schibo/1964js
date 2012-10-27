@@ -314,7 +314,12 @@ C1964jsMemory = (core) ->
     return
 
   @virtualToPhysical = (a) ->
-    return a
+    #uncomment to see where we're loading/storing
+    #if ((((a & 0xF0000000)>>>0) isnt 0x80000000) and (((a & 0xF0000000)>>>0) isnt 0xA0000000))
+    #  alert(dec2hex(a))
+   
+    #todo: tlb lookup
+    return a & 0x1fffffff
 
   @readTLB = (that, a, getFn) ->
     a = that.virtualToPhysical(a)
@@ -392,33 +397,32 @@ C1964jsMemory = (core) ->
 
   @loadByte = (addr) ->
     #throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
-    a = addr & 0x1FFFFFFF
+    a = @virtualToPhysical(addr)
     @region[a>>>14](this, a, @getInt8)
 
   @loadHalf = (addr) ->
     #throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
-    a = addr & 0x1FFFFFFF
+    a = @virtualToPhysical(addr)
     @region[a>>>14](this, a, @getInt16)
 
   @loadWord = (addr) ->
     #throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
-    a = addr & 0x1FFFFFFF
+    a = @virtualToPhysical(addr)
     @region[a>>>14](this, a, @getUint32)
 
-
   @storeWord = (val, addr, pc, isDelaySlot) ->
-    a = addr & 0x1FFFFFFF
+    a = @virtualToPhysical(addr)
     @writeRegion[a>>14](this, @setInt32, val, a, pc, isDelaySlot)
     return
 
   #Same routine as storeWord, but store a byte
   @storeByte = (val, addr, pc, isDelaySlot) ->
-    a = addr & 0x1FFFFFFF
+    a = @virtualToPhysical(addr)
     @writeRegion[a>>14](this, @setInt8, val, a, pc, isDelaySlot)
     return
 
   @storeHalf = (val, addr, pc, isDelaySlot) ->
-    a = addr & 0x1FFFFFFF
+    a = @virtualToPhysical(addr)
     @writeRegion[a>>14](this, @setInt16, val, a, pc, isDelaySlot)
     return
 

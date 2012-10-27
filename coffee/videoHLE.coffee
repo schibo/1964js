@@ -453,6 +453,8 @@ C1964jsVideoHLE = (core, glx) ->
     v1 = @getGbi0Tri1V1(pc) / @gRSP.vertexMult
     v2 = @getGbi0Tri1V2(pc) / @gRSP.vertexMult
     @prepareTriangle v2, v1, v0
+    
+    #todo: loop here and make only one draw call when the model is built
     if @core.settings.wireframe is true
       @drawScene false, 7
     else

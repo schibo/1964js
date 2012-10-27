@@ -578,6 +578,7 @@ C1964jsHelpers = (isLittleEndian) ->
 
   @writeTLBEntry = (tlb, cp0) ->
     g = cp0[consts.ENTRYLO0] & cp0[consts.ENTRYLO1] & consts.TLBLO_G
+    oldValid = tlb.valid
     tlb.valid = 0
     tlb.valid = 1 if cp0[consts.ENTRYLO1] & consts.TLBLO_V or cp0[consts.ENTRYLO0] & consts.TLBLO_V
 
@@ -588,13 +589,13 @@ C1964jsHelpers = (isLittleEndian) ->
     tlb.entryHi = cp0[consts.ENTRYHI] & ~cp0[consts.PAGEMASK]
 
     switch tlb.pageMask
-      when 0x00000000 then tlb.LoCompare = 0x00001000 #4k
-      when 0x00006000 then tlb.LoCompare = 0x00004000 #16k
-      when 0x0001E000 then tlb.LoCompare = 0x00010000 #64k
-      when 0x0007E000 then tlb.LoCompare = 0x00040000 #256k
-      when 0x001FE000 then tlb.LoCompare = 0x00100000 #1M
-      when 0x007FE000 then tlb.LoCompare = 0x00400000 #4M
-      when 0x01FFE000 then tlb.LoCompare = 0x01000000 #16M
+      when 0x00000000 then tlb.loCompare = 0x00001000 #4k
+      when 0x00006000 then tlb.loCompare = 0x00004000 #16k
+      when 0x0001E000 then tlb.loCompare = 0x00010000 #64k
+      when 0x0007E000 then tlb.loCompare = 0x00040000 #256k
+      when 0x001FE000 then tlb.loCompare = 0x00100000 #1M
+      when 0x007FE000 then tlb.loCompare = 0x00400000 #4M
+      when 0x01FFE000 then tlb.loCompare = 0x01000000 #16M
       else console.log "ERROR: tlbwi - invalid page size" + tlb.pageMask
 
     @newtlb = true
