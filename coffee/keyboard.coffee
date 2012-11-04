@@ -44,13 +44,13 @@ C1964jsPif::onKeyDown = (e) ->
   if e
     switch e.which
       when 40
-        @g1964buttons = (@g1964buttons & 0xffff00ff) | DOWN_MAX
+        @g1964buttons = (@g1964buttons & 0xffffff00) | DOWN_MAX
       when 38
-        @g1964buttons = (@g1964buttons & 0xffff00ff) | UP_MAX
+        @g1964buttons = (@g1964buttons & 0xffffff00) | UP_MAX
       when 39
-        @g1964buttons = (@g1964buttons & 0xffffff00) | RIGHT_MAX
+        @g1964buttons = (@g1964buttons & 0xffff00ff) | RIGHT_MAX
       when 37
-        @g1964buttons = (@g1964buttons & 0xffffff00) | LEFT_MAX
+        @g1964buttons = (@g1964buttons & 0xffff00ff) | LEFT_MAX
       when 13
         @g1964buttons |= START_BUTTON
       when 90 #z

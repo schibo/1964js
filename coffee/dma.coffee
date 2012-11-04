@@ -145,7 +145,7 @@ class C1964jsDMA
       to++
       from++
       --end
-    @pif.processPif()
+    #@pif.processPif()
     @interrupts.setFlag @memory.siUint8Array, consts.SI_STATUS_REG, consts.SI_STATUS_INTERRUPT
     @interrupts.triggerSIInterrupt pc, isDelaySlot
     return

@@ -77,7 +77,7 @@ C1964jsVideoHLE = (core, glx) ->
     @core.interrupts.triggerSPInterrupt 0, false
 
   C1964jsVideoHLE::videoLog = (msg) ->
-    #alert(msg);
+    #console.log msg
 
   C1964jsVideoHLE::dlParserProcess = ->
     @dlistStackPointer = 0
