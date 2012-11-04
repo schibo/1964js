@@ -282,7 +282,7 @@ class C1964jsEmulator
     lastDTLBIndex = 0
 
     #Initialize the TLB Lookup Table
-    @physRegion = new Int32Array(0x100000)
+    @physRegion = new Int16Array(0x100000)
     i = 0
     #todo: replace with call to buildTLBHelper clear
     while i < 0x100000

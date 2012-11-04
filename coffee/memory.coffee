@@ -321,8 +321,6 @@ C1964jsMemory = (core) ->
     #uncomment to verify non-tlb lookup.
     #if dec2hex(a) != dec2hex(((core.physRegion[a>>>12]<<16) | a&0x0000ffff))
     #  alert dec2hex(a) + ' ' + dec2hex(((core.physRegion[a>>>12]<<16) | a&0x0000ffff))
-    
-    #todo: tlb lookup
     return ((core.physRegion[a>>>12]<<16) | (a&0x0000ffff))
 
   @readTLB = (that, a, getFn) ->
