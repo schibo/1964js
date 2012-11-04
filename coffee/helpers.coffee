@@ -167,7 +167,7 @@ C1964jsHelpers = (core, isLittleEndian) ->
     ((i & 0x0000ffff) << 16) >> 16
 
   @setVAddr = (i) ->
-    "var vAddr=" + @se(@RS(i) + "+" + @soffset_imm(i))
+    "var vAddr=(" + @RS(i) + "+" + @soffset_imm(i) + ")>>0;"
 
   @fn = (i) ->
     i & 0x3f
@@ -178,21 +178,6 @@ C1964jsHelpers = (core, isLittleEndian) ->
   @fd = (i) ->
     i >> 6 & 0x1F
 
-  #//////////////////
-  #Expression helpers
-  #//////////////////
-  
-  #sign-extend 32bit operation
-  @se = (o) ->
-    "(" + o + ")>>0;"
-
-  #zero-extend 32bit operation
-  @ze = (o) ->
-    "(" + o + ")>>>0;"
-
-  #////////////////////
-  #Opcode logic helpers
-  #////////////////////
   @sLogic = (i, n) ->
     "{" + @tRD(i) + "=" + @RS(i) + n + @RT(i) + ";" + @tRDH(i) + "=" + @RD(i) + ">>31;}"
 
@@ -626,14 +611,11 @@ C1964jsHelpers = (core, isLittleEndian) ->
     return
 
   @refreshTLB = (tlb, cp0) ->
-    oldValid = tlb.valid
+    @buildTLB tlb, true if tlb.valid is 1 #clear old tlb
+    @writeTLBEntry tlb, cp0
     tlb.valid = 0
     tlb.valid = 1 if cp0[consts.ENTRYLO1] & consts.TLBLO_V or cp0[consts.ENTRYLO0] & consts.TLBLO_V
-
-    if tlb.valid is 1
-      @buildTLB tlb, true if oldValid is 1 #clear old tlb
-      @writeTLBEntry tlb, cp0
-      @buildTLB tlb
+    @buildTLB tlb if tlb.valid is 1
     return
 
   @inter_tlbwi = (index, tlb, cp0) ->
