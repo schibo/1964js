@@ -323,7 +323,7 @@ C1964jsMemory = (core) ->
     #  alert dec2hex(a) + ' ' + dec2hex(((core.physRegion[a>>>12]<<16) | a&0x0000ffff))
     
     #todo: tlb lookup
-    return ((core.physRegion[a>>>12]<<16) | a&0x0000ffff)
+    return ((core.physRegion[a>>>12]<<16) | (a&0x0000ffff))
 
   @readTLB = (that, a, getFn) ->
     a = that.virtualToPhysical(a)

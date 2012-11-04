@@ -580,11 +580,11 @@ C1964jsHelpers = (core, isLittleEndian) ->
   @writeTLBEntry = (tlb, cp0) ->
     g = cp0[consts.ENTRYLO0] & cp0[consts.ENTRYLO1] & consts.TLBLO_G
 
-    tlb.pageMask = cp0[consts.PAGEMASK]
-    tlb.entryLo1 = cp0[consts.ENTRYLO1] | g
-    tlb.entryLo0 = cp0[consts.ENTRYLO0] | g
-    tlb.myHiMask = ~tlb.pageMask & consts.TLBHI_VPN2MASK
-    tlb.entryHi = cp0[consts.ENTRYHI] & ~cp0[consts.PAGEMASK]
+    tlb.pageMask = cp0[consts.PAGEMASK] >>> 0
+    tlb.entryLo1 = (cp0[consts.ENTRYLO1] | g) >>> 0
+    tlb.entryLo0 = (cp0[consts.ENTRYLO0] | g) >>> 0
+    tlb.myHiMask = ((~tlb.pageMask >>> 0) & consts.TLBHI_VPN2MASK) >>> 0
+    tlb.entryHi = ((cp0[consts.ENTRYHI]>>>0) & (~cp0[consts.PAGEMASK] >>> 0)) >>> 0
 
     switch tlb.pageMask
       when 0x00000000 then tlb.loCompare = 0x00001000 #4k
@@ -601,7 +601,7 @@ C1964jsHelpers = (core, isLittleEndian) ->
 
   @buildTLBHelper = (start, end, entry, mask, clear) ->
     if (entry & 0x3)
-      realAddress = 0x80000000 | ((entry << 6) & (mask >> 1))
+      realAddress = (0x80000000 | (((entry << 6)>>>0) & (mask >>> 1))) >>> 0
       lend = end>>>12
       i = start>>>12
 
@@ -611,15 +611,15 @@ C1964jsHelpers = (core, isLittleEndian) ->
           i++
       else while i < lend
         real = (realAddress + (i << 12) - start) & 0x1fffffff
-        @core.physRegion[i] = real >>> 12
+        @core.physRegion[i] = real >>> 16
         i++
     return
 
   @buildTLB = (tlb, index, clear) ->
     #calculate the mapped address range that this TLB entry is mapping
-    lowest = tlb.entryHi & 0xffffff00  #Don't support ASID field
-    middle = lowest + tlb.loCompare
-    highest = lowest + tlb.loCompare * 2
+    lowest = (tlb.entryHi & 0xffffff00) >>> 0  #Don't support ASID field
+    middle = (lowest + tlb.loCompare) >>> 0
+    highest = (lowest + tlb.loCompare * 2) >>> 0
 
     @buildTLBHelper lowest, middle, tlb.entryLo0, tlb.myHiMask, clear
     @buildTLBHelper middle, highest, tlb.entryLo1, tlb.myHiMask, clear
@@ -664,7 +664,7 @@ C1964jsHelpers = (core, isLittleEndian) ->
 
     cp0[consts.PAGEMASK] = tlb[index].pageMask
     cp0[consts.ENTRYHI] = tlb[index].entryHi
-    cp0[consts.ENTRYHI] &= ~tlb[index].pageMask
+    cp0[consts.ENTRYHI] &= (~tlb[index].pageMask >>> 0)
     cp0[consts.ENTRYLO1] = tlb[index].entryLo1
     cp0[consts.ENTRYLO0] = tlb[index].entryLo0
     return
