@@ -298,10 +298,10 @@ class C1964jsEmulator
     @interrupts.checkInterrupts()
     if @m >= 0
       @repaintWrapper()
-      @m = -625000*2
-      @cp0[consts.COUNT] += 625000
+      @cp0[consts.COUNT] += 625000*2
       @interrupts.triggerCompareInterrupt 0, false
       @interrupts.triggerVIInterrupt 0, false
+      @m = -625000
       @interrupts.processException @p
     else if (@cp0[consts.CAUSE] & @cp0[consts.STATUS] & 0x0000FF00) isnt 0
       @interrupts.setException consts.EXC_INT, 0, @p, false

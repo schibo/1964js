@@ -72,7 +72,7 @@ C1964jsVideoHLE = (core, glx) ->
       @core.showFB = false
     @core.webGL.beginDList()
     @dlParserProcess()
-    
+
     #this.core.interrupts.triggerDPInterrupt(0, false);
     @core.interrupts.triggerSPInterrupt 0, false
 
@@ -87,14 +87,14 @@ C1964jsVideoHLE = (core, glx) ->
     @trivertices = []
     @triangleVertexPositionBuffer.numItems = 0
     @gRSP.numVertices = 0
-    
+
     #see RSP_Parser.cpp
     #TODO: purge old textures
     #TODO: stats
     #TODO: force screen clear
     #TODO: set vi scales
     @renderReset()
-    
+
     #TODO: render reset
     #TODO: begin rendering
     #TODO: set viewport
@@ -113,7 +113,7 @@ C1964jsVideoHLE = (core, glx) ->
     @videoLog "finished dlist"
     @core.interrupts.triggerSPInterrupt 0, false
     return
-  
+
   #TODO: end rendering
   C1964jsVideoHLE::RDP_GFX_PopDL = ->
     @dlistStackPointer -= 1
@@ -418,6 +418,7 @@ C1964jsVideoHLE = (core, glx) ->
     #this.texImg.addr = 0;
     @renderer.texTri 0, 0, 256, 256, 0, 0, 0, 0, 7, @core.memory.rdramUint8Array, @texImg
     @videoLog "TODO: RSP_GBI1_Texture"
+    return
 
   #test for dummy gray textures
   #create a heap of dummy texture mem.
@@ -453,18 +454,26 @@ C1964jsVideoHLE = (core, glx) ->
     v1 = @getGbi0Tri1V1(pc) / @gRSP.vertexMult
     v2 = @getGbi0Tri1V2(pc) / @gRSP.vertexMult
     @prepareTriangle v2, v1, v0
-    
-    #todo: loop here and make only one draw call when the model is built
-    if @core.settings.wireframe is true
-      @drawScene false, 7
-    else
-      @drawScene true, 7
+  
+    cmd = @getCommand(pc+8)
+    func = @currentMicrocodeMap[cmd]
 
-    #clear vertices for another shape
-    @vertices = []
-    @trivertices = []
-    @triangleVertexPositionBuffer.numItems = 0
-    @gRSP.numVertices = 0
+    if @dlistStackPointer >= 0
+      if @dlistStack[@dlistStackPointer].countdown is 0
+        if @dlistStackPointer - 1 < 0
+          @drawScene(false, 7)
+          return
+
+    if func isnt "RSP_GBI1_Tri1"
+      if @core.settings.wireframe is true
+        @drawScene false, 7
+      else
+        @drawScene true, 7
+
+      @vertices = []
+      @trivertices = []
+      @triangleVertexPositionBuffer.numItems = 0
+      @gRSP.numVertices = 0
     return
 
   C1964jsVideoHLE::RSP_GBI1_Noop = (pc) ->
@@ -659,7 +668,8 @@ C1964jsVideoHLE = (core, glx) ->
     @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexPositionBuffer
     @gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(@trivertices), @gl.STATIC_DRAW
     @gl.vertexAttribPointer @core.webGL.triangleShaderProgram.vertexPositionAttribute, @triangleVertexPositionBuffer.itemSize, @gl.FLOAT, false, 0, 0
-    @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexTextureCoordBuffer
+    #@gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexTextureCoordBuffer
+    #@gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(@triTextureCoords), @gl.STATIC_DRAW
     @gl.vertexAttribPointer @core.webGL.triangleShaderProgram.textureCoordAttribute, @triangleVertexTextureCoordBuffer.itemSize, @gl.FLOAT, false, 0, 0
     if useTexture is true
       @gl.activeTexture @gl.TEXTURE0
@@ -669,7 +679,7 @@ C1964jsVideoHLE = (core, glx) ->
     #  this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
     @core.webGL.setMatrixUniforms @core.webGL.triangleShaderProgram
     if @core.settings.wireframe is true
-      @gl.drawArrays @gl.LINE_LOOP, 0, @triangleVertexPositionBuffer.numItems
+      @gl.drawArrays @gl.LINES, 0, @triangleVertexPositionBuffer.numItems
     else
       @gl.drawArrays @gl.TRIANGLES, 0, @triangleVertexPositionBuffer.numItems
     return

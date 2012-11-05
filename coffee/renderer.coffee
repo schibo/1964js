@@ -192,9 +192,9 @@ C1964jsRenderer = (settings, glx, webGL) ->
     gl.bindBuffer gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer
     webGL.setMatrixUniforms webGL.tileShaderProgram
     if settings.wireframe is false
-      gl.drawElements gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0
+      gl.drawElements gl.LINE_STRIP, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0
     else
-      gl.drawElements gl.LINE_LOOP, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0
+      gl.drawElements gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0
     return
   return this
 #hack global space until we export classes properly
