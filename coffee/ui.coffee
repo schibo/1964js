@@ -16,7 +16,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.###
 #todo: refactor ui.coffee to remove @ globals.
 
-document.getElementById("user_panel").className = "show"
 reader = undefined
 @progress = document.querySelector(".percent")
 alertMessage = ""
@@ -87,6 +86,7 @@ uncompressAndRun = (romPath, response) ->
   return
 
 @start1964 = (settings) ->
+  document.getElementById("user_panel").className = "show"
   @i1964js = new C1964jsEmulator(settings)  if not @i1964js? or @i1964js is `undefined`
   vars = getUrlVars()
   romPath = undefined
