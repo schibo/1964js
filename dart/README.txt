@@ -1,0 +1,1 @@
+In this directory is the source code to an experimental Dart project. Currently it doesn't do much, but I am considering porting 1964js to Dart and may come back to this project in the future.
