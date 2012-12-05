@@ -324,10 +324,12 @@ class C1964jsEmulator
     @runLoop r, h
     return
 
-  stopEmulator: ->
+  #make way for another 1964 instance. cleanup old scripts written to the page.
+  stopEmulatorAndCleanup: ->
     @stopCompiling = true
     @terminate = true
-    @log "stopEmulator"
+    @log "stopEmulatorAndCleanup"
+    @flushDynaCache()
     return
 
   #clearInterval(interval);

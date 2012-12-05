@@ -16,6 +16,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.###
 #todo: refactor ui.coffee to remove @ globals.
 
+g_settings = undefined
 reader = undefined
 @progress = document.querySelector(".percent")
 alertMessage = ""
@@ -51,11 +52,16 @@ getUrlVars = ->
 
 initTryCatch = (buffer) ->
   try
+    #cleanup old compiled code on page if exists
+    if @i1964js isnt `undefined` and @i1964js?
+      @i1964js.stopEmulatorAndCleanup()
+
+    @i1964js = new C1964jsEmulator(g_settings)
     @i1964js.init buffer
   catch e
     if @i1964js isnt `undefined` and @i1964js?
       @i1964js.terminate = true
-      throw e
+    throw e
   return
 
 uncompressAndRun = (romPath, response) ->
@@ -86,8 +92,8 @@ uncompressAndRun = (romPath, response) ->
   return
 
 @start1964 = (settings) ->
+  g_settings = settings
   document.getElementById("user_panel").className = "show"
-  @i1964js = new C1964jsEmulator(settings)  if not @i1964js? or @i1964js is `undefined`
   vars = getUrlVars()
   romPath = undefined
   i = 0
@@ -99,8 +105,8 @@ uncompressAndRun = (romPath, response) ->
     xhr.open "GET", romPath, true
     xhr.responseType = "arraybuffer"
     xhr.send()
-    xhr.onload = (e) ->
-      uncompressAndRun romPath, e.target.response, @i1964js
+    xhr.onload = (e) =>
+      uncompressAndRun romPath, e.target.response
   return
 
 #Check for the various File API support.
@@ -171,7 +177,7 @@ handleFileSelect = (evt) ->
       @progress.textContent = "100%"
     setTimeout "document.getElementById('progress_bar').className='';document.getElementById('user_panel').className='';", 1000  unless @progressBar is `undefined`
     #todo: add zip support (from index.html)
-    uncompressAndRun fileName, reader.result, @i1964js
+    uncompressAndRun fileName, reader.result
     return
   
   # Read in the file as an array buffer.

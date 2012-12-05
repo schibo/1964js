@@ -308,7 +308,6 @@ C1964jsMemory = (core) ->
 
   @writeDummy = (that, setFn, val, a) ->
     log "writing to invalid memory at " + dec2hex(a)
-    #stopEmulator();
     off_ = a & 0x0000fffc
     setFn that.dummyReadWriteUint8Array, off_, val
     return
