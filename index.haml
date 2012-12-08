@@ -124,7 +124,7 @@
         %a{:href => "http://hulkholden.github.com/n64js/"} [Try n64js too!]
         %h1
           1964js
-          %div{:style => "font-size: 10px;"} v0.0.16
+          %div{:style => "font-size: 10px;"} v0.0.17
           %select{:onchange => "if (this.value !== 'Demos') window.open(this.value, '_self');", :style => "vertical-align: middle;"}
             %option{:value => "Demos"} Demos
             %option{:value => "?rom=unofficial_roms/rotate.zip"} Rotate
@@ -159,7 +159,7 @@
         end
       end
       if outputMode != "develop"
-        puts "    <script src = 'lib/1964js-0.0.16.min.js'></script>"
+        puts "    <script src = 'lib/1964js-0.0.17.min.js'></script>"
       else
         puts "<script src = 'obj/constants.js'></script>"
         puts "<script src = 'lib/bitjs/io.js'></script>"
@@ -175,6 +175,7 @@
         puts "<script src = 'obj/keyboard.js'></script>"        
         puts "<script src = 'obj/memory.js'></script>"
         puts "<script src = 'obj/gen.js'></script>"
+        puts "<script src = 'obj/audio.js'></script>"        
         puts "<script src = 'obj/dma.js'></script>"
         puts "<script src = 'obj/interrupts.js'></script>"
         puts "<script src = 'lib/glMatrix-0.9.5.min.js'></script>"

@@ -100,7 +100,7 @@ class C1964jsEmulator
     @TV_SYSTEM_NTSC = 1
     @TV_SYSTEM_PAL = 0
     @currentHack = 0
-    @kfi = 512
+    @kfi = 3200000
 
     #hook-up system objects
     @memory = new C1964jsMemory(this)

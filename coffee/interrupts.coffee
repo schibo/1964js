@@ -199,8 +199,8 @@ C1964jsInterrupts = (core, cp0) ->
         core.kfi -= 1
         if core.kfi is 0
           core.kfi = 512
-          @setFlag core.memory.aiUint8Array, consts.AI_STATUS_REG, consts.AI_STATUS_FIFO_FULL
-          @triggerAIInterrupt 0, false
+          @clrFlag core.memory.aiUint8Array, consts.AI_STATUS_REG, consts.AI_STATUS_FIFO_FULL
+          #@triggerAIInterrupt 0, false
           #checkInterrupts();
           return 0
         return 0
@@ -471,6 +471,8 @@ C1964jsInterrupts = (core, cp0) ->
     #just clear flags now to get the gfx tasks :)
     #see UpdateFifoFlag in 1964cpp's AudioLLE main.cpp.
     @clrFlag core.memory.aiUint8Array, consts.AI_STATUS_REG, consts.AI_STATUS_FIFO_FULL
+    #@interrupts.triggerAIInterrupt 0, false
+    #core.kfi = 512
     return
 
   @processJpegTask = ->
