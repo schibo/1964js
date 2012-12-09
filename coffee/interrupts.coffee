@@ -98,7 +98,7 @@ C1964jsInterrupts = (core, cp0) ->
   @clearMIInterrupt = (flag) ->
     @clrFlag core.memory.miUint8Array, consts.MI_INTR_REG, flag
     value = core.memory.miUint8Array[consts.MI_INTR_MASK_REG] << 24 | core.memory.miUint8Array[consts.MI_INTR_MASK_REG + 1] << 16 | core.memory.miUint8Array[consts.MI_INTR_MASK_REG + 2] << 8 | core.memory.miUint8Array[consts.MI_INTR_MASK_REG + 3]
-    cp0[consts.CAUSE] &= ~consts.CAUSE_IP3  if (value & (core.memory.getUint32(core.memory.miUint8Array, consts.MI_INTR_REG))) is 0
+    cp0[consts.CAUSE] &= ~consts.CAUSE_IP3  if (value & (core.memory.getUint32(core.memory.miUint8Array, consts.MI_INTR_REG))) isnt 0
     return
 
   #if((cp0[CAUSE] & cp0[STATUS] & SR_IMASK) == 0)
