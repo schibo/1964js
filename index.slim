@@ -133,10 +133,12 @@ html
         |&nbsp;
         a href="http://hulkholden.github.com/n64js/" [Try n64js too!]
 
+
         h1
           | 1964js
           div style="font-size: 10px;"
-            | v0.0.17
+            - version1964 = ENV['version1964']
+            | #{version1964}
           select onchange="if (this.value !== 'Demos') window.open(this.value, '_self');" style="vertical-align: middle;"
             option value="Demos" Demos
             option value="?rom=unofficial_roms/rotate.zip" Rotate
@@ -166,29 +168,29 @@ html
       - if a == "debug.html"
         - outputMode = "debug.html"
     - if outputMode != "debug.html"
-      script src='lib/1964js-0.0.17.min.js'
+      script src='lib/1964js-#{version1964}.min.js'
     - else
-     script src='obj/constants.js'
-     script src='lib/bitjs/io.js'
-     script src='lib/bitjs/archive.js'
-     script src='lib/BigInt.js'
-     script src='lib/closure/goog/base.js'
-     script src='obj/1964.js'
-     script src='obj/helpers.js'
-     script src='obj/opcodeMap.js'
-     script src='obj/boot.js'
-     script src='lib/closure/goog/math/long.js'
-     script src='obj/pif.js'
-     script src='obj/keyboard.js'
-     script src='obj/memory.js'
-     script src='obj/gen.js'
-     script src='obj/audio.js'
-     script src='obj/dma.js'
-     script src='obj/interrupts.js'
-     script src='lib/glMatrix-0.9.5.min.js'
-     script src='lib/webgl-utils.js'
-     script src='obj/renderer.js'
-     script src='obj/videoHLE.js'
-     script src='obj/gfxHelpers.js'
-     script src='obj/ui.js'
-     script src='obj/webGL.js'
+      script src='obj/constants.js'
+      script src='lib/bitjs/io.js'
+      script src='lib/bitjs/archive.js'
+      script src='lib/BigInt.js'
+      script src='lib/closure/goog/base.js'
+      script src='obj/1964.js'
+      script src='obj/helpers.js'
+      script src='obj/opcodeMap.js'
+      script src='obj/boot.js'
+      script src='lib/closure/goog/math/long.js'
+      script src='obj/pif.js'
+      script src='obj/keyboard.js'
+      script src='obj/memory.js'
+      script src='obj/gen.js'
+      script src='obj/audio.js'
+      script src='obj/dma.js'
+      script src='obj/interrupts.js'
+      script src='lib/glMatrix-0.9.5.min.js'
+      script src='lib/webgl-utils.js'
+      script src='obj/renderer.js'
+      script src='obj/videoHLE.js'
+      script src='obj/gfxHelpers.js'
+      script src='obj/ui.js'
+      script src='obj/webGL.js'

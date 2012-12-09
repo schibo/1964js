@@ -1,6 +1,7 @@
 #!/bin/sh
 
-minified="1964js-0.0.17.min.js"
+export version1964="0.0.18"
+minified="1964js-$version1964.min.js"
 
 echo Compiling index.html
 slimrb index.slim --pretty index.html
@@ -13,7 +14,7 @@ else
 fi
 
 echo Compiling debug.html
-slimrb index.slim --pretty debug.html
+slimrb index.slim --pretty debug.html version1964=$version1964
 if test $? -ne 0
 then
     echo Compilation aborted. Please fix slim errors first.
