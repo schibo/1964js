@@ -1,0 +1,193 @@
+html
+  head
+    title 1964 and 1964js Home page
+
+    link href="css/style.css" rel="stylesheet" type="text/css"
+    /link href="lib/jquery-ui/jquery-ui-themes-1.9.2/themes/ui-darkness/" rel="stylesheet" type="text/css"
+
+    javascript:
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-31090418-4']);
+      _gaq.push(['_trackPageview']);
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    meta content="1964js - N64 emulator in JavaScript" property="og:title"
+    meta content="game" property="og:type"
+    meta content="http://www.1964js.com" property="og:url"
+    meta content="https://fbcdn-profile-a.akamaihd.net/hprofile-ak-snc4/373029_274941852620356_1206208449_n.jpg" property="og:image"
+    meta content="1964js" property="og:site_name"
+    meta content="1397141558" property="fb:admins"
+  
+  body alink="#ff0000" bgcolor="#000000" link="#ffa953" onload="start1964({wireframe:true})" text="#ffffff" vlink="#ffa953"
+    #fb-root
+
+    javascript:
+      window.fbAsyncInit = function() {
+        FB.init({
+          appId : '518018268224773', // App ID
+          channelUrl : '//www.1964js.com/channel.html', // Channel File
+          status : true, // check login status
+          cookie : true, // enable cookies to allow the server to access the session
+          xfbml : true // parse XFBML
+        });
+      };
+        
+      (function(d){
+        var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+        if (d.getElementById(id)) {return;}
+        js = d.createElement('script'); js.id = id; js.async = true;
+        js.src = "//connect.facebook.net/en_US/all.js";
+        ref.parentNode.insertBefore(js, ref);
+      }(document));
+
+      (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=518018268224773";
+        fjs.parentNode.insertBefore(js, fjs);
+      }(document, 'script', 'facebook-jssdk'));
+
+    p
+
+    /! shader for wireframe triangles
+    script#color-framebuffer-fragment-shader type="x-shader/x-fragment"
+      | precision mediump float;
+      | varying float v_Dot;
+      | vec4 color = vec4(0.5, 1.0, 0.5, 0.5);
+      | void main(void) {
+      | gl_FragColor = vec4(color.xyz, color.a);
+      | }
+    script#triangle-fragment-shader type="x-shader/x-fragment"
+      | precision mediump float;
+      | varying vec2 vTextureCoord;
+      | uniform sampler2D uSampler;
+      | void main(void) {
+      | gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+      | }
+    script#triangle-vertex-shader type="x-shader/x-vertex"
+      | attribute vec3 aVertexPosition;
+      | attribute vec2 aTextureCoord;
+      | uniform mat4 uMVMatrix;
+      | uniform mat4 uPMatrix;
+      | varying vec2 vTextureCoord;
+      | void main(void) {
+      | gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+      | vTextureCoord = aTextureCoord;
+      | }
+    /! shaders for tiles
+    script#tile-fragment-shader type="x-shader/x-fragment"
+      | precision mediump float;
+      | varying vec2 vTextureCoord;
+      | uniform sampler2D uSampler;
+      | void main(void) {
+      | gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+      | }
+    script#tile-vertex-shader type="x-shader/x-vertex"
+      | attribute vec3 aVertexPosition;
+      | attribute vec2 aTextureCoord;
+      | uniform mat4 uMVMatrix;
+      | uniform mat4 uPMatrix;
+      | varying vec2 vTextureCoord;
+      | void main(void) {
+      | gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+      | vTextureCoord = aTextureCoord;
+      | }
+    div style="position: absolute; left: -600 px; top: -600 px"
+      canvas#pow2Texture0 height="256" width="256"
+      canvas#pow2Texture1 height="256" width="256"
+      canvas#pow2Texture2 height="256" width="256"
+      canvas#pow2Texture3 height="256" width="256"
+      canvas#pow2Texture4 height="256" width="256"
+      canvas#pow2Texture5 height="256" width="256"
+      canvas#pow2Texture6 height="256" width="256"
+      canvas#pow2Texture7 height="256" width="256"
+    canvas#Canvas height="240" width="320"
+    canvas#Canvas3D height="1024" width="1024"
+    #user_panel
+      .header
+        a href="blog"
+          | [Blog]
+        |&nbsp;
+        a href="http://code.google.com/p/1964js"
+          | [Code]
+        |&nbsp;
+        a href="http://hulkholden.github.com/n64js/"
+          | [Try n64js too!]
+        h1
+          | 1964js
+          div style="font-size: 10px;"
+            | v0.0.17
+          select onchange="if (this.value !== 'Demos') window.open(this.value, '_self');" style="vertical-align: middle;"
+            option value="Demos"
+              | Demos
+            option value="?rom=unofficial_roms/rotate.zip"
+              | Rotate
+            option value="?rom=unofficial_roms/chrome.zip"
+              | Chrome
+            option value="?rom=unofficial_roms/dextrose.zip"
+              | Dextrose
+            option value="?rom=unofficial_roms/n64stars.zip"
+              | N64 Stars
+            option value="?rom=unofficial_roms/liner.zip"
+              | Liner (0 to start)
+            option value="?rom=unofficial_roms/hardcode.zip"
+              | Hard Coded
+            option value="?rom=unofficial_roms/sp_crap.zip"
+              | Absolute Crap
+            option value="?rom=unofficial_roms/DynamixReadme.zip"
+              | Dynamix
+        input#wireframe checked="true" type="checkbox"
+          | wireframe
+      .dropShadow
+        .story
+          /!
+            | <div id="progress_bar">
+            | <div class="percent">0%</div>
+            | </div>
+          br/
+          input#files name="file" type="file"
+          | *.v64; *.n64; *.z64
+          /! <button onclick="abortRead();">Cancel read</button>
+          br/
+          br/
+      .footer
+        .fb-like data-colorscheme="dark" data-send="false" data-show-faces="false" data-width="300"
+
+    - outputMode = "release"
+    - ARGV.each do|a|
+      - if a == "develop"
+        - outputMode = "develop"
+    - if outputMode != "develop"
+      | <script src = 'lib/1964js-0.0.17.min.js'></script>
+    - else
+      /| <script src = 'lib/jquery-ui/jquery-1.8.3.js'></script>
+      /| <script src = 'lib/jquery-ui/jquery-ui.js'></script>
+      | <script src = 'obj/constants.js'></script>
+      | <script src = 'lib/bitjs/io.js'></script>
+      | <script src = 'lib/bitjs/archive.js'></script>
+      | <script src = 'lib/BigInt.js'></script>
+      | <script src = 'lib/closure/goog/base.js'></script>
+      | <script src = 'obj/1964.js'></script>
+      | <script src = 'obj/helpers.js'></script>
+      | <script src = 'obj/opcodeMap.js'></script>
+      | <script src = 'obj/boot.js'></script>
+      | <script src = 'lib/closure/goog/math/long.js'></script>
+      | <script src = 'obj/pif.js'></script>
+      | <script src = 'obj/keyboard.js'></script>
+      | <script src = 'obj/memory.js'></script>
+      | <script src = 'obj/gen.js'></script>
+      | <script src = 'obj/audio.js'></script>
+      | <script src = 'obj/dma.js'></script>
+      | <script src = 'obj/interrupts.js'></script>
+      | <script src = 'lib/glMatrix-0.9.5.min.js'></script>
+      | <script src = 'lib/webgl-utils.js'></script>
+      | <script src = 'obj/renderer.js'></script>
+      | <script src = 'obj/videoHLE.js'></script>
+      | <script src = 'obj/gfxHelpers.js'></script>
+      | <script src = 'obj/ui.js'></script>
+      | <script src = 'obj/webGL.js'></script>

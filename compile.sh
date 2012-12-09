@@ -1,8 +1,8 @@
 #!/bin/sh
 
 minified="1964js-0.0.17.min.js"
-
-haml index.haml index.html $@
+slimrb index.slim --pretty index.html
+slimrb debug.slim --pretty debug.html
 
 mkdir obj/
 mkdir css/

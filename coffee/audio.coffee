@@ -25,7 +25,6 @@ class C1964jsAudio
     right = audioBuffer.getChannelData(1)
     i = from
     k = 0
-    k = 0
     while k < length
       left[k] = ((memory.rdramUint8Array[i] << 8 | memory.rdramUint8Array[i + 1]) << 16 >> 16) * PI_2_400
       right[k] = ((memory.rdramUint8Array[i + 2] << 8 | memory.rdramUint8Array[i + 3]) << 16 >> 16) * PI_2_400
