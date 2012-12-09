@@ -160,9 +160,9 @@ html
 
     - outputMode = "release"
     - ARGV.each do|a|
-      - if a == "develop"
-        - outputMode = "develop"
-    - if outputMode != "develop"
+      - if a == "debug.html"
+        - outputMode = "debug.html"
+    - if outputMode != "debug.html"
       | <script src = 'lib/1964js-0.0.17.min.js'></script>
     - else
       /| <script src = 'lib/jquery-ui/jquery-1.8.3.js'></script>
