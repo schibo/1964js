@@ -296,22 +296,30 @@ class C1964jsEmulator
     fnName = undefined
     fn = undefined
     @interrupts.checkInterrupts()
-    if @m >= 0
-      @repaintWrapper()
-      @cp0[consts.COUNT] += 625000*2
-      @interrupts.triggerCompareInterrupt 0, false
-      @interrupts.triggerVIInterrupt 0, false
-      @m = -625000
-      @interrupts.processException @p
-    else if (@cp0[consts.CAUSE] & @cp0[consts.STATUS] & 0x0000FF00) isnt 0
-      @interrupts.setException consts.EXC_INT, 0, @p, false
-      @interrupts.processException @p
-    pc = @p >>> 2
-    fnName = "_" + pc
-    fn = @code[fnName]
-    while @m < 0
-      fn = @decompileBlock(@p) unless fn
-      fn = fn(r, h, @memory, this)
+
+    while 1
+      #trigger
+      if @m >= 0
+        @repaintWrapper()
+        @cp0[consts.COUNT] += 625000*2
+        @interrupts.triggerCompareInterrupt 0, false
+        @interrupts.triggerVIInterrupt 0, false
+        @m = -625000
+        @interrupts.processException @p
+        return
+      else
+        @interrupts.processException @p
+        pc = @p >>> 2
+        fnName = "_" + pc
+        fn = @code[fnName]
+        if @m < -321500
+          while @m < -321500
+            fn = @decompileBlock(@p) unless fn
+            fn = fn(r, h, @memory, this)
+        else
+          while @m < 0
+            fn = @decompileBlock(@p) unless fn
+            fn = fn(r, h, @memory, this)
     this
 
   repaintWrapper: ->
