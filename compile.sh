@@ -14,7 +14,7 @@ else
 fi
 
 echo Compiling debug.html
-slimrb index.slim --pretty debug.html version1964=$version1964
+slimrb index.slim --pretty debug.html
 if test $? -ne 0
 then
     echo Compilation aborted. Please fix slim errors first.
