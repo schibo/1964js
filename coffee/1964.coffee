@@ -306,7 +306,7 @@ class C1964jsEmulator
         @interrupts.triggerVIInterrupt 0, false
         @m = -625000
         @interrupts.processException @p
-        return
+        return this
       else
         @interrupts.processException @p
         pc = @p >>> 2
