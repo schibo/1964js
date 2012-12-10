@@ -311,8 +311,15 @@ class C1964jsEmulator
         @interrupts.processException @p
         pc = @p >>> 2
         fnName = "_" + pc
+
+        #this is broken-up so that we can process more interrupts. If we freeze,
+        #we probably need to split this up more.
         fn = @code[fnName]
-        if @m < -321500
+        if @m < -468750
+          while @m < -468750
+            fn = @decompileBlock(@p) unless fn
+            fn = fn(r, h, @memory, this)
+        else if @m < -321500
           while @m < -321500
             fn = @decompileBlock(@p) unless fn
             fn = fn(r, h, @memory, this)
