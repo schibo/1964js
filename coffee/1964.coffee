@@ -291,42 +291,50 @@ class C1964jsEmulator
     return
 
   runLoop: (r, h) ->
-    @request = requestAnimFrame(@runLoop.bind(this, r, h))  if @terminate is false
-    pc = undefined
-    fnName = undefined
-    fn = undefined
-    @interrupts.checkInterrupts()
+    #setTimeout to be a good citizen..don't allow for the cpu to be pegged at 100%.
+    #8ms wait time will be 50% cpu max if a 60FPS game. Currently set to 10ms idle.
+    setTimeout (=>
+      @request = requestAnimFrame(@runLoop.bind(this, r, h))  if @terminate is false
+      pc = undefined
+      fnName = undefined
+      fn = undefined
+      @interrupts.checkInterrupts()
 
-    while 1
-      #trigger
-      if @m >= 0
-        @repaintWrapper()
-        @cp0[consts.COUNT] += 625000*2
-        @interrupts.triggerCompareInterrupt 0, false
-        @interrupts.triggerVIInterrupt 0, false
-        @m = -625000
-        @interrupts.processException @p
-        return this
-      else
-        @interrupts.processException @p
-        pc = @p >>> 2
-        fnName = "_" + pc
-
-        #this is broken-up so that we can process more interrupts. If we freeze,
-        #we probably need to split this up more.
-        fn = @code[fnName]
-        if @m < -468750
-          while @m < -468750
-            fn = @decompileBlock(@p) unless fn
-            fn = fn(r, h, @memory, this)
-        else if @m < -321500
-          while @m < -321500
-            fn = @decompileBlock(@p) unless fn
-            fn = fn(r, h, @memory, this)
+      while 1
+        #trigger
+        if @m >= 0
+          @repaintWrapper()
+          @cp0[consts.COUNT] += 625000*2
+          @interrupts.triggerCompareInterrupt 0, false
+          @interrupts.triggerVIInterrupt 0, false
+          @m = -625000
+          @interrupts.processException @p
+          return this
         else
-          while @m < 0
-            fn = @decompileBlock(@p) unless fn
-            fn = fn(r, h, @memory, this)
+          @interrupts.processException @p
+          pc = @p >>> 2
+          fnName = "_" + pc
+
+          #this is broken-up so that we can process more interrupts. If we freeze,
+          #we probably need to split this up more.
+          fn = @code[fnName]
+          if @m < -468750
+            while @m < -468750
+              fn = @decompileBlock(@p) unless fn
+              fn = fn(r, h, @memory, this)
+          else if @m < -321500
+            while @m < -321500
+              fn = @decompileBlock(@p) unless fn
+              fn = fn(r, h, @memory, this)
+          else if @m < -160750
+            while @m < -160750
+              fn = @decompileBlock(@p) unless fn
+              fn = fn(r, h, @memory, this)
+          else
+            while @m < 0
+              fn = @decompileBlock(@p) unless fn
+              fn = fn(r, h, @memory, this)
+    ), 10
     this
 
   repaintWrapper: ->
