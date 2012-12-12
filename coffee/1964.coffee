@@ -293,48 +293,52 @@ class C1964jsEmulator
   runLoop: (r, h) ->
     #setTimeout to be a good citizen..don't allow for the cpu to be pegged at 100%.
     #8ms idle time will be 50% cpu max if a 60FPS game is slow.
-    setTimeout (=>
-      @request = requestAnimFrame(@runLoop.bind(this, r, h))  if @terminate is false
-      pc = undefined
-      fnName = undefined
-      fn = undefined
-      @interrupts.checkInterrupts()
+    #setTimeout (=>
+    @request = requestAnimFrame(@runLoop.bind(this, r, h))  if @terminate is false
+    pc = undefined
+    fnName = undefined
+    fn = undefined
+    @interrupts.checkInterrupts()
 
-      while 1
-        #trigger
-        if @m >= 0
-          @repaintWrapper()
-          @cp0[consts.COUNT] += 625000*2
-          @interrupts.triggerCompareInterrupt 0, false
-          @interrupts.triggerVIInterrupt 0, false
-          @m = -625000
-          @interrupts.processException @p
-          return this
-        else
-          @interrupts.processException @p
-          pc = @p >>> 2
-          fnName = "_" + pc
+    while 1
+      #trigger
+      if @m >= 0
+        @repaintWrapper()
+        @cp0[consts.COUNT] += 625000*2
+        @interrupts.triggerCompareInterrupt 0, false
+        @interrupts.triggerVIInterrupt 0, false
+        @m = -625000
+        @interrupts.processException @p
+        break
+      else
+        @interrupts.processException @p
+        pc = @p >>> 2
+        fnName = "_" + pc
 
-          #this is broken-up so that we can process more interrupts. If we freeze,
-          #we probably need to split this up more.
+        #this is broken-up so that we can process more interrupts. If we freeze,
+        #we probably need to split this up more.
+        try
           fn = @code[fnName]
           if @m < -468750
             while @m < -468750
-              fn = @decompileBlock(@p) unless fn
               fn = fn(r, h, @memory, this)
           else if @m < -321500
             while @m < -321500
-              fn = @decompileBlock(@p) unless fn
               fn = fn(r, h, @memory, this)
           else if @m < -160750
             while @m < -160750
-              fn = @decompileBlock(@p) unless fn
               fn = fn(r, h, @memory, this)
           else
             while @m < 0
-              fn = @decompileBlock(@p) unless fn
               fn = fn(r, h, @memory, this)
-    ), 8
+        catch e
+          #so, we really need to know what type of exception this is,
+          #but right now, we're assuming that we need to compile a block due to
+          #an attempt to call an undefined function. Are there standard exception types
+          #in javascript?
+          fn = @decompileBlock(@p)
+          fn = fn(r, h, @memory, this)
+    #), 0
     this
 
   repaintWrapper: ->
@@ -543,10 +547,10 @@ class C1964jsEmulator
     instruction = @memory.loadWord((@p + offset + 4) | 0)
 
     #speed hack
-    if ((instr_index >> 0) is (@p + offset) >> 0) and (instruction is 0)
-      string += "t.m=0;"
-    else
-      string += "t.m+=1.0;"
+    #if ((instr_index >> 0) is (@p + offset) >> 0) and (instruction is 0)
+    #  string += "t.m=0;"
+    #else
+    string += "t.m+=1.0;"
     string += this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     string += "t.p=" + instr_index + ";return t.code." + @getFnName(instr_index) + "}"
 

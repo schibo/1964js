@@ -112,6 +112,7 @@ C1964jsVideoHLE = (core, glx) ->
         @dlistStackPointer -= 1  if @dlistStack[@dlistStackPointer].countdown < 0
     @videoLog "finished dlist"
     @core.interrupts.triggerSPInterrupt 0, false
+    @drawScene(false, 7)
     return
 
   #TODO: end rendering
