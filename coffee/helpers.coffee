@@ -592,11 +592,11 @@ C1964jsHelpers = (core, isLittleEndian) ->
 
       if (clear is true)
         while i < lend
-          @core.physRegion[i] = (i & 0x1ffff) >>> 4
+          @core.memory.physRegion[i] = (i & 0x1ffff) >>> 4
           i++
       else while i < lend
         real = (realAddress + (i << 12) - start) & 0x1fffffff
-        @core.physRegion[i] = real >>> 16
+        @core.memory.physRegion[i] = real >>> 16
         i++
     return
 

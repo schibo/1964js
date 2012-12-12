@@ -281,13 +281,8 @@ class C1964jsEmulator
     lastITLBIndex = 0
     lastDTLBIndex = 0
 
-    #Initialize the TLB Lookup Table
-    @physRegion = new Int16Array(0x100000)
-    i = 0
-    #todo: replace with call to buildTLBHelper clear
-    while i < 0x100000
-      @physRegion[i] = (i & 0x1ffff) >>> 4
-      i++
+    @memory.initPhysRegions()
+
     return
 
   runLoop: (r, h) ->

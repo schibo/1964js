@@ -318,9 +318,9 @@ C1964jsMemory = (core) ->
     #  alert(dec2hex(a))
     
     #uncomment to verify non-tlb lookup.
-    #if dec2hex(a) != dec2hex(((core.physRegion[a>>>12]<<16) | a&0x0000ffff))
-    #  alert dec2hex(a) + ' ' + dec2hex(((core.physRegion[a>>>12]<<16) | a&0x0000ffff))
-    return ((core.physRegion[a>>>12]<<16) | (a&0x0000ffff))
+    #if dec2hex(a) != dec2hex(((physRegion[a>>>12]<<16) | a&0x0000ffff))
+    #  alert dec2hex(a) + ' ' + dec2hex(((physRegion[a>>>12]<<16) | a&0x0000ffff))
+    return ((@physRegion[a>>>12]<<16) | (a&0x0000ffff))
 
   @readTLB = (that, a, getFn) ->
     a = that.virtualToPhysical(a)
@@ -368,6 +368,17 @@ C1964jsMemory = (core) ->
   @initRegion MEMORY_START_GIO, MEMORY_SIZE_GIO, @readGio, @writeGio
   @initRegion MEMORY_START_RAMREGS0, MEMORY_SIZE_RAMREGS0, @readRamRegs0, @writeRamRegs0
   @initRegion MEMORY_START_RAMREGS8, MEMORY_SIZE_RAMREGS8, @readRamRegs8, @writeRamRegs8
+  @physRegion = undefined
+
+  @initPhysRegions = ->
+    #Initialize the TLB Lookup Table
+    @physRegion = new Int16Array(0x100000)
+    i = 0
+    #todo: replace with call to buildTLBHelper clear
+    while i < 0x100000
+      @physRegion[i] = (i & 0x1ffff) >>> 4
+      i++
+    return
 
   #getInt32 and getUint32 are identical. they both return signed.
   @getInt8 = (region, off_) ->
