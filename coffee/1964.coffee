@@ -101,6 +101,7 @@ class C1964jsEmulator
     @TV_SYSTEM_PAL = 0
     @currentHack = 0
     @kfi = 3200000
+    @cnt = 0
 
     #hook-up system objects
     @memory = new C1964jsMemory(this)
@@ -361,7 +362,7 @@ class C1964jsEmulator
     offset = 0
     g = undefined
     s = undefined
-    cnt = 0
+    @cnt = 0
     instruction = undefined
     string = undefined
     fnName = "_" + (pc >>> 2)
@@ -374,13 +375,13 @@ class C1964jsEmulator
     until @stopCompiling
       instruction = @memory.loadWord(pc + offset)
       string += this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction)
-      cnt += 1
+      @cnt += 1
       offset += 4
       throw Error "too many instructions! bailing."  if offset > 10000
     @stopCompiling = false
     
     #close out the function
-    string += "t.m+=" + cnt + ";"
+    string += "t.m+=" + @cnt + ";"
     string += "t.p=" + ((pc + offset) >> 0)
     string += ";return t.code." + @getFnName((pc + offset) >> 0) + "}"
     if @writeToDom is true
@@ -452,7 +453,8 @@ class C1964jsEmulator
     pc = (@p + offset + 4 + (@helpers.soffset_imm(i) << 2)) | 0
     instruction = @memory.loadWord((@p + offset + 4) | 0)
     opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
-    string = opcode + "t.m++;t.p=" + pc + ";return t.code." + @getFnName(pc) + "}"
+    c=@cnt+1
+    string = opcode + "t.m+="+c+";t.p=" + pc + ";return t.code." + @getFnName(pc) + "}"
 
     #if likely and if branch not taken, skip delay slot
     if likely is false
