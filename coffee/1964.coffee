@@ -361,6 +361,7 @@ class C1964jsEmulator
     offset = 0
     g = undefined
     s = undefined
+    cnt = 0
     instruction = undefined
     string = undefined
     fnName = "_" + (pc >>> 2)
@@ -372,12 +373,14 @@ class C1964jsEmulator
       string = "i1964js.code." + fnName + "=function(r, h, m, t){"
     until @stopCompiling
       instruction = @memory.loadWord(pc + offset)
-      string += "t.m+=1.0;" + this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction)
+      string += this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction)
+      cnt += 1
       offset += 4
       throw Error "too many instructions! bailing."  if offset > 10000
     @stopCompiling = false
     
     #close out the function
+    string += "t.m+=" + cnt + ";"
     string += "t.p=" + ((pc + offset) >> 0)
     string += ";return t.code." + @getFnName((pc + offset) >> 0) + "}"
     if @writeToDom is true
@@ -544,7 +547,7 @@ class C1964jsEmulator
     #if ((instr_index >> 0) is (@p + offset) >> 0) and (instruction is 0)
     #  string += "t.m=0;"
     #else
-    string += "t.m+=1.0;"
+    string += "t.m+=1;"
     string += this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     string += "t.p=" + instr_index + ";return t.code." + @getFnName(instr_index) + "}"
 
@@ -559,7 +562,7 @@ class C1964jsEmulator
     instruction = @memory.loadWord((@p + offset + 4) | 0)
     string += this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     pc = (@p + offset + 8) | 0
-    string += "t.m+=1.0;"
+    string += "t.m+=1;"
     string += "t.p=" + instr_index + ";r[31]=" + pc + ";h[31]=" + (pc >> 31) + ";return t.code." + @getFnName(instr_index) + "}"
 
   #should we set the programCounter after the delay slot or before it?
@@ -576,7 +579,7 @@ class C1964jsEmulator
     instruction = @memory.loadWord((@p + offset + 4) | 0)
     opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     string += opcode
-    string += "t.m+=1.0;"
+    string += "t.m+=1;"
     string += "t.p=temp;return t.code[t.getFnName(temp)]}"
     string
 
@@ -590,7 +593,7 @@ class C1964jsEmulator
     instruction = @memory.loadWord((@p + offset + 4) | 0)
     opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     string += opcode
-    string += "t.m+=1.0;"
+    string += "t.m+=1;"
     string += "t.p=temp;return t.code[t.getFnName(temp)]}"
  
   UNUSED: (i) ->
