@@ -290,9 +290,6 @@ class C1964jsEmulator
     #8ms idle time will be 50% cpu max if a 60FPS game is slow.
     #setTimeout (=>
     @request = requestAnimFrame(@runLoop.bind(this, r, h))  if @terminate is false
-    pc = undefined
-    fnName = undefined
-    fn = undefined
     @interrupts.checkInterrupts()
 
     while 1
@@ -315,17 +312,13 @@ class C1964jsEmulator
         try
           fn = @code[fnName]
           if @m < -468750
-            while @m < -468750
-              fn = fn(r, h, @memory, this)
+            @run fn, r, h, -468750
           else if @m < -321500
-            while @m < -321500
-              fn = fn(r, h, @memory, this)
+            @run fn, r, h, -321500
           else if @m < -160750
-            while @m < -160750
-              fn = fn(r, h, @memory, this)
+            @run fn, r, h, -160750
           else
-            while @m < 0
-              fn = fn(r, h, @memory, this)
+            @run fn, r, h, 0
         catch e
           #so, we really need to know what type of exception this is,
           #but right now, we're assuming that we need to compile a block due to
@@ -335,6 +328,12 @@ class C1964jsEmulator
           fn = fn(r, h, @memory, this)
     #), 0
     this
+
+  run: (fn, r, h, max) ->
+    x = max
+    while @m < x
+      fn = fn(r, h, @memory, this)
+    return
 
   repaintWrapper: ->
     @repaint @ctx, @ImDat, @memory.getInt32(@memory.viUint8Array, @memory.viUint8Array, consts.VI_ORIGIN_REG) & 0x00FFFFFF
