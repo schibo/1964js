@@ -334,7 +334,7 @@ class C1964jsEmulator
             while @m < 0
               fn = @decompileBlock(@p) unless fn
               fn = fn(r, h, @memory, this)
-    ), 10
+    ), 8
     this
 
   repaintWrapper: ->

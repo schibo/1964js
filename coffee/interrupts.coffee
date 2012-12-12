@@ -29,12 +29,12 @@ C1964jsInterrupts = (core, cp0) ->
   @processException = (pc, isFromDelaySlot) ->
     return false  if (cp0[consts.STATUS] & consts.IE) is 0
     if (cp0[consts.STATUS] & consts.EXL) isnt 0
-      log "nested exception"
+      #log "nested exception"
       return false
     cp0[consts.CAUSE] &= 0xFFFFFF83 #Clear exception code flags
     cp0[consts.STATUS] |= consts.EXL
     if isFromDelaySlot is true
-      log "Exception happens in CPU delay slot, pc=" + pc
+      #log "Exception happens in CPU delay slot, pc=" + pc
       cp0[consts.CAUSE] |= consts.BD
       cp0[consts.EPC] = pc - 4
     
@@ -117,7 +117,7 @@ C1964jsInterrupts = (core, cp0) ->
         #return currentHack;
         return ((core.memory.getInt32(core.memory.viUint8Array, core.memory.viUint8Array, offset) & 0xfffffffe) + currentHack) | 0
       else
-        log "unhandled video interface for vi offset: " + offset
+        #log "unhandled video interface for vi offset: " + offset
         return core.memory.getInt32 core.memory.viUint8Array, core.memory.viUint8Array, offset
 
   @writeVI = (offset, value, pc, isFromDelaySlot) ->
@@ -155,7 +155,7 @@ C1964jsInterrupts = (core, cp0) ->
         @writePIStatusReg value, pc, isFromDelaySlot
       else
         core.memory.setInt32 core.memory.piUint8Array, offset, value
-        log "unhandled pi write: " + offset
+        #log "unhandled pi write: " + offset
     return
 
   @writeSI = (offset, value, pc, isFromDelaySlot) ->
@@ -172,7 +172,7 @@ C1964jsInterrupts = (core, cp0) ->
         core.dma.copyDramToSi pc, isFromDelaySlot
       else
         core.memory.setInt32 core.memory.siUint8Array, offset, value
-        log "unhandled si write: " + offset
+        #log "unhandled si write: " + offset
     return
 
   @readSI = (offset) ->
@@ -181,7 +181,7 @@ C1964jsInterrupts = (core, cp0) ->
         @readSIStatusReg()
         return core.memory.getInt32 core.memory.siUint8Array, core.memory.siUint8Array, offset
       else
-        log "unhandled si read: " + offset
+        #log "unhandled si read: " + offset
         return core.memory.getInt32 core.memory.siUint8Array, core.memory.siUint8Array, offset
     return
 
@@ -209,7 +209,7 @@ C1964jsInterrupts = (core, cp0) ->
       when consts.AI_STATUS_REG
         return core.memory.getInt32 core.memory.aiUint8Array, core.memory.aiUint8Array, offset
       else
-        log "unhandled read ai reg " + offset
+        #log "unhandled read ai reg " + offset
         return core.memory.getInt32 core.memory.aiUint8Array, core.memory.aiUint8Array, offset
     return
 
@@ -243,7 +243,7 @@ C1964jsInterrupts = (core, cp0) ->
       #do nothing. read-only
       else
         core.memory.setInt32 core.memory.miUint8Array, offset, value
-        log "unhandled mips interface for mi offset: " + offset
+        #log "unhandled mips interface for mi offset: " + offset
     return
 
   @readSPReg1 = (offset) ->
@@ -255,7 +255,7 @@ C1964jsInterrupts = (core, cp0) ->
         core.memory.setInt32 core.memory.spReg1Uint8Array, offset, 1
         return temp
       else
-        log "unhandled read sp reg1 " + offset
+        #log "unhandled read sp reg1 " + offset
         return core.memory.getInt32 core.memory.spReg1Uint8Array, core.memory.spReg1Uint8Array, offset
     return
 
@@ -273,17 +273,17 @@ C1964jsInterrupts = (core, cp0) ->
         core.dma.copyDramToSp pc, isFromDelaySlot
       else
         core.memory.setInt32 core.memory.spReg1Uint8Array, offset, value
-        log "unhandled sp reg1 write: " + offset
+        #log "unhandled sp reg1 write: " + offset
     return
 
   @writeSPReg2 = (offset, value, pc, isFromDelaySlot) ->
     switch offset
       when consts.SP_PC_REG
-        log "writing sp pc: " + value
+        #log "writing sp pc: " + value
         core.memory.setInt32 core.memory.spReg2Uint8Array, offset, value & 0x00000FFC
       else
         core.memory.setInt32 core.memory.spReg2Uint8Array, offset, value
-        log "unhandled sp reg2 write: " + offset
+        #log "unhandled sp reg2 write: " + offset
     return
 
   #Set flag for memory register
@@ -390,7 +390,7 @@ C1964jsInterrupts = (core, cp0) ->
       if (core.memory.getUint32(core.memory.spReg1Uint8Array, consts.SP_STATUS_REG) & consts.SP_STATUS_BROKE) is 0 #bugfix.
         @clrFlag core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_HALT
         spDmemTask = core.memory.getUint32(core.memory.spMemUint8Array, consts.SP_DMEM_TASK)
-        log "SP Task triggered. SP_DMEM_TASK=" + spDmemTask
+        #log "SP Task triggered. SP_DMEM_TASK=" + spDmemTask
         @runSPTask spDmemTask
     return
 
@@ -425,7 +425,7 @@ C1964jsInterrupts = (core, cp0) ->
         break
       else
         core.memory.setInt32 core.memory.dpcUint8Array, offset, value
-        log "unhandled dpc write: " + offset
+        #log "unhandled dpc write: " + offset
     return
 
   @writePIStatusReg = (value, pc, isFromDelaySlot) ->
@@ -450,7 +450,8 @@ C1964jsInterrupts = (core, cp0) ->
     #  throw 'todo: run hle task';
     switch spDmemTask
       when consts.BAD_TASK
-        log "bad sp task"
+        #log "bad sp task"
+        break
       when consts.GFX_TASK
         core.videoHLE = new C1964jsVideoHLE(core, core.webGL.gl)  if core.videoHLE is null or core.videoHLE is `undefined`
         core.settings.wireframe = document.getElementById("wireframe").checked
@@ -460,13 +461,14 @@ C1964jsInterrupts = (core, cp0) ->
       when consts.JPG_TASK
         @processJpegTask()
       else
-        log "unhandled sp task: " + spDmemTask
+        #log "unhandled sp task: " + spDmemTask
+        break
     @checkInterrupts()
     @triggerRspBreak()
     return
 
   @processAudioList = ->
-    log "todo: process Audio List"
+    #log "todo: process Audio List"
     
     #just clear flags now to get the gfx tasks :)
     #see UpdateFifoFlag in 1964cpp's AudioLLE main.cpp.
@@ -476,11 +478,11 @@ C1964jsInterrupts = (core, cp0) ->
     return
 
   @processJpegTask = ->
-    log "todo: processJpegTask"
+    #log "todo: processJpegTask"
     return
 
   @processRDPList = ->
-    log "todo: process rdp list"
+    #log "todo: process rdp list"
     return
 
   @checkInterrupts = ->
