@@ -316,8 +316,8 @@ class C1964jsEmulator
             @run fn, r, h, -468750
           else if @m < -321500
             @run fn, r, h, -321500
-          else if @m < -160750
-            @run fn, r, h, -160750
+          else if @m < -156250
+            @run fn, r, h, -156250
           else
             @run fn, r, h, 0
         catch e
@@ -546,10 +546,10 @@ class C1964jsEmulator
     instruction = @memory.loadWord((@p + offset + 4) | 0)
 
     #speed hack
-    #if ((instr_index >> 0) is (@p + offset) >> 0) and (instruction is 0)
-    #  string += "t.m=0;"
-    #else
-    string += "t.m+=1;"
+    if ((instr_index >> 0) is (@p + offset) >> 0) and (instruction is 0)
+      string += "t.m+=156250;t.m=Math.floor(t.m/156250);t.m*=156250;"
+    else
+      string += "t.m+=1;"
     string += this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     string += "t.p=" + instr_index + ";return t.code." + @getFnName(instr_index) + "}"
 
