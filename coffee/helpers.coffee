@@ -167,7 +167,7 @@ C1964jsHelpers = (core, isLittleEndian) ->
     ((i & 0x0000ffff) << 16) >> 16
 
   @setVAddr = (i) ->
-    "t.vAddr[0]=" + @RS(i) + "+" + @soffset_imm(i) + ";"
+    "var vAddr=(" + @RS(i) + "+" + @soffset_imm(i) + ")>>0;"
 
   @fn = (i) ->
     i & 0x3f
@@ -565,21 +565,21 @@ C1964jsHelpers = (core, isLittleEndian) ->
   @writeTLBEntry = (tlb, cp0) ->
     g = cp0[consts.ENTRYLO0] & cp0[consts.ENTRYLO1] & consts.TLBLO_G
 
-    tlb.pageMask[0] = cp0[consts.PAGEMASK] >>> 0
-    tlb.entryLo1[0] = (cp0[consts.ENTRYLO1] | g) >>> 0
-    tlb.entryLo0[0] = (cp0[consts.ENTRYLO0] | g) >>> 0
-    tlb.myHiMask[0] = ((~tlb.pageMask[0] >>> 0) & consts.TLBHI_VPN2MASK) >>> 0
-    tlb.entryHi[0] = ((cp0[consts.ENTRYHI]>>>0) & (~cp0[consts.PAGEMASK] >>> 0)) >>> 0
+    tlb.pageMask = cp0[consts.PAGEMASK] >>> 0
+    tlb.entryLo1 = (cp0[consts.ENTRYLO1] | g) >>> 0
+    tlb.entryLo0 = (cp0[consts.ENTRYLO0] | g) >>> 0
+    tlb.myHiMask = ((~tlb.pageMask >>> 0) & consts.TLBHI_VPN2MASK) >>> 0
+    tlb.entryHi = ((cp0[consts.ENTRYHI]>>>0) & (~cp0[consts.PAGEMASK] >>> 0)) >>> 0
 
-    switch tlb.pageMask[0]
-      when 0x00000000 then tlb.loCompare[0] = 0x00001000 #4k
-      when 0x00006000 then tlb.loCompare[0] = 0x00004000 #16k
-      when 0x0001e000 then tlb.loCompare[0] = 0x00010000 #64k
-      when 0x0007e000 then tlb.loCompare[0] = 0x00040000 #256k
-      when 0x001fe000 then tlb.loCompare[0] = 0x00100000 #1M
-      when 0x007fe000 then tlb.loCompare[0] = 0x00400000 #4M
-      when 0x01ffe000 then tlb.loCompare[0] = 0x01000000 #16M
-      else console.log "ERROR: tlbwi - invalid page size" + tlb.pageMask[0]
+    switch tlb.pageMask
+      when 0x00000000 then tlb.loCompare = 0x00001000 #4k
+      when 0x00006000 then tlb.loCompare = 0x00004000 #16k
+      when 0x0001e000 then tlb.loCompare = 0x00010000 #64k
+      when 0x0007e000 then tlb.loCompare = 0x00040000 #256k
+      when 0x001fe000 then tlb.loCompare = 0x00100000 #1M
+      when 0x007fe000 then tlb.loCompare = 0x00400000 #4M
+      when 0x01ffe000 then tlb.loCompare = 0x01000000 #16M
+      else console.log "ERROR: tlbwi - invalid page size" + tlb.pageMask
 
     @newtlb = true
     return
@@ -602,20 +602,20 @@ C1964jsHelpers = (core, isLittleEndian) ->
 
   @buildTLB = (tlb, index, clear) ->
     #calculate the mapped address range that this TLB entry is mapping
-    lowest = (tlb.entryHi[0] & 0xffffff00) >>> 0  #Don't support ASID field
-    middle = (lowest + tlb.loCompare[0]) >>> 0
-    highest = (lowest + tlb.loCompare[0] * 2) >>> 0
+    lowest = (tlb.entryHi & 0xffffff00) >>> 0  #Don't support ASID field
+    middle = (lowest + tlb.loCompare) >>> 0
+    highest = (lowest + tlb.loCompare * 2) >>> 0
 
-    @buildTLBHelper lowest, middle, tlb.entryLo0[0], tlb.myHiMask[0], clear
-    @buildTLBHelper middle, highest, tlb.entryLo1[0], tlb.myHiMask[0], clear
+    @buildTLBHelper lowest, middle, tlb.entryLo0, tlb.myHiMask, clear
+    @buildTLBHelper middle, highest, tlb.entryLo1, tlb.myHiMask, clear
     return
 
   @refreshTLB = (tlb, cp0) ->
-    @buildTLB tlb, true if tlb.valid[0] is 1 #clear old tlb
+    @buildTLB tlb, true if tlb.valid is 1 #clear old tlb
     @writeTLBEntry tlb, cp0
-    tlb.valid[0] = 0
-    tlb.valid[0] = 1 if cp0[consts.ENTRYLO1] & consts.TLBLO_V or cp0[consts.ENTRYLO0] & consts.TLBLO_V
-    @buildTLB tlb if tlb.valid[0] is 1
+    tlb.valid = 0
+    tlb.valid = 1 if cp0[consts.ENTRYLO1] & consts.TLBLO_V or cp0[consts.ENTRYLO0] & consts.TLBLO_V
+    @buildTLB tlb if tlb.valid is 1
     return
 
   @inter_tlbwi = (index, tlb, cp0) ->
@@ -630,8 +630,8 @@ C1964jsHelpers = (core, isLittleEndian) ->
     cp0[consts.INDEX] |= 0x80000000 #initially set high-order bit
     idx = 0
     while idx < 31
-      if (tlb[idx].entryHi[0] & tlb[idx].myHiMask[0]) is (cp0[consts.ENTRYHI] & tlb[idx].myHiMask[0])
-        if (tlb[idx].entryLo0[0] & consts.TLBLO_G & tlb[idx].entryLo1[0]) or (tlb[idx].entryHi[0] & consts.TLBHI_PIDMASK) is (cp0[consts.ENTRYHI] & consts.TLBHI_PIDMASK)
+      if (tlb[idx].entryHi & tlb[idx].myHiMask) is (cp0[consts.ENTRYHI] & tlb[idx].myHiMask)
+        if (tlb[idx].entryLo0 & consts.TLBLO_G & tlb[idx].entryLo1) or (tlb[idx].entryHi & consts.TLBHI_PIDMASK) is (cp0[consts.ENTRYHI] & consts.TLBHI_PIDMASK)
           cp0[consts.INDEX] = idx
           break
       idx++
@@ -644,11 +644,11 @@ C1964jsHelpers = (core, isLittleEndian) ->
       console.log "ERROR: tlbr received an invalid index=%08X", index
       return
 
-    cp0[consts.PAGEMASK] = tlb[index].pageMask[0]
-    cp0[consts.ENTRYHI] = tlb[index].entryHi[0]
-    cp0[consts.ENTRYHI] &= (~tlb[index].pageMask[0] >>> 0)
-    cp0[consts.ENTRYLO1] = tlb[index].entryLo1[0]
-    cp0[consts.ENTRYLO0] = tlb[index].entryLo0[0]
+    cp0[consts.PAGEMASK] = tlb[index].pageMask
+    cp0[consts.ENTRYHI] = tlb[index].entryHi
+    cp0[consts.ENTRYHI] &= (~tlb[index].pageMask >>> 0)
+    cp0[consts.ENTRYLO1] = tlb[index].entryLo1
+    cp0[consts.ENTRYLO0] = tlb[index].entryLo0
     return
   this
 
