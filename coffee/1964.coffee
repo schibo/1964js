@@ -92,7 +92,8 @@ class C1964jsEmulator
     @SAMPLE_RATE = 40000
     @isLittleEndian = 0
     @isBigEndian = 0
-    @m = -625000 #magic_number
+    @interval = 0
+    @m = -156250 #which is magic_number / (interval+1)
     @forceRepaint = false #presumably origin reg doesn't change because not double or triple-buffered (single-buffered)
     #main run loop
     @doOnce = 0
@@ -131,7 +132,8 @@ class C1964jsEmulator
     @dma.startTime = 0
     @kfi = 512
     @doOnce = 0
-    @m = -625000
+    @interval = 0
+    @m = -156250 #which is magic_number / (interval+1)
     @flushDynaCache()
     @showFB = true
     @webGL.hide3D()
@@ -296,13 +298,16 @@ class C1964jsEmulator
     while 1
       #trigger
       if @m >= 0
-        @repaintWrapper()
-        @cp0[consts.COUNT] += 625000*2
-        @interrupts.triggerCompareInterrupt 0, false
-        @interrupts.triggerVIInterrupt 0, false
-        @m = -625000
-        @interrupts.processException @p
-        break
+        @interval += 1
+        @m = -156250 # which is -625000 / (interval+1)
+        if @interval is 3
+          @interval = 0
+          @repaintWrapper()
+          @cp0[consts.COUNT] += 625000*2 #todo: set count to count + @m*2 when count is requested in code
+          @interrupts.triggerCompareInterrupt 0, false
+          @interrupts.triggerVIInterrupt 0, false
+          @interrupts.processException @p
+          break
       else
         @interrupts.processException @p
         pc = @p >>> 2
@@ -312,14 +317,7 @@ class C1964jsEmulator
         #we probably need to split this up more.
         try
           fn = @code[fnName]
-          if @m < -468750
-            @run fn, r, h, -468750
-          else if @m < -321500
-            @run fn, r, h, -321500
-          else if @m < -156250
-            @run fn, r, h, -156250
-          else
-            @run fn, r, h, 0
+          @run fn, r, h
         catch e
           #so, we really need to know what type of exception this is,
           #but right now, we're assuming that we need to compile a block due to
@@ -330,9 +328,8 @@ class C1964jsEmulator
     #), 0
     this
 
-  run: (fn, r, h, max) ->
-    x = max
-    while @m < x
+  run: (fn, r, h) ->
+    while @m < 0
       fn = fn(r, h, @memory, this)
     return
 
@@ -547,7 +544,7 @@ class C1964jsEmulator
 
     #speed hack
     if ((instr_index >> 0) is (@p + offset) >> 0) and (instruction is 0)
-      string += "t.m+=156250;t.m=Math.floor(t.m/156250);t.m*=156250;"
+      string += "t.m=0;"
     else
       string += "t.m+=1;"
     string += this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
