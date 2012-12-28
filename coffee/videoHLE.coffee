@@ -455,7 +455,12 @@ C1964jsVideoHLE = (core, glx) ->
     v1 = @getGbi0Tri1V1(pc) / @gRSP.vertexMult
     v2 = @getGbi0Tri1V2(pc) / @gRSP.vertexMult
     didSucceed = @prepareTriangle v1, v2, v0
-    
+    if didSucceed is false
+      @drawScene(false, 7)
+      @triangleVertexPositionBuffer.numItems = 0
+      @gRSP.numVertices = 0
+      return
+
     cmd = @getCommand(pc+8)
     func = @currentMicrocodeMap[cmd]
 

@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 `/** @const */ var D_PAD = 0x00040000`
 `/** @const */ var U_PAD = 0x00080000`
 `/** @const */ var START_BUTTON = 0x10000000`
-`/** @const */ var B_BUTTON = 0x00200000`
+`/** @const */ var UNKNOWN_BUTTON = 0x00200000`
 `/** @const */ var R_TRIG = 0x00400000`
 `/** @const */ var L_TRIG = 0x00800000`
 `/** @const */ var R_CBUTTON = 0x01000000`
@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 `/** @const */ var D_CBUTTON = 0x04000000`
 `/** @const */ var U_CBUTTON = 0x08000000`
 `/** @const */ var A_BUTTON = 0x80000000 | 0`
+`/** @const */ var B_BUTTON = 0x40000000`
 `/** @const */ var Z_TRIG = 0x20000000`
 `/** @const */ var Y_AXIS = 0x000000FF`
 `/** @const */ var X_AXIS = 0x0000FF00`
