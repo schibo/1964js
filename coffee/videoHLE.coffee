@@ -454,8 +454,8 @@ C1964jsVideoHLE = (core, glx) ->
     v0 = @getGbi0Tri1V0(pc) / @gRSP.vertexMult
     v1 = @getGbi0Tri1V1(pc) / @gRSP.vertexMult
     v2 = @getGbi0Tri1V2(pc) / @gRSP.vertexMult
-    @prepareTriangle v2, v1, v0
-  
+    didSucceed = @prepareTriangle v1, v2, v0
+    
     cmd = @getCommand(pc+8)
     func = @currentMicrocodeMap[cmd]
 
@@ -465,14 +465,13 @@ C1964jsVideoHLE = (core, glx) ->
           @drawScene(false, 7)
           return
 
-    if func isnt "RSP_GBI1_Tri1"
+    if func[12] isnt "1"
       if @core.settings.wireframe is true
         @drawScene false, 7
       else
-        @drawScene true, 7
+        #@drawScene true, 7 #not ready yet
+        @drawScene false, 7
 
-      @vertices = []
-      @trivertices = []
       @triangleVertexPositionBuffer.numItems = 0
       @gRSP.numVertices = 0
     return
@@ -659,7 +658,8 @@ C1964jsVideoHLE = (core, glx) ->
     true
 
   C1964jsVideoHLE::drawScene = (useTexture, tileno) ->
-    @core.webGL.switchShader @core.webGL.triangleShaderProgram, @core.settings.wireframe
+    #@core.webGL.switchShader @core.webGL.triangleShaderProgram, @core.settings.wireframe #not ready yet
+    @core.webGL.switchShader @core.webGL.triangleShaderProgram, true
 
     @gl.disable @gl.DEPTH_TEST
     @gl.enable @gl.BLEND

@@ -138,9 +138,10 @@ C1964jsRenderer = (settings, glx, webGL) ->
     w /= 4
     h = yh - yl
     h /= 4
-    if settings.wireframe is false
-      blitTexture ram, texImg.addr, tileno, w, h  if texImg.changed is true
-      textureName = "pow2Texture" + tileno
+    #not ready yet
+    #if settings.wireframe is false
+    #  blitTexture ram, texImg.addr, tileno, w, h  if texImg.changed is true
+    #  textureName = "pow2Texture" + tileno
     xh -= 160 * 4
     xh /= (160 * 4)
     xl -= 160 * 4
@@ -150,12 +151,13 @@ C1964jsRenderer = (settings, glx, webGL) ->
     yh -= 120 * 4
     yh /= (-120 * 4)
     
-    if settings.wireframe is false
-      textureWidth = document.getElementById(textureName).width
-      textureHeight = document.getElementById(textureName).height
-    else
-      textureWidth = w
-      textureHeight = h
+    #not ready yet
+    #if settings.wireframe is false
+    #  textureWidth = document.getElementById(textureName).width
+    #  textureHeight = document.getElementById(textureName).height
+    #else
+    textureWidth = w
+    textureHeight = h
     scalex = (xh - xl) * ((textureWidth / w) - 1)
     scaley = (yh - yl) * ((textureHeight / h) - 1)
     initQuad xl, yl, xh + scalex, yh + scaley
@@ -164,19 +166,22 @@ C1964jsRenderer = (settings, glx, webGL) ->
     return
 
   @texTri = (xl, yl, xh, yh, s, t, dsdx, dtdy, tileno, ram, texImg) ->
-    if settings.wireframe is false
-      w = 256
-      h = 256
-      blitTexture ram, texImg.addr, tileno, w, h
-      textureName = "pow2Texture" + tileno
-      error = initTexture(tileno, true)
+    #not ready yet
+    #if settings.wireframe is false
+    #  w = 256
+    #  h = 256
+    #  blitTexture ram, texImg.addr, tileno, w, h
+    #  textureName = "pow2Texture" + tileno
+    #  error = initTexture(tileno, true)
     return
 
   @draw = (tileno, changed) ->
-    webGL.switchShader webGL.tileShaderProgram, settings.wireframe
+    webGL.switchShader webGL.tileShaderProgram, true
+    #webGL.switchShader webGL.tileShaderProgram, settings.wireframe
 
-    if settings.wireframe is false
-      error = initTexture(tileno, changed) #this is where things get really slow and we need a texture cache
+    #not ready yet
+    #if settings.wireframe is false
+    #  error = initTexture(tileno, changed) #this is where things get really slow and we need a texture cache
 
     gl.disable gl.DEPTH_TEST
     gl.enable gl.BLEND
@@ -185,9 +190,10 @@ C1964jsRenderer = (settings, glx, webGL) ->
     gl.vertexAttribPointer webGL.tileShaderProgram.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0
     gl.bindBuffer gl.ARRAY_BUFFER, cubeVertexTextureCoordBuffer
     gl.vertexAttribPointer webGL.tileShaderProgram.textureCoordAttribute, cubeVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0
-    if settings.wireframe is false
-      gl.activeTexture gl.TEXTURE0
-      gl.bindTexture gl.TEXTURE_2D, window["neheTexture" + tileno]
+    #not ready yet
+    #if settings.wireframe is false
+    #  gl.activeTexture gl.TEXTURE0
+    #  gl.bindTexture gl.TEXTURE_2D, window["neheTexture" + tileno]
     gl.uniform1i webGL.tileShaderProgram.samplerUniform, 0
     gl.bindBuffer gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer
     webGL.setMatrixUniforms webGL.tileShaderProgram
