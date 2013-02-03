@@ -88,6 +88,7 @@ C1964jsWebGL = (wireframe) ->
     alert "Could not initialize shaders"  unless @gl.getProgramParameter(shaderProgram, @gl.LINK_STATUS)
     @gl.useProgram shaderProgram
     shaderProgram.vertexPositionAttribute = @gl.getAttribLocation(shaderProgram, "aVertexPosition")
+    shaderProgram.vertexColorAttribute = @gl.getAttribLocation(shaderProgram, "aVertexColor")
     shaderProgram.pMatrixUniform = @gl.getUniformLocation(shaderProgram, "uPMatrix")
     shaderProgram.mvMatrixUniform = @gl.getUniformLocation(shaderProgram, "uMVMatrix")
     shaderProgram.nMatrixUniform = @gl.getUniformLocation(shaderProgram, "uNormalMatrix")
@@ -109,6 +110,8 @@ C1964jsWebGL = (wireframe) ->
     
     #if (shaderProgram.vertexPositionAttribute !== -1)
     @gl.enableVertexAttribArray shaderProgram.vertexPositionAttribute
+
+    @gl.enableVertexAttribArray shaderProgram.vertexColorAttribute
     
     #if (shaderProgram.textureCoordAttribute !== -1)
     @gl.enableVertexAttribArray shaderProgram.textureCoordAttribute
@@ -149,8 +152,8 @@ C1964jsWebGL = (wireframe) ->
     canvas = document.getElementById("Canvas3D")
     @initGL canvas
 
-    @wireframeTileShaderProgram = @initShaders("color-framebuffer-fragment-shader", "tile-vertex-shader")
-    @wireframeTriangleShaderProgram = @initShaders("color-framebuffer-fragment-shader", "triangle-vertex-shader")
+    @wireframeTileShaderProgram = @initShaders("wireframe-fragment-shader", "tile-vertex-shader")
+    @wireframeTriangleShaderProgram = @initShaders("wireframe-fragment-shader", "triangle-vertex-shader")
     @normalTileShaderProgram = @initShaders("tile-fragment-shader", "tile-vertex-shader")
     @normalTriangleShaderProgram = @initShaders("triangle-fragment-shader", "triangle-vertex-shader")
 

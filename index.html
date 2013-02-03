@@ -1,0 +1,114 @@
+<html>
+  <head>
+    <title>1964 and 1964js Home page</title>
+    <link href="css/style.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript">var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-31090418-4']);
+      _gaq.push(['_trackPageview']);
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();</script>
+    <meta content="1964js - N64 emulator in JavaScript" property="og:title" />
+    <meta content="game" property="og:type" />
+    <meta content="http://www.1964js.com" property="og:url" />
+    <meta content="https://fbcdn-profile-a.akamaihd.net/hprofile-ak-snc4/373029_274941852620356_1206208449_n.jpg" property="og:image" />
+    <meta content="1964js" property="og:site_name" />
+    <meta content="1397141558" property="fb:admins" />
+  </head>
+  <body alink="#ff0000" bgcolor="#000000" link="#ffa953" onload="start1964({wireframe:true})" text="#ffffff" vlink="#ffa953">
+    <div id="fb-root"></div>
+    <script type="text/javascript">window.fbAsyncInit = function() {
+        FB.init({
+          appId : '518018268224773', // App ID
+          channelUrl : '//www.1964js.com/channel.html', // Channel File
+          status : true, // check login status
+          cookie : true, // enable cookies to allow the server to access the session
+          xfbml : true // parse XFBML
+        });
+      };
+      
+      (function(d){
+        var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+        if (d.getElementById(id)) {return;}
+        js = d.createElement('script'); js.id = id; js.async = true;
+        js.src = "//connect.facebook.net/en_US/all.js";
+        ref.parentNode.insertBefore(js, ref);
+      }(document));
+      
+      (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=518018268224773";
+        fjs.parentNode.insertBefore(js, fjs);
+      }(document, 'script', 'facebook-jssdk'));</script>
+    <p></p>
+    <!--shader for wireframe triangles-->
+    <script id="wireframe-fragment-shader" type="x-shader/x-fragment">precision mediump float;
+      varying float v_Dot;
+      vec4 color = vec4(0.5, 1.0, 0.5, 1.0);
+      
+      void main(void) {
+        gl_FragColor = vec4(color.xyz, color.a);
+      }</script>
+    <script id="triangle-vertex-shader" type="x-shader/x-vertex">attribute vec3 aVertexPosition;
+      attribute vec4 aVertexColor;
+      
+      uniform mat4 uMVMatrix;
+      uniform mat4 uPMatrix;
+      
+      varying lowp vec4 vColor;
+      
+      void main(void) {
+        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+        vColor = aVertexColor;
+      }</script>
+    <script id="triangle-fragment-shader" type="x-shader/x-fragment">varying lowp vec4 vColor;
+      
+      void main(void) {
+        gl_FragColor = vColor;
+      }</script>
+    <!--shaders for tiles-->
+    <script id="tile-fragment-shader" type="x-shader/x-fragment">precision mediump float;
+      varying vec2 vTextureCoord;
+      uniform sampler2D uSampler;
+      
+      void main(void) {
+        gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+      }</script>
+    <script id="tile-vertex-shader" type="x-shader/x-vertex">attribute vec3 aVertexPosition;
+      attribute vec2 aTextureCoord;
+      uniform mat4 uMVMatrix;
+      uniform mat4 uPMatrix;
+      varying vec2 vTextureCoord;
+      
+      void main(void) {
+        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+        vTextureCoord = aTextureCoord;
+      }</script>
+    <div style="position: absolute; left: -600 px; top: -600 px">
+      <canvas height="256" id="pow2Texture0" width="256"></canvas><canvas height="256" id="pow2Texture1" width="256"></canvas><canvas height="256" id="pow2Texture2" width="256"></canvas><canvas height="256" id="pow2Texture3" width="256"></canvas><canvas height="256" id="pow2Texture4" width="256"></canvas><canvas height="256" id="pow2Texture5" width="256"></canvas><canvas height="256" id="pow2Texture6" width="256"></canvas><canvas height="256" id="pow2Texture7" width="256"></canvas>
+    </div>
+    <canvas height="240" id="Canvas" width="320"></canvas><canvas height="1024" id="Canvas3D" width="1024"></canvas>
+    <div id="user_panel">
+      <div class="header">
+        <a href="blog">[Blog]</a>&nbsp;<a href="http://code.google.com/p/1964js">[Code]</a>&nbsp;<a href="http://hulkholden.github.com/n64js/">[Try n64js too!]</a>
+        <h1>1964js<div style="font-size: 10px;">v0.1.6</div>
+          <select onchange="if (this.value !== 'Demos') window.open(this.value, '_self');" style="vertical-align: middle;"><option value="Demos">Demos</option><option value="?rom=unofficial_roms/rotate.zip">Rotate</option><option value="?rom=unofficial_roms/chrome.zip">Chrome</option><option value="?rom=unofficial_roms/dextrose.zip">Dextrose</option><option value="?rom=unofficial_roms/n64stars.zip">N64 Stars</option><option value="?rom=unofficial_roms/liner.zip">Liner (z to start)</option><option value="?rom=unofficial_roms/hardcode.zip">Hard Coded</option><option value="?rom=unofficial_roms/sp_crap.zip">Absolute Crap</option><option value="?rom=unofficial_roms/DynamixReadme.zip">Dynamix</option></select>
+        </h1>
+        <input id="wireframe" type="checkbox">wireframe</input>
+      </div>
+      <div class="dropShadow">
+        <div class="story">
+          <br /><input id="files" name="file" type="file">*.v64; *.n64; *.z64</input><br /><br />
+        </div>
+      </div>
+      <div class="footer">
+        <div class="fb-like" data-colorscheme="dark" data-send="false" data-show-faces="false" data-width="300"></div>
+      </div>
+    </div>
+    <script src="lib/1964js-0.1.6.min.js"></script>
+  </body>
+</html>

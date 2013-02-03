@@ -1,0 +1,104 @@
+#progress_bar {
+  margin: 10px 0;
+  padding: 3px;
+  border: 1px solid black;
+  font-size: 14px;
+  clear: both;
+  opacity: 0;
+  -moz-transition: opacity 1s linear;
+  -o-transition: opacity 1s linear;
+  -webkit-transition: opacity 1s linear; }
+  #progress_bar.loading {
+    opacity: 1; }
+  #progress_bar .percent {
+    background-color: #99ccff;
+    height: auto;
+    width: 0; }
+
+#user_panel {
+  background-color: #222222;
+  border: 2px solid #303030;
+  text-align: center;
+  font-family: "Arial";
+  color: white;
+  width: 380px;
+  opacity: 0;
+  /* Firefox */
+  -moz-transition-property: opacity;
+  -moz-transition-duration: 1s;
+  -moz-transition-delay: 0s;
+  /* WebKit */
+  -webkit-transition-property: opacity;
+  -webkit-transition-duration: 1s;
+  -webkit-transition-delay: 0s;
+  /* Opera */
+  -o-transition-property: opacity;
+  -o-transition-duration: 1s;
+  -o-transition-delay: 0s;
+  /* Standard */
+  transition-property: opacity;
+  transition-duration: 1s;
+  transition-delay: 0s; }
+  #user_panel .header {
+    background-color: #303030;
+    border: 1px solid #303030;
+    font-size: 12px;
+    font-weight: bold; }
+
+h1 {
+  font-size: 35px;
+  font-weight: bold;
+  font-family: "Arial"; }
+
+#user_panel .story {
+  border: 3px solid #303030;
+  font-size: 12px;
+  font-weight: bold;
+  font-family: "Arial"; }
+#user_panel .footer {
+  background-color: #303030;
+  border: 13px solid #303030; }
+#user_panel.show_fast {
+  opacity: 0.8;
+  /* Firefox */
+  -moz-transition-property: opacity;
+  -moz-transition-duration: 0s;
+  -moz-transition-delay: 0s;
+  /* WebKit */
+  -webkit-transition-property: opacity;
+  -webkit-transition-duration: 0s;
+  -webkit-transition-delay: 0s;
+  /* Opera */
+  -o-transition-property: opacity;
+  -o-transition-duration: 0s;
+  -o-transition-delay: 0s;
+  /* Standard */
+  transition-property: opacity;
+  transition-duration: 0s;
+  transition-delay: 0s; }
+#user_panel.show {
+  opacity: 0.8; }
+
+#Canvas {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  z-index: -1000;
+  top: 0;
+  left: 0;
+  background-color: black;
+  margin: 0; }
+
+#Canvas3D {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  z-index: -999;
+  top: 0;
+  left: 0;
+  margin: 0;
+  visibility: hidden; }
+
+.dropShadow {
+  text-shadow: 3px 3px 3px #555555;
+  font-size: 12px; }

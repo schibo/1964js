@@ -54,37 +54,37 @@ html
     p
 
     /! shader for wireframe triangles
-    script#color-framebuffer-fragment-shader type="x-shader/x-fragment"
+    script#wireframe-fragment-shader type="x-shader/x-fragment"
       | 
         precision mediump float;
         varying float v_Dot;
-        vec4 color = vec4(0.5, 0.8, 0.5, 0.07);
+        vec4 color = vec4(0.5, 1.0, 0.5, 1.0);
 
         void main(void) {
           gl_FragColor = vec4(color.xyz, color.a);
         }
 
-    script#triangle-fragment-shader type="x-shader/x-fragment"
-      |
-        precision mediump float;
-        varying vec2 vTextureCoord;
-        uniform sampler2D uSampler;
-        
-        void main(void) {
-          gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
-        }
-
     script#triangle-vertex-shader type="x-shader/x-vertex"
       | 
         attribute vec3 aVertexPosition;
-        attribute vec2 aTextureCoord;
+        attribute vec4 aVertexColor;
+
         uniform mat4 uMVMatrix;
         uniform mat4 uPMatrix;
-        varying vec2 vTextureCoord;
+
+        varying lowp vec4 vColor;
 
         void main(void) {
           gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-          vTextureCoord = aTextureCoord;
+          vColor = aVertexColor;
+        }
+
+    script#triangle-fragment-shader type="x-shader/x-fragment"
+      |
+        varying lowp vec4 vColor;
+
+        void main(void) {
+          gl_FragColor = vColor;
         }
 
     /! shaders for tiles

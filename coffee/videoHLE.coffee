@@ -34,6 +34,7 @@ C1964jsVideoHLE = (core, glx) ->
   @matToLoad = mat4.create()
   @gRSPworldProject = mat4.create()
   @triangleVertexPositionBuffer = `undefined`
+  @triangleVertexColorBuffer = `undefined`
   @dlistStackPointer = 0
   @dlistStack = []
   @renderer = new C1964jsRenderer(@core.settings, @core.webGL.gl, @core.webGL)
@@ -78,14 +79,16 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::videoLog = (msg) ->
     #console.log msg
+    return
 
   C1964jsVideoHLE::dlParserProcess = ->
     @dlistStackPointer = 0
     @dlistStack[@dlistStackPointer].pc = @core.memory.getInt32(@core.memory.spMemUint8Array, @core.memory.spMemUint8Array, consts.TASK_DATA_PTR)
     @dlistStack[@dlistStackPointer].countdown = consts.MAX_DL_COUNT
     @vertices = []
-    @trivertices = []
+    @triVertices = []
     @triangleVertexPositionBuffer.numItems = 0
+    @triangleVertexColorBuffer.numItems = 0
     @gRSP.numVertices = 0
 
     #see RSP_Parser.cpp
@@ -458,6 +461,7 @@ C1964jsVideoHLE = (core, glx) ->
     if didSucceed is false
       @drawScene(false, 7)
       @triangleVertexPositionBuffer.numItems = 0
+      @triangleVertexColorBuffer.numItems = 0
       @gRSP.numVertices = 0
       return
 
@@ -478,6 +482,7 @@ C1964jsVideoHLE = (core, glx) ->
         @drawScene false, 7
 
       @triangleVertexPositionBuffer.numItems = 0
+      @triangleVertexColorBuffer.numItems = 0
       @gRSP.numVertices = 0
     return
 
@@ -650,30 +655,45 @@ C1964jsVideoHLE = (core, glx) ->
     @vtxProjected5[vtxIndex][2] = @vtxTransformed[dwV].z
     @vtxProjected5[vtxIndex][3] = @vtxTransformed[dwV].w
     @vtxProjected5[vtxIndex][4] = @vecProjected[dwV].z
-    @vtxProjected5[vtxIndex][4] = 0  if @vtxTransformed[dwV].w < 0
+    @vtxProjected5[vtxIndex][4] = 0 if @vtxTransformed[dwV].w < 0
     vtxIndex[vtxIndex] = vtxIndex
-    
+
     #this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.triangleVertexPositionBuffer);
     offset = 3 * (@triangleVertexPositionBuffer.numItems)
-    @trivertices[offset] = @vtxProjected5[vtxIndex][0]
-    @trivertices[offset + 1] = @vtxProjected5[vtxIndex][1]
-    @trivertices[offset + 2] = @vtxProjected5[vtxIndex][2]
+    @triVertices[offset] = @vtxProjected5[vtxIndex][0]
+    @triVertices[offset + 1] = @vtxProjected5[vtxIndex][1]
+    @triVertices[offset + 2] = @vtxProjected5[vtxIndex][2]
     @triangleVertexPositionBuffer.itemSize = 3
     @triangleVertexPositionBuffer.numItems += 1
+
+    #hack: throw in some color
+    colorOffset = 4 * (@triangleVertexColorBuffer.numItems)
+    @triColorVertices[colorOffset] = @triVertices[offset+2] / 20
+    @triColorVertices[colorOffset + 1] = @triVertices[offset+2] / 20
+    @triColorVertices[colorOffset + 2] = @triVertices[offset+2] / 20
+    @triColorVertices[colorOffset + 3] = 1.0
+
+    @triangleVertexColorBuffer.itemSize = 4
+    @triangleVertexColorBuffer.numItems += 1
     true
 
   C1964jsVideoHLE::drawScene = (useTexture, tileno) ->
-    #@core.webGL.switchShader @core.webGL.triangleShaderProgram, @core.settings.wireframe #not ready yet
-    @core.webGL.switchShader @core.webGL.triangleShaderProgram, true
+    @core.webGL.switchShader @core.webGL.triangleShaderProgram, @core.settings.wireframe
 
     @gl.disable @gl.DEPTH_TEST
     @gl.enable @gl.BLEND
     @gl.blendFunc @gl.SRC_ALPHA, @gl.ONE
     
     #simple lighting. Get the normal matrix of the model-view matrix
+
     @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexPositionBuffer
-    @gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(@trivertices), @gl.STATIC_DRAW
+    @gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(@triVertices), @gl.STATIC_DRAW
     @gl.vertexAttribPointer @core.webGL.triangleShaderProgram.vertexPositionAttribute, @triangleVertexPositionBuffer.itemSize, @gl.FLOAT, false, 0, 0
+    
+    @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexColorBuffer
+    @gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(@triColorVertices), @gl.STATIC_DRAW
+    @gl.vertexAttribPointer @core.webGL.triangleShaderProgram.vertexColorAttribute, @triangleVertexColorBuffer.itemSize, @gl.FLOAT, false, 0, 0
+
     #@gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexTextureCoordBuffer
     #@gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(@triTextureCoords), @gl.STATIC_DRAW
     @gl.vertexAttribPointer @core.webGL.triangleShaderProgram.textureCoordAttribute, @triangleVertexTextureCoordBuffer.itemSize, @gl.FLOAT, false, 0, 0
@@ -694,9 +714,16 @@ C1964jsVideoHLE = (core, glx) ->
   C1964jsVideoHLE::initBuffers = ->
     @triangleVertexPositionBuffer = @gl.createBuffer()
     @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexPositionBuffer
-    @trivertices = [0.0, 1.0, 0.0, -1.0, -1.0, 0.0, 1.0, -1.0, 0.0]
+    @triVertices = [0.0, 1.0, 0.0, -1.0, -1.0, 0.0, 1.0, -1.0, 0.0]
     @triangleVertexPositionBuffer.itemSize = 3
-    @triangleVertexPositionBuffer.numItems = @trivertices.length / 3
+    @triangleVertexPositionBuffer.numItems = @triVertices.length / 3
+
+    @triangleVertexColorBuffer = @gl.createBuffer()
+    @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexColorBuffer
+    @triColorVertices = [0.5, 1.0, 0.5, 1.0]
+    @triangleVertexColorBuffer.itemSize = 4
+    @triangleVertexColorBuffer.numItems = @triColorVertices.length / 4
+
     @triangleVertexTextureCoordBuffer = @gl.createBuffer()
     @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexTextureCoordBuffer
    
