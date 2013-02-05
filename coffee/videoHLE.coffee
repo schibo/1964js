@@ -26,6 +26,10 @@ C1964jsVideoHLE = (core, glx) ->
   #todo: make gRSP a class object.
   @RICE_MATRIX_STACK = 60
   @MAX_TEXTURES = 8
+  @MAX_VERTICES = 80
+  @MAX_TILES = 8
+  @textureTiles = []
+  @N64VertexList = []
   @vtxTransformed = []
   @vtxNonTransformed = []
   @vecProjected = []
@@ -43,6 +47,14 @@ C1964jsVideoHLE = (core, glx) ->
 
   #todo: different microcodes support
   @currentMicrocodeMap = @microcodeMap0
+  i = 0
+  while i< @MAX_TILES
+    @textureTiles[i] = []
+    i += 1
+  i = 0
+  while i < @MAX_VERTICES
+    @N64VertexList[i] = {}
+    i += 1
   i = 0
   while i < consts.MAX_DL_STACK_SIZE
     @dlistStack[i] = {}
@@ -242,6 +254,7 @@ C1964jsVideoHLE = (core, glx) ->
     return
   
   #this.videoLog('Texture: format=' + this.texImg.format + ' size=' + this.texImg.size + ' ' + 'width=' + this.texImg.width + ' addr=' + this.texImg.addr + ' bpl=' + this.texImg.bpl);
+  
   C1964jsVideoHLE::RSP_GBI0_Vtx = (pc) ->
     v0 = undefined
     seg = undefined
@@ -276,10 +289,31 @@ C1964jsVideoHLE = (core, glx) ->
     i = v0
     while i < v0 + num
       a = addr + 16 * (i - v0)
+	  
+	  # Legacy 
       @vtxNonTransformed[i] = {}
       @vtxNonTransformed[i].x = @getFiddledVertexX(a)
       @vtxNonTransformed[i].y = @getFiddledVertexY(a)
       @vtxNonTransformed[i].z = @getFiddledVertexZ(a)
+	  # End Legacy
+	  
+      @N64VertexList[i].x = @getVertexX(a)
+      @N64VertexList[i].y = @getVertexY(a)
+      @N64VertexList[i].z = @getVertexZ(a)
+	  
+      @N64VertexList[i].s = @getVertexS(a)
+      @N64VertexList[i].t = @getVertexT(a)
+	  
+      @N64VertexList[i].r = @getVertexColorR(a)
+      @N64VertexList[i].g = @getVertexColorG(a)
+      @N64VertexList[i].b = @getVertexColorB(a)
+      @N64VertexList[i].a = @getVertexAlpha(a)
+	  
+      @N64VertexList[i].nx = @toSByte @getVertexNormalX(a)
+      @N64VertexList[i].ny = @toSByte @getVertexNormalY(a)
+      @N64VertexList[i].nz = @toSByte @getVertexNormalZ(a)
+
+      #Legacy
       @vtxTransformed[i] = {}
       @vtxTransformed[i].x = @vtxNonTransformed[i].x * @gRSPworldProject[0] + @vtxNonTransformed[i].y * @gRSPworldProject[4] + @vtxNonTransformed[i].z * @gRSPworldProject[8] + @gRSPworldProject[12]
       @vtxTransformed[i].y = @vtxNonTransformed[i].x * @gRSPworldProject[1] + @vtxNonTransformed[i].y * @gRSPworldProject[5] + @vtxNonTransformed[i].z * @gRSPworldProject[9] + @gRSPworldProject[13]
@@ -413,15 +447,12 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::RSP_GBI1_Texture = (pc) ->
-    #hack: experimenting.
-    @texImg.format = @getTImgFormat(pc)
-    @texImg.size = @getTImgSize(pc)
-    @texImg.width = @getTImgWidth(pc)
-    @texImg.addr = @getTImgAddr(pc + 4)
-    @texImg.changed = true
-    #this.texImg.addr = 0;
-    @renderer.texTri 0, 0, 256, 256, 0, 0, 0, 0, 7, @core.memory.rdramUint8Array, @texImg
-    @videoLog "TODO: RSP_GBI1_Texture"
+    tile = @getTextureTile(pc)
+    @textureTiles[tile].on    = @getTextureOn(pc)
+    @textureTiles[tile].level = @getTextureLevel(pc)
+    @textureTiles[tile].scales = @getTextureScaleS(pc) / 0x8000
+    @textureTiles[tile].scalet = @getTextureScaleT(pc) / 0x8000
+    #console.log "RSP_GBI1_Texture: Tile:" + tile + " On:" + @textureTiles[tile].on + " Level:" + @textureTiles[tile].level + " ScaleS:" + @textureTiles[tile].scales + " ScaleT:" + @textureTiles[tile].scalet
     return
 
   #test for dummy gray textures
@@ -432,16 +463,6 @@ C1964jsVideoHLE = (core, glx) ->
   while k < 1024 * 1024
     testTextureMem[k] = 128
     k++
-
-  C1964jsVideoHLE::RSP_GBI1_Texture = (pc) ->
-    #hack: experimenting.
-    @texImg.format = @getTImgFormat(pc + 4)
-    @texImg.size = @getTImgSize(pc + 4)
-    @texImg.width = @getTImgWidth(pc + 4)
-    @texImg.addr = 0
-    @renderer.texTri 0, 0, 256, 256, 0, 0, 0, 0, 7, testTextureMem, @texImg
-    @videoLog "TODO: RSP_GBI1_Texture"
-    return
 
   C1964jsVideoHLE::RSP_GBI1_PopMtx = (pc) ->
     @videoLog "TODO: RSP_GBI1_PopMtx"
