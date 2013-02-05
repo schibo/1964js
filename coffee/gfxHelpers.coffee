@@ -59,7 +59,7 @@ C1964jsVideoHLE::getGbi0NumVertices = (pc) ->
 C1964jsVideoHLE::getGbi0Vertex0 = (pc) ->
   @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc) >>> 16 & 0x0F
 
-#Fiddled vertex struct
+#Fiddled vertex struct - Legacy
 C1964jsVideoHLE::getFiddledVertexX = (pc) ->
   Number @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc) >> 16
 
@@ -68,7 +68,64 @@ C1964jsVideoHLE::getFiddledVertexY = (pc) ->
 
 C1964jsVideoHLE::getFiddledVertexZ = (pc) ->
   Number @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc + 4) >> 16
+  
+#Vertex Struct
+C1964jsVideoHLE::getVertexX = (pc) ->
+  Number @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc) >> 16
+  
+C1964jsVideoHLE::getVertexY = (pc) ->
+  Number @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc) << 16 >> 16
 
+C1964jsVideoHLE::getVertexZ = (pc) ->
+  Number @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc + 4) >> 16
+  
+C1964jsVideoHLE::getVertexS = (pc) ->
+  Number @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc + 8) >> 16
+
+C1964jsVideoHLE::getVertexT = (pc) ->
+  Number @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc + 8) << 16 >> 16
+  
+C1964jsVideoHLE::getVertexColorR = (pc) ->
+  Number @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc + 12) >>> 24
+  
+C1964jsVideoHLE::getVertexColorG = (pc) ->
+  Number @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc + 12) >> 16 & 0xFF
+  
+C1964jsVideoHLE::getVertexColorB = (pc) ->
+  Number @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc + 12) >> 8 & 0xFF
+  
+C1964jsVideoHLE::getVertexAlpha = (pc) ->
+  Number @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc + 12) & 0xFF
+  
+C1964jsVideoHLE::getVertexNormalX = (pc) ->
+  Number @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc + 12) >>> 24
+  
+C1964jsVideoHLE::getVertexNormalY = (pc) ->
+  Number @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc + 12) >> 16 & 0xFF
+  
+C1964jsVideoHLE::getVertexNormalZ = (pc) ->
+  Number @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc + 12) >> 8 & 0xFF
+  
+C1964jsVideoHLE::toSByte = (ub) ->
+  if ub > 127 then return ub - 256 else return ub
+  
+#Texture Struct
+C1964jsVideoHLE::getTextureLevel = (pc) ->
+  Number @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc ) >> 11 & 0x07
+  
+C1964jsVideoHLE::getTextureTile = (pc) ->
+  Number @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc ) >> 8 & 0x07
+  
+C1964jsVideoHLE::getTextureOn = (pc) ->
+  Number @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc ) & 0x0F
+  
+C1964jsVideoHLE::getTextureScaleS = (pc) ->
+  Number @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc + 4 ) >> 16 & 0xFFFF
+  
+C1964jsVideoHLE::getTextureScaleT = (pc) ->
+  Number @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc + 4 ) & 0xFFFF
+
+  
 #GBI0 matrix struct
 C1964jsVideoHLE::gbi0isProjectionMatrix = (pc) ->
   (if ((@core.memory.rdramUint8Array[pc + 1] & 0x00000001) isnt 0) then true else false)
