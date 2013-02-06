@@ -290,7 +290,7 @@ C1964jsVideoHLE = (core, glx) ->
     while i < v0 + num
       a = addr + 16 * (i - v0)
 	  
-	  # Legacy 
+	  # Legacy
       @vtxNonTransformed[i] = {}
       @vtxNonTransformed[i].x = @getFiddledVertexX(a)
       @vtxNonTransformed[i].y = @getFiddledVertexY(a)

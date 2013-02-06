@@ -52,7 +52,7 @@ C1964jsWebGL = (wireframe) ->
     log "Could not initialise WebGL. Your browser may not support it."  unless @gl
     return
 
-  C1964jsWebGL::getShader = (id) ->
+  C1964jsWebGL::getShaderFromScriptTag = (id) ->
     k = undefined
     shaderScript = undefined
     shader = undefined
@@ -76,11 +76,70 @@ C1964jsWebGL = (wireframe) ->
       return null
     shader
 
+  #TODO: Make this a utility function. It is generic. Or, just use jquery at some point.
+  C1964jsWebGL::loadFile = (url, data, callback, errorCallback) ->
+    #asynchronous request
+    request = new XMLHttpRequest()
+    request.open 'GET', url, false #todo: synchronous calls are bad.
+
+    #Hook the event that gets called as the request progresses
+    request.onreadystatechange = ()->
+      #If the request is "DONE" (completed or failed)
+      if request.readyState is 4
+        #If we got HTTP status 200 (OK)
+        if request.status is 200
+          callback(request.responseText, data)
+        else #failed
+          errorCallback(url)
+      return
+
+    request.send(null)
+    return
+
+  C1964jsWebGL::loadFiles = (urls, callback, errorCallback) ->
+    numUrls = urls.length
+    numComplete = 0
+    result = []
+
+    #Callback for a single file
+    partialCallback = (text, urlIndex) ->
+      result[urlIndex] = text
+      numComplete+=1
+
+      #When all files have downloaded
+      callback result if numComplete is numUrls
+      return
+
+    i = 0
+    while i < numUrls
+      @loadFile urls[i], i, partialCallback, errorCallback
+      i++
+    return
+
   C1964jsWebGL::initShaders = (fs, vs) ->
     shaderProgram = undefined
     vertexShader = undefined
-    fragmentShader = @getShader(fs)
-    vertexShader = @getShader(vs)
+    fragmentShader = undefined
+    #fragmentShader = @getShaderFromScriptTag(fs)
+    #vertexShader = @getShaderFromScriptTag(vs)
+    @loadFiles(['shaders/'+fs, 'shaders/'+vs],
+      (shaderText) =>
+        vertexShader = @gl.createShader @gl.VERTEX_SHADER
+        fragmentShader = @gl.createShader @gl.FRAGMENT_SHADER
+        @gl.shaderSource fragmentShader, shaderText[0]
+        @gl.shaderSource vertexShader, shaderText[1]
+        @gl.compileShader fragmentShader
+        @gl.compileShader vertexShader
+        unless @gl.getShaderParameter(vertexShader, @gl.COMPILE_STATUS)
+          alert vs + ': '+ @gl.getShaderInfoLog(vertexShader)
+        unless @gl.getShaderParameter(framgentShader, @gl.COMPILE_STATUS)
+          alert @gl.getShaderInfoLog(fs + ' ' + fragmentShader)
+        return
+      (url) ->
+        alert 'Failed to download "' + url + '"'
+        return
+    )
+ 
     shaderProgram = @gl.createProgram()
     @gl.attachShader shaderProgram, vertexShader
     @gl.attachShader shaderProgram, fragmentShader

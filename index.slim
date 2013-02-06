@@ -53,64 +53,6 @@ html
 
     p
 
-    /! shader for wireframe triangles
-    script#wireframe-fragment-shader type="x-shader/x-fragment"
-      | 
-        precision mediump float;
-        varying float v_Dot;
-        vec4 color = vec4(0.5, 1.0, 0.5, 1.0);
-
-        void main(void) {
-          gl_FragColor = vec4(color.xyz, color.a);
-        }
-
-    script#triangle-vertex-shader type="x-shader/x-vertex"
-      | 
-        attribute vec3 aVertexPosition;
-        attribute vec4 aVertexColor;
-
-        uniform mat4 uMVMatrix;
-        uniform mat4 uPMatrix;
-
-        varying lowp vec4 vColor;
-
-        void main(void) {
-          gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-          vColor = aVertexColor;
-        }
-
-    script#triangle-fragment-shader type="x-shader/x-fragment"
-      |
-        varying lowp vec4 vColor;
-
-        void main(void) {
-          gl_FragColor = vColor;
-        }
-
-    /! shaders for tiles
-    script#tile-fragment-shader type="x-shader/x-fragment"
-      |
-        precision mediump float;
-        varying vec2 vTextureCoord;
-        uniform sampler2D uSampler;
-
-        void main(void) {
-          gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
-        }
-
-    script#tile-vertex-shader type="x-shader/x-vertex"
-      |
-        attribute vec3 aVertexPosition;
-        attribute vec2 aTextureCoord;
-        uniform mat4 uMVMatrix;
-        uniform mat4 uPMatrix;
-        varying vec2 vTextureCoord;
-
-        void main(void) {
-          gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-          vTextureCoord = aTextureCoord;
-        }
-
     div style="position: absolute; left: -600 px; top: -600 px"
       canvas#pow2Texture0 height="256" width="256"
       canvas#pow2Texture1 height="256" width="256"
