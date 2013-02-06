@@ -352,7 +352,46 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_SetCombine = (pc) ->
-    @videoLog "TODO: DLParser_SetCombine"
+    @combineA0 = @getCombineA0(pc)
+    @combineB0 = @getCombineB0(pc)
+    @combineC0 = @getCombineC0(pc)
+    @combineD0 = @getCombineD0(pc)
+    @combineA0 = 0xFF if @combineA0 is 15
+    @combineB0 = 0xFF if @combineB0 is 15
+    @combineC0 = 0xFF if @combineC0 is 31
+    @combineD0 = 0xFF if @combineD0 is 7
+    @combineA0a = @getCombineA0a(pc)
+    @combineB0a = @getCombineB0a(pc)
+    @combineC0a = @getCombineC0a(pc)
+    @combineD0a = @getCombineD0a(pc)
+    @combineA0a = 0xFF if @combineA0a is 7
+    @combineB0a = 0xFF if @combineB0a is 7
+    @combineC0a = 0xFF if @combineC0a is 7
+    @combineD0a = 0xFF if @combineD0a is 7
+    @combineA1 = @getCombineA1(pc)
+    @combineB1 = @getCombineB1(pc)
+    @combineC1 = @getCombineC1(pc)
+    @combineD1 = @getCombineD1(pc)
+    @combineA1 = 0xFF if @combineA1 is 15
+    @combineB1 = 0xFF if @combineB1 is 15
+    @combineC1 = 0xFF if @combineC1 is 31
+    @combineD1 = 0xFF if @combineD1 is 7
+    @combineA1a = @getCombineA1a(pc)
+    @combineB1a = @getCombineB1a(pc)
+    @combineC1a = @getCombineC1a(pc)
+    @combineD1a = @getCombineD1a(pc)
+    @combineA1a = 0xFF if @combineA1a is 7
+    @combineB1a = 0xFF if @combineB1a is 7
+    @combineC1a = 0xFF if @combineC1a is 7
+    @combineD1a = 0xFF if @combineD1a is 7
+    w0 = Number @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc )
+    w1 = Number @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc + 4)
+    console.log "w0: " + (w0 & 0x7FFFFFFF).toString(16) + " w1: " + (w1 & 0x7FFFFFFF).toString(16)
+    console.log " a0:" + @combineA0 + " b0:" + @combineB0 + " c0:" + @combineC0 + " d0:" + @combineD0 +
+                " a0a:" + @combineA0a + " b0a:" + @combineB0a + " c0a:" + @combineC0a + " d0a:" + @combineD0a +
+                " a1:" + @combineA1 + " b1:" + @combineB1 + " c1:" + @combineC1 + " d1:" + @combineD1 +
+                " a1a:" + @combineA1a + " b1a:" + @combineB1a + " c1a:" + @combineC1a + " d1a:" + @combineD1a
+    #@videoLog "TODO: DLParser_SetCombine"
     return
 
   C1964jsVideoHLE::RSP_GBI1_MoveWord = (pc) ->
