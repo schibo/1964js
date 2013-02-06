@@ -132,7 +132,7 @@ C1964jsWebGL = (wireframe) ->
         @gl.compileShader vertexShader
         unless @gl.getShaderParameter(vertexShader, @gl.COMPILE_STATUS)
           alert vs + ': '+ @gl.getShaderInfoLog(vertexShader)
-        unless @gl.getShaderParameter(framgentShader, @gl.COMPILE_STATUS)
+        unless @gl.getShaderParameter(fragmentShader, @gl.COMPILE_STATUS)
           alert @gl.getShaderInfoLog(fs + ' ' + fragmentShader)
         return
       (url) ->
