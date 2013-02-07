@@ -176,29 +176,32 @@ C1964jsRenderer = (settings, glx, webGL) ->
     return
 
   @draw = (tileno, changed) ->
-    webGL.switchShader webGL.tileShaderProgram, true
-    #webGL.switchShader webGL.tileShaderProgram, settings.wireframe
-
+    gl.useProgram webGL.shaderProgram
     #not ready yet
     #if settings.wireframe is false
     #  error = initTexture(tileno, changed) #this is where things get really slow and we need a texture cache
 
+    # basic settings
     gl.disable gl.DEPTH_TEST
     gl.enable gl.BLEND
     gl.blendFunc gl.SRC_ALPHA, gl.ONE
+    
     gl.bindBuffer gl.ARRAY_BUFFER, cubeVertexPositionBuffer
-    gl.vertexAttribPointer webGL.tileShaderProgram.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0
+    gl.vertexAttribPointer webGL.shaderProgram.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0
+
     gl.bindBuffer gl.ARRAY_BUFFER, cubeVertexTextureCoordBuffer
-    gl.vertexAttribPointer webGL.tileShaderProgram.textureCoordAttribute, cubeVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0
+    gl.vertexAttribPointer webGL.shaderProgram.textureCoordAttribute, cubeVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0
+
     #not ready yet
     #if settings.wireframe is false
     #  gl.activeTexture gl.TEXTURE0
     #  gl.bindTexture gl.TEXTURE_2D, window["neheTexture" + tileno]
-    gl.uniform1i webGL.tileShaderProgram.samplerUniform, 0
+    gl.uniform1i webGL.shaderProgram.samplerUniform, 0
     gl.bindBuffer gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer
-    webGL.setMatrixUniforms webGL.tileShaderProgram
-    if settings.wireframe is false
-      gl.drawElements gl.LINE_STRIP, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0
+    webGL.setMatrixUniforms webGL.shaderProgram
+	    
+    if settings.wireframe is true
+      gl.drawElements gl.LINE_LOOP, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0
     else
       gl.drawElements gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0
     return

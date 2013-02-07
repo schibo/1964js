@@ -115,19 +115,17 @@ C1964jsVideoHLE = (core, glx) ->
     #TODO: set viewport
     #TODO: set fill mode
     while @dlistStackPointer >= 0
-      func = undefined
-      cmd = undefined
       pc = @dlistStack[@dlistStackPointer].pc
       cmd = @getCommand(pc)
-      @dlistStack[@dlistStackPointer].pc += 8
       func = @currentMicrocodeMap[cmd]
+      @dlistStack[@dlistStackPointer].pc += 8
       this[func] pc
       if @dlistStackPointer >= 0
         @dlistStack[@dlistStackPointer].countdown -= 1
         @dlistStackPointer -= 1  if @dlistStack[@dlistStackPointer].countdown < 0
     @videoLog "finished dlist"
     @core.interrupts.triggerSPInterrupt 0, false
-    @drawScene(false, 7)
+    #@drawScene(false, 7)
     return
 
   #TODO: end rendering
@@ -339,7 +337,6 @@ C1964jsVideoHLE = (core, glx) ->
   #Gets new display list address
   C1964jsVideoHLE::RSP_GBI0_DL = (pc) ->
     param = undefined
-    addr = undefined
     seg = @getGbi0DlistAddr(pc)
     addr = @getRspSegmentAddr(seg)
     @videoLog "dlist address = " + dec2hex(addr)
@@ -386,10 +383,12 @@ C1964jsVideoHLE = (core, glx) ->
     @combineD1a = 0xFF if @combineD1a is 7
     w0 = Number @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc )
     w1 = Number @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc + 4)
-    #console.log " a0:" + @combineA0 + " b0:" + @combineB0 + " c0:" + @combineC0 + " d0:" + @combineD0 +
+    ###
+    console.log " a0:" + @combineA0 + " b0:" + @combineB0 + " c0:" + @combineC0 + " d0:" + @combineD0 +
                 " a0a:" + @combineA0a + " b0a:" + @combineB0a + " c0a:" + @combineC0a + " d0a:" + @combineD0a +
                 " a1:" + @combineA1 + " b1:" + @combineB1 + " c1:" + @combineC1 + " d1:" + @combineD1 +
                 " a1a:" + @combineA1a + " b1a:" + @combineB1a + " c1a:" + @combineC1a + " d1a:" + @combineD1a
+    ###
     #@videoLog "TODO: DLParser_SetCombine"
     return
 
@@ -511,11 +510,10 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::RSP_GBI1_Tri1 = (pc) ->
-    v2 = undefined
-    v1 = undefined
     v0 = @getGbi0Tri1V0(pc) / @gRSP.vertexMult
     v1 = @getGbi0Tri1V1(pc) / @gRSP.vertexMult
     v2 = @getGbi0Tri1V2(pc) / @gRSP.vertexMult
+    flag = @getGbi0Tri1Flag(pc)
     didSucceed = @prepareTriangle v1, v2, v0
     if didSucceed is false
       @drawScene(false, 7)
@@ -737,61 +735,68 @@ C1964jsVideoHLE = (core, glx) ->
     true
 
   C1964jsVideoHLE::drawScene = (useTexture, tileno) ->
-    @core.webGL.switchShader @core.webGL.triangleShaderProgram, @core.settings.wireframe
+    @gl.useProgram @core.webGL.shaderProgram
 
     @gl.disable @gl.DEPTH_TEST
     @gl.enable @gl.BLEND
     @gl.blendFunc @gl.SRC_ALPHA, @gl.ONE
+    @gl.cullFace @gl.BACK
     
     #simple lighting. Get the normal matrix of the model-view matrix
 
+    @gl.enableVertexAttribArray @core.webGL.shaderProgram.vertexPositionAttribute
     @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexPositionBuffer
     @gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(@triVertices), @gl.STATIC_DRAW
-    @gl.vertexAttribPointer @core.webGL.triangleShaderProgram.vertexPositionAttribute, @triangleVertexPositionBuffer.itemSize, @gl.FLOAT, false, 0, 0
+    @gl.vertexAttribPointer @core.webGL.shaderProgram.vertexPositionAttribute, @triangleVertexPositionBuffer.itemSize, @gl.FLOAT, false, 0, 0
     
+    @gl.enableVertexAttribArray @core.webGL.shaderProgram.vertexColorAttribute
     @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexColorBuffer
     @gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(@triColorVertices), @gl.STATIC_DRAW
-    @gl.vertexAttribPointer @core.webGL.triangleShaderProgram.vertexColorAttribute, @triangleVertexColorBuffer.itemSize, @gl.FLOAT, false, 0, 0
+    @gl.vertexAttribPointer @core.webGL.shaderProgram.vertexColorAttribute, @triangleVertexColorBuffer.itemSize, @gl.FLOAT, false, 0, 0
 
+    @gl.enableVertexAttribArray @core.webGL.shaderProgram.textureCoordAttribute
     #@gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexTextureCoordBuffer
     #@gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(@triTextureCoords), @gl.STATIC_DRAW
-    @gl.vertexAttribPointer @core.webGL.triangleShaderProgram.textureCoordAttribute, @triangleVertexTextureCoordBuffer.itemSize, @gl.FLOAT, false, 0, 0
+    @gl.vertexAttribPointer @core.webGL.shaderProgram.textureCoordAttribute, @triangleVertexTextureCoordBuffer.itemSize, @gl.FLOAT, false, 0, 0
+
     if useTexture is true
       @gl.activeTexture @gl.TEXTURE0
       @gl.bindTexture @gl.TEXTURE_2D, window["neheTexture" + tileno]
-    @gl.uniform1i @core.webGL.triangleShaderProgram.samplerUniform, 0
+    @gl.uniform1i @core.webGL.shaderProgram.samplerUniform, 0
+	
+    @gl.uniform1i @core.webGL.shaderProgram.wireframeUniform, if @core.settings.wireframe then 1 else 0
     
-    #  this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
-    @core.webGL.setMatrixUniforms @core.webGL.triangleShaderProgram
+    @core.webGL.setMatrixUniforms @core.webGL.shaderProgram
     if @core.settings.wireframe is true
       @gl.drawArrays @gl.LINES, 0, @triangleVertexPositionBuffer.numItems
     else
       @gl.drawArrays @gl.TRIANGLES, 0, @triangleVertexPositionBuffer.numItems
     return
 
-  #  mvPopMatrix();
   C1964jsVideoHLE::initBuffers = ->
     @triangleVertexPositionBuffer = @gl.createBuffer()
     @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexPositionBuffer
-    @triVertices = [0.0, 1.0, 0.0, -1.0, -1.0, 0.0, 1.0, -1.0, 0.0]
+    @triVertices = []
     @triangleVertexPositionBuffer.itemSize = 3
-    @triangleVertexPositionBuffer.numItems = @triVertices.length / 3
+    @triangleVertexPositionBuffer.numItems = 0
 
     @triangleVertexColorBuffer = @gl.createBuffer()
     @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexColorBuffer
-    @triColorVertices = [0.5, 1.0, 0.5, 1.0]
+    @triColorVertices = []
     @triangleVertexColorBuffer.itemSize = 4
-    @triangleVertexColorBuffer.numItems = @triColorVertices.length / 4
+    @triangleVertexColorBuffer.numItems = 0
 
     @triangleVertexTextureCoordBuffer = @gl.createBuffer()
     @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexTextureCoordBuffer
-   
-    #front face
-    @triTextureCoords = [1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0]
+    @triTextureCoords = []
+    @triangleVertexTextureCoordBuffer.itemSize = 2
+    @triangleVertexTextureCoordBuffer.numItems = 0
+	
+    ###
     @gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(@triTextureCoords), @gl.STATIC_DRAW
-    @gl.vertexAttribPointer @core.webGL.triangleShaderProgram.vertexPositionAttribute, @triangleVertexPositionBuffer.itemSize, @gl.FLOAT, false, 0, 0
-    @triangleVertexTextureCoordBuffer.itemSize = 3
-    @triangleVertexTextureCoordBuffer.numItems = @triTextureCoords.length / 3
+    @gl.vertexAttribPointer @core.webGL.shaderProgram.vertexPositionAttribute, @triangleVertexPositionBuffer.itemSize, @gl.FLOAT, false, 0, 0
+    ###
+    
     return
 )()
 #hack global space until we export classes properly

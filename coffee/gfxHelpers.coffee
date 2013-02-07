@@ -51,6 +51,9 @@ C1964jsVideoHLE::getGbi0Tri1V1 = (pc) ->
 
 C1964jsVideoHLE::getGbi0Tri1V0 = (pc) ->
   @core.memory.rdramUint8Array[pc + 5]
+  
+C1964jsVideoHLE::getGbi0Tri1Flag = (pc) ->
+  @core.memory.rdramUint8Array[pc + 4]
 
 #GBI0 vertex struct
 C1964jsVideoHLE::getGbi0NumVertices = (pc) ->

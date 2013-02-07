@@ -21,12 +21,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 C1964jsWebGL = (wireframe) ->
   "use strict"
   @gl = `undefined`
-  @wireframeTileShaderProgram = `undefined`
-  @wireframeTriangleShaderProgram = `undefined`
-  @tileShaderProgram = `undefined`
-  @triangleShaderProgram = `undefined`
-  @normalTileShaderProgram = `undefined`
-  @normalTriangleShaderProgram = `undefined`
   @webGLStart(wireframe)
   return this
 
@@ -51,30 +45,6 @@ C1964jsWebGL = (wireframe) ->
       log "this.gl.viewportHeight = " + @gl.viewportHeight
     log "Could not initialise WebGL. Your browser may not support it."  unless @gl
     return
-
-  C1964jsWebGL::getShaderFromScriptTag = (id) ->
-    k = undefined
-    shaderScript = undefined
-    shader = undefined
-    str = ""
-    shaderScript = document.getElementById(id)
-    return null  unless shaderScript
-    k = shaderScript.firstChild
-    while k
-      str += k.textContent  if k.nodeType is 3
-      k = k.nextSibling
-    if shaderScript.type is "x-shader/x-fragment"
-      shader = @gl.createShader(@gl.FRAGMENT_SHADER)
-    else if shaderScript.type is "x-shader/x-vertex"
-      shader = @gl.createShader(@gl.VERTEX_SHADER)
-    else
-      return null
-    @gl.shaderSource shader, str
-    @gl.compileShader shader
-    unless @gl.getShaderParameter(shader, @gl.COMPILE_STATUS)
-      alert @gl.getShaderInfoLog(shader)
-      return null
-    shader
 
   #TODO: Make this a utility function. It is generic. Or, just use jquery at some point.
   C1964jsWebGL::loadFile = (url, data, callback, errorCallback) ->
@@ -153,30 +123,9 @@ C1964jsWebGL = (wireframe) ->
     shaderProgram.nMatrixUniform = @gl.getUniformLocation(shaderProgram, "uNormalMatrix")
     shaderProgram.textureCoordAttribute = @gl.getAttribLocation(shaderProgram, "aTextureCoord")
     shaderProgram.samplerUniform = @gl.getUniformLocation(shaderProgram, "uSampler")
+    shaderProgram.wireframeUniform = @gl.getUniformLocation(shaderProgram, "uWireframe")
     shaderProgram
-
-  C1964jsWebGL::switchShader = (shaderProgram, wireframe) ->
-
-    if wireframe is true
-      @tileShaderProgram = @wireframeTileShaderProgram
-      @triangleShaderProgram = @wireframeTriangleShaderProgram
-    else
-      @tileShaderProgram = @normalTileShaderProgram
-      @triangleShaderProgram = @normalTriangleShaderProgram
-
-
-    @gl.useProgram shaderProgram
-    
-    #if (shaderProgram.vertexPositionAttribute !== -1)
-    @gl.enableVertexAttribArray shaderProgram.vertexPositionAttribute
-
-    @gl.enableVertexAttribArray shaderProgram.vertexColorAttribute
-    
-    #if (shaderProgram.textureCoordAttribute !== -1)
-    @gl.enableVertexAttribArray shaderProgram.textureCoordAttribute
-
-    return
-
+	
   C1964jsWebGL::beginDList = ->
     @gl.viewport 0, 0, @gl.viewportWidth, @gl.viewportHeight
     @gl.clear @gl.COLOR_BUFFER_BIT | @gl.DEPTH_BUFFER_BIT
@@ -210,18 +159,7 @@ C1964jsWebGL = (wireframe) ->
   C1964jsWebGL::webGLStart = (wireframe) ->
     canvas = document.getElementById("Canvas3D")
     @initGL canvas
-
-    @wireframeTileShaderProgram = @initShaders("wireframe-fragment-shader", "tile-vertex-shader")
-    @wireframeTriangleShaderProgram = @initShaders("wireframe-fragment-shader", "triangle-vertex-shader")
-    @normalTileShaderProgram = @initShaders("tile-fragment-shader", "tile-vertex-shader")
-    @normalTriangleShaderProgram = @initShaders("triangle-fragment-shader", "triangle-vertex-shader")
-
-    if wireframe is true
-      @tileShaderProgram = @wireframeTileShaderProgram
-      @triangleShaderProgram = @wireframeTriangleShaderProgram
-    else
-      @tileShaderProgram = @normalTileShaderProgram
-      @triangleShaderProgram = @normalTriangleShaderProgram
+    @shaderProgram = @initShaders("fragment.shader", "vertex.shader")
 
     if @gl
       @gl.clearColor 0.0, 0.0, 0.0, 1.0
