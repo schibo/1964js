@@ -198,36 +198,36 @@ C1964jsVideoHLE::gbi0PushMatrix = (pc) ->
 # uint16 uT   = (uint16)(  dwCmd2    )&0xFFFF;
 # uint16  uDSDX   = (uint16)((  dwCmd3>>16)&0xFFFF);
 # uint16  uDTDY     = (uint16)((  dwCmd3    )&0xFFFF);
-#X coordinate of upper left
+#X coordinate of lower right
 C1964jsVideoHLE::getTexRectXh = (pc) ->
   @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc) >>> 12 & 0x0FFF
 
-#Y coordinate of upper left
+#Y coordinate of lower right
 C1964jsVideoHLE::getTexRectYh = (pc) ->
   @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc) & 0x0FFF
 
 C1964jsVideoHLE::getTexRectTileNo = (pc) ->
   @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc + 4) >>> 24 & 0x07
 
-#X coordinate of lower right
+#X coordinate of upper left
 C1964jsVideoHLE::getTexRectXl = (pc) ->
   @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc + 4) >>> 12 & 0x0FFF
 
-#Y coordinate of lower right
+#Y coordinate of upper left
 C1964jsVideoHLE::getTexRectYl = (pc) ->
   @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc + 4) & 0x0FFF
 
 C1964jsVideoHLE::getTexRectS = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc + 8) >>> 16 & 0xFFFF
-
-C1964jsVideoHLE::getTexRectT = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc + 8) & 0xFFFF
-
-C1964jsVideoHLE::getTexRectDsDx = (pc) ->
   @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc + 12) >>> 16 & 0xFFFF
 
-C1964jsVideoHLE::getTexRectDtDy = (pc) ->
+C1964jsVideoHLE::getTexRectT = (pc) ->
   @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc + 12) & 0xFFFF
+
+C1964jsVideoHLE::getTexRectDsDx = (pc) ->
+  @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc + 20) >>> 16 & 0xFFFF
+
+C1964jsVideoHLE::getTexRectDtDy = (pc) ->
+  @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc + 20) & 0xFFFF
 
 C1964jsVideoHLE::getGbi1Type = (pc) ->
 
@@ -269,7 +269,113 @@ C1964jsVideoHLE::getTImgFormat = (pc) ->
 C1964jsVideoHLE::getTImgAddr = (pc) ->
   tImgAddr = @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc + 4)
   @getRspSegmentAddr tImgAddr
+  
+#SetTile
 
+C1964jsVideoHLE::getSetTileFmt = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc) >> 21 & 0x07
+  
+C1964jsVideoHLE::getSetTileSiz = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc) >> 19 & 0x03
+  
+C1964jsVideoHLE::getSetTileLine = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc) >> 9 & 0x01FF
+  
+C1964jsVideoHLE::getSetTileTmem = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc) & 0x01FF
+  
+C1964jsVideoHLE::getSetTileTile = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc + 4 ) >> 24 & 0x07
+  
+C1964jsVideoHLE::getSetTilePal = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc + 4 ) >> 20 & 0x0F
+  
+C1964jsVideoHLE::getSetTileCmt = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc + 4 ) >> 18 & 0x03
+  
+C1964jsVideoHLE::getSetTileMaskt = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc + 4 ) >> 14 & 0x0F
+  
+C1964jsVideoHLE::getSetTileShiftt = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc + 4 ) >> 10 & 0x0F
+  
+C1964jsVideoHLE::getSetTileCms = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc + 4 ) >> 8 & 0x03
+  
+C1964jsVideoHLE::getSetTileMasks = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc + 4 ) >> 4 & 0x0F
+  
+C1964jsVideoHLE::getSetTileShifts = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc + 4 ) & 0x0F
+  
+#LoadBlock
+
+C1964jsVideoHLE::getLoadBlockTile = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc + 4 ) >> 24 & 0x07
+  
+C1964jsVideoHLE::getLoadBlockUls = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc ) >> 12 & 0x0FFF
+  
+C1964jsVideoHLE::getLoadBlockUlt = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc ) & 0x0FFF
+  
+C1964jsVideoHLE::getLoadBlockLrs = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc + 4 ) >> 12 & 0x0FFF
+  
+C1964jsVideoHLE::getLoadBlockDxt = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc + 4 ) & 0x0FFF
+  
+#SetTileSize
+
+C1964jsVideoHLE::getSetTileSizeTile = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc + 4 ) >> 24 & 0x07
+  
+C1964jsVideoHLE::getSetTileSizeUls = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc ) >> 12 & 0x0FFF
+  
+C1964jsVideoHLE::getSetTileSizeUlt = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc ) & 0x0FFF
+  
+C1964jsVideoHLE::getSetTileSizeLrs = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc + 4 ) >> 12 & 0x0FFF
+  
+C1964jsVideoHLE::getSetTileSizeLrt = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc + 4 ) & 0x0FFF
+  
+#SetPrimColor
+
+C1964jsVideoHLE::getSetPrimColorM = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc ) >> 8 & 0xFF
+  
+C1964jsVideoHLE::getSetPrimColorL = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc ) & 0xFF
+  
+C1964jsVideoHLE::getSetPrimColorR = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc + 4 ) >> 24 & 0xFF
+  
+C1964jsVideoHLE::getSetPrimColorG = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc + 4 ) >> 16 & 0xFF
+  
+C1964jsVideoHLE::getSetPrimColorB = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc + 4 ) >> 8 & 0xFF
+  
+C1964jsVideoHLE::getSetPrimColorA = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc + 4 ) & 0xFF
+  
+#SetGeometryMode
+
+C1964jsVideoHLE::getSetGeometryMode = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc + 4 ) 
+  
+C1964jsVideoHLE::getClearGeometryMode = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc + 4 ) 
+  
+C1964jsVideoHLE::pow2roundup = (value) ->
+  result = 1
+  while result < value
+    result <<= 1
+  return result
+  
 C1964jsVideoHLE::microcodeMap0 = [
     'RSP_GBI1_SpNoop', 'RSP_GBI0_Mtx', 'RSP_GBI1_Reserved', 'RSP_GBI1_MoveMem',
     'RSP_GBI0_Vtx', 'RSP_GBI1_Reserved', 'RSP_GBI0_DL', 'RSP_GBI1_Reserved',

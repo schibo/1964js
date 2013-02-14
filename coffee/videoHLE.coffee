@@ -28,12 +28,15 @@ C1964jsVideoHLE = (core, glx) ->
   @MAX_TEXTURES = 8
   @MAX_VERTICES = 80
   @MAX_TILES = 8
-  @textureTiles = []
+  @tmem = new Uint8Array(1024 * 4)
+  @activeTile = 0
+  @textureTile = []
   @N64VertexList = []
   @vtxTransformed = []
   @vtxNonTransformed = []
   @vecProjected = []
   @vtxProjected5 = []
+  @geometryMode = 0
   @gRSP = {}
   @matToLoad = mat4.create()
   @gRSPworldProject = mat4.create()
@@ -44,12 +47,13 @@ C1964jsVideoHLE = (core, glx) ->
   @renderer = new C1964jsRenderer(@core.settings, @core.webGL.gl, @core.webGL)
   @texImg = {}
   @segments = []
+  @primColor = []
 
   #todo: different microcodes support
   @currentMicrocodeMap = @microcodeMap0
   i = 0
   while i< @MAX_TILES
-    @textureTiles[i] = []
+    @textureTile[i] = []
     i += 1
   i = 0
   while i < @MAX_VERTICES
@@ -244,11 +248,12 @@ C1964jsVideoHLE = (core, glx) ->
   C1964jsVideoHLE::DLParser_SetTImg = (pc) ->
     @texImg.format = @getTImgFormat(pc)
     @texImg.size = @getTImgSize(pc)
-    @texImg.width = @getTImgWidth(pc)
+    @texImg.width = @getTImgWidth(pc) + 1
     @texImg.addr = @getTImgAddr(pc)
     @texImg.bpl = @texImg.width << @texImg.size >> 1
     @texImg.changed = true #no texture cache
-    @videoLog "TODO: DLParser_SetTImg"
+    #console.log "SetTImg: Format:"+ @texImg.format + " Size:" + @texImg.size + " Width: "+ @texImg.width
+    #@videoLog "TODO: DLParser_SetTImg"
     return
   
   #this.videoLog('Texture: format=' + this.texImg.format + ' size=' + this.texImg.size + ' ' + 'width=' + this.texImg.width + ' addr=' + this.texImg.addr + ' bpl=' + this.texImg.bpl);
@@ -288,45 +293,26 @@ C1964jsVideoHLE = (core, glx) ->
     while i < v0 + num
       a = addr + 16 * (i - v0)
 	  
-	  # Legacy
-      @vtxNonTransformed[i] = {}
-      @vtxNonTransformed[i].x = @getFiddledVertexX(a)
-      @vtxNonTransformed[i].y = @getFiddledVertexY(a)
-      @vtxNonTransformed[i].z = @getFiddledVertexZ(a)
-	  # End Legacy
-	  
       @N64VertexList[i].x = @getVertexX(a)
       @N64VertexList[i].y = @getVertexY(a)
       @N64VertexList[i].z = @getVertexZ(a)
 	  
-      @N64VertexList[i].s = @getVertexS(a)
-      @N64VertexList[i].t = @getVertexT(a)
+      texWidth = @textureTile[@activeTile].width
+      texHeight = @textureTile[@activeTile].height
+      @N64VertexList[i].s = @getVertexS(a)/32 / texWidth
+      @N64VertexList[i].t = @getVertexT(a)/32 / texHeight
 	  
-      @N64VertexList[i].r = @getVertexColorR(a)
-      @N64VertexList[i].g = @getVertexColorG(a)
-      @N64VertexList[i].b = @getVertexColorB(a)
-      @N64VertexList[i].a = @getVertexAlpha(a)
+      @N64VertexList[i].r = @getVertexColorR(a)/255
+      @N64VertexList[i].g = @getVertexColorG(a)/255
+      @N64VertexList[i].b = @getVertexColorB(a)/255
+      @N64VertexList[i].a = @getVertexAlpha(a)/255
 	  
-      @N64VertexList[i].nx = @toSByte @getVertexNormalX(a)
-      @N64VertexList[i].ny = @toSByte @getVertexNormalY(a)
-      @N64VertexList[i].nz = @toSByte @getVertexNormalZ(a)
+      @N64VertexList[i].nx = (@toSByte @getVertexNormalX(a))/255
+      @N64VertexList[i].ny = (@toSByte @getVertexNormalY(a))/255
+      @N64VertexList[i].nz = (@toSByte @getVertexNormalZ(a))/255
+	  
+      #console.log "Vertex "+i+": XYZ("+@N64VertexList[i].x+" , "+@N64VertexList[i].y+" , "+@N64VertexList[i].z+") ST("+@N64VertexList[i].s+" , "+@N64VertexList[i].t+") RGBA("+@N64VertexList[i].r+" , "+@N64VertexList[i].g+" , "+@N64VertexList[i].b+" , "+@N64VertexList[i].a+") N("+@N64VertexList[i].nx+" , "+@N64VertexList[i].ny+" , "+@N64VertexList[i].nz+")"
 
-      #Legacy
-      @vtxTransformed[i] = {}
-      @vtxTransformed[i].x = @vtxNonTransformed[i].x * @gRSPworldProject[0] + @vtxNonTransformed[i].y * @gRSPworldProject[4] + @vtxNonTransformed[i].z * @gRSPworldProject[8] + @gRSPworldProject[12]
-      @vtxTransformed[i].y = @vtxNonTransformed[i].x * @gRSPworldProject[1] + @vtxNonTransformed[i].y * @gRSPworldProject[5] + @vtxNonTransformed[i].z * @gRSPworldProject[9] + @gRSPworldProject[13]
-      @vtxTransformed[i].z = @vtxNonTransformed[i].x * @gRSPworldProject[2] + @vtxNonTransformed[i].y * @gRSPworldProject[6] + @vtxNonTransformed[i].z * @gRSPworldProject[10] + @gRSPworldProject[14]
-      @vtxTransformed[i].w = @vtxNonTransformed[i].x * @gRSPworldProject[3] + @vtxNonTransformed[i].y * @gRSPworldProject[7] + @vtxNonTransformed[i].z * @gRSPworldProject[11] + @gRSPworldProject[15]
-      @vecProjected[i] = {}
-      @vecProjected[i].w = 1.0 / @vtxTransformed[i].w
-      @vecProjected[i].x = @vtxTransformed[i].x * @vecProjected[i].w
-      @vecProjected[i].y = @vtxTransformed[i].y * @vecProjected[i].w
-      @vecProjected[i].z = @vtxTransformed[i].z * @vecProjected[i].w
-      
-      #temp
-      @vtxTransformed[i].x = @vecProjected[i].x
-      @vtxTransformed[i].y = @vecProjected[i].y
-      @vtxTransformed[i].z = @vecProjected[i].z
       i += 1
     return
 
@@ -381,14 +367,13 @@ C1964jsVideoHLE = (core, glx) ->
     @combineB1a = 0xFF if @combineB1a is 7
     @combineC1a = 0xFF if @combineC1a is 7
     @combineD1a = 0xFF if @combineD1a is 7
+	
     w0 = Number @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc )
     w1 = Number @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc + 4)
-    ###
-    console.log " a0:" + @combineA0 + " b0:" + @combineB0 + " c0:" + @combineC0 + " d0:" + @combineD0 +
-                " a0a:" + @combineA0a + " b0a:" + @combineB0a + " c0a:" + @combineC0a + " d0a:" + @combineD0a +
-                " a1:" + @combineA1 + " b1:" + @combineB1 + " c1:" + @combineC1 + " d1:" + @combineD1 +
-                " a1a:" + @combineA1a + " b1a:" + @combineB1a + " c1a:" + @combineC1a + " d1a:" + @combineD1a
-    ###
+    
+    #if (@combineD0 == 4)
+    #  console.log " a0:" + @combineA0 + " b0:" + @combineB0 + " c0:" + @combineC0 + " d0:" + @combineD0 + " a0a:" + @combineA0a + " b0a:" + @combineB0a + " c0a:" + @combineC0a + " d0a:" + @combineD0a + " a1:" + @combineA1 + " b1:" + @combineB1 + " c1:" + @combineC1 + " d1:" + @combineD1 + " a1a:" + @combineA1a + " b1a:" + @combineB1a + " c1a:" + @combineC1a + " d1a:" + @combineD1a
+    
     #@videoLog "TODO: DLParser_SetCombine"
     return
 
@@ -471,35 +456,31 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::RSP_GBI1_ClearGeometryMode = (pc) ->
-    @videoLog "TODO: RSP_GBI1_ClearGeometryMode"
+    data = @getClearGeometryMode(pc)
+    @geometryMode &= ~data
+    #@videoLog "TODO: RSP_GBI1_ClearGeometryMode"
     return
 
   C1964jsVideoHLE::RSP_GBI1_SetGeometryMode = (pc) ->
-    @videoLog "TODO: RSP_GBI1_SetGeometryMode"
+    data = @getSetGeometryMode(pc)
+    @geometryMode |= data
+    #@videoLog "TODO: RSP_GBI1_SetGeometryMode"
     return
 
   C1964jsVideoHLE::RSP_GBI1_EndDL = (pc) ->
     @videoLog "RSP_GBI1_EndDL"
     @RDP_GFX_PopDL()
+    #alert "EndFrame"
     return
 
   C1964jsVideoHLE::RSP_GBI1_Texture = (pc) ->
     tile = @getTextureTile(pc)
-    @textureTiles[tile].on    = @getTextureOn(pc)
-    @textureTiles[tile].level = @getTextureLevel(pc)
-    @textureTiles[tile].scales = @getTextureScaleS(pc) / 0x8000
-    @textureTiles[tile].scalet = @getTextureScaleT(pc) / 0x8000
-    #console.log "RSP_GBI1_Texture: Tile:" + tile + " On:" + @textureTiles[tile].on + " Level:" + @textureTiles[tile].level + " ScaleS:" + @textureTiles[tile].scales + " ScaleT:" + @textureTiles[tile].scalet
+    @textureTile[tile].on    = @getTextureOn(pc)
+    @textureTile[tile].level = @getTextureLevel(pc)
+    @textureTile[tile].scales = @getTextureScaleS(pc) / 0x8000
+    @textureTile[tile].scalet = @getTextureScaleT(pc) / 0x8000
+    #console.log "RSP_GBI1_Texture: Tile:" + tile + " On:" + @textureTile[tile].on + " Level:" + @textureTile[tile].level + " ScaleS:" + @textureTile[tile].scales + " ScaleT:" + @textureTile[tile].scalet
     return
-
-  #test for dummy gray textures
-  #create a heap of dummy texture mem.
-  testTextureMem = new Array(256 * 256 * 4)
-  testTextureMem = new Uint8Array(testTextureMem)
-  k = 0
-  while k < 1024 * 1024
-    testTextureMem[k] = 128
-    k++
 
   C1964jsVideoHLE::RSP_GBI1_PopMtx = (pc) ->
     @videoLog "TODO: RSP_GBI1_PopMtx"
@@ -514,33 +495,13 @@ C1964jsVideoHLE = (core, glx) ->
     v1 = @getGbi0Tri1V1(pc) / @gRSP.vertexMult
     v2 = @getGbi0Tri1V2(pc) / @gRSP.vertexMult
     flag = @getGbi0Tri1Flag(pc)
-    didSucceed = @prepareTriangle v1, v2, v0
-    if didSucceed is false
-      @drawScene(false, 7)
-      @triangleVertexPositionBuffer.numItems = 0
-      @triangleVertexColorBuffer.numItems = 0
-      @gRSP.numVertices = 0
-      return
-
-    cmd = @getCommand(pc+8)
-    func = @currentMicrocodeMap[cmd]
-
-    if @dlistStackPointer >= 0
-      if @dlistStack[@dlistStackPointer].countdown is 0
-        if @dlistStackPointer - 1 < 0
-          @drawScene(false, 7)
-          return
-
-    if func[12] isnt "1"
-      if @core.settings.wireframe is true
-        @drawScene false, 7
-      else
-        #@drawScene true, 7 #not ready yet
-        @drawScene false, 7
-
-      @triangleVertexPositionBuffer.numItems = 0
-      @triangleVertexColorBuffer.numItems = 0
-      @gRSP.numVertices = 0
+    #console.log "Tri1: "+v0+", "+v1+", "+v2+"   Flag: "+flag
+    @prepareTriangle v0, v1, v2
+    @drawScene(false, 7)
+    @triangleVertexPositionBuffer.numItems = 0
+    @triangleVertexColorBuffer.numItems = 0
+    @triangleVertexTextureCoordBuffer.numItems = 0
+    @gRSP.numVertices = 0
     return
 
   C1964jsVideoHLE::RSP_GBI1_Noop = (pc) ->
@@ -580,25 +541,18 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_TexRect = (pc) ->
-    @videoLog "TODO: DLParser_TexRect"
-    xl = undefined
-    yl = undefined
-    s = undefined
-    t = undefined
-    dsdx = undefined
-    dtdy = undefined
-    yh = undefined
-    tileno = undefined
-    xh = @getTexRectXh(pc)
-    yh = @getTexRectYh(pc)
+    #@videoLog "TODO: DLParser_TexRect"
+    xh = @getTexRectXh(pc) / 4
+    yh = @getTexRectYh(pc) / 4
     tileno = @getTexRectTileNo(pc)
-    xl = @getTexRectXl(pc)
-    yl = @getTexRectYl(pc)
-    s = @getTexRectS(pc)
-    t = @getTexRectT(pc)
-    dsdx = @getTexRectDsDx(pc)
-    dtdy = @getTexRectDtDy(pc)
-    @renderer.texRect xl, yl, xh, yh, s, t, dsdx, dtdy, tileno, @core.memory.rdramUint8Array, @texImg
+    xl = @getTexRectXl(pc) / 4
+    yl = @getTexRectYl(pc) / 4
+    s = @getTexRectS(pc) / 32
+    t = @getTexRectT(pc) / 32
+    dsdx = @getTexRectDsDx(pc) / 1024
+    dtdy = @getTexRectDtDy(pc) / 1024
+    #console.log "Texrect: UL("+xl+","+yl+") LR("+xh+","+yh+") Tile:"+tileno+" TexCoord:("+s+","+t+") TexSlope:("+dsdx+","+dtdy+")"
+    @renderer.texRect xl, yl, xh, yh, s, t, dsdx, dtdy, @textureTile[tileno], @tmem, this
     @dlistStack[@dlistStackPointer].pc += 8
     return
 
@@ -649,12 +603,33 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_SetTileSize = (pc) ->
+    tile = @getSetTileSizeTile(pc)
+    @textureTile[tile].uls = @getSetTileSizeUls(pc)
+    @textureTile[tile].ult = @getSetTileSizeUlt(pc)
+    @textureTile[tile].lrs = (@getSetTileSizeLrs(pc) >> 2) + 1
+    @textureTile[tile].lrt = (@getSetTileSizeLrt(pc) >> 2) + 1
+    @textureTile[tile].width = @textureTile[tile].lrs - @textureTile[tile].uls
+    @textureTile[tile].height = @textureTile[tile].lrt - @textureTile[tile].ult
+    #console.log "SetTileSize: UL("+@textureTile[tile].uls+"/"+@textureTile[tile].ult+") LR("+@textureTile[tile].lrs+"/"+@textureTile[tile].lrt+") Dim: "+@textureTile[tile].width+"x"+@textureTile[tile].height
     @videoLog "TODO: DLParser_SetTileSize"
     return
 
   C1964jsVideoHLE::DLParser_LoadBlock = (pc) ->
-    # this.texImg.changed = true;
-    @videoLog "TODO: DLParser_LoadBlock"
+    tile = @getLoadBlockTile(pc)
+    uls = @getLoadBlockUls(pc)
+    ult = @getLoadBlockUlt(pc)
+    lrs = @getLoadBlockLrs(pc)+1
+    dxt = @getLoadBlockDxt(pc)
+    #console.log "LoadBlock: Tile:"+tile+" UL("+uls+"/"+ult+") LRS:"+lrs+" DXT: 0x"+dec2hex(dxt)
+    #textureAddr = @core.memory.rdramUint8Array[@texImg.addr])
+    bytesToXfer = lrs * @textureTile[tile].siz
+    if bytesToXfer > 4096
+      console.error "LoadBlock is making too large of a transfer. "+bytesToXfer+" bytes"
+    i=0
+    while i < bytesToXfer
+      @tmem[i]= @core.memory.rdramUint8Array[@texImg.addr+i]
+      i++
+    #@videoLog "TODO: DLParser_LoadBlock"
     return
 
   C1964jsVideoHLE::DLParser_LoadTile = (pc) ->
@@ -662,6 +637,21 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_SetTile = (pc) ->
+    tile = @getSetTileTile(pc)
+    @activeTile = tile
+    @textureTile[tile].fmt = @getSetTileFmt(pc);
+    @textureTile[tile].siz = @getSetTileSiz(pc);
+    @textureTile[tile].line = @getSetTileLine(pc);
+    @textureTile[tile].tmem = @getSetTileTmem(pc);
+    @textureTile[tile].pal = @getSetTilePal(pc);
+    @textureTile[tile].cmt = @getSetTileCmt(pc);
+    @textureTile[tile].cms = @getSetTileCms(pc);
+    @textureTile[tile].maskt = @getSetTileMaskt(pc);
+    @textureTile[tile].masks = @getSetTileMasks(pc);
+    @textureTile[tile].shiftt = @getSetTileShiftt(pc);
+    @textureTile[tile].shifts = @getSetTileShifts(pc);
+    #if @combineD0 == 4
+    #console.log "SetTile:"+tile+" FMT:"+@textureTile[tile].fmt+" SIZ:"+@textureTile[tile].siz+" LINE: "+@textureTile[tile].line+" TMEM:"+@textureTile[tile].tmem+" PAL:"+@textureTile[tile].pal+" CMS/T:"+@textureTile[tile].cms+"/"+@textureTile[tile].cmt+" MASKS/T:"+@textureTile[tile].masks+"/"+@textureTile[tile].maskt+" SHIFTS/T:"+@textureTile[tile].shifts+"/"+@textureTile[tile].shiftt
     @videoLog "TODO: DLParser_SetTile"
     return
 
@@ -682,6 +672,12 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_SetPrimColor = (pc) ->
+    @primColor = []
+    @primColor.push @getSetPrimColorR(pc)/255;
+    @primColor.push @getSetPrimColorG(pc)/255;
+    @primColor.push @getSetPrimColorB(pc)/255;
+    @primColor.push @getSetPrimColorA(pc)/255;
+    #alert @primColor
     @videoLog "TODO: DLParser_SetPrimColor"
     return
 
@@ -704,34 +700,26 @@ C1964jsVideoHLE = (core, glx) ->
     didSucceed
 
   C1964jsVideoHLE::initVertex = (dwV, vtxIndex, bTexture) ->
-    return false  if vtxIndex >= consts.MAX_VERTS
-    @vtxProjected5[vtxIndex] = []  if @vtxProjected5[vtxIndex] is `undefined` and vtxIndex < consts.MAX_VERTS
-    return false  if @vtxTransformed[dwV] is `undefined`
-    @vtxProjected5[vtxIndex][0] = @vtxTransformed[dwV].x
-    @vtxProjected5[vtxIndex][1] = @vtxTransformed[dwV].y
-    @vtxProjected5[vtxIndex][2] = @vtxTransformed[dwV].z
-    @vtxProjected5[vtxIndex][3] = @vtxTransformed[dwV].w
-    @vtxProjected5[vtxIndex][4] = @vecProjected[dwV].z
-    @vtxProjected5[vtxIndex][4] = 0 if @vtxTransformed[dwV].w < 0
-    vtxIndex[vtxIndex] = vtxIndex
+    #console.log "Vertex Index: "+vtxIndex+" dwV:"+dwV
+    return false  if dwV >= consts.MAX_VERTS
 
-    #this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.triangleVertexPositionBuffer);
     offset = 3 * (@triangleVertexPositionBuffer.numItems)
-    @triVertices[offset] = @vtxProjected5[vtxIndex][0]
-    @triVertices[offset + 1] = @vtxProjected5[vtxIndex][1]
-    @triVertices[offset + 2] = @vtxProjected5[vtxIndex][2]
-    @triangleVertexPositionBuffer.itemSize = 3
+    @triVertices[offset]     = @N64VertexList[dwV].x
+    @triVertices[offset + 1] = @N64VertexList[dwV].y
+    @triVertices[offset + 2] = @N64VertexList[dwV].z
     @triangleVertexPositionBuffer.numItems += 1
 
-    #hack: throw in some color
     colorOffset = 4 * (@triangleVertexColorBuffer.numItems)
-    @triColorVertices[colorOffset] = @triVertices[offset+2] / 20
-    @triColorVertices[colorOffset + 1] = @triVertices[offset+2] / 20
-    @triColorVertices[colorOffset + 2] = @triVertices[offset+2] / 20
-    @triColorVertices[colorOffset + 3] = 1.0
-
-    @triangleVertexColorBuffer.itemSize = 4
+    @triColorVertices[colorOffset]     = @N64VertexList[dwV].r
+    @triColorVertices[colorOffset + 1] = @N64VertexList[dwV].g
+    @triColorVertices[colorOffset + 2] = @N64VertexList[dwV].b
+    @triColorVertices[colorOffset + 3] = @N64VertexList[dwV].a
     @triangleVertexColorBuffer.numItems += 1
+	
+    texOffset = 2 * (@triangleVertexTextureCoordBuffer.numItems)
+    @triTextureCoords[texOffset]     = @N64VertexList[dwV].s
+    @triTextureCoords[texOffset + 1] = @N64VertexList[dwV].t
+    @triangleVertexTextureCoordBuffer.numItems += 1
     true
 
   C1964jsVideoHLE::drawScene = (useTexture, tileno) ->
@@ -740,37 +728,53 @@ C1964jsVideoHLE = (core, glx) ->
     @gl.disable @gl.DEPTH_TEST
     @gl.enable @gl.BLEND
     @gl.blendFunc @gl.SRC_ALPHA, @gl.ONE
-    @gl.cullFace @gl.BACK
     
-    #simple lighting. Get the normal matrix of the model-view matrix
-
-    @gl.enableVertexAttribArray @core.webGL.shaderProgram.vertexPositionAttribute
     @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexPositionBuffer
     @gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(@triVertices), @gl.STATIC_DRAW
+    @gl.enableVertexAttribArray @core.webGL.shaderProgram.vertexPositionAttribute
     @gl.vertexAttribPointer @core.webGL.shaderProgram.vertexPositionAttribute, @triangleVertexPositionBuffer.itemSize, @gl.FLOAT, false, 0, 0
     
-    @gl.enableVertexAttribArray @core.webGL.shaderProgram.vertexColorAttribute
     @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexColorBuffer
     @gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(@triColorVertices), @gl.STATIC_DRAW
+    @gl.enableVertexAttribArray @core.webGL.shaderProgram.vertexColorAttribute
     @gl.vertexAttribPointer @core.webGL.shaderProgram.vertexColorAttribute, @triangleVertexColorBuffer.itemSize, @gl.FLOAT, false, 0, 0
 
+    @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexTextureCoordBuffer
+    @gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(@triTextureCoords), @gl.STATIC_DRAW
     @gl.enableVertexAttribArray @core.webGL.shaderProgram.textureCoordAttribute
-    #@gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexTextureCoordBuffer
-    #@gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(@triTextureCoords), @gl.STATIC_DRAW
     @gl.vertexAttribPointer @core.webGL.shaderProgram.textureCoordAttribute, @triangleVertexTextureCoordBuffer.itemSize, @gl.FLOAT, false, 0, 0
-
-    if useTexture is true
-      @gl.activeTexture @gl.TEXTURE0
-      @gl.bindTexture @gl.TEXTURE_2D, window["neheTexture" + tileno]
-    @gl.uniform1i @core.webGL.shaderProgram.samplerUniform, 0
 	
+    tile = @textureTile[@activeTile]
+    canvaswidth = @pow2roundup tile.width
+    canvasheight = @pow2roundup tile.height	
+    texture = @renderer.formatTexture(tile, @tmem, canvaswidth, canvasheight)
+    colorsTexture = @gl.createTexture()
+    @gl.activeTexture(@gl.TEXTURE0)
+    @gl.bindTexture(@gl.TEXTURE_2D, colorsTexture)
+    @gl.texImage2D( @gl.TEXTURE_2D, 0, @gl.RGBA, tile.width, tile.height, 0, @gl.RGBA, @gl.UNSIGNED_BYTE, texture)
+    @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MAG_FILTER, @gl.NEAREST)
+    @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MIN_FILTER, @gl.NEAREST)
+    @gl.uniform1i @core.webGL.shaderProgram.samplerUniform, colorsTexture
+
+    @gl.uniform4fv @core.webGL.shaderProgram.uPrimColor, @primColor
+
     @gl.uniform1i @core.webGL.shaderProgram.wireframeUniform, if @core.settings.wireframe then 1 else 0
     
-    @core.webGL.setMatrixUniforms @core.webGL.shaderProgram
+    # Matrix Uniforms
+    @gl.uniformMatrix4fv(@core.webGL.shaderProgram.pMatrixUniform, false, @gRSP.projectionMtxs[@gRSP.projectionMtxTop]);
+    @gl.uniformMatrix4fv(@core.webGL.shaderProgram.mvMatrixUniform, false, @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop]);
+
     if @core.settings.wireframe is true
       @gl.drawArrays @gl.LINES, 0, @triangleVertexPositionBuffer.numItems
     else
       @gl.drawArrays @gl.TRIANGLES, 0, @triangleVertexPositionBuffer.numItems
+	  
+    @triangleVertexPositionBuffer.numItems = 0
+    @triangleVertexColorBuffer.numItems = 0
+    @triangleVertexTextureCoordBuffer.numItems = 0
+    @triVertices = []
+    @triColorVertices = []
+    @triTextureCoords = []
     return
 
   C1964jsVideoHLE::initBuffers = ->
@@ -792,11 +796,6 @@ C1964jsVideoHLE = (core, glx) ->
     @triangleVertexTextureCoordBuffer.itemSize = 2
     @triangleVertexTextureCoordBuffer.numItems = 0
 	
-    ###
-    @gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(@triTextureCoords), @gl.STATIC_DRAW
-    @gl.vertexAttribPointer @core.webGL.shaderProgram.vertexPositionAttribute, @triangleVertexPositionBuffer.itemSize, @gl.FLOAT, false, 0, 0
-    ###
-    
     return
 )()
 #hack global space until we export classes properly

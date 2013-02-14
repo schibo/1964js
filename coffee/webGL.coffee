@@ -18,9 +18,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 #jslint bitwise: true, todo: true
 #TODO: parameterize "Canvas3D" so this dom id can be arbitrary.
 
-C1964jsWebGL = (wireframe) ->
+C1964jsWebGL = (core, wireframe) ->
   "use strict"
   @gl = `undefined`
+  @core = core
   @webGLStart(wireframe)
   return this
 
@@ -90,8 +91,6 @@ C1964jsWebGL = (wireframe) ->
     shaderProgram = undefined
     vertexShader = undefined
     fragmentShader = undefined
-    #fragmentShader = @getShaderFromScriptTag(fs)
-    #vertexShader = @getShaderFromScriptTag(vs)
     @loadFiles(['shaders/'+fs, 'shaders/'+vs],
       (shaderText) =>
         vertexShader = @gl.createShader @gl.VERTEX_SHADER
@@ -124,7 +123,47 @@ C1964jsWebGL = (wireframe) ->
     shaderProgram.textureCoordAttribute = @gl.getAttribLocation(shaderProgram, "aTextureCoord")
     shaderProgram.samplerUniform = @gl.getUniformLocation(shaderProgram, "uSampler")
     shaderProgram.wireframeUniform = @gl.getUniformLocation(shaderProgram, "uWireframe")
+	
+    shaderProgram.uCombineA0 = @gl.getUniformLocation(shaderProgram, "uCombineA0")	
+    shaderProgram.uCombineB0 = @gl.getUniformLocation(shaderProgram, "uCombineB0")
+    shaderProgram.uCombineC0 = @gl.getUniformLocation(shaderProgram, "uCombineC0")
+    shaderProgram.uCombineD0 = @gl.getUniformLocation(shaderProgram, "uCombineD0")
+    shaderProgram.uCombineA0a = @gl.getUniformLocation(shaderProgram, "uCombineA0a")
+    shaderProgram.uCombineB0a = @gl.getUniformLocation(shaderProgram, "uCombineB0a")
+    shaderProgram.uCombineC0a = @gl.getUniformLocation(shaderProgram, "uCombineC0a")
+    shaderProgram.uCombineD0a = @gl.getUniformLocation(shaderProgram, "uCombineD0a")
+    shaderProgram.uCombineA1 = @gl.getUniformLocation(shaderProgram, "uCombineA1")	
+    shaderProgram.uCombineB1 = @gl.getUniformLocation(shaderProgram, "uCombineB1")
+    shaderProgram.uCombineC1 = @gl.getUniformLocation(shaderProgram, "uCombineC1")
+    shaderProgram.uCombineD1 = @gl.getUniformLocation(shaderProgram, "uCombineD1")
+    shaderProgram.uCombineA1a = @gl.getUniformLocation(shaderProgram, "uCombineA1a")
+    shaderProgram.uCombineB1a = @gl.getUniformLocation(shaderProgram, "uCombineB1a")
+    shaderProgram.uCombineC1a = @gl.getUniformLocation(shaderProgram, "uCombineC1a")
+    shaderProgram.uCombineD1a = @gl.getUniformLocation(shaderProgram, "uCombineD1a")
+    
+    shaderProgram.uPrimColor = @gl.getUniformLocation(shaderProgram, "uPrimColor")
+	
     shaderProgram
+	
+  C1964jsWebGL::setCombineUniforms = (shaderProgram) ->
+    vhle = @core.videoHLE
+    @gl.uniform1i shaderProgram.uCombineA0, vhle.combineA0
+    @gl.uniform1i shaderProgram.uCombineB0, vhle.combineB0
+    @gl.uniform1i shaderProgram.uCombineC0, vhle.combineC0
+    @gl.uniform1i shaderProgram.uCombineD0, vhle.combineD0
+    @gl.uniform1i shaderProgram.uCombineA0a, vhle.combineA0a
+    @gl.uniform1i shaderProgram.uCombineB0a, vhle.combineB0a
+    @gl.uniform1i shaderProgram.uCombineC0a, vhle.combineC0a
+    @gl.uniform1i shaderProgram.uCombineD0a, vhle.combineD0a
+    @gl.uniform1i shaderProgram.uCombineA1, vhle.combineA1
+    @gl.uniform1i shaderProgram.uCombineB1, vhle.combineB1
+    @gl.uniform1i shaderProgram.uCombineC1, vhle.combineC1
+    @gl.uniform1i shaderProgram.uCombineD1, vhle.combineD1
+    @gl.uniform1i shaderProgram.uCombineA1a, vhle.combineA1a
+    @gl.uniform1i shaderProgram.uCombineB1a, vhle.combineB1a
+    @gl.uniform1i shaderProgram.uCombineC1a, vhle.combineC1a
+    @gl.uniform1i shaderProgram.uCombineD1a, vhle.combineD1a
+    return
 	
   C1964jsWebGL::beginDList = ->
     @gl.viewport 0, 0, @gl.viewportWidth, @gl.viewportHeight
