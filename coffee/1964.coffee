@@ -65,8 +65,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 "use strict"
 consts = new C1964jsConstants()
 offset = undefined
+
 class C1964jsEmulator
+  callBind: (fn, me) ->
+    ->
+      fn.call me
+
   constructor: (userSettings) ->
+    @runLoop = @callBind @runLoop, this
     i = undefined
     @settings = userSettings
     @request = `undefined`
@@ -93,7 +99,7 @@ class C1964jsEmulator
     @isLittleEndian = 0
     @isBigEndian = 0
     @interval = 0
-    @m = -156250 #which is magic_number / (interval+1)
+    @m = -125000 #which is magic_number / (interval+1)
     @forceRepaint = false #presumably origin reg doesn't change because not double or triple-buffered (single-buffered)
     #main run loop
     @doOnce = 0
@@ -133,7 +139,7 @@ class C1964jsEmulator
     @kfi = 512
     @doOnce = 0
     @interval = 0
-    @m = -156250 #which is magic_number / (interval+1)
+    @m = -125000 #which is magic_number / (interval+1)
     @flushDynaCache()
     @showFB = true
     @webGL.hide3D()
@@ -288,7 +294,7 @@ class C1964jsEmulator
 
     return
 
-  runLoop: () =>
+  runLoop: () ->
     #setTimeout to be a good citizen..don't allow for the cpu to be pegged at 100%.
     #8ms idle time will be 50% cpu max if a 60FPS game is slow.
     #setTimeout (=>
@@ -299,8 +305,8 @@ class C1964jsEmulator
       #trigger
       if @m >= 0
         @interval += 1
-        @m = -156250 # which is -625000 / (interval+1)
-        if @interval is 3
+        @m = -125000 # which is -625000 / (interval+1)
+        if @interval is 4
           @interval = 0
           @repaintWrapper()
           @cp0[consts.COUNT] += 625000*2 #todo: set count to count + @m*2 when count is requested in code
