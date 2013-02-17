@@ -103,6 +103,8 @@ class C1964jsEmulator
     @currentHack = 0
     @kfi = 3200000
     @cnt = 0
+    @r = new Int32Array([0, 0, 0xd1731be9, 0xd1731be9, 0x001be9, 0xf45231e5, 0xa4001f0c, 0xa4001f08, 0x070, 0, 0x040, 0xA4000040, 0xd1330bc3, 0xd1330bc3, 0x025613a26, 0x02ea04317, 0, 0, 0, 0, 0, 0, 0, 0x06, 0, 0xd73f2993, 0, 0, 0, 0xa4001ff0, 0, 0xa4001554, 0, 0, 0])
+    @h = new Int32Array(35)
 
     #hook-up system objects
     @memory = new C1964jsMemory(this)
@@ -122,8 +124,6 @@ class C1964jsEmulator
     x = undefined
     i = undefined
     y = undefined
-    r = new Int32Array([0, 0, 0xd1731be9, 0xd1731be9, 0x001be9, 0xf45231e5, 0xa4001f0c, 0xa4001f08, 0x070, 0, 0x040, 0xA4000040, 0xd1330bc3, 0xd1330bc3, 0x025613a26, 0x02ea04317, 0, 0, 0, 0, 0, 0, 0, 0x06, 0, 0xd73f2993, 0, 0, 0, 0xa4001ff0, 0, 0xa4001554, 0, 0, 0])
-    h = new Int32Array(35)
     @initTLB()
 
     #todo: verity that r[8] is 0x070
@@ -171,8 +171,8 @@ class C1964jsEmulator
     while k < 0x1000
       @memory.spMemUint8Array[k] = @memory.rom[k]
       k += 1
-    r[20] = @getTVSystem(@memory.romUint8Array[0x3D])
-    r[22] = @getCIC()
+    @r[20] = @getTVSystem(@memory.romUint8Array[0x3D])
+    @r[22] = @getCIC()
     @cp0[consts.STATUS] = 0x70400004
     @cp0[consts.RANDOM] = 0x0000001f
     @cp0[consts.CONFIG] = 0x0006e463
@@ -192,9 +192,9 @@ class C1964jsEmulator
     #set hi vals
     i = 0
     while i < 35
-      h[i] = r[i] >> 31
+      @h[i] = @r[i] >> 31
       i += 1
-    @startEmulator r, h
+    @startEmulator()
     return
 
   #swap to 0x80371240
@@ -288,11 +288,11 @@ class C1964jsEmulator
 
     return
 
-  runLoop: (r, h) ->
+  runLoop: () =>
     #setTimeout to be a good citizen..don't allow for the cpu to be pegged at 100%.
     #8ms idle time will be 50% cpu max if a 60FPS game is slow.
     #setTimeout (=>
-    @request = requestAnimFrame(@runLoop.bind(this, r, h))  if @terminate is false
+    @request = requestAnimFrame(@runLoop)  if @terminate is false
     @interrupts.checkInterrupts()
 
     while 1
@@ -317,14 +317,14 @@ class C1964jsEmulator
         #we probably need to split this up more.
         try
           fn = @code[fnName]
-          @run fn, r, h
+          @run fn, @r, @h
         catch e
           #so, we really need to know what type of exception this is,
           #but right now, we're assuming that we need to compile a block due to
           #an attempt to call an undefined function. Are there standard exception types
           #in javascript?
           fn = @decompileBlock(@p)
-          fn = fn(r, h, @memory, this)
+          fn = fn(@r, @h, @memory, this)
     #), 0
     this
 
@@ -337,10 +337,10 @@ class C1964jsEmulator
     @repaint @ctx, @ImDat, @memory.getInt32(@memory.viUint8Array, @memory.viUint8Array, consts.VI_ORIGIN_REG) & 0x00FFFFFF
     return
 
-  startEmulator: (r, h) ->
+  startEmulator: () ->
     @terminate = false
     @log "startEmulator"
-    @runLoop r, h
+    @runLoop()
     return
 
   #make way for another 1964 instance. cleanup old scripts written to the page.
