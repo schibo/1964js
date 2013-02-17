@@ -424,18 +424,18 @@ class C1964jsMemory
 
   storeWord: (val, addr, pc, isDelaySlot) ->
     a = @virtualToPhysical(addr)
-    @writeRegion[a>>14](this, @setInt32, val, a, pc, isDelaySlot)
+    @writeRegion[a>>>14](this, @setInt32, val, a, pc, isDelaySlot)
     return
 
   #Same routine as storeWord, but store a byte
   storeByte: (val, addr, pc, isDelaySlot) ->
     a = @virtualToPhysical(addr)
-    @writeRegion[a>>14](this, @setInt8, val, a, pc, isDelaySlot)
+    @writeRegion[a>>>14](this, @setInt8, val, a, pc, isDelaySlot)
     return
 
   storeHalf: (val, addr, pc, isDelaySlot) ->
     a = @virtualToPhysical(addr)
-    @writeRegion[a>>14](this, @setInt16, val, a, pc, isDelaySlot)
+    @writeRegion[a>>>14](this, @setInt16, val, a, pc, isDelaySlot)
     return
 
 #hack global space until we export classes properly
