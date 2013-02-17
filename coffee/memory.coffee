@@ -407,33 +407,33 @@ class C1964jsMemory
     uregion[off_ + 1] = val
     return
 
-  loadByte: (addr) ->
+  lb: (addr) ->
     #throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
     a = @virtualToPhysical(addr)
     @region[a>>>14](this, a, @getInt8)
 
-  loadHalf: (addr) ->
+  lh: (addr) ->
     #throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
     a = @virtualToPhysical(addr)
     @region[a>>>14](this, a, @getInt16)
 
-  loadWord: (addr) ->
+  lw: (addr) ->
     #throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
     a = @virtualToPhysical(addr)
     @region[a>>>14](this, a, @getUint32)
 
-  storeWord: (val, addr, pc, isDelaySlot) ->
+  sw: (val, addr, pc, isDelaySlot) ->
     a = @virtualToPhysical(addr)
     @writeRegion[a>>>14](this, @setInt32, val, a, pc, isDelaySlot)
     return
 
   #Same routine as storeWord, but store a byte
-  storeByte: (val, addr, pc, isDelaySlot) ->
+  sb: (val, addr, pc, isDelaySlot) ->
     a = @virtualToPhysical(addr)
     @writeRegion[a>>>14](this, @setInt8, val, a, pc, isDelaySlot)
     return
 
-  storeHalf: (val, addr, pc, isDelaySlot) ->
+  sh: (val, addr, pc, isDelaySlot) ->
     a = @virtualToPhysical(addr)
     @writeRegion[a>>>14](this, @setInt16, val, a, pc, isDelaySlot)
     return

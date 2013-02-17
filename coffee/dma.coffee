@@ -57,7 +57,7 @@ class C1964jsDMA
     else
       alert "pi reading from somewhere other than cartridge domain"
       while end-- >= 0
-        @memory.rdramUint8Array[to] = @memory.loadByte(from)
+        @memory.rdramUint8Array[to] = @memory.lb(from)
         from++
         to++
 
