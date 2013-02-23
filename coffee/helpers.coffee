@@ -585,22 +585,23 @@ C1964jsHelpers = (core, isLittleEndian) ->
     return
 
   @buildTLBHelper = (start, end, entry, mask, clear) ->
-    if (entry & 0x3)
+    i = start>>>12
+    lend = end>>>12
+  
+    if (clear is true) #clear unconditionally or if (entry & 3)? If so, why?
+      while i < lend
+        @core.memory.physRegion[i] = (i & 0x1ffff) >>> 4
+        i++
+    else #if (entry & 0x3) #why?
       realAddress = (0x80000000 | (((entry << 6)>>>0) & (mask >>> 1))) >>> 0
-      lend = end>>>12
-      i = start>>>12
 
-      if (clear is true)
-        while i < lend
-          @core.memory.physRegion[i] = (i & 0x1ffff) >>> 4
-          i++
-      else while i < lend
+      while i < lend
         real = (realAddress + (i << 12) - start) & 0x1fffffff
         @core.memory.physRegion[i] = real >>> 16
         i++
     return
 
-  @buildTLB = (tlb, index, clear) ->
+  @buildTLB = (tlb, clear) ->
     #calculate the mapped address range that this TLB entry is mapping
     lowest = (tlb.entryHi & 0xffffff00) >>> 0  #Don't support ASID field
     middle = (lowest + tlb.loCompare) >>> 0

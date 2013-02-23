@@ -130,6 +130,8 @@ class C1964jsEmulator
     x = undefined
     i = undefined
     y = undefined
+    @endianTest()
+    @helpers = new C1964jsHelpers(this, @isLittleEndian)
     @initTLB()
 
     #todo: verity that r[8] is 0x070
@@ -143,8 +145,6 @@ class C1964jsEmulator
     @flushDynaCache()
     @showFB = true
     @webGL.hide3D()
-    @endianTest()
-    @helpers = new C1964jsHelpers(this, @isLittleEndian)
 
     #runTest();
     @memory.rom = buffer
