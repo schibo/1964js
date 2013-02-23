@@ -4,14 +4,14 @@ export version1964="0.1.6"
 minified="1964js-$version1964.min.js"
 
 echo Compiling index.html
-#slimrb index.slim --pretty index.html
-#if test $? -ne 0
-#then
-#    echo Compilation aborted. Please fix slim errors first.
-#    exit $?
-#else
-#    echo done.
-#fi
+slimrb index.slim --pretty index.html
+if test $? -ne 0
+then
+    echo Compilation aborted. Please fix slim errors first.
+    exit $?
+else
+    echo done.
+fi
 
 #echo Compiling debug.html
 #slimrb index.slim --pretty debug.html
