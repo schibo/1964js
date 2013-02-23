@@ -129,7 +129,6 @@ C1964jsVideoHLE = (core, glx) ->
         @dlistStackPointer -= 1  if @dlistStack[@dlistStackPointer].countdown < 0
     @videoLog "finished dlist"
     @core.interrupts.triggerSPInterrupt 0, false
-    @drawScene(false, 7)
     return
 
   #TODO: end rendering
@@ -470,6 +469,8 @@ C1964jsVideoHLE = (core, glx) ->
   C1964jsVideoHLE::RSP_GBI1_EndDL = (pc) ->
     @videoLog "RSP_GBI1_EndDL"
     @RDP_GFX_PopDL()
+    @drawScene(false, 7)
+
     #alert "EndFrame"
     return
 
@@ -498,21 +499,14 @@ C1964jsVideoHLE = (core, glx) ->
     #console.log "Tri1: "+v0+", "+v1+", "+v2+"   Flag: "+flag
     didSucceed = @prepareTriangle v0, v1, v2
     
-
-#    @drawScene(false, 7)
     if didSucceed is false
-      @drawScene(false, 7)
-      @triangleVertexPositionBuffer.numItems = 0
-      @triangleVertexColorBuffer.numItems = 0
-      @triangleVertexTextureCoordBuffer.numItems = 0
-      @gRSP.numVertices = 0
       return
 
     cmd = @getCommand(pc+8)
     func = @currentMicrocodeMap[cmd]
 
-    if func isnt "RSP_GBI1_Tri1"
-      @drawScene false, 7
+ #   if func isnt "RSP_GBI1_Tri1"
+ #     @drawScene false, 7
 
     return
 
