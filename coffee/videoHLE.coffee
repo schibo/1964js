@@ -129,7 +129,7 @@ C1964jsVideoHLE = (core, glx) ->
         @dlistStackPointer -= 1  if @dlistStack[@dlistStackPointer].countdown < 0
     @videoLog "finished dlist"
     @core.interrupts.triggerSPInterrupt 0, false
-    #@drawScene(false, 7)
+    @drawScene(false, 7)
     return
 
   #TODO: end rendering
@@ -496,12 +496,24 @@ C1964jsVideoHLE = (core, glx) ->
     v2 = @getGbi0Tri1V2(pc) / @gRSP.vertexMult
     flag = @getGbi0Tri1Flag(pc)
     #console.log "Tri1: "+v0+", "+v1+", "+v2+"   Flag: "+flag
-    @prepareTriangle v0, v1, v2
-    @drawScene(false, 7)
-    @triangleVertexPositionBuffer.numItems = 0
-    @triangleVertexColorBuffer.numItems = 0
-    @triangleVertexTextureCoordBuffer.numItems = 0
-    @gRSP.numVertices = 0
+    didSucceed = @prepareTriangle v0, v1, v2
+    
+
+#    @drawScene(false, 7)
+    if didSucceed is false
+      @drawScene(false, 7)
+      @triangleVertexPositionBuffer.numItems = 0
+      @triangleVertexColorBuffer.numItems = 0
+      @triangleVertexTextureCoordBuffer.numItems = 0
+      @gRSP.numVertices = 0
+      return
+
+    cmd = @getCommand(pc+8)
+    func = @currentMicrocodeMap[cmd]
+
+    if func isnt "RSP_GBI1_Tri1"
+      @drawScene false, 7
+
     return
 
   C1964jsVideoHLE::RSP_GBI1_Noop = (pc) ->
