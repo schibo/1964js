@@ -754,13 +754,14 @@ C1964jsVideoHLE = (core, glx) ->
     canvaswidth = @pow2roundup tile.width
     canvasheight = @pow2roundup tile.height	
     texture = @renderer.formatTexture(tile, @tmem, canvaswidth, canvasheight)
-    colorsTexture = @gl.createTexture()
-    @gl.activeTexture(@gl.TEXTURE0)
-    @gl.bindTexture(@gl.TEXTURE_2D, colorsTexture)
-    @gl.texImage2D( @gl.TEXTURE_2D, 0, @gl.RGBA, tile.width, tile.height, 0, @gl.RGBA, @gl.UNSIGNED_BYTE, texture)
-    @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MAG_FILTER, @gl.NEAREST)
-    @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MIN_FILTER, @gl.NEAREST)
-    @gl.uniform1i @core.webGL.shaderProgram.samplerUniform, colorsTexture
+    if texture isnt undefined
+      colorsTexture = @gl.createTexture()
+      @gl.activeTexture(@gl.TEXTURE0)
+      @gl.bindTexture(@gl.TEXTURE_2D, colorsTexture)
+      @gl.texImage2D( @gl.TEXTURE_2D, 0, @gl.RGBA, tile.width, tile.height, 0, @gl.RGBA, @gl.UNSIGNED_BYTE, texture)
+      @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MAG_FILTER, @gl.NEAREST)
+      @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MIN_FILTER, @gl.NEAREST)
+      @gl.uniform1i @core.webGL.shaderProgram.samplerUniform, colorsTexture
 
     @gl.uniform4fv @core.webGL.shaderProgram.uPrimColor, @primColor
 

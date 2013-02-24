@@ -24,7 +24,7 @@ C1964jsRenderer = (settings, glx, webGL) ->
   texrectVertexIndexBuffer = undefined
   @videoHLE = undefined
   fivetoeight = [0x00,0x08,0x10,0x18,0x21,0x29,0x31,0x39,0x42,0x4A,0x52,0x5A,0x63,0x6B,0x73,0x7B,0x84,0x8C,0x94,0x9C,0xA5,0xAD,0xB5,0xBD,0xC6,0xCE,0xD6,0xDE,0xE7,0xEF,0xF7,0xFF]
-  @textureCache = new Array()
+  @textureCache = new Object()
 
   @texRect = (xl, yl, xh, yh, s, t, dsdx, dtdy, tile, tmem, videoHLE) ->
   
@@ -60,31 +60,35 @@ C1964jsRenderer = (settings, glx, webGL) ->
     canvasheight = ch
 
     texturesize = canvasheight * canvaswidth * 4
-
     #hacky texture cache unique id (want to see how fast we currently are)
-    textureId = tmem[1] + tmem[21] + tmem[201] + tmem[41] + tmem[29] + texturesize
-    unless @textureCache[textureId]?
-      buffer = new ArrayBuffer(texturesize)
-      texture = new Uint8Array(buffer)
-      @textureCache[textureId] = texture
-      switch tile.fmt
-        when 0
-          switch tile.siz
-            when 2
-              width = tile.width;
-              j=0
-              while j < tile.height
-                i=0
-                while i < tile.width
-                  base2 = (j*width*2) + (i*2)
-                  base4 = (j*canvaswidth*4) + (i*4) 
-                  color16 = tmem[base2]<<8 | tmem[base2+1]           
-                  texture[base4]     = fivetoeight[color16 >> 11 & 0x1F]
-                  texture[base4 + 1] = fivetoeight[color16 >> 6 & 0x1F]
-                  texture[base4 + 2] = fivetoeight[color16 >> 1 & 0x1F]
-                  texture[base4 + 3] = if color16 & 0x01 == 0 then 0x00 else 0xFF
-                  i++
-                j++
+    
+    @useTextureCache is false
+    if @useTextureCache is true
+      randomPixel = canvasheight * canvaswidth * 2
+      textureId = (tmem[randomPixel]>>>0) << 24 | (tmem[randomPixel+8]>>>0) << 16 | (tmem[randomPixel+16]>>>0) << 8 | tmem[randomPixel+24]>>>0 
+      return @textureCache[textureId] if @textureCache[textureId]?
+
+    buffer = new ArrayBuffer(texturesize)
+    texture = new Uint8Array(buffer)
+    @textureCache[textureId] = texture
+    switch tile.fmt
+      when 0
+        switch tile.siz
+          when 2
+            width = tile.width;
+            j=0
+            while j < tile.height
+              i=0
+              while i < tile.width
+                base2 = (j*width*2) + (i*2)
+                base4 = (j*canvaswidth*4) + (i*4) 
+                color16 = tmem[base2]<<8 | tmem[base2+1]           
+                texture[base4]     = fivetoeight[color16 >> 11 & 0x1F]
+                texture[base4 + 1] = fivetoeight[color16 >> 6 & 0x1F]
+                texture[base4 + 2] = fivetoeight[color16 >> 1 & 0x1F]
+                texture[base4 + 3] = if color16 & 0x01 == 0 then 0x00 else 0xFF
+                i++
+              j++
           
 		  
     return @textureCache[textureId]
@@ -136,25 +140,26 @@ C1964jsRenderer = (settings, glx, webGL) ->
     #console.log "Binding Texture Size: "+tile.width+" x "+tile.height+" -> "+canvaswidth+" x "+canvasheight
     
     texture = @formatTexture(tile, tmem, canvaswidth, canvasheight)
-    colorsTexture = gl.createTexture()
-    gl.activeTexture(gl.TEXTURE0)
-    gl.bindTexture(gl.TEXTURE_2D, colorsTexture)
-    gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, canvaswidth, canvasheight, 0, gl.RGBA, gl.UNSIGNED_BYTE, texture)
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-    gl.uniform1i webGL.shaderProgram.samplerUniform, colorsTexture
+    if texture isnt undefined
+      colorsTexture = gl.createTexture()
+      gl.activeTexture(gl.TEXTURE0)
+      gl.bindTexture(gl.TEXTURE_2D, colorsTexture)
+      gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, canvaswidth, canvasheight, 0, gl.RGBA, gl.UNSIGNED_BYTE, texture)
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+      gl.uniform1i webGL.shaderProgram.samplerUniform, colorsTexture
 	
-    gl.uniform4fv webGL.shaderProgram.uPrimColor, videoHLE.primColor
+      gl.uniform4fv webGL.shaderProgram.uPrimColor, videoHLE.primColor
 	
-    gl.bindBuffer gl.ELEMENT_ARRAY_BUFFER, texrectVertexIndexBuffer
-    webGL.setMatrixUniforms webGL.shaderProgram
-    webGL.setCombineUniforms webGL.shaderProgram
-    gl.uniform1i webGL.shaderProgram.wireframeUniform, if settings.wireframe then 1 else 0
+      gl.bindBuffer gl.ELEMENT_ARRAY_BUFFER, texrectVertexIndexBuffer
+      webGL.setMatrixUniforms webGL.shaderProgram
+      webGL.setCombineUniforms webGL.shaderProgram
+      gl.uniform1i webGL.shaderProgram.wireframeUniform, if settings.wireframe then 1 else 0
     
-    if settings.wireframe is true
-      gl.drawElements gl.LINE_LOOP, texrectVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0
-    else
-      gl.drawElements gl.TRIANGLES, texrectVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0
+      if settings.wireframe is true
+        gl.drawElements gl.LINE_LOOP, texrectVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0
+      else
+        gl.drawElements gl.TRIANGLES, texrectVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0
 	  
     return
   return this
