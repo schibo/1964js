@@ -13,15 +13,15 @@ else
     echo done.
 fi
 
-#echo Compiling debug.html
-#slimrb index.slim --pretty debug.html
-#if test $? -ne 0
-#then
-#    echo Compilation aborted. Please fix slim errors first.
-#    exit $?
-#else
-#    echo done.
-#fi
+echo Compiling debug.html
+slimrb index.slim --pretty debug.html
+if test $? -ne 0
+then
+    echo Compilation aborted. Please fix slim errors first.
+    exit $?
+else
+    echo done.
+fi
 
 mkdir obj/
 mkdir css/
