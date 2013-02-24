@@ -68,7 +68,12 @@ class C1964jsMemory
   constructor: (@core) ->
     @romUint8Array = `undefined` # set after rom is loaded.
     @rom = `undefined` # set after rom is loaded.
-    @rdramUint8Array = new Uint8Array(0x800000)
+    @rdramArrayBuffer = new ArrayBuffer(0x800000);
+    @rdramUint8Array = new Uint8Array(@rdramArrayBuffer);
+    @rdramUint16Array = new Uint16Array(@rdramArrayBuffer);
+    @rdramUint32Array = new Uint32Array(@rdramArrayBuffer);
+    @rdramDataView = new DataView(@rdramArrayBuffer);
+
     @spMemUint8Array = new Uint8Array(0x10000)
     @spReg1Uint8Array = new Uint8Array(0x10000)
     @spReg2Uint8Array = new Uint8Array(0x10000)
@@ -91,50 +96,70 @@ class C1964jsMemory
     @ramRegs8Uint8Array = new Uint8Array(0x10000)
     @dummyReadWriteUint8Array = new Uint8Array(0x10000)
     @region = []
-    @writeRegion = []
+    @region16 = []
+    @region32 = []
+    @writeRegion8 = []
+    @writeRegion16 = []
+    @writeRegion32 = []
+
     @initRegion 0, 0x80000000, @readTLB, @writeTLB
     @initRegion 0x80000000, 0x40000000, @readDummy, @writeDummy
     @initRegion 0xC0000000, 0x40000000, @readTLB, @writeTLB
-    @initRegion MEMORY_START_RDRAM, MEMORY_SIZE_RDRAM, @readRdram, @writeRdram
-    @initRegion MEMORY_START_RAMREGS4, MEMORY_START_RAMREGS4, @readRamRegs4, @writeRamRegs4
-    @initRegion MEMORY_START_SPMEM, MEMORY_SIZE_SPMEM, @readSpMem, @writeSpMem
-    @initRegion MEMORY_START_SPREG_1, MEMORY_SIZE_SPREG_1, @readSpReg1, @writeSpReg1
-    @initRegion MEMORY_START_SPREG_2, MEMORY_SIZE_SPREG_2, @readSpReg2, @writeSpReg2
-    @initRegion MEMORY_START_DPC, MEMORY_SIZE_DPC, @readDpc, @writeDpc
-    @initRegion MEMORY_START_DPS, MEMORY_SIZE_DPS, @readDps, @writeDps
-    @initRegion MEMORY_START_MI, MEMORY_SIZE_MI, @readMi, @writeMi
-    @initRegion MEMORY_START_VI, MEMORY_SIZE_VI, @readVi, @writeVi
-    @initRegion MEMORY_START_AI, MEMORY_SIZE_AI, @readAi, @writeAi
-    @initRegion MEMORY_START_PI, MEMORY_SIZE_PI, @readPi, @writePi
-    @initRegion MEMORY_START_SI, MEMORY_SIZE_SI, @readSi, @writeSi
-    @initRegion MEMORY_START_C2A1, MEMORY_SIZE_C2A1, @readC2A1, @writeC2A1
-    @initRegion MEMORY_START_C1A1, MEMORY_SIZE_C1A1, @readC1A1, @writeC1A1
-    @initRegion MEMORY_START_C2A2, MEMORY_SIZE_C2A2, @readC2A2, @writeC2A2
-    @initRegion MEMORY_START_ROM_IMAGE, MEMORY_SIZE_ROM, @readRom, @writeRom #todo: could be a problem to use romLength
-    @initRegion MEMORY_START_C1A3, MEMORY_SIZE_C1A3, @readC1A3, @writeC1A3
-    @initRegion MEMORY_START_RI, MEMORY_SIZE_RI, @readRi, @writeRi
-    @initRegion MEMORY_START_PIF, MEMORY_SIZE_PIF, @readPif, @writePif
-    @initRegion MEMORY_START_GIO, MEMORY_SIZE_GIO, @readGio, @writeGio
-    @initRegion MEMORY_START_RAMREGS0, MEMORY_SIZE_RAMREGS0, @readRamRegs0, @writeRamRegs0
-    @initRegion MEMORY_START_RAMREGS8, MEMORY_SIZE_RAMREGS8, @readRamRegs8, @writeRamRegs8
+    @initRegion MEMORY_START_RDRAM, MEMORY_SIZE_RDRAM, @readRdram8, @writeRdram8, @readRdram16, @writeRdram16, @readRdram32, @writeRdram32
+    @initRegion MEMORY_START_RAMREGS4, MEMORY_START_RAMREGS4, @readRamRegs4, @writeRamRegs4, @readRamRegs4, @writeRamRegs4, @readRamRegs4, @writeRamRegs4
+    @initRegion MEMORY_START_SPMEM, MEMORY_SIZE_SPMEM, @readSpMem, @writeSpMem, @readSpMem, @writeSpMem, @readSpMem, @writeSpMem
+    @initRegion MEMORY_START_SPREG_1, MEMORY_SIZE_SPREG_1, @readSpReg1, @writeSpReg1, @readSpReg1, @writeSpReg1, @readSpReg1, @writeSpReg1
+    @initRegion MEMORY_START_SPREG_2, MEMORY_SIZE_SPREG_2, @readSpReg2, @writeSpReg2, @readSpReg2, @writeSpReg2, @readSpReg2, @writeSpReg2
+    @initRegion MEMORY_START_DPC, MEMORY_SIZE_DPC, @readDpc, @writeDpc, @readDpc, @writeDpc, @readDpc, @writeDpc
+    @initRegion MEMORY_START_DPS, MEMORY_SIZE_DPS, @readDps, @writeDps, @readDps, @writeDps, @readDps, @writeDps
+    @initRegion MEMORY_START_MI, MEMORY_SIZE_MI, @readMi, @writeMi, @readMi, @writeMi, @readMi, @writeMi
+    @initRegion MEMORY_START_VI, MEMORY_SIZE_VI, @readVi, @writeVi, @readVi, @writeVi, @readVi, @writeVi
+    @initRegion MEMORY_START_AI, MEMORY_SIZE_AI, @readAi, @writeAi, @readAi, @writeAi, @readAi, @writeAi
+    @initRegion MEMORY_START_PI, MEMORY_SIZE_PI, @readPi, @writePi, @readPi, @writePi, @readPi, @writePi
+    @initRegion MEMORY_START_SI, MEMORY_SIZE_SI, @readSi, @writeSi, @readSi, @writeSi, @readSi, @writeSi
+    @initRegion MEMORY_START_C2A1, MEMORY_SIZE_C2A1, @readC2A1, @writeC2A1, @readC2A1, @writeC2A1, @readC2A1, @writeC2A1
+    @initRegion MEMORY_START_C1A1, MEMORY_SIZE_C1A1, @readC1A1, @writeC1A1, @readC1A1, @writeC1A1, @readC1A1, @writeC1A1
+    @initRegion MEMORY_START_C2A2, MEMORY_SIZE_C2A2, @readC2A2, @writeC2A2, @readC2A2, @writeC2A2, @readC2A2, @writeC2A2
+    @initRegion MEMORY_START_ROM_IMAGE, MEMORY_SIZE_ROM, @readRom, @writeRom, @readRom, @writeRom, @readRom, @writeRom #todo: could be a problem to use romLength
+    @initRegion MEMORY_START_C1A3, MEMORY_SIZE_C1A3, @readC1A3, @writeC1A3, @readC1A3, @writeC1A3, @readC1A3, @writeC1A3
+    @initRegion MEMORY_START_RI, MEMORY_SIZE_RI, @readRi, @writeRi, @readRi, @writeRi, @readRi, @writeRi
+    @initRegion MEMORY_START_PIF, MEMORY_SIZE_PIF, @readPif, @writePif, @readPif, @writePif, @readPif, @writePif
+    @initRegion MEMORY_START_GIO, MEMORY_SIZE_GIO, @readGio, @writeGio, @readGio, @writeGio, @readGio, @writeGio
+    @initRegion MEMORY_START_RAMREGS0, MEMORY_SIZE_RAMREGS0, @readRamRegs0, @writeRamRegs0, @readRamRegs0, @writeRamRegs0, @readRamRegs0, @writeRamRegs0
+    @initRegion MEMORY_START_RAMREGS8, MEMORY_SIZE_RAMREGS8, @readRamRegs8, @writeRamRegs8, @readRamRegs8, @writeRamRegs8, @readRamRegs8, @writeRamRegs8
     @physRegion = undefined
 
-  initRegion: (start, size, region, writeRegion) ->
+  initRegion: (start, size, readRegion8, writeRegion8, readRegion16, writeRegion16, readRegion32, writeRegion32) ->
     end = (start + size) >>> 14
     start >>>= 14
 
     while start < end
-      @region[start] = region
-      @writeRegion[start++] = writeRegion
+      @region[start] = readRegion8
+      @region16[start] = readRegion16
+      @region32[start] = readRegion32     
+      @writeRegion8[start] = writeRegion8
+      @writeRegion16[start] = writeRegion16
+      @writeRegion32[start] = writeRegion32
+      start++
+
     return
 
   readDummy: (that, a, getFn) ->
     off_ = a & 0x0000FFFC
     getFn that.dummyReadWriteUint8Array, off_
 
-  readRdram: (that, a, getFn) ->
+  #little-endian only
+  readRdram8: (that, a) ->
     off_ = a-MEMORY_START_RDRAM
-    getFn that.rdramUint8Array, off_
+    that.rdramUint8Array[off_]
+
+  readRdram16: (that, a) ->
+    off_ = (a-MEMORY_START_RDRAM)
+    that.rdramUint8Array[off_] << 8 | that.rdramUint8Array[off_ + 1]
+
+  readRdram32: (that, a) ->
+    off_ = (a-MEMORY_START_RDRAM)
+    that.rdramUint8Array[off_] << 24 | that.rdramUint8Array[off_ + 1] << 16 | that.rdramUint8Array[off_ + 2] << 8 | that.rdramUint8Array[off_ + 3]
 
   readRamRegs0: (that, a, getFn) ->
     off_ = a - MEMORY_START_RAMREGS0
@@ -220,9 +245,23 @@ class C1964jsMemory
     off_ = a - MEMORY_START_GIO
     getFn that.gioUint8Array, off_
 
-  writeRdram: (that, setFn, val, a) ->
+  writeRdram8: (that, setFn, val, a) ->
     off_ = a - MEMORY_START_RDRAM
-    setFn that.rdramUint8Array, off_, val
+    that.rdramUint8Array[off_] = val
+    return
+
+  writeRdram16: (that, setFn, val, a) ->
+    off_ = a - MEMORY_START_RDRAM
+    that.rdramUint8Array[off_] = val >> 8
+    that.rdramUint8Array[off_ + 1] = val
+    return
+
+  writeRdram32: (that, setFn, val, a) ->
+    off_ = a - MEMORY_START_RDRAM
+    that.rdramUint8Array[off_] = val >> 24
+    that.rdramUint8Array[off_ + 1] = val >> 16
+    that.rdramUint8Array[off_ + 2] = val >> 8
+    that.rdramUint8Array[off_ + 3] = val
     return
 
   writeSpMem: (that, setFn, val, a) ->
@@ -360,7 +399,7 @@ class C1964jsMemory
   writeTLB: (that, setFn, val, a, pc, isDelaySlot) ->
     a = that.virtualToPhysical(a)
 
-    region = that.writeRegion[a>>>14]
+    region = that.writeRegion8[a>>>14]
 
     if region is that.writeTLB
       region = that.writeDummy
@@ -415,27 +454,27 @@ class C1964jsMemory
   lh: (addr) ->
     #throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
     a = @virtualToPhysical(addr)
-    @region[a>>>14](this, a, @getInt16)
+    @region16[a>>>14](this, a, @getInt16)
 
   lw: (addr) ->
     #throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
     a = @virtualToPhysical(addr)
-    @region[a>>>14](this, a, @getUint32)
+    @region32[a>>>14](this, a, @getUint32)
 
   sw: (val, addr, pc, isDelaySlot) ->
     a = @virtualToPhysical(addr)
-    @writeRegion[a>>>14](this, @setInt32, val, a, pc, isDelaySlot)
+    @writeRegion32[a>>>14](this, @setInt32, val, a, pc, isDelaySlot)
     return
 
   #Same routine as storeWord, but store a byte
   sb: (val, addr, pc, isDelaySlot) ->
     a = @virtualToPhysical(addr)
-    @writeRegion[a>>>14](this, @setInt8, val, a, pc, isDelaySlot)
+    @writeRegion8[a>>>14](this, @setInt8, val, a, pc, isDelaySlot)
     return
 
   sh: (val, addr, pc, isDelaySlot) ->
     a = @virtualToPhysical(addr)
-    @writeRegion[a>>>14](this, @setInt16, val, a, pc, isDelaySlot)
+    @writeRegion16[a>>>14](this, @setInt16, val, a, pc, isDelaySlot)
     return
 
 #hack global space until we export classes properly
