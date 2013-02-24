@@ -62,7 +62,7 @@ C1964jsRenderer = (settings, glx, webGL) ->
     texturesize = canvasheight * canvaswidth * 4
     #hacky texture cache unique id (want to see how fast we currently are)
     
-    @useTextureCache is false
+    @useTextureCache is true
     if @useTextureCache is true
       randomPixel = canvasheight * canvaswidth * 2
       textureId = (tmem[randomPixel]>>>0) << 24 | (tmem[randomPixel+8]>>>0) << 16 | (tmem[randomPixel+16]>>>0) << 8 | tmem[randomPixel+24]>>>0 
@@ -70,7 +70,7 @@ C1964jsRenderer = (settings, glx, webGL) ->
 
     buffer = new ArrayBuffer(texturesize)
     texture = new Uint8Array(buffer)
-    
+
     if @useTextureCache is true
       @textureCache[textureId] = texture
     switch tile.fmt
