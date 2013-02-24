@@ -70,7 +70,9 @@ C1964jsRenderer = (settings, glx, webGL) ->
 
     buffer = new ArrayBuffer(texturesize)
     texture = new Uint8Array(buffer)
-    @textureCache[textureId] = texture
+    
+    if @useTextureCache is true
+      @textureCache[textureId] = texture
     switch tile.fmt
       when 0
         switch tile.siz
@@ -89,9 +91,10 @@ C1964jsRenderer = (settings, glx, webGL) ->
                 texture[base4 + 3] = if color16 & 0x01 == 0 then 0x00 else 0xFF
                 i++
               j++
-          
-		  
-    return @textureCache[textureId]
+
+    if @useTextureCache is true
+      return @textureCache[textureId]
+    return texture
             
   initQuad = (xl, yl, xh, yh, sl, tl, sh, th, videoHLE) ->
   
