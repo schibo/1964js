@@ -19,28 +19,28 @@ vec4 A0Factor, B0Factor, C0Factor, D0Factor;
       void main(void) {
          if (uWireframe == 1) {	gl_FragColor = green; return; } 
 		 
-		if (uCombineA0 < 3) {
+		if (uCombineA0 == 1) {
 			A0Factor = vec4(texture2D(uSampler, vec2(vTextureCoord.st) ).rgb, 1.0);
 		} else if (uCombineA0 == 3) {
 			A0Factor = vec4(uPrimColor.rgb, 1.0);
 		} else {
 			A0Factor = vec4(1.0, 1.0, 1.0, 1.0);
 		}
-		if (uCombineB0 < 3) {
+		if (uCombineB0 == 1) {
 			B0Factor = vec4(texture2D(uSampler, vec2(vTextureCoord.st) ).rgb, 1.0);
 		} else if (uCombineB0 == 3) {
 			B0Factor = vec4(uPrimColor.rgb, 1.0);
 		} else {
 			B0Factor = vec4(0.0, 0.0, 0.0, 0.0);
 		}
-		if (uCombineC0 < 3) {
+		if (uCombineC0 == 1) {
 			C0Factor = vec4(texture2D(uSampler, vec2(vTextureCoord.st) ).rgb, 1.0);
 		} else if (uCombineC0 == 3) {
 			C0Factor = vec4(uPrimColor.rgb, 1.0);
 		} else {
 			C0Factor = vec4(1.0, 1.0, 1.0, 1.0);
 		}
-		if (uCombineD0 < 3) {
+		if (uCombineD0 == 1) {
 			D0Factor = vec4(texture2D(uSampler, vec2(vTextureCoord.st) ).rgb, 1.0);
 		} else if (uCombineD0 == 3) {
 			D0Factor = vec4(uPrimColor.rgb, 1.0);
