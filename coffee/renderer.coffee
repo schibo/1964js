@@ -62,7 +62,7 @@ C1964jsRenderer = (settings, glx, webGL) ->
     texturesize = canvasheight * canvaswidth * 4
 
     #hacky texture cache unique id (want to see how fast we currently are)
-    textureId = tmem[0] + tmem[20] + tmem[200] + tmem[40] + tmem[28] + texturesize
+    textureId = tmem[1] + tmem[21] + tmem[201] + tmem[41] + tmem[29] + texturesize
     unless @textureCache[textureId]?
       buffer = new ArrayBuffer(texturesize)
       texture = new Uint8Array(buffer)
