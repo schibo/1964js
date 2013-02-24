@@ -258,10 +258,11 @@ class C1964jsMemory
 
   writeRdram32: (that, setFn, val, a) ->
     off_ = a - MEMORY_START_RDRAM
-    that.rdramUint8Array[off_] = val >> 24
-    that.rdramUint8Array[off_ + 1] = val >> 16
-    that.rdramUint8Array[off_ + 2] = val >> 8
-    that.rdramUint8Array[off_ + 3] = val
+    rdram = that.rdramUint8Array
+    rdram[off_] = val >> 24
+    rdram[off_ + 1] = val >> 16
+    rdram[off_ + 2] = val >> 8
+    rdram[off_ + 3] = val
     return
 
   writeSpMem: (that, setFn, val, a) ->
