@@ -7,6 +7,7 @@ class C1964jsAudio
   constructor: ->
 
   processAudio: (memory, from, length) ->
+    return
     try
       return  if audioContext is "unsupported"
       audioContext = new webkitAudioContext()  if audioContext is `undefined`
