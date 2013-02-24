@@ -47,8 +47,13 @@ vec4 A0Factor, B0Factor, C0Factor, D0Factor;
 		} else {
 		    D0Factor = vec4(0.0, 0.0, 0.0, 0.0);
 		}
-		
-		gl_FragColor = vec4(((A0Factor.rgb-B0Factor.rgb)*C0Factor.rgb)+D0Factor.rgb, 0.3);
+		//testing texture draws
+		A0Factor = vec4(texture2D(uSampler, vec2(vTextureCoord.st) ).rgb, 1.0);
+		B0Factor = vec4(texture2D(uSampler, vec2(vTextureCoord.st) ).rgb, 1.0);
+		C0Factor = vec4(texture2D(uSampler, vec2(vTextureCoord.st) ).rgb, 1.0);
+		D0Factor = vec4(texture2D(uSampler, vec2(vTextureCoord.st) ).rgb, 1.0);
+
+		gl_FragColor = vec4(((A0Factor.rgb-B0Factor.rgb)*C0Factor.rgb)+D0Factor.rgb, 1.0);
 		// gl_FragColor = blue;
 		// gl_FragColor = uPrimColor;
        

@@ -62,7 +62,7 @@ C1964jsRenderer = (settings, glx, webGL) ->
     texturesize = canvasheight * canvaswidth * 4
     #hacky texture cache unique id (want to see how fast we currently are)
     
-    @useTextureCache = true #change to true to try texture cache
+    @useTextureCache = false #change to true to try texture cache
     if @useTextureCache is true
       randomPixel = canvasheight * canvaswidth
       textureId = (tmem[randomPixel]>>>0) << 24 | (tmem[randomPixel+canvaswidth+1]>>>0) << 16 | (tmem[randomPixel+canvaswidth*2+1]>>>0) << 8 | tmem[randomPixel+canvaswidth*3+1]>>>0 
@@ -92,8 +92,8 @@ C1964jsRenderer = (settings, glx, webGL) ->
                 i++
               j++
 
-    if @useTextureCache is true
-      return @textureCache[textureId]
+   # if @useTextureCache is true
+   #   return @textureCache[textureId]
     return texture
             
   initQuad = (xl, yl, xh, yh, sl, tl, sh, th, videoHLE) ->

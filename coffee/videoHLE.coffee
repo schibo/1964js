@@ -87,6 +87,8 @@ C1964jsVideoHLE = (core, glx) ->
       @initBuffers()
       @core.webGL.show3D()
       @core.showFB = false
+      @resetState()
+
     @core.webGL.beginDList()
     @dlParserProcess()
 
@@ -101,11 +103,6 @@ C1964jsVideoHLE = (core, glx) ->
     @dlistStackPointer = 0
     @dlistStack[@dlistStackPointer].pc = @core.memory.getInt32(@core.memory.spMemUint8Array, @core.memory.spMemUint8Array, consts.TASK_DATA_PTR)
     @dlistStack[@dlistStackPointer].countdown = consts.MAX_DL_COUNT
-    @vertices = []
-    @triVertices = []
-    @triangleVertexPositionBuffer.numItems = 0
-    @triangleVertexColorBuffer.numItems = 0
-    @gRSP.numVertices = 0
 
     #see RSP_Parser.cpp
     #TODO: purge old textures
@@ -505,8 +502,10 @@ C1964jsVideoHLE = (core, glx) ->
     cmd = @getCommand(pc+8)
     func = @currentMicrocodeMap[cmd]
 
- #   if func isnt "RSP_GBI1_Tri1"
- #     @drawScene false, 7
+ #   @drawScene(false, 7)
+
+  #  if func isnt "RSP_GBI1_Tri1"
+  #    @drawScene false, 7
 
     return
 
@@ -560,6 +559,7 @@ C1964jsVideoHLE = (core, glx) ->
     #console.log "Texrect: UL("+xl+","+yl+") LR("+xh+","+yh+") Tile:"+tileno+" TexCoord:("+s+","+t+") TexSlope:("+dsdx+","+dtdy+")"
     @renderer.texRect xl, yl, xh, yh, s, t, dsdx, dtdy, @textureTile[tileno], @tmem, this
     @dlistStack[@dlistStackPointer].pc += 8
+    @hasTexture = true
     return
 
   C1964jsVideoHLE::DLParser_TexRectFlip = (pc) ->
@@ -582,6 +582,7 @@ C1964jsVideoHLE = (core, glx) ->
   C1964jsVideoHLE::DLParser_RDPFullSynch = (pc) ->
     @videoLog "TODO: DLParser_RDPFullSynch"
     @core.interrupts.triggerDPInterrupt 0, false
+    #@drawScene(7, false)
     return
 
   C1964jsVideoHLE::DLParser_SetKeyGB = (pc) ->
@@ -749,21 +750,20 @@ C1964jsVideoHLE = (core, glx) ->
     @gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(@triTextureCoords), @gl.STATIC_DRAW
     @gl.enableVertexAttribArray @core.webGL.shaderProgram.textureCoordAttribute
     @gl.vertexAttribPointer @core.webGL.shaderProgram.textureCoordAttribute, @triangleVertexTextureCoordBuffer.itemSize, @gl.FLOAT, false, 0, 0
-	
     tile = @textureTile[@activeTile]
     canvaswidth = @pow2roundup tile.width
     canvasheight = @pow2roundup tile.height	
     texture = @renderer.formatTexture(tile, @tmem, canvaswidth, canvasheight)
-    if texture isnt undefined
-      colorsTexture = @gl.createTexture()
-      @gl.activeTexture(@gl.TEXTURE0)
-      @gl.bindTexture(@gl.TEXTURE_2D, colorsTexture)
-      @gl.texImage2D( @gl.TEXTURE_2D, 0, @gl.RGBA, tile.width, tile.height, 0, @gl.RGBA, @gl.UNSIGNED_BYTE, texture)
-      @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MAG_FILTER, @gl.NEAREST)
-      @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MIN_FILTER, @gl.NEAREST)
-      @gl.uniform1i @core.webGL.shaderProgram.samplerUniform, colorsTexture
+    colorsTexture = @gl.createTexture()
+    @gl.activeTexture(@gl.TEXTURE0)
+    @gl.bindTexture(@gl.TEXTURE_2D, colorsTexture)
+    @gl.texImage2D( @gl.TEXTURE_2D, 0, @gl.RGBA, tile.width, tile.height, 0, @gl.RGBA, @gl.UNSIGNED_BYTE, texture)
+    @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MAG_FILTER, @gl.NEAREST)
+    @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MIN_FILTER, @gl.NEAREST)
+    @gl.uniform1i @core.webGL.shaderProgram.samplerUniform, colorsTexture
 
-    @gl.uniform4fv @core.webGL.shaderProgram.uPrimColor, @primColor
+    if @primColor.length > 0
+      @gl.uniform4fv @core.webGL.shaderProgram.uPrimColor, @primColor
 
     @gl.uniform1i @core.webGL.shaderProgram.wireframeUniform, if @core.settings.wireframe then 1 else 0
     
@@ -776,13 +776,17 @@ C1964jsVideoHLE = (core, glx) ->
     else
       @gl.drawArrays @gl.TRIANGLES, 0, @triangleVertexPositionBuffer.numItems
 	  
+    @resetState()
+    return
+
+  C1964jsVideoHLE::resetState = ->
     @triangleVertexPositionBuffer.numItems = 0
     @triangleVertexColorBuffer.numItems = 0
     @triangleVertexTextureCoordBuffer.numItems = 0
     @triVertices = []
     @triColorVertices = []
     @triTextureCoords = []
-    return
+    @primColor = []
 
   C1964jsVideoHLE::initBuffers = ->
     @triangleVertexPositionBuffer = @gl.createBuffer()
