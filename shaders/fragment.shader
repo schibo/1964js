@@ -48,7 +48,7 @@ vec4 A0Factor, B0Factor, C0Factor, D0Factor;
 		    D0Factor = vec4(0.0, 0.0, 0.0, 0.0);
 		}
 		
-		gl_FragColor = vec4(((A0Factor.rgb-B0Factor.rgb)*C0Factor.rgb)+D0Factor.rgb, 1.0);
+		gl_FragColor = vec4(((A0Factor.rgb-B0Factor.rgb)*C0Factor.rgb)+D0Factor.rgb, 0.3);
 		// gl_FragColor = blue;
 		// gl_FragColor = uPrimColor;
        

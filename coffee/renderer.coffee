@@ -24,6 +24,7 @@ C1964jsRenderer = (settings, glx, webGL) ->
   texrectVertexIndexBuffer = undefined
   @videoHLE = undefined
   fivetoeight = [0x00,0x08,0x10,0x18,0x21,0x29,0x31,0x39,0x42,0x4A,0x52,0x5A,0x63,0x6B,0x73,0x7B,0x84,0x8C,0x94,0x9C,0xA5,0xAD,0xB5,0xBD,0xC6,0xCE,0xD6,0xDE,0xE7,0xEF,0xF7,0xFF]
+  @textureCache = new Array()
 
   @texRect = (xl, yl, xh, yh, s, t, dsdx, dtdy, tile, tmem, videoHLE) ->
   
@@ -57,31 +58,36 @@ C1964jsRenderer = (settings, glx, webGL) ->
   @formatTexture = (tile, tmem, cw, ch) ->
     canvaswidth = cw
     canvasheight = ch
-    
+
     texturesize = canvasheight * canvaswidth * 4
-    buffer = new ArrayBuffer(texturesize)
-    texture = new Uint8Array(buffer)
-    switch tile.fmt
-      when 0
-        switch tile.siz
-          when 2
-            width = tile.width;
-            j=0
-            while j < tile.height
-              i=0
-              while i < tile.width
-                base2 = (j*width*2) + (i*2)
-                base4 = (j*canvaswidth*4) + (i*4) 
-                color16 = tmem[base2]<<8 | tmem[base2+1]           
-                texture[base4]     = fivetoeight[color16 >> 11 & 0x1F]
-                texture[base4 + 1] = fivetoeight[color16 >> 6 & 0x1F]
-                texture[base4 + 2] = fivetoeight[color16 >> 1 & 0x1F]
-                texture[base4 + 3] = if color16 & 0x01 == 0 then 0x00 else 0xFF
-                i++
-              j++
+
+    #hacky texture cache unique id (want to see how fast we currently are)
+    textureId = tmem[0] + tmem[20] + tmem[200] + tmem[40] + tmem[28] + texturesize
+    unless @textureCache[textureId]?
+      buffer = new ArrayBuffer(texturesize)
+      texture = new Uint8Array(buffer)
+      @textureCache[textureId] = texture
+      switch tile.fmt
+        when 0
+          switch tile.siz
+            when 2
+              width = tile.width;
+              j=0
+              while j < tile.height
+                i=0
+                while i < tile.width
+                  base2 = (j*width*2) + (i*2)
+                  base4 = (j*canvaswidth*4) + (i*4) 
+                  color16 = tmem[base2]<<8 | tmem[base2+1]           
+                  texture[base4]     = fivetoeight[color16 >> 11 & 0x1F]
+                  texture[base4 + 1] = fivetoeight[color16 >> 6 & 0x1F]
+                  texture[base4 + 2] = fivetoeight[color16 >> 1 & 0x1F]
+                  texture[base4 + 3] = if color16 & 0x01 == 0 then 0x00 else 0xFF
+                  i++
+                j++
           
 		  
-    return texture
+    return @textureCache[textureId]
             
   initQuad = (xl, yl, xh, yh, sl, tl, sh, th, videoHLE) ->
   
