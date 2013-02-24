@@ -13,43 +13,59 @@ uniform vec4 uPrimColor;
 
 vec4 pink = vec4(1.0, 0.5, 0.5, 0.5);
 vec4 green = vec4(0.5, 1.0, 0.5, 1.0);
-vec4 blue = vec4(0.5, 0.5, 1.0, 0.1);
+vec4 blue = vec4(0.5, 0.5, 1.0, 0.5);
+vec4 gray = vec4(0.1, 0.1, 0.1, 1.0);
 vec4 A0Factor, B0Factor, C0Factor, D0Factor;
       
       void main(void) {
          if (uWireframe == 1) {	gl_FragColor = green; return; } 
 		 
 		if (uCombineA0 == 1) {
-			A0Factor = vec4(texture2D(uSampler, vec2(vTextureCoord.st) ).rgb, 1.0);
+			A0Factor = vec4(texture2D(uSampler, vec2(vTextureCoord.st) ).rgba);
 		} else if (uCombineA0 == 3) {
-			A0Factor = vec4(uPrimColor.rgb, 1.0);
+			A0Factor = vec4(uPrimColor.rgba);
+		} else if (uCombineA0 == 2) {
+			A0Factor = pink;		
+		} else if (uCombineA0 == 4) {
+			A0Factor = gray;
 		} else {
-			A0Factor = vec4(1.0, 1.0, 1.0, 1.0);
+			A0Factor = gray;
 		}
 		if (uCombineB0 == 1) {
-			B0Factor = vec4(texture2D(uSampler, vec2(vTextureCoord.st) ).rgb, 1.0);
+			B0Factor = vec4(texture2D(uSampler, vec2(vTextureCoord.st) ).rgba);
 		} else if (uCombineB0 == 3) {
-			B0Factor = vec4(uPrimColor.rgb, 1.0);
+			B0Factor = vec4(uPrimColor.rgba);
+		} else if (uCombineB0 == 2) {
+			B0Factor = pink;		
+		} else if (uCombineB0 == 4) {
+			B0Factor = gray;
 		} else {
-			B0Factor = vec4(0.0, 0.0, 0.0, 0.0);
+			B0Factor = gray;
 		}
 		if (uCombineC0 == 1) {
-			C0Factor = vec4(texture2D(uSampler, vec2(vTextureCoord.st) ).rgb, 1.0);
+			C0Factor = vec4(texture2D(uSampler, vec2(vTextureCoord.st) ).rgba);
 		} else if (uCombineC0 == 3) {
-			C0Factor = vec4(uPrimColor.rgb, 1.0);
+			C0Factor = vec4(uPrimColor.rgba);
+		} else if (uCombineC0 == 2) {
+			C0Factor = pink;		
+		} else if (uCombineC0 == 4) {
+			C0Factor = gray;		
 		} else {
-			C0Factor = vec4(1.0, 1.0, 1.0, 1.0);
+			C0Factor = gray;
 		}
 		if (uCombineD0 == 1) {
-			D0Factor = vec4(texture2D(uSampler, vec2(vTextureCoord.st) ).rgb, 1.0);
+			D0Factor = vec4(texture2D(uSampler, vec2(vTextureCoord.st) ).rgba);
 		} else if (uCombineD0 == 3) {
-			D0Factor = vec4(uPrimColor.rgb, 1.0);
+			D0Factor = vec4(uPrimColor.rgba);
+		} else if (uCombineD0 == 2) {
+			D0Factor = pink;		
+		} else if (uCombineD0 == 4) {
+			D0Factor = gray;		
 		} else {
-		    D0Factor = vec4(0.0, 0.0, 0.0, 0.0);
+		    D0Factor = gray;
 		}
 		
-//		gl_FragColor = vec4(((A0Factor.rgb-B0Factor.rgb)*C0Factor.rgb)+D0Factor.rgb, 1.0);
-		gl_FragColor = vec4(((A0Factor.rgb-B0Factor.rgb)*C0Factor.rgb)+D0Factor.rgb, 0.5);
+		gl_FragColor = vec4(((A0Factor.rgba-B0Factor.rgba)*C0Factor.rgba)+D0Factor.rgba);
 		// gl_FragColor = blue;
 		// gl_FragColor = uPrimColor;
        
