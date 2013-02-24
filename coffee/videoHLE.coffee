@@ -765,6 +765,8 @@ C1964jsVideoHLE = (core, glx) ->
     if @primColor.length > 0
       @gl.uniform4fv @core.webGL.shaderProgram.uPrimColor, @primColor
 
+    @core.webGL.setCombineUniforms @core.webGL.shaderProgram
+
     @gl.uniform1i @core.webGL.shaderProgram.wireframeUniform, if @core.settings.wireframe then 1 else 0
     
     # Matrix Uniforms
