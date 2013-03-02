@@ -48,6 +48,8 @@ C1964jsVideoHLE = (core, glx) ->
   @texImg = {}
   @segments = []
   @primColor = []
+  @fillColor = []
+  @envColor = []
 
   #todo: different microcodes support
   @currentMicrocodeMap = @microcodeMap0
@@ -667,6 +669,12 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_SetFillColor = (pc) ->
+    @fillColor = []
+    @fillColor.push @getSetFillColorR(pc)/255.0;
+    @fillColor.push @getSetFillColorG(pc)/255.0;
+    @fillColor.push @getSetFillColorB(pc)/255.0;
+    @fillColor.push @getSetFillColorA(pc)/255.0;
+
     @videoLog "TODO: DLParser_SetFillColor"
     return
 
@@ -689,6 +697,12 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_SetEnvColor = (pc) ->
+    @envColor = []
+    @envColor.push @getSetEnvColorR(pc)/255.0;
+    @envColor.push @getSetEnvColorG(pc)/255.0;
+    @envColor.push @getSetEnvColorB(pc)/255.0;
+    @envColor.push @getSetEnvColorA(pc)/255.0;
+
     @videoLog "TODO: DLParser_SetEnvColor"
     return
 
@@ -765,6 +779,13 @@ C1964jsVideoHLE = (core, glx) ->
     if @primColor.length > 0
       @gl.uniform4fv @core.webGL.shaderProgram.uPrimColor, @primColor
 
+    if @fillColor.length > 0
+      @gl.uniform4fv @core.webGL.shaderProgram.uFillColor, @fillColor  
+
+    if @envColor.length > 0
+      @gl.uniform4fv @core.webGL.shaderProgram.uEnvColor, @envColor  
+
+
     @core.webGL.setCombineUniforms @core.webGL.shaderProgram
 
     @gl.uniform1i @core.webGL.shaderProgram.wireframeUniform, if @core.settings.wireframe then 1 else 0
@@ -789,6 +810,8 @@ C1964jsVideoHLE = (core, glx) ->
     @triColorVertices = []
     @triTextureCoords = []
     @primColor = []
+    @fillColor = []
+    @envColor = []
 
   C1964jsVideoHLE::initBuffers = ->
     @triangleVertexPositionBuffer = @gl.createBuffer()

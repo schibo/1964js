@@ -140,11 +140,13 @@ C1964jsWebGL = (core, wireframe) ->
     shaderProgram.uCombineB1a = @gl.getUniformLocation(shaderProgram, "uCombineB1a")
     shaderProgram.uCombineC1a = @gl.getUniformLocation(shaderProgram, "uCombineC1a")
     shaderProgram.uCombineD1a = @gl.getUniformLocation(shaderProgram, "uCombineD1a")
-    
+
     shaderProgram.uPrimColor = @gl.getUniformLocation(shaderProgram, "uPrimColor")
-	
+    shaderProgram.uFillColor = @gl.getUniformLocation(shaderProgram, "uFillColor")
+    shaderProgram.uEnvColor = @gl.getUniformLocation(shaderProgram, "uEnvColor")
+
     shaderProgram
-	
+
   C1964jsWebGL::setCombineUniforms = (shaderProgram) ->
     vhle = @core.videoHLE
     @gl.uniform1i shaderProgram.uCombineA0, vhle.combineA0

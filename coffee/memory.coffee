@@ -102,31 +102,31 @@ class C1964jsMemory
     @writeRegion16 = []
     @writeRegion32 = []
 
-    @initRegion 0, 0x80000000, @readTLB, @writeTLB
-    @initRegion 0x80000000, 0x40000000, @readDummy, @writeDummy
-    @initRegion 0xC0000000, 0x40000000, @readTLB, @writeTLB
+    @initRegion 0, 0x80000000, @readTLB8, @writeTLB8, @readTLB16, @writeTLB16, @readTLB32, @writeTLB32
+    @initRegion 0x80000000, 0x40000000, @readDummy8, @writeDummy8, @readDummy16, @writeDummy16, @readDummy32, @writeDummy32
+    @initRegion 0xC0000000, 0x40000000, @readTLB8, @writeTLB8, @readTLB16, @writeTLB16, @readTLB32, @writeTLB32
     @initRegion MEMORY_START_RDRAM, MEMORY_SIZE_RDRAM, @readRdram8, @writeRdram8, @readRdram16, @writeRdram16, @readRdram32, @writeRdram32
     @initRegion MEMORY_START_RAMREGS4, MEMORY_START_RAMREGS4, @readRamRegs4, @writeRamRegs4, @readRamRegs4, @writeRamRegs4, @readRamRegs4, @writeRamRegs4
-    @initRegion MEMORY_START_SPMEM, MEMORY_SIZE_SPMEM, @readSpMem, @writeSpMem, @readSpMem, @writeSpMem, @readSpMem, @writeSpMem
-    @initRegion MEMORY_START_SPREG_1, MEMORY_SIZE_SPREG_1, @readSpReg1, @writeSpReg1, @readSpReg1, @writeSpReg1, @readSpReg1, @writeSpReg1
-    @initRegion MEMORY_START_SPREG_2, MEMORY_SIZE_SPREG_2, @readSpReg2, @writeSpReg2, @readSpReg2, @writeSpReg2, @readSpReg2, @writeSpReg2
-    @initRegion MEMORY_START_DPC, MEMORY_SIZE_DPC, @readDpc, @writeDpc, @readDpc, @writeDpc, @readDpc, @writeDpc
-    @initRegion MEMORY_START_DPS, MEMORY_SIZE_DPS, @readDps, @writeDps, @readDps, @writeDps, @readDps, @writeDps
-    @initRegion MEMORY_START_MI, MEMORY_SIZE_MI, @readMi, @writeMi, @readMi, @writeMi, @readMi, @writeMi
-    @initRegion MEMORY_START_VI, MEMORY_SIZE_VI, @readVi, @writeVi, @readVi, @writeVi, @readVi, @writeVi
-    @initRegion MEMORY_START_AI, MEMORY_SIZE_AI, @readAi, @writeAi, @readAi, @writeAi, @readAi, @writeAi
-    @initRegion MEMORY_START_PI, MEMORY_SIZE_PI, @readPi, @writePi, @readPi, @writePi, @readPi, @writePi
-    @initRegion MEMORY_START_SI, MEMORY_SIZE_SI, @readSi, @writeSi, @readSi, @writeSi, @readSi, @writeSi
-    @initRegion MEMORY_START_C2A1, MEMORY_SIZE_C2A1, @readC2A1, @writeC2A1, @readC2A1, @writeC2A1, @readC2A1, @writeC2A1
-    @initRegion MEMORY_START_C1A1, MEMORY_SIZE_C1A1, @readC1A1, @writeC1A1, @readC1A1, @writeC1A1, @readC1A1, @writeC1A1
-    @initRegion MEMORY_START_C2A2, MEMORY_SIZE_C2A2, @readC2A2, @writeC2A2, @readC2A2, @writeC2A2, @readC2A2, @writeC2A2
-    @initRegion MEMORY_START_ROM_IMAGE, MEMORY_SIZE_ROM, @readRom, @writeRom, @readRom, @writeRom, @readRom, @writeRom #todo: could be a problem to use romLength
-    @initRegion MEMORY_START_C1A3, MEMORY_SIZE_C1A3, @readC1A3, @writeC1A3, @readC1A3, @writeC1A3, @readC1A3, @writeC1A3
-    @initRegion MEMORY_START_RI, MEMORY_SIZE_RI, @readRi, @writeRi, @readRi, @writeRi, @readRi, @writeRi
-    @initRegion MEMORY_START_PIF, MEMORY_SIZE_PIF, @readPif, @writePif, @readPif, @writePif, @readPif, @writePif
-    @initRegion MEMORY_START_GIO, MEMORY_SIZE_GIO, @readGio, @writeGio, @readGio, @writeGio, @readGio, @writeGio
-    @initRegion MEMORY_START_RAMREGS0, MEMORY_SIZE_RAMREGS0, @readRamRegs0, @writeRamRegs0, @readRamRegs0, @writeRamRegs0, @readRamRegs0, @writeRamRegs0
-    @initRegion MEMORY_START_RAMREGS8, MEMORY_SIZE_RAMREGS8, @readRamRegs8, @writeRamRegs8, @readRamRegs8, @writeRamRegs8, @readRamRegs8, @writeRamRegs8
+    @initRegion MEMORY_START_SPMEM, MEMORY_SIZE_SPMEM, @readSpMem8, @writeSpMem8, @readSpMem16, @writeSpMem16, @readSpMem32, @writeSpMem32
+    @initRegion MEMORY_START_SPREG_1, MEMORY_SIZE_SPREG_1, @readSpReg1_8, @writeSpReg1_8, @readSpReg1_16, @writeSpReg1_16, @readSpReg1_32, @writeSpReg1_32
+    @initRegion MEMORY_START_SPREG_2, MEMORY_SIZE_SPREG_2, @readSpReg2_8, @writeSpReg2_8, @readSpReg2_16, @writeSpReg2_16, @readSpReg2_32, @writeSpReg2_32
+    @initRegion MEMORY_START_DPC, MEMORY_SIZE_DPC, @readDpc8, @writeDpc8, @readDpc16, @writeDpc16, @readDpc32, @writeDpc32
+    @initRegion MEMORY_START_DPS, MEMORY_SIZE_DPS, @readDps8, @writeDps8, @readDps16, @writeDps16, @readDps32, @writeDps32
+    @initRegion MEMORY_START_MI, MEMORY_SIZE_MI, @readMi8, @writeMi8, @readMi16, @writeMi16, @readMi32, @writeMi32
+    @initRegion MEMORY_START_VI, MEMORY_SIZE_VI, @readVi8, @writeVi8, @readVi16, @writeVi16, @readVi32, @writeVi32
+    @initRegion MEMORY_START_AI, MEMORY_SIZE_AI, @readAi8, @writeAi8, @readAi16, @writeAi16, @readAi32, @writeAi32
+    @initRegion MEMORY_START_PI, MEMORY_SIZE_PI, @readPi8, @writePi8, @readPi16, @writePi16, @readPi32, @writePi32
+    @initRegion MEMORY_START_SI, MEMORY_SIZE_SI, @readSi8, @writeSi8, @readSi16, @writeSi16, @readSi32, @writeSi32
+    @initRegion MEMORY_START_C2A1, MEMORY_SIZE_C2A1, @readC2A1_8, @writeC2A1_8, @readC2A1_16, @writeC2A1_16, @readC2A1_32, @writeC2A1_32
+    @initRegion MEMORY_START_C1A1, MEMORY_SIZE_C1A1, @readC1A1_8, @writeC1A1_8, @readC1A1_16, @writeC1A1_16, @readC1A1_32, @writeC1A1_32
+    @initRegion MEMORY_START_C2A2, MEMORY_SIZE_C2A2, @readC2A2_8, @writeC2A2_8, @readC2A2_16, @writeC2A2_16, @readC2A2_32, @writeC2A2_32
+    @initRegion MEMORY_START_ROM_IMAGE, MEMORY_SIZE_ROM, @readRom8, @writeRom8, @readRom16, @writeRom16, @readRom32, @writeRom #todo: could be a problem to use romLength
+    @initRegion MEMORY_START_C1A3, MEMORY_SIZE_C1A3, @readC1A3_8, @writeC1A3_8, @readC1A3_16, @writeC1A3_16, @readC1A3_32, @writeC1A3_32
+    @initRegion MEMORY_START_RI, MEMORY_SIZE_RI, @readRi8, @writeRi8, @readRi16, @writeRi16, @readRi32, @writeRi32
+    @initRegion MEMORY_START_PIF, MEMORY_SIZE_PIF, @readPif8, @writePif8, @readPif16, @writePif16, @readPif32, @writePif32
+    @initRegion MEMORY_START_GIO, MEMORY_SIZE_GIO, @readGio8, @writeGio8, @readGio16, @writeGio16, @readGio32, @writeGio32
+    @initRegion MEMORY_START_RAMREGS0, MEMORY_SIZE_RAMREGS0, @readRamRegs0_8, @writeRamRegs0_8, @readRamRegs0_16, @writeRamRegs0_16, @readRamRegs0_32, @writeRamRegs0_32
+    @initRegion MEMORY_START_RAMREGS8, MEMORY_SIZE_RAMREGS8, @readRamRegs8_8, @writeRamRegs8_8, @readRamRegs8_16, @writeRamRegs8_16, @readRamRegs8_32, @writeRamRegs8_32
     @physRegion = undefined
 
   initRegion: (start, size, readRegion8, writeRegion8, readRegion16, writeRegion16, readRegion32, writeRegion32) ->
@@ -161,102 +161,270 @@ class C1964jsMemory
     off_ = (a-MEMORY_START_RDRAM)
     that.rdramUint8Array[off_] << 24 | that.rdramUint8Array[off_ + 1] << 16 | that.rdramUint8Array[off_ + 2] << 8 | that.rdramUint8Array[off_ + 3]
 
-  readRamRegs0: (that, a, getFn) ->
+  readRamRegs0_8: (that, a) ->
     off_ = a - MEMORY_START_RAMREGS0
-    getFn that.ramRegs0Uint8Array, off_
+    that.ramRegs0Uint8Array[off_]
 
-  readRamRegs4: (that, a, getFn) ->
+  readRamRegs0_16: (that, a) ->
+    off_ = (a-MEMORY_START_RAMREGS0)
+    that.ramRegs0Uint8Array[off_] << 8 | that.ramRegs0Uint8Array[off_ + 1]
+
+  readRamRegs0_32: (that, a) ->
+    off_ = (a-MEMORY_START_RAMREGS0)
+    that.ramRegs0Uint8Array[off_] << 24 | that.ramRegs0Uint8Array[off_ + 1] << 16 | that.ramRegs0Uint8Array[off_ + 2] << 8 | that.ramRegs0Uint8Array[off_ + 3]
+
+  readRamRegs4_8: (that, a) ->
     off_ = a - MEMORY_START_RAMREGS4
-    getFn that.ramRegs4Uint8Array, off_
+    that.ramRegs4Uint8Array[off_]
 
-  readRamRegs8: (that, a, getFn) ->
+  readRamRegs4_16: (that, a) ->
+    off_ = (a-MEMORY_START_RAMREGS4)
+    that.ramRegs4Uint8Array[off_] << 8 | that.ramRegs4Uint8Array[off_ + 1]
+
+  readRamRegs4_32: (that, a) ->
+    off_ = (a-MEMORY_START_RAMREGS4)
+    that.ramRegs4Uint8Array[off_] << 24 | that.ramRegs4Uint8Array[off_ + 1] << 16 | that.ramRegs4Uint8Array[off_ + 2] << 8 | that.ramRegs4Uint8Array[off_ + 3]
+
+  readRamRegs8_8: (that, a) ->
     off_ = a - MEMORY_START_RAMREGS8
-    getFn that.ramRegs8Uint8Array, off_
+    that.ramRegs8Uint8Array[off_]
 
-  readSpMem: (that, a, getFn) ->
+  readRamRegs8_16: (that, a) ->
+    off_ = (a-MEMORY_START_RAMREGS8)
+    that.ramRegs8Uint8Array[off_] << 8 | that.ramRegs8Uint8Array[off_ + 1]
+
+  readRamRegs8_32: (that, a) ->
+    off_ = (a-MEMORY_START_RAMREGS8)
+    that.ramRegs8Uint8Array[off_] << 24 | that.ramRegs8Uint8Array[off_ + 1] << 16 | that.ramRegs8Uint8Array[off_ + 2] << 8 | that.ramRegs8Uint8Array[off_ + 3]
+
+  readSpMem8: (that, a) ->
     off_ = a - MEMORY_START_SPMEM
-    getFn that.spMemUint8Array, off_
+    that.spMemUint8Array[off_]
 
-  readSpReg1: (that, a) ->
+  readSpMem16: (that, a) ->
+    off_ = (a-MEMORY_START_SPMEM)
+    that.spMemUint8Array[off_] << 8 | that.spMemUint8Array[off_ + 1]
+
+  readSpMem32: (that, a) ->
+    off_ = (a-MEMORY_START_SPMEM)
+    that.spMemUint8Array[off_] << 24 | that.spMemUint8Array[off_ + 1] << 16 | that.spMemUint8Array[off_ + 2] << 8 | that.spMemUint8Array[off_ + 3]
+
+  readSpReg1_8: (that, a) ->
     off_ = a - MEMORY_START_SPREG_1
     that.core.interrupts.readSPReg1 off_
 
-  readSpReg2: (that, a, getFn) ->
+  readSpReg1_16: (that, a) ->
+    off_ = a - MEMORY_START_SPREG_1
+    that.core.interrupts.readSPReg1 off_
+
+  readSpReg1_32: (that, a) ->
+    off_ = a - MEMORY_START_SPREG_1
+    that.core.interrupts.readSPReg1 off_
+
+  readSpReg2_8: (that, a) ->
     off_ = a - MEMORY_START_SPREG_2
-    getFn that.spReg2Uint8Array, off_
+    that.spReg2Uint8Array[off_]
 
-  readDpc: (that, a, getFn) ->
+  readSpReg2_16: (that, a) ->
+    off_ = (a-MEMORY_START_SPREG_2)
+    that.spReg2Uint8Array[off_] << 8 | that.spReg2Uint8Array[off_ + 1]
+
+  readSpReg2_32: (that, a) ->
+    off_ = (a-MEMORY_START_SPREG_2)
+    that.spReg2Uint8Array[off_] << 24 | that.spReg2Uint8Array[off_ + 1] << 16 | that.spReg2Uint8Array[off_ + 2] << 8 | that.spReg2Uint8Array[off_ + 3]
+
+  readDpc8: (that, a) ->
     off_ = a - MEMORY_START_DPC
-    getFn that.dpcUint8Array, off_
+    that.dpcUint8Array[off_]
 
-  readDps: (that, a, getFn) ->
+  readDpc16: (that, a) ->
+    off_ = (a-MEMORY_START_DPC)
+    that.dpcUint8Array[off_] << 8 | that.dpcUint8Array[off_ + 1]
+
+  readDpc32: (that, a) ->
+    off_ = (a-MEMORY_START_DPC)
+    that.dpcUint8Array[off_] << 24 | that.dpcUint8Array[off_ + 1] << 16 | that.dpcUint8Array[off_ + 2] << 8 | that.dpcUint8Array[off_ + 3]
+
+  readDps8: (that, a) ->
     off_ = a - MEMORY_START_DPS
-    getFn that.dpsUint8Array, off_
+    that.dpsUint8Array[off_]
 
-  readMi: (that, a, getFn) ->
+  readDps16: (that, a) ->
+    off_ = (a-MEMORY_START_DPS)
+    that.dpsUint8Array[off_] << 8 | that.dpsUint8Array[off_ + 1]
+
+  readDps32: (that, a) ->
+    off_ = (a-MEMORY_START_DPS)
+    that.dpsUint8Array[off_] << 24 | that.dpsUint8Array[off_ + 1] << 16 | that.dpsUint8Array[off_ + 2] << 8 | that.dpsUint8Array[off_ + 3]
+
+  readMi8: (that, a) ->
     off_ = a - MEMORY_START_MI
-    getFn that.miUint8Array, off_
+    that.miUint8Array[off_]
 
-  readVi: (that, a) ->
+  readMi16: (that, a) ->
+    off_ = (a-MEMORY_START_MI)
+    that.miUint8Array[off_] << 8 | that.miUint8Array[off_ + 1]
+
+  readMi32: (that, a) ->
+    off_ = (a-MEMORY_START_MI)
+    that.miUint8Array[off_] << 24 | that.miUint8Array[off_ + 1] << 16 | that.miUint8Array[off_ + 2] << 8 | that.miUint8Array[off_ + 3]
+
+  readVi8: (that, a) ->
     off_ = a - MEMORY_START_VI
     that.core.interrupts.readVI off_
 
-  readAi: (that, a) ->
+  readVi16: (that, a) ->
+    off_ = a - MEMORY_START_VI
+    that.core.interrupts.readVI off_
+
+  readVi32: (that, a) ->
+    off_ = a - MEMORY_START_VI
+    that.core.interrupts.readVI off_
+
+  readAi8: (that, a) ->
     off_ = a - MEMORY_START_AI
     that.core.interrupts.readAI off_
   
-  readPi: (that, a, getFn) ->
+  readAi16: (that, a) ->
+    off_ = a - MEMORY_START_AI
+    that.core.interrupts.readAI off_
+
+  readAi32: (that, a) ->
+    off_ = a - MEMORY_START_AI
+    that.core.interrupts.readAI off_
+
+  readPi8: (that, a) ->
     off_ = a - MEMORY_START_PI
-    getFn that.piUint8Array, off_
+    that.piUint8Array[off_]
   
-  readSi: (that, a) ->
+  readPi16: (that, a) ->
+    off_ = (a-MEMORY_START_PI)
+    that.piUint8Array[off_] << 8 | that.piUint8Array[off_ + 1]
+
+  readPi32: (that, a) ->
+    off_ = (a-MEMORY_START_PI)
+    that.piUint8Array[off_] << 24 | that.piUint8Array[off_ + 1] << 16 | that.piUint8Array[off_ + 2] << 8 | that.piUint8Array[off_ + 3]
+
+  readSi8: (that, a) ->
     off_ = a - MEMORY_START_SI
     that.core.interrupts.readSI off_
 
-  readC2A1: (that, a, getFn) ->
+  readSi16: (that, a) ->
+    off_ = a - MEMORY_START_SI
+    that.core.interrupts.readSI off_
+
+  readSi32: (that, a) ->
+    off_ = a - MEMORY_START_SI
+    that.core.interrupts.readSI off_
+
+  readC2A1_8: (that, a) ->
     off_ = a - MEMORY_START_C2A1
-    getFn that.c2a1Uint8Array, off_
+    that.c2a1Uint8Array[off_]
 
-  readC1A1: (that, a, getFn) ->
+  readC2A1_16: (that, a) ->
+    off_ = (a-MEMORY_START_C2A1)
+    that.c2a1Uint8Array[off_] << 8 | that.c2a1Uint8Array[off_ + 1]
+
+  readC2A1_32: (that, a) ->
+    off_ = (a-MEMORY_START_C2A1)
+    that.c2a1Uint8Array[off_] << 24 | that.c2a1Uint8Array[off_ + 1] << 16 | that.c2a1Uint8Array[off_ + 2] << 8 | that.c2a1Uint8Array[off_ + 3]
+
+  readC1A1_8: (that, a) ->
     off_ = a - MEMORY_START_C1A1
-    getFn that.c1a1Uint8Array, off_
+    that.c1a1Uint8Array[off_]
 
-  readC2A2: (that, a, getFn) ->
+  readC1A1_16: (that, a) ->
+    off_ = (a-MEMORY_START_C1A1)
+    that.c1a1Uint8Array[off_] << 8 | that.c1a1Uint8Array[off_ + 1]
+
+  readC1A1_32: (that, a) ->
+    off_ = (a-MEMORY_START_C1A1)
+    that.c1a1Uint8Array[off_] << 24 | that.c1a1Uint8Array[off_ + 1] << 16 | that.c1a1Uint8Array[off_ + 2] << 8 | that.c1a1Uint8Array[off_ + 3]
+
+  readC2A2_8: (that, a) ->
     off_ = a - MEMORY_START_C2A2
-    getFn that.c2a2Uint8Array, off_
+    that.c2a2Uint8Array[off_]
 
-  readRom: (that, a, getFn) ->
+  readC2A2_16: (that, a) ->
+    off_ = (a-MEMORY_START_C2A2)
+    that.c2a2Uint8Array[off_] << 8 | that.c2a2Uint8Array[off_ + 1]
+
+  readC2A2_32: (that, a) ->
+    off_ = (a-MEMORY_START_C2A2)
+    that.c2a2Uint8Array[off_] << 24 | that.c2a2Uint8Array[off_ + 1] << 16 | that.c2a2Uint8Array[off_ + 2] << 8 | that.c2a2Uint8Array[off_ + 3]
+
+  readRom8: (that, a) ->
     off_ = a - MEMORY_START_ROM_IMAGE
-    getFn that.romUint8Array, off_
+    that.romUint8Array[off_]
 
-  readC1A3: (that, a, getFn) ->
+  readRom16: (that, a) ->
+    off_ = (a-MEMORY_START_ROM_IMAGE)
+    that.romUint8Array[off_] << 8 | that.romUint8Array[off_ + 1]
+
+  readRom32: (that, a) ->
+    off_ = (a-MEMORY_START_ROM_IMAGE)
+    that.romUint8Array[off_] << 24 | that.romUint8Array[off_ + 1] << 16 | that.romUint8Array[off_ + 2] << 8 | that.romUint8Array[off_ + 3]
+
+  readC1A3_8: (that, a) ->
     off_ = a - MEMORY_START_C1A3
-    getFn that.c1a3Uint8Array, off_
+    that.c1a3Uint8Array[off_]
 
-  readRi: (that, a, getFn) ->
+  readC1A3_16: (that, a) ->
+    off_ = (a-MEMORY_START_C1A3)
+    that.c1a3Uint8Array[off_] << 8 | that.c1a3Uint8Array[off_ + 1]
+
+  readC1A3_32: (that, a) ->
+    off_ = (a-MEMORY_START_C1A3)
+    that.c1a3Uint8Array[off_] << 24 | that.c1a3Uint8Array[off_ + 1] << 16 | that.c1a3Uint8Array[off_ + 2] << 8 | that.c1a3Uint8Array[off_ + 3]
+
+  readRi8: (that, a) ->
     off_ = a - MEMORY_START_RI
-    getFn that.riUint8Array, off_
+    that.riUint8Array[off_]
 
-  readPif: (that, a, getFn) ->
+  readRi16: (that, a) ->
+    off_ = (a-MEMORY_START_RI)
+    that.riUint8Array[off_] << 8 | that.riUint8Array[off_ + 1]
+
+  readRi32: (that, a) ->
+    off_ = (a-MEMORY_START_RI)
+    that.riUint8Array[off_] << 24 | that.riUint8Array[off_ + 1] << 16 | that.riUint8Array[off_ + 2] << 8 | that.riUint8Array[off_ + 3]
+
+  readPif8: (that, a) ->
     off_ = a - MEMORY_START_PIF
-    getFn that.pifUint8Array, off_
+    that.pifUint8Array[off_]
 
-  readGio: (that, a, getFn) ->
+  readPif16: (that, a) ->
+    off_ = (a-MEMORY_START_PIF)
+    that.pifUint8Array[off_] << 8 | that.pifUint8Array[off_ + 1]
+
+  readPif32: (that, a) ->
+    off_ = (a-MEMORY_START_PIF)
+    that.pifUint8Array[off_] << 24 | that.pifUint8Array[off_ + 1] << 16 | that.pifUint8Array[off_ + 2] << 8 | that.pifUint8Array[off_ + 3]
+
+  readGio8: (that, a) ->
     off_ = a - MEMORY_START_GIO
-    getFn that.gioUint8Array, off_
+    that.gioUint8Array[off_]
 
-  writeRdram8: (that, setFn, val, a) ->
+  readGio16: (that, a) ->
+    off_ = (a-MEMORY_START_GIO)
+    that.gioUint8Array[off_] << 8 | that.gioUint8Array[off_ + 1]
+
+  readGio32: (that, a) ->
+    off_ = (a-MEMORY_START_GIO)
+    that.gioUint8Array[off_] << 24 | that.gioUint8Array[off_ + 1] << 16 | that.gioUint8Array[off_ + 2] << 8 | that.gioUint8Array[off_ + 3]
+
+  writeRdram8: (that, val, a) ->
     off_ = a - MEMORY_START_RDRAM
     that.rdramUint8Array[off_] = val
     return
 
-  writeRdram16: (that, setFn, val, a) ->
+  writeRdram16: (that, val, a) ->
     off_ = a - MEMORY_START_RDRAM
     that.rdramUint8Array[off_] = val >> 8
     that.rdramUint8Array[off_ + 1] = val
     return
 
-  writeRdram32: (that, setFn, val, a) ->
+  writeRdram32: (that, val, a) ->
     off_ = a - MEMORY_START_RDRAM
     that.rdramUint8Array[off_] = val >> 24
     that.rdramUint8Array[off_ + 1] = val >> 16
@@ -264,116 +432,392 @@ class C1964jsMemory
     that.rdramUint8Array[off_ + 3] = val
     return
 
-  writeSpMem: (that, setFn, val, a) ->
+  writeSpMem8: (that, val, a) ->
     off_ = a - MEMORY_START_SPMEM
-    setFn that.spMemUint8Array, off_, val
+    that.spMemUint8Array[off_] = val
     return
 
-  writeRi: (that, setFn, val, a) ->
+  writeSpMem16: (that, val, a) ->
+    off_ = a - MEMORY_START_SPMEM
+    that.spMemUint8Array[off_] = val >> 8
+    that.spMemUint8Array[off_ + 1] = val
+    return
+
+  writeSpMem32: (that, val, a) ->
+    off_ = a - MEMORY_START_SPMEM
+    that.spMemUint8Array[off_] = val >> 24
+    that.spMemUint8Array[off_ + 1] = val >> 16
+    that.spMemUint8Array[off_ + 2] = val >> 8
+    that.spMemUint8Array[off_ + 3] = val
+    return
+
+  writeRi8: (that, val, a) ->
     off_ = a - MEMORY_START_RI
-    setFn that.riUint8Array, off_, val
+    that.riUint8Array[off_] = val
     return
 
-  writeMi: (that, setFn, val, a, pc, isDelaySlot) ->
+  writeRi16: (that, val, a) ->
+    off_ = a - MEMORY_START_RI
+    that.riUint8Array[off_] = val >> 8
+    that.riUint8Array[off_ + 1] = val
+    return
+
+  writeRi32: (that, val, a) ->
+    off_ = a - MEMORY_START_RI
+    that.riUint8Array[off_] = val >> 24
+    that.riUint8Array[off_ + 1] = val >> 16
+    that.riUint8Array[off_ + 2] = val >> 8
+    that.riUint8Array[off_ + 3] = val
+    return
+
+  writeMi8: (that, val, a, pc, isDelaySlot) ->
     off_ = a - MEMORY_START_MI
     that.core.interrupts.writeMI off_, val, pc, isDelaySlot
     return
 
-  writeRamRegs8: (that, setFn, val, a) ->
+  writeMi16: (that, val, a, pc, isDelaySlot) ->
+    off_ = a - MEMORY_START_MI
+    that.core.interrupts.writeMI off_, val, pc, isDelaySlot
+    return
+
+  writeMi32: (that, val, a, pc, isDelaySlot) ->
+    off_ = a - MEMORY_START_MI
+    that.core.interrupts.writeMI off_, val, pc, isDelaySlot
+    return
+
+  writeRamRegs8_8: (that, val, a) ->
     off_ = a - MEMORY_START_RAMREGS8
-    setFn that.ramRegs8Uint8Array, off_, val
+    that.ramRegs8Uint8Array[off_] = val
     return
 
-  writeRamRegs4: (that, setFn, val, a) ->
+  writeRamRegs8_16: (that, val, a) ->
+    off_ = a - MEMORY_START_RAMREGS8
+    that.ramRegs8Uint8Array[off_] = val >> 8
+    that.ramRegs8Uint8Array[off_ + 1] = val
+    return
+
+  writeRamRegs8_32: (that, val, a) ->
+    off_ = a - MEMORY_START_RAMREGS8
+    that.ramRegs8Uint8Array[off_] = val >> 24
+    that.ramRegs8Uint8Array[off_ + 1] = val >> 16
+    that.ramRegs8Uint8Array[off_ + 2] = val >> 8
+    that.ramRegs8Uint8Array[off_ + 3] = val
+    return
+
+  writeRamRegs4_8: (that, val, a) ->
     off_ = a - MEMORY_START_RAMREGS4
-    setFn that.ramRegs4Uint8Array, off_, val
+    that.ramRegs4Uint8Array[off_] = val
     return
 
-  writeRamRegs0: (that, setFn, val, a) ->
+  writeRamRegs4_16: (that, val, a) ->
+    off_ = a - MEMORY_START_RAMREGS4
+    that.ramRegs4Uint8Array[off_] = val >> 8
+    that.ramRegs4Uint8Array[off_ + 1] = val
+    return
+
+  writeRamRegs4_32: (that, val, a) ->
+    off_ = a - MEMORY_START_RAMREGS4
+    that.ramRegs4Uint8Array[off_] = val >> 24
+    that.ramRegs4Uint8Array[off_ + 1] = val >> 16
+    that.ramRegs4Uint8Array[off_ + 2] = val >> 8
+    that.ramRegs4Uint8Array[off_ + 3] = val
+    return
+
+  writeRamRegs0_8: (that, val, a) ->
     off_ = a - MEMORY_START_RAMREGS0
-    setFn that.ramRegs0Uint8Array, off_, val
+    that.ramRegs0Uint8Array[off_] = val
     return
 
-  writeSpReg1: (that, setFn, val, a, pc, isDelaySlot) ->
+  writeRamRegs0_16: (that, val, a) ->
+    off_ = a - MEMORY_START_RAMREGS0
+    that.ramRegs0Uint8Array[off_] = val >> 8
+    that.ramRegs0Uint8Array[off_ + 1] = val
+    return
+
+  writeRamRegs0_32: (that, val, a) ->
+    off_ = a - MEMORY_START_RAMREGS0
+    that.ramRegs0Uint8Array[off_] = val >> 24
+    that.ramRegs0Uint8Array[off_ + 1] = val >> 16
+    that.ramRegs0Uint8Array[off_ + 2] = val >> 8
+    that.ramRegs0Uint8Array[off_ + 3] = val
+    return
+
+  writeSpReg1_8: (that, val, a, pc, isDelaySlot) ->
     off_ = a - MEMORY_START_SPREG_1
     that.core.interrupts.writeSPReg1 off_, val, pc, isDelaySlot
     return
 
-  writePi: (that, setFn, val, a, pc, isDelaySlot) ->
+  writeSpReg1_16: (that, val, a, pc, isDelaySlot) ->
+    off_ = a - MEMORY_START_SPREG_1
+    that.core.interrupts.writeSPReg1 off_, val, pc, isDelaySlot
+    return
+
+  writeSpReg1_32: (that, val, a, pc, isDelaySlot) ->
+    off_ = a - MEMORY_START_SPREG_1
+    that.core.interrupts.writeSPReg1 off_, val, pc, isDelaySlot
+    return
+
+  writePi8: (that, val, a, pc, isDelaySlot) ->
     off_ = a - MEMORY_START_PI
     that.core.interrupts.writePI off_, val, pc, isDelaySlot
     return
 
-  writeSi: (that, setFn, val, a, pc, isDelaySlot) ->
+  writePi16: (that, val, a, pc, isDelaySlot) ->
+    off_ = a - MEMORY_START_PI
+    that.core.interrupts.writePI off_, val, pc, isDelaySlot
+    return
+
+  writePi32: (that, val, a, pc, isDelaySlot) ->
+    off_ = a - MEMORY_START_PI
+    that.core.interrupts.writePI off_, val, pc, isDelaySlot
+    return
+
+  writeSi8: (that, val, a, pc, isDelaySlot) ->
     off_ = a - MEMORY_START_SI
     that.core.interrupts.writeSI off_, val, pc, isDelaySlot
     return
 
-  writeAi: (that, setFn, val, a, pc, isDelaySlot) ->
+  writeSi16: (that, val, a, pc, isDelaySlot) ->
+    off_ = a - MEMORY_START_SI
+    that.core.interrupts.writeSI off_, val, pc, isDelaySlot
+    return
+
+  writeSi32: (that, val, a, pc, isDelaySlot) ->
+    off_ = a - MEMORY_START_SI
+    that.core.interrupts.writeSI off_, val, pc, isDelaySlot
+    return
+
+  writeAi8: (that, val, a, pc, isDelaySlot) ->
     off_ = a - MEMORY_START_AI
     that.core.interrupts.writeAI off_, val, pc, isDelaySlot
     return
 
-  writeVi: (that, setFn, val, a, pc, isDelaySlot) ->
+  writeAi16: (that, val, a, pc, isDelaySlot) ->
+    off_ = a - MEMORY_START_AI
+    that.core.interrupts.writeAI off_, val, pc, isDelaySlot
+    return
+
+  writeAi32: (that, val, a, pc, isDelaySlot) ->
+    off_ = a - MEMORY_START_AI
+    that.core.interrupts.writeAI off_, val, pc, isDelaySlot
+    return
+
+  writeVi8: (that, val, a, pc, isDelaySlot) ->
     off_ = a - MEMORY_START_VI
     that.core.interrupts.writeVI off_, val, pc, isDelaySlot
     return
 
-  writeSpReg2: (that, setFn, val, a, pc, isDelaySlot) ->
+  writeVi16: (that, val, a, pc, isDelaySlot) ->
+    off_ = a - MEMORY_START_VI
+    that.core.interrupts.writeVI off_, val, pc, isDelaySlot
+    return
+
+  writeVi32: (that, val, a, pc, isDelaySlot) ->
+    off_ = a - MEMORY_START_VI
+    that.core.interrupts.writeVI off_, val, pc, isDelaySlot
+    return
+
+  writeSpReg2_8: (that, val, a, pc, isDelaySlot) ->
     off_ = a - MEMORY_START_SPREG_2
     that.core.interrupts.writeSPReg2 off_, val, pc, isDelaySlot
     return
 
-  writeDpc: (that, setFn, val, a, pc, isDelaySlot) ->
+  writeSpReg2_16: (that, val, a, pc, isDelaySlot) ->
+    off_ = a - MEMORY_START_SPREG_2
+    that.core.interrupts.writeSPReg2 off_, val, pc, isDelaySlot
+    return
+
+  writeSpReg2_32: (that, val, a, pc, isDelaySlot) ->
+    off_ = a - MEMORY_START_SPREG_2
+    that.core.interrupts.writeSPReg2 off_, val, pc, isDelaySlot
+    return
+
+  writeDpc8: (that, val, a, pc, isDelaySlot) ->
     off_ = a - MEMORY_START_DPC
     that.core.interrupts.writeDPC off_, val, pc, isDelaySlot
     return
 
-  writeDps: (that, setFn, val, a) ->
+  writeDpc16: (that, val, a, pc, isDelaySlot) ->
+    off_ = a - MEMORY_START_DPC
+    that.core.interrupts.writeDPC off_, val, pc, isDelaySlot
+    return
+
+  writeDpc32: (that, val, a, pc, isDelaySlot) ->
+    off_ = a - MEMORY_START_DPC
+    that.core.interrupts.writeDPC off_, val, pc, isDelaySlot
+    return
+
+  writeDps8: (that, val, a) ->
     off_ = a - MEMORY_START_DPS
-    setFn that.dpsUint8Array, off_, val
+    that.dpsUint8Array[off_] = val
     return
 
-  writeC2A1: (that, setFn, val, a) ->
+  writeDps16: (that, val, a) ->
+    off_ = a - MEMORY_START_DPS
+    that.dpsUint8Array[off_] = val >> 8
+    that.dpsUint8Array[off_ + 1] = val
+    return
+
+  writeDps32: (that, val, a) ->
+    off_ = a - MEMORY_START_DPS
+    that.dpsUint8Array[off_] = val >> 24
+    that.dpsUint8Array[off_ + 1] = val >> 16
+    that.dpsUint8Array[off_ + 2] = val >> 8
+    that.dpsUint8Array[off_ + 3] = val
+    return
+
+  writeC2A1_8: (that, val, a) ->
     off_ = a - MEMORY_START_C2A1
-    setFn that.c2a1Uint8Array, off_, val
+    that.c2a1Uint8Array[off_] = val
     return
 
-  writeC1A1: (that, setFn, val, a) ->
+  writeC2A1_16: (that, val, a) ->
+    off_ = a - MEMORY_START_C2A1
+    that.c2a1Uint8Array[off_] = val >> 8
+    that.c2a1Uint8Array[off_ + 1] = val
+    return
+
+  writeC2A1_32: (that, val, a) ->
+    off_ = a - MEMORY_START_C2A1
+    that.c2a1Uint8Array[off_] = val >> 24
+    that.c2a1Uint8Array[off_ + 1] = val >> 16
+    that.c2a1Uint8Array[off_ + 2] = val >> 8
+    that.c2a1Uint8Array[off_ + 3] = val
+    return
+
+  writeC1A1_8: (that, val, a) ->
     off_ = a - MEMORY_START_C1A1
-    setFn that.c1a1Uint8Array, off_, val
+    that.c1a1Uint8Array[off_] = val
     return
 
-  writeC2A2: (that, setFn, val, a) ->
+  writeC1A1_16: (that, val, a) ->
+    off_ = a - MEMORY_START_C1A1
+    that.c1a1Uint8Array[off_] = val >> 8
+    that.c1a1Uint8Array[off_ + 1] = val
+    return
+
+  writeC1A1_32: (that, val, a) ->
+    off_ = a - MEMORY_START_C1A1
+    that.c1a1Uint8Array[off_] = val >> 24
+    that.c1a1Uint8Array[off_ + 1] = val >> 16
+    that.c1a1Uint8Array[off_ + 2] = val >> 8
+    that.c1a1Uint8Array[off_ + 3] = val
+    return
+
+  writeC2A2_8: (that, val, a) ->
     off_ = a - MEMORY_START_C2A2
-    setFn that.c2a2Uint8Array, off_, val
+    that.c2a2Uint8Array[off_] = val
     return
 
-  writeRom: (that, setFn, val, a) ->
+  writeC2A2_16: (that, val, a) ->
+    off_ = a - MEMORY_START_C2A2
+    that.c2a2Uint8Array[off_] = val >> 8
+    that.c2a2Uint8Array[off_ + 1] = val
+    return
+
+  writeC2A2_32: (that, val, a) ->
+    off_ = a - MEMORY_START_C2A2
+    that.c2a2Uint8Array[off_] = val >> 24
+    that.c2a2Uint8Array[off_ + 1] = val >> 16
+    that.c2a2Uint8Array[off_ + 2] = val >> 8
+    that.c2a2Uint8Array[off_ + 3] = val
+    return
+
+  writeRom8: (that, val, a) ->
     alert "attempt to overwrite rom!"
     off_ = a - MEMORY_START_ROM_IMAGE
-    setFn that.romUint8Array, off_, val
+    that.romUint8Array[off_] = val
     return
 
-  writeC1A3: (that, setFn, val, a) ->
+  writeRom16: (that, val, a) ->
+    off_ = a - MEMORY_START_ROM_IMAGE
+    that.romUint8Array[off_] = val >> 8
+    that.romUint8Array[off_ + 1] = val
+    return
+
+  writeRom32: (that, val, a) ->
+    off_ = a - MEMORY_START_ROM_IMAGE
+    that.romUint8Array[off_] = val >> 24
+    that.romUint8Array[off_ + 1] = val >> 16
+    that.romUint8Array[off_ + 2] = val >> 8
+    that.romUint8Array[off_ + 3] = val
+    return
+
+  writeC1A3_8: (that, val, a) ->
     off_ = a - MEMORY_START_C1A3
-    setFn that.c1a3Uint8Array, off_, val
+    that.c1a3Uint8Array[off_] = val
     return
 
-  writePif: (that, setFn, val, a) ->
+  writeC1A3_16: (that, val, a) ->
+    off_ = a - MEMORY_START_C1A3
+    that.c1a3Uint8Array[off_] = val >> 8
+    that.c1a3Uint8Array[off_ + 1] = val
+    return
+
+  writeC1A3_32: (that, val, a) ->
+    off_ = a - MEMORY_START_C1A3
+    that.c1a3Uint8Array[off_] = val >> 24
+    that.c1a3Uint8Array[off_ + 1] = val >> 16
+    that.c1a3Uint8Array[off_ + 2] = val >> 8
+    that.c1a3Uint8Array[off_ + 3] = val
+    return
+
+  writePif8: (that, val, a) ->
     off_ = a - MEMORY_START_PIF
-    setFn that.pifUint8Array, off_, val
+    that.pifUint8Array[off_] = val
     return
 
-  writeGio: (that, setFn, val, a) ->
+  writePif16: (that, val, a) ->
+    off_ = a - MEMORY_START_PIF
+    that.pifUint8Array[off_] = val >> 8
+    that.pifUint8Array[off_ + 1] = val
+    return
+
+  writePif32: (that, val, a) ->
+    off_ = a - MEMORY_START_PIF
+    that.pifUint8Array[off_] = val >> 24
+    that.pifUint8Array[off_ + 1] = val >> 16
+    that.pifUint8Array[off_ + 2] = val >> 8
+    that.pifUint8Array[off_ + 3] = val
+    return
+
+  writeGio8: (that, val, a) ->
     off_ = a - MEMORY_START_GIO
-    setFn that.gioUint8Array, off_, val
+    that.gioUint8Array[off_] = val
     return
 
-  writeDummy: (that, setFn, val, a) ->
-    log "writing to invalid memory at " + dec2hex(a)
+  writeGio16: (that, val, a) ->
+    off_ = a - MEMORY_START_GIO
+    that.gioUint8Array[off_] = val >> 8
+    that.gioUint8Array[off_ + 1] = val
+    return
+
+  writeGio32: (that, val, a) ->
+    off_ = a - MEMORY_START_GIO
+    that.gioUint8Array[off_] = val >> 24
+    that.gioUint8Array[off_ + 1] = val >> 16
+    that.gioUint8Array[off_ + 2] = val >> 8
+    that.gioUint8Array[off_ + 3] = val
+    return
+
+  writeDummy8: (that, val, a) ->
+    #log "writing to invalid memory at " + dec2hex(a)
     off_ = a & 0x0000fffc
-    setFn that.dummyReadWriteUint8Array, off_, val
+    that.dummyReadWriteUint8Array[off_] = val
+    return
+
+  writeDummy16: (that, val, a) ->
+    off_ = a - MEMORY_START_GIO
+    that.dummyReadWriteUint8Array[off_] = val >> 8
+    that.dummyReadWriteUint8Array[off_ + 1] = val
+    return
+
+  writeDummy32: (that, val, a) ->
+    off_ = a - MEMORY_START_GIO
+    that.dummyReadWriteUint8Array[off_] = val >> 24
+    that.dummyReadWriteUint8Array[off_ + 1] = val >> 16
+    that.dummyReadWriteUint8Array[off_ + 2] = val >> 8
+    that.dummyReadWriteUint8Array[off_ + 3] = val
     return
 
   virtualToPhysical: (a) ->
@@ -386,25 +830,67 @@ class C1964jsMemory
     #  alert dec2hex(a) + ' ' + dec2hex(((physRegion[a>>>12]<<16) | a&0x0000ffff))
     return ((@physRegion[a>>>12]<<16) | (a&0x0000ffff))
 
-  readTLB: (that, a, getFn) ->
+  readTLB8: (that, a) ->
     a = that.virtualToPhysical(a)
 
     region = that.region[a>>>14]
 
-    if region is that.readTLB
-      region = that.readDummy
+    if region is that.readTLB8
+      region = that.readDummy8
 
-    region(that, a, getFn)
+    region(that, a)
 
-  writeTLB: (that, setFn, val, a, pc, isDelaySlot) ->
+  writeTLB8: (that, val, a, pc, isDelaySlot) ->
     a = that.virtualToPhysical(a)
 
     region = that.writeRegion8[a>>>14]
 
-    if region is that.writeTLB
-      region = that.writeDummy
+    if region is that.writeTLB8
+      region = that.writeDummy8
 
-    region(that, setFn, val, a, pc, isDelaySlot)
+    region(that, val, a, pc, isDelaySlot)
+    return
+
+  readTLB16: (that, a) ->
+    a = that.virtualToPhysical(a)
+
+    region16 = that.region16[a>>>14]
+
+    if region16 is that.readTLB16
+      region16 = that.readDummy16
+
+    region16(that, a)
+
+  writeTLB16: (that, val, a, pc, isDelaySlot) ->
+    a = that.virtualToPhysical(a)
+
+    region16 = that.writeRegion16[a>>>14]
+
+    if region16 is that.writeTLB16
+      region16 = that.writeDummy16
+
+    region16(that, val, a, pc, isDelaySlot)
+    return
+
+  readTLB32: (that, a) ->
+    a = that.virtualToPhysical(a)
+
+    region32 = that.region32[a>>>14]
+
+    if region32 is that.readTLB32
+      region32 = that.readDummy32
+
+    region32(that, a)
+
+  writeTLB32: (that, val, a, pc, isDelaySlot) ->
+    a = that.virtualToPhysical(a)
+
+    region32 = that.writeRegion32[a>>>14]
+
+    if region32 is that.writeTLB32
+      region32 = that.writeDummy
+
+    region32(that, val, a, pc, isDelaySlot)
     return
 
   initPhysRegions: ->
@@ -449,32 +935,32 @@ class C1964jsMemory
   lb: (addr) ->
     #throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
     a = @virtualToPhysical(addr)
-    @region[a>>>14](this, a, @getInt8)
+    @region[a>>>14](this, a)
 
   lh: (addr) ->
     #throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
     a = @virtualToPhysical(addr)
-    @region16[a>>>14](this, a, @getInt16)
+    @region16[a>>>14](this, a)
 
   lw: (addr) ->
     #throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
     a = @virtualToPhysical(addr)
-    @region32[a>>>14](this, a, @getUint32)
+    @region32[a>>>14](this, a)
 
   sw: (val, addr, pc, isDelaySlot) ->
     a = @virtualToPhysical(addr)
-    @writeRegion32[a>>>14](this, @setInt32, val, a, pc, isDelaySlot)
+    @writeRegion32[a>>>14](this, val, a, pc, isDelaySlot)
     return
 
   #Same routine as storeWord, but store a byte
   sb: (val, addr, pc, isDelaySlot) ->
     a = @virtualToPhysical(addr)
-    @writeRegion8[a>>>14](this, @setInt8, val, a, pc, isDelaySlot)
+    @writeRegion8[a>>>14](this, val, a, pc, isDelaySlot)
     return
 
   sh: (val, addr, pc, isDelaySlot) ->
     a = @virtualToPhysical(addr)
-    @writeRegion16[a>>>14](this, @setInt16, val, a, pc, isDelaySlot)
+    @writeRegion16[a>>>14](this, val, a, pc, isDelaySlot)
     return
 
 #hack global space until we export classes properly

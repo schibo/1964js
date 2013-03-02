@@ -151,9 +151,16 @@ C1964jsRenderer = (settings, glx, webGL) ->
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
       gl.uniform1i webGL.shaderProgram.samplerUniform, colorsTexture
-	
-      gl.uniform4fv webGL.shaderProgram.uPrimColor, videoHLE.primColor
-	
+      
+      if videoHLE.primColor.length > 0
+        gl.uniform4fv webGL.shaderProgram.uPrimColor, videoHLE.primColor   
+        
+      if videoHLE.fillColor.length > 0
+        gl.uniform4fv webGL.shaderProgram.uFillColor, videoHLE.fillColor
+
+      if videoHLE.envColor.length > 0
+        gl.uniform4fv webGL.shaderProgram.uEnvColor, videoHLE.envColor
+
       gl.bindBuffer gl.ELEMENT_ARRAY_BUFFER, texrectVertexIndexBuffer
       webGL.setMatrixUniforms webGL.shaderProgram
       webGL.setCombineUniforms webGL.shaderProgram

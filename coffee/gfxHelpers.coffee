@@ -375,7 +375,36 @@ C1964jsVideoHLE::pow2roundup = (value) ->
   while result < value
     result <<= 1
   return result
+
+#SetFillColor
   
+C1964jsVideoHLE::getSetFillColorR = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc + 4 ) >> 24 & 0xFF
+  
+C1964jsVideoHLE::getSetFillColorG = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc + 4 ) >> 16 & 0xFF
+  
+C1964jsVideoHLE::getSetFillColorB = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc + 4 ) >> 8 & 0xFF
+  
+C1964jsVideoHLE::getSetFillColorA = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc + 4 ) & 0xFF
+
+#setEnvColor
+
+C1964jsVideoHLE::getSetEnvColorR = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc + 4 ) >> 24 & 0xFF
+  
+C1964jsVideoHLE::getSetEnvColorG = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc + 4 ) >> 16 & 0xFF
+  
+C1964jsVideoHLE::getSetEnvColorB = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc + 4 ) >> 8 & 0xFF
+  
+C1964jsVideoHLE::getSetEnvColorA = (pc) ->
+  @core.memory.getInt32(0, @core.memory.rdramUint8Array, pc + 4 ) & 0xFF
+
+
 C1964jsVideoHLE::microcodeMap0 = [
     'RSP_GBI1_SpNoop', 'RSP_GBI0_Mtx', 'RSP_GBI1_Reserved', 'RSP_GBI1_MoveMem',
     'RSP_GBI0_Vtx', 'RSP_GBI1_Reserved', 'RSP_GBI0_DL', 'RSP_GBI1_Reserved',
