@@ -144,9 +144,17 @@ class C1964jsMemory
 
     return
 
-  readDummy: (that, a, getFn) ->
+  readDummy8: (that, a) ->
     off_ = a & 0x0000FFFC
-    getFn that.dummyReadWriteUint8Array, off_
+    that.dummyReadWriteUint8Array[off_]
+
+  readDummy16: (that, a) ->
+    off_ = a & 0x0000FFFC
+    that.dummyReadWriteUint8Array[off_] << 8 | that.dummyReadWriteUint8Array[off_ + 1]
+
+  readDummy32: (that, a) ->
+    off_ = a & 0x0000FFFC
+    that.dummyReadWriteUint8Array[off_] << 24 | that.dummyReadWriteUint8Array[off_ + 1] << 16 | that.dummyReadWriteUint8Array[off_ + 2] << 8 | that.dummyReadWriteUint8Array[off_ + 3]
 
   #little-endian only
   readRdram8: (that, a) ->
@@ -807,13 +815,13 @@ class C1964jsMemory
     return
 
   writeDummy16: (that, val, a) ->
-    off_ = a - MEMORY_START_GIO
+    off_ = a & 0x0000fffc
     that.dummyReadWriteUint8Array[off_] = val >> 8
     that.dummyReadWriteUint8Array[off_ + 1] = val
     return
 
   writeDummy32: (that, val, a) ->
-    off_ = a - MEMORY_START_GIO
+    off_ = a & 0x0000fffc
     that.dummyReadWriteUint8Array[off_] = val >> 24
     that.dummyReadWriteUint8Array[off_ + 1] = val >> 16
     that.dummyReadWriteUint8Array[off_ + 2] = val >> 8
