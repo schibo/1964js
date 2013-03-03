@@ -297,9 +297,10 @@ class C1964jsEmulator
   runLoop: () ->
     #setTimeout to be a good citizen..don't allow for the cpu to be pegged at 100%.
     #8ms idle time will be 50% cpu max if a 60FPS game is slow.
-    setInterval (=>
+    @mySetInterval = setInterval (=>
       #@request = requestAnimFrame(@runLoop)  if @terminate is false
-      #@interrupts.checkInterrupts()
+      clearInterval mySetInterval if @terminate is true
+      @interrupts.checkInterrupts()
 
       while 1
         #trigger
@@ -328,7 +329,6 @@ class C1964jsEmulator
             #  #@frameTime += (thisFrameTime - @frameTime) / filterStrength;
             #  @lastLoop = thisLoop;            #@fps = thisLoop
             #  break if (frameTime > 30.0)
-            @interrupts.checkInterrupts()
             break
         else
           @interrupts.processException @p

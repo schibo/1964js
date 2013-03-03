@@ -455,7 +455,8 @@ C1964jsInterrupts = (core, cp0) ->
       when consts.GFX_TASK
         core.videoHLE = new C1964jsVideoHLE(core, core.webGL.gl)  if core.videoHLE is null or core.videoHLE is `undefined`
         core.settings.wireframe = document.getElementById("wireframe").checked
-        core.videoHLE.processDisplayList()
+        if core.terminate is false
+          core.videoHLE.processDisplayList()
       when consts.SND_TASK
         @processAudioList()
       when consts.JPG_TASK
