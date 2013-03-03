@@ -305,11 +305,13 @@ class C1964jsEmulator
       #trigger
       if @m >= 0
         @interval += 1
-        @m = -125000 # which is -625000 / (interval+1)
+        #@m = -125000 # which is -625000 / (interval+1)
+        @m = -62500 # which is -625000 / (interval+1) / 2
         if @interval is 4
           @interval = 0
           @repaintWrapper()
-          @cp0[consts.COUNT] += 625000*2 #todo: set count to count + @m*2 when count is requested in code
+          #@cp0[consts.COUNT] += 625000*2 #todo: set count to count + @m*2 when count is requested in code
+          @cp0[consts.COUNT] += 625000 #todo: set count to count + @m*2 when count is requested in code
           @interrupts.triggerCompareInterrupt 0, false
           @interrupts.triggerVIInterrupt 0, false
           @interrupts.processException @p
