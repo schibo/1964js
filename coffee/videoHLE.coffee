@@ -19,6 +19,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 #globals window, mat4, C1964jsRenderer, consts, dec2hex, Float32Array
 C1964jsVideoHLE = (core, glx) ->
   "use strict"
+
+  @processDisplayList = @callBind @processDisplayList, this
+
   i = undefined
   @core = core #only needed for gfxHelpers prototypes to access.
   @gl = glx
@@ -84,6 +87,11 @@ C1964jsVideoHLE = (core, glx) ->
 
 (->
   "use strict"
+
+  C1964jsVideoHLE::callBind = (fn, me) ->
+    ->
+      fn.call me
+
   C1964jsVideoHLE::processDisplayList = ->
     if @core.showFB is true
       @initBuffers()
@@ -772,7 +780,7 @@ C1964jsVideoHLE = (core, glx) ->
     @gl.activeTexture(@gl.TEXTURE0)
     @gl.bindTexture(@gl.TEXTURE_2D, colorsTexture)
     @gl.texImage2D( @gl.TEXTURE_2D, 0, @gl.RGBA, tile.width, tile.height, 0, @gl.RGBA, @gl.UNSIGNED_BYTE, texture)
-    @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MAG_FILTER, @gl.NEAREST)
+    @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MAG_FILTER, @gl.LINEAR)
     @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MIN_FILTER, @gl.NEAREST)
     @gl.uniform1i @core.webGL.shaderProgram.samplerUniform, colorsTexture
 

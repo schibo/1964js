@@ -72,7 +72,7 @@ class C1964jsEmulator
       fn.call me
 
   constructor: (userSettings) ->
-    @runLoop = @callBind @runLoop, this
+    #@runLoop = @callBind @runLoop, this
     i = undefined
     @settings = userSettings
     @request = `undefined`
@@ -297,43 +297,57 @@ class C1964jsEmulator
   runLoop: () ->
     #setTimeout to be a good citizen..don't allow for the cpu to be pegged at 100%.
     #8ms idle time will be 50% cpu max if a 60FPS game is slow.
-    #setTimeout (=>
-    @request = requestAnimFrame(@runLoop)  if @terminate is false
-    @interrupts.checkInterrupts()
+    setInterval (=>
+      #@request = requestAnimFrame(@runLoop)  if @terminate is false
+      #@interrupts.checkInterrupts()
 
-    while 1
-      #trigger
-      if @m >= 0
-        @interval += 1
-        #@m = -125000 # which is -625000 / (interval+1)
-        @m = -62500 # which is -625000 / (interval+1) / 2
-        if @interval is 4
-          @interval = 0
-          @repaintWrapper()
-          #@cp0[consts.COUNT] += 625000*2 #todo: set count to count + @m*2 when count is requested in code
-          @cp0[consts.COUNT] += 625000 #todo: set count to count + @m*2 when count is requested in code
-          @interrupts.triggerCompareInterrupt 0, false
-          @interrupts.triggerVIInterrupt 0, false
+      while 1
+        #trigger
+        if @m >= 0
+          @interval += 1
+          #@m = -125000 # which is -625000 / (interval+1)
+          @m = -62500 # which is -625000 / (interval+1) / 2
+          if @interval is 4
+            @interval = 0
+            @repaintWrapper()
+            #@cp0[consts.COUNT] += 625000*2 #todo: set count to count + @m*2 when count is requested in code
+            @cp0[consts.COUNT] += 625000 #todo: set count to count + @m*2 when count is requested in code
+            @interrupts.triggerCompareInterrupt 0, false
+            @interrupts.triggerVIInterrupt 0, false
+            @interrupts.processException @p
+            #@request = requestAnimFrame(@runLoop)  if @terminate is false
+            #filterStrength = 1.0
+            #frameTime = 0.0
+            #if(@lastLoop is undefined)
+            #  @lastLoop = new Date()
+            #  @lastLoop = @lastLoop.getTime()
+            #else loop
+            #  thisLoop = new Date()
+            #  thisLoop = thisLoop.getTime()
+            #  frameTime += thisLoop - @lastLoop
+            #  #@frameTime += (thisFrameTime - @frameTime) / filterStrength;
+            #  @lastLoop = thisLoop;            #@fps = thisLoop
+            #  break if (frameTime > 30.0)
+            @interrupts.checkInterrupts()
+            break
+        else
           @interrupts.processException @p
-          break
-      else
-        @interrupts.processException @p
-        pc = @p >>> 2
-        fnName = "_" + pc
+          pc = @p >>> 2
+          fnName = "_" + pc
 
-        #this is broken-up so that we can process more interrupts. If we freeze,
-        #we probably need to split this up more.
-        try
-          fn = @code[fnName]
-          @run fn, @r, @h
-        catch e
-          #so, we really need to know what type of exception this is,
-          #but right now, we're assuming that we need to compile a block due to
-          #an attempt to call an undefined function. Are there standard exception types
-          #in javascript?
-          fn = @decompileBlock(@p)
-          fn = fn(@r, @h, @memory, this)
-    #), 0
+          #this is broken-up so that we can process more interrupts. If we freeze,
+          #we probably need to split this up more.
+          try
+            fn = @code[fnName]
+            @run fn, @r, @h
+          catch e
+            #so, we really need to know what type of exception this is,
+            #but right now, we're assuming that we need to compile a block due to
+            #an attempt to call an undefined function. Are there standard exception types
+            #in javascript?
+            fn = @decompileBlock(@p)
+            fn = fn(@r, @h, @memory, this)
+    ), 8
     this
 
   run: (fn, r, h) ->
