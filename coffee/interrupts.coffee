@@ -17,6 +17,51 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 #1964cpp treats consts.MI_INTR_MASK_REG_R as a separate memory location. Not sure that's right.
 #jslint bitwise: true, devel: true, todo: true
 #globals consts, log, C1964jsVideoHLE
+
+    #SP_STATUS_REG read flags
+`/** @const */ SP_STATUS_HALT = 0x0001`
+`/** @const */ SP_STATUS_BROKE = 0x0002`
+`/** @const */ SP_STATUS_DMA_BUSY = 0x0004`
+`/** @const */ SP_STATUS_DMA_FULL = 0x0008`
+`/** @const */ SP_STATUS_IO_FULL = 0x0010`
+`/** @const */ SP_STATUS_SSTEP = 0x0020`
+`/** @const */ SP_STATUS_INTR_BREAK = 0x0040`
+`/** @const */ SP_STATUS_YIELD = 0x0080`
+`/** @const */ SP_STATUS_YIELDED = 0x0100`
+`/** @const */ SP_STATUS_TASKDONE = 0x0200`
+`/** @const */ SP_STATUS_SIG3 = 0x0400`
+`/** @const */ SP_STATUS_SIG4 = 0x0800`
+`/** @const */ SP_STATUS_SIG5 = 0x1000`
+`/** @const */ SP_STATUS_SIG6 = 0x2000`
+`/** @const */ SP_STATUS_SIG7 = 0x4000`
+
+#SP_STATUS_REG write flags
+`/** @const */ SP_CLR_HALT = 0x0000001`
+`/** @const */ SP_SET_HALT = 0x0000002`
+`/** @const */ SP_CLR_BROKE = 0x0000004`
+`/** @const */ SP_CLR_INTR = 0x0000008`
+`/** @const */ SP_SET_INTR = 0x0000010`
+`/** @const */ SP_CLR_SSTEP = 0x0000020`
+`/** @const */ SP_SET_SSTEP = 0x0000040`
+`/** @const */ SP_CLR_INTR_BREAK = 0x0000080`
+`/** @const */ SP_SET_INTR_BREAK = 0x0000100`
+`/** @const */ SP_CLR_YIELD = 0x0000200`
+`/** @const */ SP_SET_YIELD = 0x0000400`
+`/** @const */ SP_CLR_YIELDED = 0x0000800`
+`/** @const */ SP_SET_YIELDED = 0x0001000`
+`/** @const */ SP_CLR_TASKDONE = 0x0002000`
+`/** @const */ SP_SET_TASKDONE = 0x0004000`
+`/** @const */ SP_CLR_SIG3 = 0x0008000`
+`/** @const */ SP_SET_SIG3 = 0x0010000`
+`/** @const */ SP_CLR_SIG4 = 0x0020000`
+`/** @const */ SP_SET_SIG4 = 0x0040000`
+`/** @const */ SP_CLR_SIG5 = 0x0080000`
+`/** @const */ SP_SET_SIG5 = 0x0100000`
+`/** @const */ SP_CLR_SIG6 = 0x0200000`
+`/** @const */ SP_SET_SIG6 = 0x0400000`
+`/** @const */ SP_CLR_SIG7 = 0x0800000`
+`/** @const */ SP_SET_SIG7 = 0x1000000`
+
 currentHack = 0
 C1964jsInterrupts = (core, cp0) ->
   "use strict"
@@ -349,49 +394,54 @@ C1964jsInterrupts = (core, cp0) ->
     return
 
   @writeSPStatusReg = (value, pc, isFromDelaySlot) ->
-    @clrFlag core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_BROKE  if value & consts.SP_CLR_BROKE
-    if value & consts.SP_SET_INTR
+    tempSr = core.memory.getUint32(core.memory.spReg1Uint8Array, consts.SP_STATUS_REG)
+    tempSr &= ~consts.SP_STATUS_BROKE if value & SP_CLR_BROKE
+    if value & SP_SET_INTR
       @triggerSPInterrupt pc, isFromDelaySlot
     #to use else if here is a possible bux fix (what is this?..this looks weird)
-    else @clearMIInterrupt consts.MI_INTR_SP  if value & consts.SP_CLR_INTR
-    if value & consts.SP_SET_SSTEP
-      @setFlag core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_SSTEP
-    else @clrFlag core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_SSTEP  if value & consts.SP_CLR_SSTEP
-    if value & consts.SP_SET_INTR_BREAK
-      @setFlag core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_INTR_BREAK
-    else @clrFlag core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_INTR_BREAK  if value & consts.SP_CLR_INTR_BREAK
-    if value & consts.SP_SET_YIELD
-      @setFlag core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_YIELD
-    else @clrFlag core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_YIELD  if value & consts.SP_CLR_YIELD
-    if value & consts.SP_SET_YIELDED
-      @setFlag core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_YIELDED
-    else @clrFlag core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_YIELDED  if value & consts.SP_CLR_YIELDED
-    if value & consts.SP_SET_TASKDONE
-      @setFlag core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_TASKDONE
-    else @clrFlag core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_YIELDED  if value & consts.SP_CLR_YIELDED
-    if value & consts.SP_SET_SIG3
-      @setFlag core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_SIG3
-    else @clrFlag core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_SIG3  if value & consts.SP_CLR_SIG3
-    if value & consts.SP_SET_SIG4
-      @setFlag core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_SIG4
-    else @clrFlag core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_SIG4  if value & consts.SP_CLR_SIG4
-    if value & consts.SP_SET_SIG5
-      @setFlag core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_SIG5
-    else @clrFlag core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_SIG5  if value & consts.SP_CLR_SIG5
-    if value & consts.SP_SET_SIG6
-      @setFlag core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_SIG6
-    else @clrFlag core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_SIG6  if value & consts.SP_CLR_SIG6
-    if value & consts.SP_SET_SIG7
-      @setFlag core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_SIG7
-    else @setFlag core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_SIG7  if value & consts.SP_CLR_SIG7
-    if value & consts.SP_SET_HALT
-      @setFlag core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_HALT
-    else if value & consts.SP_CLR_HALT
-      if (core.memory.getUint32(core.memory.spReg1Uint8Array, consts.SP_STATUS_REG) & consts.SP_STATUS_BROKE) is 0 #bugfix.
-        @clrFlag core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_HALT
+    else @clearMIInterrupt consts.MI_INTR_SP if value & SP_CLR_INTR
+    if value & SP_SET_SSTEP
+      tempSr |= SP_STATUS_SSTEP
+    else tempSr &= ~SP_STATUS_SSTEP if value & SP_CLR_SSTEP
+    if value & SP_SET_INTR_BREAK
+      tempSr |= SP_STATUS_INTR_BREAK
+    else tempSr &= ~SP_STATUS_INTR_BREAK  if value & SP_CLR_INTR_BREAK
+    if value & SP_SET_YIELD
+      tempSr |= SP_STATUS_YIELD
+    else tempSr &= ~SP_STATUS_YIELD  if value & SP_CLR_YIELD
+    if value & SP_SET_YIELDED
+      tempSr |= SP_STATUS_YIELDED
+    else tempSr &= ~SP_STATUS_YIELDED  if value & SP_CLR_YIELDED
+    if value & SP_SET_TASKDONE
+      tempSr |= SP_STATUS_TASKDONE
+    else tempSr &= ~SP_STATUS_YIELDED  if value & SP_CLR_YIELDED
+    if value & SP_SET_SIG3
+      tempSr |= SP_STATUS_SIG3
+    else tempSr &= ~SP_STATUS_SIG3  if value & SP_CLR_SIG3
+    if value & SP_SET_SIG4
+      tempSr |= SP_STATUS_SIG4
+    else tempSr &= ~SP_STATUS_SIG4  if value & SP_CLR_SIG4
+    if value & SP_SET_SIG5
+      tempSr |= SP_STATUS_SIG5
+    else tempSr &= ~SP_STATUS_SIG5  if value & SP_CLR_SIG5
+    if value & SP_SET_SIG6
+      tempSr |= SP_STATUS_SIG6
+    else tempSr &= ~SP_STATUS_SIG6  if value & SP_CLR_SIG6
+    if value & SP_SET_SIG7
+      tempSr |= SP_STATUS_SIG7
+    else tempSr &= ~SP_STATUS_SIG7  if value & SP_CLR_SIG7
+    if value & SP_SET_HALT
+      tempSr |= SP_STATUS_HALT
+      core.memory.setInt32 core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, tempSr
+    else if value & SP_CLR_HALT
+      if (tempSr & SP_STATUS_BROKE) is 0 #bugfix.
+        tempSr &= ~SP_STATUS_HALT
+        core.memory.setInt32 core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, tempSr
         spDmemTask = core.memory.getUint32(core.memory.spMemUint8Array, consts.SP_DMEM_TASK)
         #log "SP Task triggered. SP_DMEM_TASK=" + spDmemTask
         @runSPTask spDmemTask
+      else
+        core.memory.setInt32 core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, tempSr
     return
 
   #Added by Rice, 2001.08.10
