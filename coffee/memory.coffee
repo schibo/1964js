@@ -918,7 +918,7 @@ class C1964jsMemory
   getInt16: (region, off_) ->
     region[off_] << 8 | region[off_ + 1]
 
-  getInt32: (sregion, uregion, off_) ->
+  getInt32: (uregion, off_) ->
     uregion[off_] << 24 | uregion[off_ + 1] << 16 | uregion[off_ + 2] << 8 | uregion[off_ + 3]
 
   getUint32: (uregion, off_) ->

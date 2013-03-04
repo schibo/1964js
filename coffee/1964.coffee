@@ -356,7 +356,7 @@ class C1964jsEmulator
     return
 
   repaintWrapper: ->
-    @repaint @ctx, @ImDat, @memory.getInt32(@memory.viUint8Array, @memory.viUint8Array, consts.VI_ORIGIN_REG) & 0x00FFFFFF
+    @repaint @ctx, @ImDat, @memory.getInt32(@memory.viUint8Array, consts.VI_ORIGIN_REG) & 0x00FFFFFF
     return
 
   startEmulator: () ->

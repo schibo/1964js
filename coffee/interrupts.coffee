@@ -160,10 +160,10 @@ C1964jsInterrupts = (core, cp0) ->
         #can service an interrupt immediately without setting rt[i]
         
         #return currentHack;
-        return ((core.memory.getInt32(core.memory.viUint8Array, core.memory.viUint8Array, offset) & 0xfffffffe) + currentHack) | 0
+        return ((core.memory.getInt32(core.memory.viUint8Array, offset) & 0xfffffffe) + currentHack) | 0
       else
         #log "unhandled video interface for vi offset: " + offset
-        return core.memory.getInt32 core.memory.viUint8Array, core.memory.viUint8Array, offset
+        return core.memory.getInt32 core.memory.viUint8Array, offset
 
   @writeVI = (offset, value, pc, isFromDelaySlot) ->
     switch offset
@@ -224,10 +224,10 @@ C1964jsInterrupts = (core, cp0) ->
     switch offset
       when consts.SI_STATUS_REG
         @readSIStatusReg()
-        return core.memory.getInt32 core.memory.siUint8Array, core.memory.siUint8Array, offset
+        return core.memory.getInt32 core.memory.siUint8Array, offset
       else
         #log "unhandled si read: " + offset
-        return core.memory.getInt32 core.memory.siUint8Array, core.memory.siUint8Array, offset
+        return core.memory.getInt32 core.memory.siUint8Array, offset
     return
 
   @readSIStatusReg = ->
@@ -250,12 +250,12 @@ C1964jsInterrupts = (core, cp0) ->
           return 0
         return 0
       #return kfi;
-      #return getInt32(aiUint8Array, aiUint8Array, offset);
+      #return getInt32(aiUint8Array, offset);
       when consts.AI_STATUS_REG
-        return core.memory.getInt32 core.memory.aiUint8Array, core.memory.aiUint8Array, offset
+        return core.memory.getInt32 core.memory.aiUint8Array, offset
       else
         #log "unhandled read ai reg " + offset
-        return core.memory.getInt32 core.memory.aiUint8Array, core.memory.aiUint8Array, offset
+        return core.memory.getInt32 core.memory.aiUint8Array, offset
     return
 
   @writeAI = (offset, value, pc, isFromDelaySlot) ->
@@ -294,14 +294,14 @@ C1964jsInterrupts = (core, cp0) ->
   @readSPReg1 = (offset) ->
     switch offset
       when consts.SP_STATUS_REG
-        return core.memory.getInt32 core.memory.spReg1Uint8Array, core.memory.spReg1Uint8Array, offset
+        return core.memory.getInt32 core.memory.spReg1Uint8Array, offset
       when consts.SP_SEMAPHORE_REG
-        temp = core.memory.getInt32(core.memory.aiUint8Array, core.memory.aiUint8Array, offset)
+        temp = core.memory.getInt32(core.memory.aiUint8Array, offset)
         core.memory.setInt32 core.memory.spReg1Uint8Array, offset, 1
         return temp
       else
         #log "unhandled read sp reg1 " + offset
-        return core.memory.getInt32 core.memory.spReg1Uint8Array, core.memory.spReg1Uint8Array, offset
+        return core.memory.getInt32 core.memory.spReg1Uint8Array, offset
     return
 
   @writeSPReg1 = (offset, value, pc, isFromDelaySlot) ->

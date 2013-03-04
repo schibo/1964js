@@ -111,7 +111,7 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::dlParserProcess = ->
     @dlistStackPointer = 0
-    @dlistStack[@dlistStackPointer].pc = @core.memory.getInt32(@core.memory.spMemUint8Array, @core.memory.spMemUint8Array, consts.TASK_DATA_PTR)
+    @dlistStack[@dlistStackPointer].pc = @core.memory.getInt32(@core.memory.spMemUint8Array, consts.TASK_DATA_PTR)
     @dlistStack[@dlistStackPointer].countdown = consts.MAX_DL_COUNT
 
     #see RSP_Parser.cpp
@@ -308,14 +308,14 @@ C1964jsVideoHLE = (core, glx) ->
       @N64VertexList[i].s = @getVertexS(a)/32 / texWidth
       @N64VertexList[i].t = @getVertexT(a)/32 / texHeight
 	  
-      @N64VertexList[i].r = @getVertexColorR(a)/255
-      @N64VertexList[i].g = @getVertexColorG(a)/255
-      @N64VertexList[i].b = @getVertexColorB(a)/255
-      @N64VertexList[i].a = @getVertexAlpha(a)/255
+      @N64VertexList[i].r = @getVertexColorR(a)
+      @N64VertexList[i].g = @getVertexColorG(a)
+      @N64VertexList[i].b = @getVertexColorB(a)
+      @N64VertexList[i].a = @getVertexAlpha(a)
 	  
-      @N64VertexList[i].nx = (@toSByte @getVertexNormalX(a))/255
-      @N64VertexList[i].ny = (@toSByte @getVertexNormalY(a))/255
-      @N64VertexList[i].nz = (@toSByte @getVertexNormalZ(a))/255
+      @N64VertexList[i].nx = (@toSByte @getVertexNormalX(a))
+      @N64VertexList[i].ny = (@toSByte @getVertexNormalY(a))
+      @N64VertexList[i].nz = (@toSByte @getVertexNormalZ(a))
 	  
       #console.log "Vertex "+i+": XYZ("+@N64VertexList[i].x+" , "+@N64VertexList[i].y+" , "+@N64VertexList[i].z+") ST("+@N64VertexList[i].s+" , "+@N64VertexList[i].t+") RGBA("+@N64VertexList[i].r+" , "+@N64VertexList[i].g+" , "+@N64VertexList[i].b+" , "+@N64VertexList[i].a+") N("+@N64VertexList[i].nx+" , "+@N64VertexList[i].ny+" , "+@N64VertexList[i].nz+")"
 
@@ -374,8 +374,8 @@ C1964jsVideoHLE = (core, glx) ->
     @combineC1a = 0xFF if @combineC1a is 7
     @combineD1a = 0xFF if @combineD1a is 7
 	
-    w0 = Number @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc )
-    w1 = Number @core.memory.getInt32(@core.memory.rdramUint8Array, @core.memory.rdramUint8Array, pc + 4)
+    w0 = Number @core.memory.getInt32(@core.memory.rdramUint8Array, pc )
+    w1 = Number @core.memory.getInt32(@core.memory.rdramUint8Array, pc + 4)
     
     #if (@combineD0 == 4)
     #  console.log " a0:" + @combineA0 + " b0:" + @combineB0 + " c0:" + @combineC0 + " d0:" + @combineD0 + " a0a:" + @combineA0a + " b0a:" + @combineB0a + " c0a:" + @combineC0a + " d0a:" + @combineD0a + " a1:" + @combineA1 + " b1:" + @combineB1 + " c1:" + @combineC1 + " d1:" + @combineD1 + " a1a:" + @combineA1a + " b1a:" + @combineB1a + " c1a:" + @combineC1a + " d1a:" + @combineD1a
@@ -739,10 +739,10 @@ C1964jsVideoHLE = (core, glx) ->
     @triangleVertexPositionBuffer.numItems += 1
 
     colorOffset = 4 * (@triangleVertexColorBuffer.numItems)
-    @triColorVertices[colorOffset]     = @N64VertexList[dwV].r
-    @triColorVertices[colorOffset + 1] = @N64VertexList[dwV].g
-    @triColorVertices[colorOffset + 2] = @N64VertexList[dwV].b
-    @triColorVertices[colorOffset + 3] = @N64VertexList[dwV].a
+    @triColorVertices[colorOffset]     = @N64VertexList[dwV].r/255
+    @triColorVertices[colorOffset + 1] = @N64VertexList[dwV].g/255
+    @triColorVertices[colorOffset + 2] = @N64VertexList[dwV].b/255
+    @triColorVertices[colorOffset + 3] = @N64VertexList[dwV].a/255
     @triangleVertexColorBuffer.numItems += 1
 	
     texOffset = 2 * (@triangleVertexTextureCoordBuffer.numItems)
