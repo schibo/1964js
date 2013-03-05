@@ -53,7 +53,6 @@ C1964jsVideoHLE = (core, glx) ->
   @primColor = []
   @fillColor = []
   @envColor = []
-  @triTextureCoords = []#new Float32Array()
 
   #todo: different microcodes support
   @currentMicrocodeMap = @microcodeMap0
@@ -821,6 +820,7 @@ C1964jsVideoHLE = (core, glx) ->
     @triangleVertexTextureCoordBuffer.numItems = 0
     @triVertices = []
     @triColorVertices = []
+    @triTextureCoords = []
     @primColor = []
     @fillColor = []
     @envColor = []
@@ -829,12 +829,14 @@ C1964jsVideoHLE = (core, glx) ->
     @triangleVertexPositionBuffer = @gl.createBuffer()
     @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexPositionBuffer
     @triVertices = []
+    @triTextureCoords = []
     @triangleVertexPositionBuffer.itemSize = 3
     @triangleVertexPositionBuffer.numItems = 0
 
     @triangleVertexColorBuffer = @gl.createBuffer()
     @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexColorBuffer
     @triColorVertices = []
+    @triTextureCoords = []
     @triangleVertexColorBuffer.itemSize = 4
     @triangleVertexColorBuffer.numItems = 0
 
