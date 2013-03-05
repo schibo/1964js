@@ -53,6 +53,7 @@ C1964jsVideoHLE = (core, glx) ->
   @primColor = []
   @fillColor = []
   @envColor = []
+  @triTextureCoords = []#new Float32Array()
 
   #todo: different microcodes support
   @currentMicrocodeMap = @microcodeMap0
@@ -758,31 +759,34 @@ C1964jsVideoHLE = (core, glx) ->
     @gl.enable @gl.BLEND
     @gl.blendFunc @gl.SRC_ALPHA, @gl.ONE
     
-    @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexPositionBuffer
-    @gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(@triVertices), @gl.STATIC_DRAW
-    @gl.enableVertexAttribArray @core.webGL.shaderProgram.vertexPositionAttribute
-    @gl.vertexAttribPointer @core.webGL.shaderProgram.vertexPositionAttribute, @triangleVertexPositionBuffer.itemSize, @gl.FLOAT, false, 0, 0
+    if @triangleVertexPositionBuffer.numItems > 0
+      @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexPositionBuffer
+      @gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(@triVertices), @gl.STATIC_DRAW
+      @gl.enableVertexAttribArray @core.webGL.shaderProgram.vertexPositionAttribute
+      @gl.vertexAttribPointer @core.webGL.shaderProgram.vertexPositionAttribute, @triangleVertexPositionBuffer.itemSize, @gl.FLOAT, false, 0, 0
     
-    @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexColorBuffer
-    @gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(@triColorVertices), @gl.STATIC_DRAW
-    @gl.enableVertexAttribArray @core.webGL.shaderProgram.vertexColorAttribute
-    @gl.vertexAttribPointer @core.webGL.shaderProgram.vertexColorAttribute, @triangleVertexColorBuffer.itemSize, @gl.FLOAT, false, 0, 0
+    if @triangleVertexColorBuffer.numItems > 0
+      @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexColorBuffer
+      @gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(@triColorVertices), @gl.STATIC_DRAW
+      @gl.enableVertexAttribArray @core.webGL.shaderProgram.vertexColorAttribute
+      @gl.vertexAttribPointer @core.webGL.shaderProgram.vertexColorAttribute, @triangleVertexColorBuffer.itemSize, @gl.FLOAT, false, 0, 0
 
-    @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexTextureCoordBuffer
-    @gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(@triTextureCoords), @gl.STATIC_DRAW
-    @gl.enableVertexAttribArray @core.webGL.shaderProgram.textureCoordAttribute
-    @gl.vertexAttribPointer @core.webGL.shaderProgram.textureCoordAttribute, @triangleVertexTextureCoordBuffer.itemSize, @gl.FLOAT, false, 0, 0
-    tile = @textureTile[@activeTile]
-    canvaswidth = @pow2roundup tile.width
-    canvasheight = @pow2roundup tile.height	
-    texture = @renderer.formatTexture(tile, @tmem, canvaswidth, canvasheight)
-    colorsTexture = @gl.createTexture()
-    @gl.activeTexture(@gl.TEXTURE0)
-    @gl.bindTexture(@gl.TEXTURE_2D, colorsTexture)
-    @gl.texImage2D( @gl.TEXTURE_2D, 0, @gl.RGBA, tile.width, tile.height, 0, @gl.RGBA, @gl.UNSIGNED_BYTE, texture)
-    @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MAG_FILTER, @gl.LINEAR)
-    @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MIN_FILTER, @gl.NEAREST)
-    @gl.uniform1i @core.webGL.shaderProgram.samplerUniform, colorsTexture
+    if @triangleVertexTextureCoordBuffer.numItems > 0
+      @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexTextureCoordBuffer
+      @gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(@triTextureCoords), @gl.STATIC_DRAW
+      @gl.enableVertexAttribArray @core.webGL.shaderProgram.textureCoordAttribute
+      @gl.vertexAttribPointer @core.webGL.shaderProgram.textureCoordAttribute, @triangleVertexTextureCoordBuffer.itemSize, @gl.FLOAT, false, 0, 0
+      tile = @textureTile[@activeTile]
+      canvaswidth = @pow2roundup tile.width
+      canvasheight = @pow2roundup tile.height	
+      texture = @renderer.formatTexture(tile, @tmem, canvaswidth, canvasheight)
+      colorsTexture = @gl.createTexture()
+      @gl.activeTexture(@gl.TEXTURE0)
+      @gl.bindTexture(@gl.TEXTURE_2D, colorsTexture)
+      @gl.texImage2D( @gl.TEXTURE_2D, 0, @gl.RGBA, tile.width, tile.height, 0, @gl.RGBA, @gl.UNSIGNED_BYTE, texture)
+      @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MAG_FILTER, @gl.LINEAR)
+      @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MIN_FILTER, @gl.NEAREST)
+      @gl.uniform1i @core.webGL.shaderProgram.samplerUniform, colorsTexture
 
     if @primColor.length > 0
       @gl.uniform4fv @core.webGL.shaderProgram.uPrimColor, @primColor
@@ -802,11 +806,12 @@ C1964jsVideoHLE = (core, glx) ->
     @gl.uniformMatrix4fv(@core.webGL.shaderProgram.pMatrixUniform, false, @gRSP.projectionMtxs[@gRSP.projectionMtxTop]);
     @gl.uniformMatrix4fv(@core.webGL.shaderProgram.mvMatrixUniform, false, @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop]);
 
-    if @core.settings.wireframe is true
-      @gl.drawArrays @gl.LINES, 0, @triangleVertexPositionBuffer.numItems
-    else
-      @gl.drawArrays @gl.TRIANGLES, 0, @triangleVertexPositionBuffer.numItems
-	  
+    if @triangleVertexPositionBuffer.numItems > 0
+      if @core.settings.wireframe is true
+        @gl.drawArrays @gl.LINES, 0, @triangleVertexPositionBuffer.numItems
+      else
+        @gl.drawArrays @gl.TRIANGLES, 0, @triangleVertexPositionBuffer.numItems
+
     @resetState()
     return
 
@@ -816,7 +821,6 @@ C1964jsVideoHLE = (core, glx) ->
     @triangleVertexTextureCoordBuffer.numItems = 0
     @triVertices = []
     @triColorVertices = []
-    @triTextureCoords = []
     @primColor = []
     @fillColor = []
     @envColor = []
@@ -836,7 +840,6 @@ C1964jsVideoHLE = (core, glx) ->
 
     @triangleVertexTextureCoordBuffer = @gl.createBuffer()
     @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexTextureCoordBuffer
-    @triTextureCoords = []
     @triangleVertexTextureCoordBuffer.itemSize = 2
     @triangleVertexTextureCoordBuffer.numItems = 0
 	
