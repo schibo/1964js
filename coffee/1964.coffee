@@ -680,8 +680,9 @@ class C1964jsEmulator
 
   r4300i_cache: (i) ->
     @log "todo: r4300i_cache"
+    @stopCompiling = true
     ""
-
+  
   r4300i_multu: (i) ->
     "t.helpers.inter_multu(r,h," + i + ");"
 
