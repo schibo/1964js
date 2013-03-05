@@ -374,8 +374,8 @@ C1964jsVideoHLE = (core, glx) ->
     @combineC1a = 0xFF if @combineC1a is 7
     @combineD1a = 0xFF if @combineD1a is 7
 	
-    w0 = Number @core.memory.getInt32(@core.memory.rdramUint8Array, pc )
-    w1 = Number @core.memory.getInt32(@core.memory.rdramUint8Array, pc + 4)
+    w0 = @core.memory.getInt32(@core.memory.rdramUint8Array, pc )
+    w1 = @core.memory.getInt32(@core.memory.rdramUint8Array, pc + 4)
     
     #if (@combineD0 == 4)
     #  console.log " a0:" + @combineA0 + " b0:" + @combineB0 + " c0:" + @combineC0 + " d0:" + @combineD0 + " a0a:" + @combineA0a + " b0a:" + @combineB0a + " c0a:" + @combineC0a + " d0a:" + @combineD0a + " a1:" + @combineA1 + " b1:" + @combineB1 + " c1:" + @combineC1 + " d1:" + @combineD1 + " a1a:" + @combineA1a + " b1a:" + @combineB1a + " c1a:" + @combineC1a + " d1a:" + @combineD1a
