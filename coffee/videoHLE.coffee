@@ -738,14 +738,14 @@ C1964jsVideoHLE = (core, glx) ->
     @triVertices[offset + 2] = @N64VertexList[dwV].z
     @triangleVertexPositionBuffer.numItems += 1
 
-    colorOffset = 4 * (@triangleVertexColorBuffer.numItems)
+    colorOffset = @triangleVertexColorBuffer.numItems << 2
     @triColorVertices[colorOffset]     = @N64VertexList[dwV].r/255
     @triColorVertices[colorOffset + 1] = @N64VertexList[dwV].g/255
     @triColorVertices[colorOffset + 2] = @N64VertexList[dwV].b/255
     @triColorVertices[colorOffset + 3] = @N64VertexList[dwV].a/255
     @triangleVertexColorBuffer.numItems += 1
 	
-    texOffset = 2 * (@triangleVertexTextureCoordBuffer.numItems)
+    texOffset = @triangleVertexTextureCoordBuffer.numItems << 1
     @triTextureCoords[texOffset]     = @N64VertexList[dwV].s
     @triTextureCoords[texOffset + 1] = @N64VertexList[dwV].t
     @triangleVertexTextureCoordBuffer.numItems += 1
@@ -824,19 +824,16 @@ C1964jsVideoHLE = (core, glx) ->
     @primColor = []
     @fillColor = []
     @envColor = []
+    return
 
   C1964jsVideoHLE::initBuffers = ->
     @triangleVertexPositionBuffer = @gl.createBuffer()
     @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexPositionBuffer
-    @triVertices = []
-    @triTextureCoords = []
     @triangleVertexPositionBuffer.itemSize = 3
     @triangleVertexPositionBuffer.numItems = 0
 
     @triangleVertexColorBuffer = @gl.createBuffer()
     @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexColorBuffer
-    @triColorVertices = []
-    @triTextureCoords = []
     @triangleVertexColorBuffer.itemSize = 4
     @triangleVertexColorBuffer.numItems = 0
 
