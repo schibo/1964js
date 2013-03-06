@@ -83,7 +83,8 @@ C1964jsVideoHLE::getVertexZ = (pc) ->
   @core.memory.getInt32(@core.memory.rdramUint8Array, pc + 4) >> 16
   
 C1964jsVideoHLE::getVertexS = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, pc + 8) >> 16
+  0
+  #@core.memory.getInt32(@core.memory.rdramUint8Array, pc + 8) >> 16
 
 C1964jsVideoHLE::getVertexT = (pc) ->
   @core.memory.getInt32(@core.memory.rdramUint8Array, pc + 8) << 16 >> 16
