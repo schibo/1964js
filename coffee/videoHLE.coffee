@@ -53,6 +53,9 @@ C1964jsVideoHLE = (core, glx) ->
   @primColor = []
   @fillColor = []
   @envColor = []
+  @triVertices = new Float32Array(16384)
+  @triColorVertices = new Float32Array(16384)
+  @triTextureCoords = new Float32Array(16384)
 
   #todo: different microcodes support
   @currentMicrocodeMap = @microcodeMap0
@@ -374,8 +377,8 @@ C1964jsVideoHLE = (core, glx) ->
     @combineC1a = 0xFF if @combineC1a is 7
     @combineD1a = 0xFF if @combineD1a is 7
 	
-    w0 = @core.memory.getInt32(@core.memory.rdramUint8Array, pc )
-    w1 = @core.memory.getInt32(@core.memory.rdramUint8Array, pc + 4)
+    w0 = @core.memory.rdramUint8Array[pc] << 24 | @core.memory.rdramUint8Array[pc + 1] << 16 | @core.memory.rdramUint8Array[pc + 2] << 8 | @core.memory.rdramUint8Array[pc + 3]
+    w1 = @core.memory.rdramUint8Array[pc + 4] << 24 | @core.memory.rdramUint8Array[pc + 5] << 16 | @core.memory.rdramUint8Array[pc + 6] << 8 | @core.memory.rdramUint8Array[pc + 7]
     
     #if (@combineD0 == 4)
     #  console.log " a0:" + @combineA0 + " b0:" + @combineB0 + " c0:" + @combineC0 + " d0:" + @combineD0 + " a0a:" + @combineA0a + " b0a:" + @combineB0a + " c0a:" + @combineC0a + " d0a:" + @combineD0a + " a1:" + @combineA1 + " b1:" + @combineB1 + " c1:" + @combineC1 + " d1:" + @combineD1 + " a1a:" + @combineA1a + " b1a:" + @combineB1a + " c1a:" + @combineC1a + " d1a:" + @combineD1a
@@ -733,9 +736,11 @@ C1964jsVideoHLE = (core, glx) ->
     return false  if dwV >= consts.MAX_VERTS
 
     offset = 3 * (@triangleVertexPositionBuffer.numItems)
-    @triVertices[offset]     = @N64VertexList[dwV].x
-    @triVertices[offset + 1] = @N64VertexList[dwV].y
-    @triVertices[offset + 2] = @N64VertexList[dwV].z
+    @triVertices[offset] = @N64VertexList[dwV].x
+    @triVertices[offset+1] = @N64VertexList[dwV].y
+    @triVertices[offset+2] = @N64VertexList[dwV].z
+
+
     @triangleVertexPositionBuffer.numItems += 1
 
     colorOffset = @triangleVertexColorBuffer.numItems << 2
@@ -760,19 +765,19 @@ C1964jsVideoHLE = (core, glx) ->
     
     if @triangleVertexPositionBuffer.numItems > 0
       @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexPositionBuffer
-      @gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(@triVertices), @gl.STATIC_DRAW
+      @gl.bufferData @gl.ARRAY_BUFFER, @triVertices.subarray(0, @triangleVertexPositionBuffer.numItems*@triangleVertexPositionBuffer.itemSize*4), @gl.STATIC_DRAW
       @gl.enableVertexAttribArray @core.webGL.shaderProgram.vertexPositionAttribute
       @gl.vertexAttribPointer @core.webGL.shaderProgram.vertexPositionAttribute, @triangleVertexPositionBuffer.itemSize, @gl.FLOAT, false, 0, 0
-    
+
     if @triangleVertexColorBuffer.numItems > 0
       @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexColorBuffer
-      @gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(@triColorVertices), @gl.STATIC_DRAW
+      @gl.bufferData @gl.ARRAY_BUFFER, @triColorVertices.subarray(0, @triangleVertexColorBuffer.numItems*@triangleVertexColorBuffer.itemSize*4), @gl.STATIC_DRAW
       @gl.enableVertexAttribArray @core.webGL.shaderProgram.vertexColorAttribute
       @gl.vertexAttribPointer @core.webGL.shaderProgram.vertexColorAttribute, @triangleVertexColorBuffer.itemSize, @gl.FLOAT, false, 0, 0
 
     if @triangleVertexTextureCoordBuffer.numItems > 0
       @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexTextureCoordBuffer
-      @gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(@triTextureCoords), @gl.STATIC_DRAW
+      @gl.bufferData @gl.ARRAY_BUFFER, @triTextureCoords.subarray(0, @triangleVertexTextureCoordBuffer.numItems*@triangleVertexTextureCoordBuffer.itemSize*4), @gl.STATIC_DRAW
       @gl.enableVertexAttribArray @core.webGL.shaderProgram.textureCoordAttribute
       @gl.vertexAttribPointer @core.webGL.shaderProgram.textureCoordAttribute, @triangleVertexTextureCoordBuffer.itemSize, @gl.FLOAT, false, 0, 0
       tile = @textureTile[@activeTile]
@@ -818,12 +823,6 @@ C1964jsVideoHLE = (core, glx) ->
     @triangleVertexPositionBuffer.numItems = 0
     @triangleVertexColorBuffer.numItems = 0
     @triangleVertexTextureCoordBuffer.numItems = 0
-    @triVertices = []
-    @triColorVertices = []
-    @triTextureCoords = []
-    @primColor = []
-    @fillColor = []
-    @envColor = []
     return
 
   C1964jsVideoHLE::initBuffers = ->
