@@ -27,45 +27,67 @@ vec4 A0Factor, B0Factor, C0Factor, D0Factor;
 		} else if (uCombineA0 == 2) {
 			A0Factor = pink;		
 		} else if (uCombineA0 == 4) {
-			A0Factor = gray;
-		} else {
-			A0Factor = gray;
+			if (uCombineA0a == 7) {
+				A0Factor = vec4(vColor.rgb, 1.0);
+			} else {
+				A0Factor = vec4(texture2D(uSampler, vec2(vTextureCoord.st) ).rgb, 1.0);
+			}
+			//A0Factor = vec4(texture2D(uSampler, vec2(vTextureCoord.st) ).rgb, 1.0);
 		}
+		else
+			A0Factor = vec4(0.0, 0.0, 0.0, 0.0);
+
 		if (uCombineB0 == 1) {
-			B0Factor = vec4(texture2D(uSampler, vec2(vTextureCoord.st) ).rgba);
+			B0Factor = vec4(texture2D(uSampler, vec2(vTextureCoord.st) ).rgb, 1.0);
 		} else if (uCombineB0 == 3) {
 			B0Factor = vec4(uPrimColor.rgba);
 		} else if (uCombineB0 == 2) {
 			B0Factor = pink;		
 		} else if (uCombineB0 == 4) {
-			B0Factor = gray;
-		} else {
-			B0Factor = gray;
+			if (uCombineB0a == 7) {
+				B0Factor = vec4(vColor.rgb, 1.0);
+			} else {
+				B0Factor = vec4(texture2D(uSampler, vec2(vTextureCoord.st) ).rgb, 1.0);
+			}
+			//B0Factor = vec4(texture2D(uSampler, vec2(vTextureCoord.st) ).rgb, 1.0);
 		}
+		else
+			B0Factor = vec4(0.0, 0.0, 0.0, 0.0);
+
 		if (uCombineC0 == 1) {
-			C0Factor = vec4(texture2D(uSampler, vec2(vTextureCoord.st) ).rgba);
+			C0Factor = vec4(texture2D(uSampler, vec2(vTextureCoord.st) ).rgb, 1.0);
 		} else if (uCombineC0 == 3) {
 			C0Factor = vec4(uPrimColor.rgba);
 		} else if (uCombineC0 == 2) {
 			C0Factor = pink;		
 		} else if (uCombineC0 == 4) {
-			C0Factor = gray;		
-		} else {
-			C0Factor = gray;
+			if (uCombineC0a == 7) {
+				C0Factor = vec4(vColor.rgb, 1.0);
+			} else {
+				C0Factor = vec4(texture2D(uSampler, vec2(vTextureCoord.st) ).rgb, 1.0);
+			}
+			//C0Factor = vec4(texture2D(uSampler, vec2(vTextureCoord.st) ).rgb, 1.0);
 		}
+		else
+			C0Factor = vec4(0.0, 0.0, 0.0, 0.0);
+
 		if (uCombineD0 == 1) {
-			D0Factor = vec4(texture2D(uSampler, vec2(vTextureCoord.st) ).rgba);
+			D0Factor = vec4(texture2D(uSampler, vec2(vTextureCoord.st) ).rgb, 1.0);
 		} else if (uCombineD0 == 3) {
 			D0Factor = vec4(uPrimColor.rgba);
 		} else if (uCombineD0 == 2) {
 			D0Factor = pink;		
 		} else if (uCombineD0 == 4) {
-			D0Factor = gray;		
-		} else {
-		    D0Factor = gray;
+			if (uCombineD0a == 7) {
+				D0Factor = vec4(vColor.rgb, 1.0);
+			} else {
+				D0Factor = vec4(texture2D(uSampler, vec2(vTextureCoord.st) ).rgb, 1.0);
+			}
 		}
+		else
+			D0Factor = vec4(0.0, 0.0, 0.0, 0.0);
 		
-		gl_FragColor = vec4(((A0Factor.rgba-B0Factor.rgba)*C0Factor.rgba)+D0Factor.rgba);
+		gl_FragColor = vec4(((A0Factor.rgb-B0Factor.rgb)*C0Factor.rgb)+D0Factor.rgb, 1.0);
 		// gl_FragColor = blue;
 		// gl_FragColor = uPrimColor;
        

@@ -348,34 +348,34 @@ C1964jsVideoHLE = (core, glx) ->
     @combineB0 = @getCombineB0(pc)
     @combineC0 = @getCombineC0(pc)
     @combineD0 = @getCombineD0(pc)
-    @combineA0 = 0xFF if @combineA0 is 15
-    @combineB0 = 0xFF if @combineB0 is 15
-    @combineC0 = 0xFF if @combineC0 is 31
-    @combineD0 = 0xFF if @combineD0 is 7
+    #@combineA0 = 0xFF if @combineA0 is 15
+    #@combineB0 = 0xFF if @combineB0 is 15
+    #@combineC0 = 0xFF if @combineC0 is 31
+    #@combineD0 = 0xFF if @combineD0 is 7
     @combineA0a = @getCombineA0a(pc)
     @combineB0a = @getCombineB0a(pc)
     @combineC0a = @getCombineC0a(pc)
     @combineD0a = @getCombineD0a(pc)
-    @combineA0a = 0xFF if @combineA0a is 7
-    @combineB0a = 0xFF if @combineB0a is 7
-    @combineC0a = 0xFF if @combineC0a is 7
-    @combineD0a = 0xFF if @combineD0a is 7
+    #@combineA0a = 0xFF if @combineA0a is 7
+    #@combineB0a = 0xFF if @combineB0a is 7
+    #@combineC0a = 0xFF if @combineC0a is 7
+    #@combineD0a = 0xFF if @combineD0a is 7
     @combineA1 = @getCombineA1(pc)
     @combineB1 = @getCombineB1(pc)
     @combineC1 = @getCombineC1(pc)
     @combineD1 = @getCombineD1(pc)
-    @combineA1 = 0xFF if @combineA1 is 15
-    @combineB1 = 0xFF if @combineB1 is 15
-    @combineC1 = 0xFF if @combineC1 is 31
-    @combineD1 = 0xFF if @combineD1 is 7
+    #@combineA1 = 0xFF if @combineA1 is 15
+    #@combineB1 = 0xFF if @combineB1 is 15
+    #@combineC1 = 0xFF if @combineC1 is 31
+    #@combineD1 = 0xFF if @combineD1 is 7
     @combineA1a = @getCombineA1a(pc)
     @combineB1a = @getCombineB1a(pc)
     @combineC1a = @getCombineC1a(pc)
     @combineD1a = @getCombineD1a(pc)
-    @combineA1a = 0xFF if @combineA1a is 7
-    @combineB1a = 0xFF if @combineB1a is 7
-    @combineC1a = 0xFF if @combineC1a is 7
-    @combineD1a = 0xFF if @combineD1a is 7
+    #@combineA1a = 0xFF if @combineA1a is 7
+    #@combineB1a = 0xFF if @combineB1a is 7
+    #@combineC1a = 0xFF if @combineC1a is 7
+    #@combineD1a = 0xFF if @combineD1a is 7
 	
     w0 = @core.memory.rdramUint8Array[pc] << 24 | @core.memory.rdramUint8Array[pc + 1] << 16 | @core.memory.rdramUint8Array[pc + 2] << 8 | @core.memory.rdramUint8Array[pc + 3]
     w1 = @core.memory.rdramUint8Array[pc + 4] << 24 | @core.memory.rdramUint8Array[pc + 5] << 16 | @core.memory.rdramUint8Array[pc + 6] << 8 | @core.memory.rdramUint8Array[pc + 7]
@@ -738,16 +738,16 @@ C1964jsVideoHLE = (core, glx) ->
     offset = 3 * (@triangleVertexPositionBuffer.numItems)
     @triVertices[offset] = @N64VertexList[dwV].x
     @triVertices[offset+1] = @N64VertexList[dwV].y
-    @triVertices[offset+2] = @N64VertexList[dwV].z
+    @triVertices[offset+2] = @N64VertexList[dwV].z - 2;
 
 
     @triangleVertexPositionBuffer.numItems += 1
 
     colorOffset = @triangleVertexColorBuffer.numItems << 2
-    @triColorVertices[colorOffset]     = @N64VertexList[dwV].r/255
-    @triColorVertices[colorOffset + 1] = @N64VertexList[dwV].g/255
-    @triColorVertices[colorOffset + 2] = @N64VertexList[dwV].b/255
-    @triColorVertices[colorOffset + 3] = @N64VertexList[dwV].a/255
+    @triColorVertices[colorOffset]     = @N64VertexList[dwV].r / 255.0
+    @triColorVertices[colorOffset + 1] = @N64VertexList[dwV].g / 255.0
+    @triColorVertices[colorOffset + 2] = @N64VertexList[dwV].b / 255.0
+    @triColorVertices[colorOffset + 3] = @N64VertexList[dwV].a / 255.0
     @triangleVertexColorBuffer.numItems += 1
 	
     texOffset = @triangleVertexTextureCoordBuffer.numItems << 1
@@ -759,9 +759,10 @@ C1964jsVideoHLE = (core, glx) ->
   C1964jsVideoHLE::drawScene = (useTexture, tileno) ->
     @gl.useProgram @core.webGL.shaderProgram
 
-    @gl.disable @gl.DEPTH_TEST
+    @gl.enable @gl.DEPTH_TEST
+    @gl.depthFunc(@gl.LEQUAL);
     @gl.enable @gl.BLEND
-    @gl.blendFunc @gl.SRC_ALPHA, @gl.ONE
+    @gl.blendFunc @gl.SRC_ALPHA, @gl.ONE_MINUS_SRC_ALPHA
     
     if @triangleVertexPositionBuffer.numItems > 0
       @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexPositionBuffer
