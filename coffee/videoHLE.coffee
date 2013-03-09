@@ -744,10 +744,10 @@ C1964jsVideoHLE = (core, glx) ->
     @triangleVertexPositionBuffer.numItems += 1
 
     colorOffset = @triangleVertexColorBuffer.numItems << 2
-    @triColorVertices[colorOffset]     = @N64VertexList[dwV].r / 255.0
-    @triColorVertices[colorOffset + 1] = @N64VertexList[dwV].g / 255.0
-    @triColorVertices[colorOffset + 2] = @N64VertexList[dwV].b / 255.0
-    @triColorVertices[colorOffset + 3] = @N64VertexList[dwV].a / 255.0
+    @triColorVertices[colorOffset]     = @N64VertexList[dwV].r * (1.0/255.0)
+    @triColorVertices[colorOffset + 1] = @N64VertexList[dwV].g * (1.0/255.0)
+    @triColorVertices[colorOffset + 2] = @N64VertexList[dwV].b * (1.0/255.0)
+    @triColorVertices[colorOffset + 3] = @N64VertexList[dwV].a * (1.0/255.0)
     @triangleVertexColorBuffer.numItems += 1
 	
     texOffset = @triangleVertexTextureCoordBuffer.numItems << 1
