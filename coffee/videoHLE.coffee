@@ -52,10 +52,13 @@ C1964jsVideoHLE = (core, glx) ->
   @segments = []
   @primColor = []
   @fillColor = []
+  @blendColor = []
   @envColor = []
   @triVertices = new Float32Array(16384)
-  @triColorVertices = new Float32Array(16384)
+  @triColorVertices = new Uint8Array(16384)
   @triTextureCoords = new Float32Array(16384)
+  @otherModeL = 0
+  @otherModeH = 0
 
   #todo: different microcodes support
   @currentMicrocodeMap = @microcodeMap0
@@ -433,11 +436,15 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::RSP_GBI1_SetOtherModeH = (pc) ->
-    @videoLog "TODO: DLParser_GBI1_SetOtherModeH"
+    #@videoLog "TODO: DLParser_GBI1_SetOtherModeH"
+    @otherModeH = @getOtherModeH()
+    #alert @otherModeH
     return
 
   C1964jsVideoHLE::RSP_GBI1_SetOtherModeL = (pc) ->
     @videoLog "TODO: DLParser_GBI1_SetOtherModeL"
+    @otherModeL = @getOtherModeL()
+    #alert dec2hex @otherModeL
     return
 
   C1964jsVideoHLE::RSP_GBI0_Sprite2DBase = (pc) ->
@@ -694,7 +701,11 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_SetBlendColor = (pc) ->
-    @videoLog "TODO: DLParser_SetBlendColor"
+    @blendColor = []
+    @blendColor.push @getSetFillColorR(pc)/255.0;
+    @blendColor.push @getSetFillColorG(pc)/255.0;
+    @blendColor.push @getSetFillColorB(pc)/255.0;
+    @blendColor.push @getSetFillColorA(pc)/255.0;
     return
 
   C1964jsVideoHLE::DLParser_SetPrimColor = (pc) ->
@@ -738,16 +749,17 @@ C1964jsVideoHLE = (core, glx) ->
     offset = 3 * (@triangleVertexPositionBuffer.numItems)
     @triVertices[offset] = @N64VertexList[dwV].x
     @triVertices[offset+1] = @N64VertexList[dwV].y
-    @triVertices[offset+2] = @N64VertexList[dwV].z - 2;
+    @triVertices[offset+2] = @N64VertexList[dwV].z - 2.0
 
 
     @triangleVertexPositionBuffer.numItems += 1
 
     colorOffset = @triangleVertexColorBuffer.numItems << 2
-    @triColorVertices[colorOffset]     = @N64VertexList[dwV].r * (1.0/255.0)
-    @triColorVertices[colorOffset + 1] = @N64VertexList[dwV].g * (1.0/255.0)
-    @triColorVertices[colorOffset + 2] = @N64VertexList[dwV].b * (1.0/255.0)
-    @triColorVertices[colorOffset + 3] = @N64VertexList[dwV].a * (1.0/255.0)
+    # | 128 is a hack. It makes gfx look better...probably needs lighting?
+    @triColorVertices[colorOffset]     = @N64VertexList[dwV].r|128
+    @triColorVertices[colorOffset + 1] = @N64VertexList[dwV].g|128
+    @triColorVertices[colorOffset + 2] = @N64VertexList[dwV].b|128
+    @triColorVertices[colorOffset + 3] = @N64VertexList[dwV].a
     @triangleVertexColorBuffer.numItems += 1
 	
     texOffset = @triangleVertexTextureCoordBuffer.numItems << 1
@@ -772,9 +784,9 @@ C1964jsVideoHLE = (core, glx) ->
 
     if @triangleVertexColorBuffer.numItems > 0
       @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexColorBuffer
-      @gl.bufferData @gl.ARRAY_BUFFER, @triColorVertices.subarray(0, @triangleVertexColorBuffer.numItems*@triangleVertexColorBuffer.itemSize*4), @gl.STATIC_DRAW
+      @gl.bufferData @gl.ARRAY_BUFFER, @triColorVertices.subarray(0, @triangleVertexColorBuffer.numItems*@triangleVertexColorBuffer.itemSize), @gl.STATIC_DRAW
       @gl.enableVertexAttribArray @core.webGL.shaderProgram.vertexColorAttribute
-      @gl.vertexAttribPointer @core.webGL.shaderProgram.vertexColorAttribute, @triangleVertexColorBuffer.itemSize, @gl.FLOAT, false, 0, 0
+      @gl.vertexAttribPointer @core.webGL.shaderProgram.vertexColorAttribute, @triangleVertexColorBuffer.itemSize, @gl.UNSIGNED_BYTE, true, 0, 0
 
     if @triangleVertexTextureCoordBuffer.numItems > 0
       @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexTextureCoordBuffer
@@ -802,6 +814,11 @@ C1964jsVideoHLE = (core, glx) ->
     if @envColor.length > 0
       @gl.uniform4fv @core.webGL.shaderProgram.uEnvColor, @envColor  
 
+    if @blendColor.length > 0
+      @gl.uniform4fv @core.webGL.shaderProgram.uBlendColor, @blendColor  
+
+    @gl.uniform1i @core.webGL.shaderProgram.otherModeL, @otherModeL
+    @gl.uniform1i @core.webGL.shaderProgram.otherModeH, @otherModeH
 
     @core.webGL.setCombineUniforms @core.webGL.shaderProgram
 

@@ -100,7 +100,7 @@ C1964jsVideoHLE::getVertexColorB = (pc) ->
   @core.memory.getInt32(@core.memory.rdramUint8Array, pc + 12) << 16 >>> 24
   
 C1964jsVideoHLE::getVertexAlpha = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, pc + 12) & 0xFF
+  @core.memory.getInt32(@core.memory.rdramUint8Array, pc + 12) << 24 >>> 24
   
 C1964jsVideoHLE::getVertexNormalX = (pc) ->
   @core.memory.getInt32(@core.memory.rdramUint8Array, pc + 12) >> 24
@@ -249,6 +249,12 @@ C1964jsVideoHLE::getRspSegmentAddr = (seg) ->
   @segments[seg >> 24 & 0x0F] + (seg & 0x00FFFFFF)
 
 
+C1964jsVideoHLE::getOtherModeL = (pc) ->
+  @core.memory.getInt32(@core.memory.rdramUint8Array, pc) & 0x00FF
+
+C1964jsVideoHLE::getOtherModeH = (pc) ->
+  @core.memory.getInt32(@core.memory.rdramUint8Array+4, pc) & 0x00FF
+
 #
 #typedef struct {
 #    unsigned int    width:12;
@@ -347,22 +353,22 @@ C1964jsVideoHLE::getSetTileSizeLrt = (pc) ->
 #SetPrimColor
 
 C1964jsVideoHLE::getSetPrimColorM = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array,pc ) >> 8 & 0xFF
+  @core.memory.getInt32(@core.memory.rdramUint8Array,pc ) >>> 8 & 0xFF
   
 C1964jsVideoHLE::getSetPrimColorL = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array,pc ) & 0xFF
+  @core.memory.getInt32(@core.memory.rdramUint8Array,pc ) & 0x000000FF
   
 C1964jsVideoHLE::getSetPrimColorR = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array,pc + 4 ) >> 24 & 0xFF
+  @core.memory.getInt32(@core.memory.rdramUint8Array,pc + 4 ) >>> 24
   
 C1964jsVideoHLE::getSetPrimColorG = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array,pc + 4 ) >> 16 & 0xFF
+  @core.memory.getInt32(@core.memory.rdramUint8Array,pc + 4 ) << 8 >>> 24
   
 C1964jsVideoHLE::getSetPrimColorB = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array,pc + 4 ) >> 8 & 0xFF
+  @core.memory.getInt32(@core.memory.rdramUint8Array,pc + 4 ) << 16 >>> 24
   
 C1964jsVideoHLE::getSetPrimColorA = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array,pc + 4 ) & 0xFF
+  @core.memory.getInt32(@core.memory.rdramUint8Array,pc + 4 ) << 24 >>> 24
   
 #SetGeometryMode
 
@@ -381,30 +387,30 @@ C1964jsVideoHLE::pow2roundup = (value) ->
 #SetFillColor
   
 C1964jsVideoHLE::getSetFillColorR = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array,pc + 4 ) >> 24 & 0xFF
+  @core.memory.getInt32(@core.memory.rdramUint8Array,pc + 4 ) >>> 24
   
 C1964jsVideoHLE::getSetFillColorG = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array,pc + 4 ) >> 16 & 0xFF
+  @core.memory.getInt32(@core.memory.rdramUint8Array,pc + 4 ) << 8 >>> 24
   
 C1964jsVideoHLE::getSetFillColorB = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array,pc + 4 ) >> 8 & 0xFF
+  @core.memory.getInt32(@core.memory.rdramUint8Array,pc + 4 ) << 16 >>> 24
   
 C1964jsVideoHLE::getSetFillColorA = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array,pc + 4 ) & 0xFF
+  @core.memory.getInt32(@core.memory.rdramUint8Array,pc + 4 ) << 24 >>> 24
 
 #setEnvColor
 
 C1964jsVideoHLE::getSetEnvColorR = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array,pc + 4 ) >> 24 & 0xFF
+  @core.memory.getInt32(@core.memory.rdramUint8Array,pc + 4 ) >>> 24
   
 C1964jsVideoHLE::getSetEnvColorG = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array,pc + 4 ) >> 16 & 0xFF
+  @core.memory.getInt32(@core.memory.rdramUint8Array,pc + 4 ) << 8 >>> 24
   
 C1964jsVideoHLE::getSetEnvColorB = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array,pc + 4 ) >> 8 & 0xFF
+  @core.memory.getInt32(@core.memory.rdramUint8Array,pc + 4 ) << 16 >>> 24
   
 C1964jsVideoHLE::getSetEnvColorA = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array,pc + 4 ) & 0xFF
+  @core.memory.getInt32(@core.memory.rdramUint8Array,pc + 4 ) << 24 >>> 24
 
 
 C1964jsVideoHLE::microcodeMap0 = [

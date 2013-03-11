@@ -158,6 +158,9 @@ C1964jsRenderer = (settings, glx, webGL) ->
       if videoHLE.fillColor.length > 0
         gl.uniform4fv webGL.shaderProgram.uFillColor, videoHLE.fillColor
 
+      if videoHLE.blendColor.length > 0
+        gl.uniform4fv webGL.shaderProgram.uBlendColor, videoHLE.blendColor
+
       if videoHLE.envColor.length > 0
         gl.uniform4fv webGL.shaderProgram.uEnvColor, videoHLE.envColor
 

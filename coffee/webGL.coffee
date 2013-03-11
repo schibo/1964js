@@ -144,6 +144,11 @@ C1964jsWebGL = (core, wireframe) ->
     shaderProgram.uPrimColor = @gl.getUniformLocation(shaderProgram, "uPrimColor")
     shaderProgram.uFillColor = @gl.getUniformLocation(shaderProgram, "uFillColor")
     shaderProgram.uEnvColor = @gl.getUniformLocation(shaderProgram, "uEnvColor")
+    shaderProgram.uBlendColor = @gl.getUniformLocation(shaderProgram, "uBlendColor")
+    shaderProgram.otherModeL = @gl.getUniformLocation(shaderProgram, "otherModeL")
+    shaderProgram.otherModeH = @gl.getUniformLocation(shaderProgram, "otherModeH")
+
+
 
     shaderProgram
 
