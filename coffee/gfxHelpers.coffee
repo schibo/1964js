@@ -74,13 +74,14 @@ C1964jsVideoHLE::getFiddledVertexZ = (pc) ->
   
 #Vertex Struct
 C1964jsVideoHLE::getVertexX = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, pc) >> 16
+  (@core.memory.rdramUint8Array[pc] << 24 | @core.memory.rdramUint8Array[pc + 1] << 16) >> 16
   
 C1964jsVideoHLE::getVertexY = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, pc) << 16 >> 16
+  (@core.memory.rdramUint8Array[pc + 2] << 8 | @core.memory.rdramUint8Array[pc + 3]) << 16 >> 16
 
 C1964jsVideoHLE::getVertexZ = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, pc + 4) >> 16
+  (@core.memory.rdramUint8Array[pc + 4] << 24 | @core.memory.rdramUint8Array[pc + 5] << 16) >> 16
+
 
 C1964jsVideoHLE::getVertexS = (pc) ->
   #@core.memory.getInt32(@core.memory.rdramUint8Array, pc + 8) >> 16
@@ -91,16 +92,16 @@ C1964jsVideoHLE::getVertexT = (pc) ->
   (@core.memory.rdramUint8Array[pc + 10]<<8 | @core.memory.rdramUint8Array[pc + 11])<<16>>16
   
 C1964jsVideoHLE::getVertexColorR = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, pc + 12) >>> 24
+  @core.memory.rdramUint8Array[pc+12]
 
 C1964jsVideoHLE::getVertexColorG = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, pc + 12) << 8 >>> 24
+  @core.memory.rdramUint8Array[pc+13]
 
 C1964jsVideoHLE::getVertexColorB = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, pc + 12) << 16 >>> 24
+  @core.memory.rdramUint8Array[pc+14]
   
 C1964jsVideoHLE::getVertexAlpha = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, pc + 12) << 24 >>> 24
+  @core.memory.rdramUint8Array[pc+15]
   
 C1964jsVideoHLE::getVertexNormalX = (pc) ->
   @core.memory.getInt32(@core.memory.rdramUint8Array, pc + 12) >> 24
