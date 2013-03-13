@@ -133,49 +133,56 @@ C1964jsVideoHLE::getTextureScaleT = (pc) ->
   
 #Combine Struct
 C1964jsVideoHLE::getCombineA0 = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, pc ) >> 20 & 0x0F
+  #(@core.memory.getInt32(@core.memory.rdramUint8Array, pc ) >> 20) & 0x0F
+ #uregion[off_] << 24 | uregion[off_ + 1] << 16 | uregion[off_ + 2] << 8 | uregion[off_ + 3]
+  (@core.memory.rdramUint8Array[pc + 1] >> 4 ) & 0x0F
   
 C1964jsVideoHLE::getCombineB0 = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, pc + 4 ) >> 28 & 0x0F
+  #(@core.memory.getInt32(@core.memory.rdramUint8Array, pc + 4 ) >> 28) & 0x0F
+  (@core.memory.rdramUint8Array[pc + 4] >> 4 ) & 0x0F
+
   
 C1964jsVideoHLE::getCombineC0 = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, pc ) >> 15 & 0x1F
+  #@core.memory.getInt32(@core.memory.rdramUint8Array, pc ) >> 15 & 0x1F
+  ((@core.memory.rdramUint8Array[pc+1] << 1 ) & 0x1E) | ((@core.memory.rdramUint8Array[pc+2] & 0x80) >>> 7)
+
   
 C1964jsVideoHLE::getCombineD0 = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, pc + 4 ) >> 15 & 0x07
+  #(@core.memory.getInt32(@core.memory.rdramUint8Array, pc + 4 ) >> 15) & 0x07
+  ((@core.memory.rdramUint8Array[pc+5] << 1 ) & 0x6) | ((@core.memory.rdramUint8Array[pc+6] & 0x80) >>> 7)
   
 C1964jsVideoHLE::getCombineA0a = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, pc ) >> 12 & 0x07
+  (@core.memory.getInt32(@core.memory.rdramUint8Array, pc ) >> 12) & 0x07
   
 C1964jsVideoHLE::getCombineB0a = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, pc + 4 ) >> 12 & 0x07
+  (@core.memory.getInt32(@core.memory.rdramUint8Array, pc + 4 ) >> 12) & 0x07
   
 C1964jsVideoHLE::getCombineC0a = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, pc ) >> 9 & 0x07
+  (@core.memory.getInt32(@core.memory.rdramUint8Array, pc ) >> 9) & 0x07
   
 C1964jsVideoHLE::getCombineD0a = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, pc + 4 ) >> 9 & 0x07
+  (@core.memory.getInt32(@core.memory.rdramUint8Array, pc + 4 ) >> 9) & 0x07
   
 C1964jsVideoHLE::getCombineA1 = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, pc ) >> 5 & 0x0F
+  (@core.memory.getInt32(@core.memory.rdramUint8Array, pc ) >> 5) & 0x0F
   
 C1964jsVideoHLE::getCombineB1 = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, pc + 4 ) >> 24 & 0x0F
+  (@core.memory.getInt32(@core.memory.rdramUint8Array, pc + 4 ) >> 24) & 0x0F
   
 C1964jsVideoHLE::getCombineC1 = (pc) ->
   @core.memory.getInt32(@core.memory.rdramUint8Array, pc ) & 0x1F
   
 C1964jsVideoHLE::getCombineD1 = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, pc + 4 ) >> 6 & 0x07
+  (@core.memory.getInt32(@core.memory.rdramUint8Array, pc + 4 ) >> 6) & 0x07
   
 C1964jsVideoHLE::getCombineA1a = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, pc + 4 ) >> 21 & 0x07
+  (@core.memory.getInt32(@core.memory.rdramUint8Array, pc + 4 ) >> 21) & 0x07
   
 C1964jsVideoHLE::getCombineB1a = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, pc + 4 ) >> 3 & 0x07
+  (@core.memory.getInt32(@core.memory.rdramUint8Array, pc + 4 ) >> 3) & 0x07
   
 C1964jsVideoHLE::getCombineC1a = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, pc + 4 ) >> 18 & 0x07
+  (@core.memory.getInt32(@core.memory.rdramUint8Array, pc + 4 ) >> 18) & 0x07
   
 C1964jsVideoHLE::getCombineD1a = (pc) ->
   @core.memory.getInt32(@core.memory.rdramUint8Array, pc + 4 ) & 0x07

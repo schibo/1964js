@@ -299,7 +299,9 @@ class C1964jsEmulator
     #8ms idle time will be 50% cpu max if a 60FPS game is slow.
     @mySetInterval = setInterval (=>
       #@request = requestAnimFrame(@runLoop)  if @terminate is false
-      clearInterval mySetInterval if @terminate is true
+      if @terminate is true
+        clearInterval @mySetInterval 
+        return
       @interrupts.checkInterrupts()
 
       while 1
