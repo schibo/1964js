@@ -57,10 +57,13 @@ C1964jsVideoHLE::getGbi0Tri1Flag = (pc) ->
 
 #GBI0 vertex struct
 C1964jsVideoHLE::getGbi0NumVertices = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, pc) >>> 20 & 0x0F
+  #@core.memory.getInt32(@core.memory.rdramUint8Array, pc) >>> 20 & 0x0F
+  (@core.memory.rdramUint8Array[pc + 1] >> 4 ) & 0x0F
 
 C1964jsVideoHLE::getGbi0Vertex0 = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, pc) >>> 16 & 0x0F
+  #@core.memory.getInt32(@core.memory.rdramUint8Array, pc) >>> 16 & 0x0F
+  (@core.memory.rdramUint8Array[pc + 1]) & 0x0F
+
 
 #Fiddled vertex struct - Legacy
 C1964jsVideoHLE::getFiddledVertexX = (pc) ->
@@ -150,7 +153,7 @@ C1964jsVideoHLE::getCombineC0 = (pc) ->
 C1964jsVideoHLE::getCombineD0 = (pc) ->
   #(@core.memory.getInt32(@core.memory.rdramUint8Array, pc + 4 ) >> 15) & 0x07
   ((@core.memory.rdramUint8Array[pc+5] << 1 ) & 0x6) | ((@core.memory.rdramUint8Array[pc+6] & 0x80) >>> 7)
-  
+
 C1964jsVideoHLE::getCombineA0a = (pc) ->
   (@core.memory.getInt32(@core.memory.rdramUint8Array, pc ) >> 12) & 0x07
   
@@ -420,6 +423,92 @@ C1964jsVideoHLE::getSetEnvColorB = (pc) ->
 C1964jsVideoHLE::getSetEnvColorA = (pc) ->
   @core.memory.getInt32(@core.memory.rdramUint8Array,pc + 4 ) << 24 >>> 24
 
+
+#TODO: port this code for blend modes:
+
+#void RSP_GBI1_SetOtherModeL(Gfx *gfx) {
+#  SP_Timing(RSP_GBI1_SetOtherModeL);
+
+#  uint32 dwShift = ((gfx->words.w0)>>8)&0xFF;
+#  uint32 dwLength= ((gfx->words.w0)   )&0xFF;
+#  uint32 dwData  = (gfx->words.w1);
+#  uint32 dwMask = ((1<<dwLength)-1)<<dwShift;
+#  uint32 modeL = gRDP.otherModeL;
+#  modeL = (modeL&(~dwMask)) | dwData;
+
+#  Gfx tempgfx;
+#  tempgfx.words.w0 = gRDP.otherModeH;
+#  tempgfx.words.w1 = modeL;
+#  DLParser_RDPSetOtherMode(&tempgfx);
+#}
+
+#void RSP_GBI1_SetOtherModeH(Gfx *gfx) {
+#  SP_Timing(RSP_GBI1_SetOtherModeH);
+#  uint32 dwShift = ((gfx->words.w0)>>8)&0xFF;
+#  uint32 dwLength= ((gfx->words.w0)   )&0xFF;
+#  uint32 dwData  = (gfx->words.w1);
+#  uint32 dwMask = ((1<<dwLength)-1)<<dwShift;
+#  uint32 dwModeH = gRDP.otherModeH;
+
+#  dwModeH = (dwModeH&(~dwMask)) | dwData;
+#  Gfx tempgfx;
+#  tempgfx.words.w0 = dwModeH;
+#  tempgfx.words.w1 = gRDP.otherModeL;
+#  DLParser_RDPSetOtherMode(&tempgfx );
+#}
+
+#typedef struct {
+#  union
+#  {
+#    struct
+#    {
+#      // Low bits
+#      unsigned int    alpha_compare : 2;      // 0..1
+#      unsigned int    depth_source : 1;     // 2..2
+
+#    //  unsigned int    render_mode : 13;     // 3..15
+#      unsigned int    aa_en : 1;          // 3
+#      unsigned int    z_cmp : 1;          // 4
+#      unsigned int    z_upd : 1;          // 5
+#      unsigned int    im_rd : 1;          // 6
+#      unsigned int    clr_on_cvg : 1;       // 7
+
+#      unsigned int    cvg_dst : 2;        // 8..9
+#      unsigned int    zmode : 2;          // 10..11
+
+#      unsigned int    cvg_x_alpha : 1;      // 12
+#      unsigned int    alpha_cvg_sel : 1;      // 13
+#      unsigned int    force_bl : 1;       // 14
+#      unsigned int    tex_edge : 1;       // 15 - Not used
+
+#      unsigned int    blender : 16;       // 16..31
+
+#      // High bits
+#      unsigned int    blend_mask : 4;       // 0..3 - not supported
+#      unsigned int    alpha_dither : 2;     // 4..5
+#      unsigned int    rgb_dither : 2;       // 6..7
+      
+#      unsigned int    key_en : 1;       // 8..8
+#      unsigned int    text_conv : 3;        // 9..11
+#      unsigned int    text_filt : 2;        // 12..13
+#      unsigned int    text_tlut : 2;        // 14..15
+
+#      unsigned int    text_lod : 1;       // 16..16
+#      unsigned int    text_sharpen : 1;     // 17..18
+#      unsigned int    text_detail : 1;      // 17..18
+#      unsigned int    text_persp : 1;       // 19..19
+#      unsigned int    cycle_type : 2;       // 20..21
+#      unsigned int    reserved : 1;       // 22..22 - not supported
+#      unsigned int    atomic_prim : 1;        // 23..23
+
+#      unsigned int    pad : 8;          // 24..31 - padding
+
+#    };
+#    uint64      _u64;
+#    uint32      _u32[2];
+#  };
+#} RDP_OtherMode;
+#blender
 
 C1964jsVideoHLE::microcodeMap0 = [
     'RSP_GBI1_SpNoop', 'RSP_GBI0_Mtx', 'RSP_GBI1_Reserved', 'RSP_GBI1_MoveMem',
