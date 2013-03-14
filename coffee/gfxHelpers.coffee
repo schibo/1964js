@@ -24,23 +24,26 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 #} GGBI0_MoveWord;
 #
 C1964jsVideoHLE::getGbi0MoveWordType = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, pc) & 0x00ff
+  @core.memory.rdramUint8Array[pc+3] & 0x00ff
 
 C1964jsVideoHLE::getGbi0MoveWordOffset = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, pc) >> 8 & 0x00ffff
+  (@core.memory.rdramUint8Array[pc+1]<<8 | @core.memory.rdramUint8Array[pc+2])>>>0
 
 C1964jsVideoHLE::getGbi0MoveWordValue = (pc) ->
-  @core.memory.getInt32 @core.memory.rdramUint8Array, pc + 4
+  #@core.memory.getInt32 @core.memory.rdramUint8Array, pc + 4
+  (@core.memory.rdramUint8Array[pc+4]<<24 | @core.memory.rdramUint8Array[pc+5]<<16 | @core.memory.rdramUint8Array[pc+6]<<8 | @core.memory.rdramUint8Array[pc+7])>>>0
 
 #GBI0 Dlist struct
 C1964jsVideoHLE::getGbi0DlistParam = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, pc) >>> 16 & 0x00ff
+  #@core.memory.getInt32(@core.memory.rdramUint8Array, pc) >>> 16 & 0x00ff
+  (@core.memory.rdramUint8Array[pc + 1]) & 0x0FF
 
 C1964jsVideoHLE::getGbi0DlistAddr = (pc) -> #this will probably be generic getGbi0Addr
-  @core.memory.getInt32 @core.memory.rdramUint8Array, pc + 4
+  #@core.memory.getInt32 @core.memory.rdramUint8Array, pc + 4
+  (@core.memory.rdramUint8Array[pc+4]<<24 | @core.memory.rdramUint8Array[pc+5]<<16 | @core.memory.rdramUint8Array[pc+6]<<8 | @core.memory.rdramUint8Array[pc+7])>>>0
 
 C1964jsVideoHLE::getCommand = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, pc) >>> 24 & 0x00ff
+  @core.memory.rdramUint8Array[pc] & 0x00ff
 
 #GBI0 Tri1 struct
 C1964jsVideoHLE::getGbi0Tri1V2 = (pc) ->

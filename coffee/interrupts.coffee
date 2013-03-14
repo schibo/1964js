@@ -160,10 +160,12 @@ C1964jsInterrupts = (core, cp0) ->
         #can service an interrupt immediately without setting rt[i]
         
         #return currentHack;
-        return ((core.memory.getInt32(core.memory.viUint8Array, offset) & 0xfffffffe) + currentHack) | 0
+        #return ((core.memory.getInt32(core.memory.viUint8Array, offset) & 0xfffffffe) + currentHack) | 0
+        return (((core.memory.viUint8Array[offset] << 24 | core.memory.viUint8Array[offset + 1] << 16 | core.memory.viUint8Array[offset + 2] << 8 | core.memory.viUint8Array[offset + 3]) & 0xfffffffe) + currentHack) | 0
       else
         #log "unhandled video interface for vi offset: " + offset
-        return core.memory.getInt32 core.memory.viUint8Array, offset
+        #return core.memory.getInt32 core.memory.viUint8Array, offset
+        return (core.memory.viUint8Array[offset] << 24 | core.memory.viUint8Array[offset + 1] << 16 | core.memory.viUint8Array[offset + 2] << 8 | core.memory.viUint8Array[offset + 3])
 
   @writeVI = (offset, value, pc, isFromDelaySlot) ->
     switch offset

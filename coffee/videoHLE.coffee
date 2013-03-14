@@ -134,7 +134,9 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::dlParserProcess = ->
     @dlistStackPointer = 0
-    @dlistStack[@dlistStackPointer].pc = @core.memory.getInt32(@core.memory.spMemUint8Array, consts.TASK_DATA_PTR)
+
+
+    @dlistStack[@dlistStackPointer].pc = (@core.memory.spMemUint8Array[consts.TASK_DATA_PTR] << 24 | @core.memory.spMemUint8Array[consts.TASK_DATA_PTR + 1] << 16 | @core.memory.spMemUint8Array[consts.TASK_DATA_PTR + 2] << 8 | @core.memory.spMemUint8Array[consts.TASK_DATA_PTR + 3])>>>0
     @dlistStack[@dlistStackPointer].countdown = consts.MAX_DL_COUNT
 
     #see RSP_Parser.cpp
@@ -157,7 +159,7 @@ C1964jsVideoHLE = (core, glx) ->
       if @dlistStackPointer >= 0
         @dlistStack[@dlistStackPointer].countdown -= 1
         @dlistStackPointer -= 1  if @dlistStack[@dlistStackPointer].countdown < 0
-    @videoLog "finished dlist"
+    #@videoLog "finished dlist"
     @core.interrupts.triggerSPInterrupt 0, false
     return
 
@@ -167,7 +169,7 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::RSP_RDP_Nothing = (pc) ->
-    @videoLog "RSP RDP NOTHING"
+    #@videoLog "RSP RDP NOTHING"
     @dlistStackPointer -= 1
     return
 
@@ -177,15 +179,15 @@ C1964jsVideoHLE = (core, glx) ->
     type = @getGbi1Type(pc)
     length = @getGbi1Length(pc)
     addr = @getGbi1RspSegmentAddr(pc)
-    @videoLog "movemem type=" + type + ", length=" + length + " addr=" + addr
+    #@videoLog "movemem type=" + type + ", length=" + length + " addr=" + addr
     return
 
   C1964jsVideoHLE::RSP_GBI1_SpNoop = (pc) ->
-    @videoLog "RSP_GBI1_SpNoop"
+    #@videoLog "RSP_GBI1_SpNoop"
     return
 
   C1964jsVideoHLE::RSP_GBI1_Reserved = (pc) ->
-    @videoLog "RSP_GBI1_Reserved"
+    #@videoLog "RSP_GBI1_Reserved"
     return
 
   C1964jsVideoHLE::setProjection = (mat, bPush, bReplace) ->
@@ -247,7 +249,7 @@ C1964jsVideoHLE = (core, glx) ->
     addr = undefined
     seg = @getGbi0DlistAddr(pc)
     addr = @getRspSegmentAddr(seg)
-    @videoLog "RSP_GBI0_Mtx addr: " + dec2hex(addr)
+    #@videoLog "RSP_GBI0_Mtx addr: " + dec2hex(addr)
     @loadMatrix addr
     if @gbi0isProjectionMatrix(pc)
       @setProjection @matToLoad, @gbi0PushMatrix(pc), @gbi0LoadMatrix(pc)
@@ -309,6 +311,7 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::updateCombinedMatrix = ->
+    return #this is set in the shader
     if @gRSP.bMatrixIsUpdated
       pmtx = undefined
       vmtx = @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop]
@@ -317,8 +320,6 @@ C1964jsVideoHLE = (core, glx) ->
       
       #this.gRSPworldProject = this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop] * this.gRSP.projectionMtxs[this.gRSP.projectionMtxTop];
       @gRSP.bMatrixIsUpdated = false
-      @gRSP.bCombinedMatrixIsUpdated = true
-    @gRSP.bCombinedMatrixIsUpdated = false
     return
 
   C1964jsVideoHLE::processVertexData = (addr, v0, num) ->
@@ -354,7 +355,7 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_SetCImg = (pc) ->
-    @videoLog "TODO: DLParser_SetCImg"
+    #@videoLog "TODO: DLParser_SetCImg"
     return
 
   #Gets new display list address
@@ -362,7 +363,7 @@ C1964jsVideoHLE = (core, glx) ->
     param = undefined
     seg = @getGbi0DlistAddr(pc)
     addr = @getRspSegmentAddr(seg)
-    @videoLog "dlist address = " + dec2hex(addr)
+    #@videoLog "dlist address = " + dec2hex(addr)
     
     #TODO: address adjust
     param = @getGbi0DlistParam(pc)
@@ -415,7 +416,7 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::RSP_GBI1_MoveWord = (pc) ->
-    @videoLog "RSP_GBI1_MoveWord"
+    #@videoLog "RSP_GBI1_MoveWord"
     switch @getGbi0MoveWordType(pc)
       when consts.RSP_MOVE_WORD_MATRIX
         @RSP_RDP_InsertMatrix()
@@ -453,11 +454,10 @@ C1964jsVideoHLE = (core, glx) ->
   C1964jsVideoHLE::RSP_RDP_InsertMatrix = ->
     @updateCombinedMatrix()
     @gRSP.bMatrixIsUpdated = false
-    @gRSP.bCombinedMatrixIsUpdated = true
     return
 
   C1964jsVideoHLE::DLParser_SetScissor = (pc) ->
-    @videoLog "TODO: DLParser_SetScissor"
+    #@videoLog "TODO: DLParser_SetScissor"
     return
 
   C1964jsVideoHLE::RSP_GBI1_SetOtherModeH = (pc) ->
@@ -467,33 +467,33 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::RSP_GBI1_SetOtherModeL = (pc) ->
-    @videoLog "TODO: DLParser_GBI1_SetOtherModeL"
+    #@videoLog "TODO: DLParser_GBI1_SetOtherModeL"
     @otherModeL = @getOtherModeL()
     #alert dec2hex @otherModeL
     return
 
   C1964jsVideoHLE::RSP_GBI0_Sprite2DBase = (pc) ->
-    @videoLog "TODO: RSP_GBI0_Sprite2DBase"
+    #@videoLog "TODO: RSP_GBI0_Sprite2DBase"
     return
 
   C1964jsVideoHLE::RSP_GBI0_Tri4 = (pc) ->
-    @videoLog "TODO: RSP_GBI0_Tri4"
+    #@videoLog "TODO: RSP_GBI0_Tri4"
     return
 
   C1964jsVideoHLE::RSP_GBI1_RDPHalf_Cont = (pc) ->
-    @videoLog "TODO: RSP_GBI1_RDPHalf_Cont"
+    #@videoLog "TODO: RSP_GBI1_RDPHalf_Cont"
     return
 
   C1964jsVideoHLE::RSP_GBI1_RDPHalf_2 = (pc) ->
-    @videoLog "TODO: RSP_GBI1_RDPHalf_2"
+    #@videoLog "TODO: RSP_GBI1_RDPHalf_2"
     return
 
   C1964jsVideoHLE::RSP_GBI1_RDPHalf_1 = (pc) ->
-    @videoLog "TODO: RSP_GBI1_RDPHalf_1"
+    #@videoLog "TODO: RSP_GBI1_RDPHalf_1"
     return
 
   C1964jsVideoHLE::RSP_GBI1_Line3D = (pc) ->
-    @videoLog "TODO: RSP_GBI1_Line3D"
+    #@videoLog "TODO: RSP_GBI1_Line3D"
     return
 
   C1964jsVideoHLE::RSP_GBI1_ClearGeometryMode = (pc) ->
@@ -509,7 +509,7 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::RSP_GBI1_EndDL = (pc) ->
-    @videoLog "RSP_GBI1_EndDL"
+    #@videoLog "RSP_GBI1_EndDL"
     @RDP_GFX_PopDL()
     @drawScene(false, 7)
 
@@ -526,11 +526,11 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::RSP_GBI1_PopMtx = (pc) ->
-    @videoLog "TODO: RSP_GBI1_PopMtx"
+    #@videoLog "TODO: RSP_GBI1_PopMtx"
     return
 
   C1964jsVideoHLE::RSP_GBI1_CullDL = (pc) ->
-    @videoLog "TODO: RSP_GBI1_CullDL"
+    #@videoLog "TODO: RSP_GBI1_CullDL"
     return
 
   C1964jsVideoHLE::RSP_GBI1_Tri1 = (pc) ->
@@ -555,39 +555,39 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::RSP_GBI1_Noop = (pc) ->
-    @videoLog "TODO: RSP_GBI1_Noop"
+    #@videoLog "TODO: RSP_GBI1_Noop"
     return
 
   C1964jsVideoHLE::RDP_TriFill = (pc) ->
-    @videoLog "TODO: RDP_TriFill"
+    #@videoLog "TODO: RDP_TriFill"
     return
 
   C1964jsVideoHLE::RDP_TriFillZ = (pc) ->
-    @videoLog "RDP_TriFillZ"
+    #@videoLog "RDP_TriFillZ"
     return
 
   C1964jsVideoHLE::RDP_TriTxtr = (pc) ->
-    @videoLog "TODO: RDP_TriTxtr"
+    #@videoLog "TODO: RDP_TriTxtr"
     return
 
   C1964jsVideoHLE::RDP_TriTxtrZ = (pc) ->
-    @videoLog "TODO: RDP_TriTxtrZ"
+    #@videoLog "TODO: RDP_TriTxtrZ"
     return
 
   C1964jsVideoHLE::RDP_TriShade = (pc) ->
-    @videoLog "TODO: RDP_TriShade"
+    #@videoLog "TODO: RDP_TriShade"
     return
 
   C1964jsVideoHLE::RDP_TriShadeZ = (pc) ->
-    @videoLog "TODO: RDP_TriShadeZ"
+    #@videoLog "TODO: RDP_TriShadeZ"
     return
 
   C1964jsVideoHLE::RDP_TriShadeTxtr = (pc) ->
-    @videoLog "TODO: RDP_TriShadeTxtr"
+    #@videoLog "TODO: RDP_TriShadeTxtr"
     return
 
   C1964jsVideoHLE::RDP_TriShadeTxtrZ = (pc) ->
-    @videoLog "TODO: RDP_TriShadeTxtrZ"
+    #@videoLog "TODO: RDP_TriShadeTxtrZ"
     return
 
   C1964jsVideoHLE::DLParser_TexRect = (pc) ->
@@ -609,49 +609,49 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::DLParser_TexRectFlip = (pc) ->
     @dlistStack[@dlistStackPointer].pc += 8
-    @videoLog "TODO: DLParser_TexRectFlip"
+    #@videoLog "TODO: DLParser_TexRectFlip"
     return
 
   C1964jsVideoHLE::DLParser_RDPLoadSynch = (pc) ->
-    @videoLog "TODO: DLParser_RDPLoadSynch"
+    #@videoLog "TODO: DLParser_RDPLoadSynch"
     return
 
   C1964jsVideoHLE::DLParser_RDPPipeSynch = (pc) ->
-    @videoLog "TODO: DLParser_RDPPipeSynch"
+    #@videoLog "TODO: DLParser_RDPPipeSynch"
     return
 
   C1964jsVideoHLE::DLParser_RDPTileSynch = (pc) ->
-    @videoLog "TODO: DLParser_RDPTileSynch"
+    #@videoLog "TODO: DLParser_RDPTileSynch"
     return
 
   C1964jsVideoHLE::DLParser_RDPFullSynch = (pc) ->
-    @videoLog "TODO: DLParser_RDPFullSynch"
+    #@videoLog "TODO: DLParser_RDPFullSynch"
     @core.interrupts.triggerDPInterrupt 0, false
     #@drawScene(7, false)
     return
 
   C1964jsVideoHLE::DLParser_SetKeyGB = (pc) ->
-    @videoLog "TODO: DLParser_SetKeyGB"
+    #@videoLog "TODO: DLParser_SetKeyGB"
     return
 
   C1964jsVideoHLE::DLParser_SetKeyR = (pc) ->
-    @videoLog "TODO: DLParser_SetKeyR"
+    #@videoLog "TODO: DLParser_SetKeyR"
     return
 
   C1964jsVideoHLE::DLParser_SetConvert = (pc) ->
-    @videoLog "TODO: DLParser_SetConvert"
+    #@videoLog "TODO: DLParser_SetConvert"
     return
 
   C1964jsVideoHLE::DLParser_SetPrimDepth = (pc) ->
-    @videoLog "TODO: DLParser_SetPrimDepth"
+    #@videoLog "TODO: DLParser_SetPrimDepth"
     return
 
   C1964jsVideoHLE::DLParser_RDPSetOtherMode = (pc) ->
-    @videoLog "TODO: DLParser_RDPSetOtherMode"
+    #@videoLog "TODO: DLParser_RDPSetOtherMode"
     return
 
   C1964jsVideoHLE::DLParser_LoadTLut = (pc) ->
-    @videoLog "TODO: DLParser_LoadTLut"
+    #@videoLog "TODO: DLParser_LoadTLut"
     return
 
   C1964jsVideoHLE::DLParser_SetTileSize = (pc) ->
@@ -663,7 +663,7 @@ C1964jsVideoHLE = (core, glx) ->
     @textureTile[tile].width = @textureTile[tile].lrs - @textureTile[tile].uls
     @textureTile[tile].height = @textureTile[tile].lrt - @textureTile[tile].ult
     #console.log "SetTileSize: UL("+@textureTile[tile].uls+"/"+@textureTile[tile].ult+") LR("+@textureTile[tile].lrs+"/"+@textureTile[tile].lrt+") Dim: "+@textureTile[tile].width+"x"+@textureTile[tile].height
-    @videoLog "TODO: DLParser_SetTileSize"
+    #@videoLog "TODO: DLParser_SetTileSize"
     return
 
   C1964jsVideoHLE::DLParser_LoadBlock = (pc) ->
@@ -685,7 +685,7 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_LoadTile = (pc) ->
-    @videoLog "TODO: DLParser_LoadTile"
+    #@videoLog "TODO: DLParser_LoadTile"
     return
 
   C1964jsVideoHLE::DLParser_SetTile = (pc) ->
@@ -704,11 +704,11 @@ C1964jsVideoHLE = (core, glx) ->
     @textureTile[tile].shifts = @getSetTileShifts(pc);
     #if @combineD0 == 4
     #console.log "SetTile:"+tile+" FMT:"+@textureTile[tile].fmt+" SIZ:"+@textureTile[tile].siz+" LINE: "+@textureTile[tile].line+" TMEM:"+@textureTile[tile].tmem+" PAL:"+@textureTile[tile].pal+" CMS/T:"+@textureTile[tile].cms+"/"+@textureTile[tile].cmt+" MASKS/T:"+@textureTile[tile].masks+"/"+@textureTile[tile].maskt+" SHIFTS/T:"+@textureTile[tile].shifts+"/"+@textureTile[tile].shiftt
-    @videoLog "TODO: DLParser_SetTile"
+    #@videoLog "TODO: DLParser_SetTile"
     return
 
   C1964jsVideoHLE::DLParser_FillRect = (pc) ->
-    @videoLog "TODO: DLParser_FillRect"
+    #@videoLog "TODO: DLParser_FillRect"
     return
 
   C1964jsVideoHLE::DLParser_SetFillColor = (pc) ->
@@ -718,11 +718,11 @@ C1964jsVideoHLE = (core, glx) ->
     @fillColor.push @getSetFillColorB(pc)/255.0;
     @fillColor.push @getSetFillColorA(pc)/255.0;
 
-    @videoLog "TODO: DLParser_SetFillColor"
+    #@videoLog "TODO: DLParser_SetFillColor"
     return
 
   C1964jsVideoHLE::DLParser_SetFogColor = (pc) ->
-    @videoLog "TODO: DLParser_SetFogColor"
+    #@videoLog "TODO: DLParser_SetFogColor"
     return
 
   C1964jsVideoHLE::DLParser_SetBlendColor = (pc) ->
@@ -744,7 +744,7 @@ C1964jsVideoHLE = (core, glx) ->
     @primColor.push @getSetPrimColorB(pc)/255;
     @primColor.push @getSetPrimColorA(pc)/255;
     #alert @primColor
-    @videoLog "TODO: DLParser_SetPrimColor"
+    #@videoLog "TODO: DLParser_SetPrimColor"
     return
 
   C1964jsVideoHLE::DLParser_SetEnvColor = (pc) ->
@@ -754,11 +754,11 @@ C1964jsVideoHLE = (core, glx) ->
     @envColor.push @getSetEnvColorB(pc)/255.0;
     @envColor.push @getSetEnvColorA(pc)/255.0;
 
-    @videoLog "TODO: DLParser_SetEnvColor"
+    #@videoLog "TODO: DLParser_SetEnvColor"
     return
 
   C1964jsVideoHLE::DLParser_SetZImg = (pc) ->
-    @videoLog "TODO: DLParser_SetZImg"
+    #@videoLog "TODO: DLParser_SetZImg"
     return
 
   C1964jsVideoHLE::prepareTriangle = (dwV0, dwV1, dwV2) ->

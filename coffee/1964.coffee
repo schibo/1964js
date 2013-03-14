@@ -241,14 +241,15 @@ class C1964jsEmulator
       @isBigEndian = 1
     return
 
-  repaint: (ctx, ImDat, origin) ->
+  repaint: (ctx, ImDat) ->
     out = undefined
-    k = origin
     i = 0
     y = undefined
     hi = undefined
     lo = undefined
     return  unless @showFB
+    #get origin
+    k = @memory.getInt32(@memory.viUint8Array, consts.VI_ORIGIN_REG) & 0x00FFFFFF
     out = ImDat.data
     
     #endian-safe blit: rgba5551
@@ -349,7 +350,7 @@ class C1964jsEmulator
             #in javascript?
             fn = @decompileBlock(@p)
             fn = fn(@r, @h, @memory, this)
-    ), 8
+    ), 15
     this
 
   run: (fn, r, h) ->
@@ -358,7 +359,7 @@ class C1964jsEmulator
     return
 
   repaintWrapper: ->
-    @repaint @ctx, @ImDat, @memory.getInt32(@memory.viUint8Array, consts.VI_ORIGIN_REG) & 0x00FFFFFF
+    @repaint @ctx, @ImDat
     return
 
   startEmulator: () ->
