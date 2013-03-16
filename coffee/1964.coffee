@@ -59,6 +59,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 # The hope is that the compiler will optimimize the pattern
 # with a swap or bswap.
 #
+# Take care when using @helpers.RS(i) + "+" + @helpers.soffset_imm(i). I used to explicitly wrap it in ()>>0 to convert to int, but
+# everywhere it is currently used implicitly uses it as a 32bit int. In a few cases, if it is assigned to a float, it could be larger than 32bits.
+#
 ###jslint bitwise: true, evil: true, undef: false, todo: true, browser: true, devel: true###
 ###globals Int32Array, ArrayBuffer, Float32Array, C1964jsMemory, C1964jsInterrupts, C1964jsConstants, C1964jsPif, C1964jsDMA, Float64Array, C1964jsWebGL, cancelAnimFrame, C1964jsHelpers, dec2hex, Uint8Array, Uint16Array, requestAnimFrame###
 
@@ -450,7 +453,7 @@ class C1964jsEmulator
     @helpers.dLogic i, "^"
 
   r4300i_nor: (i) ->
-    "{" + @helpers.tRD(i) + "=~(" + @helpers.RS(i) + "|" + @helpers.RT(i) + ");" + @helpers.tRDH(i) + "=~(" + @helpers.RSH(i) + "|" + @helpers.RTH(i) + ")}"
+    @helpers.tRD(i) + "=~(" + @helpers.RS(i) + "|" + @helpers.RT(i) + ")," + @helpers.tRDH(i) + "=~(" + @helpers.RSH(i) + "|" + @helpers.RTH(i) + ");"
 
   r4300i_and: (i) ->
     @helpers.dLogic i, "&"
@@ -460,22 +463,22 @@ class C1964jsEmulator
     @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=" + temp + ")>>31;"
 
   r4300i_lw: (i) ->
-    @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=m.lw((" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ")>>0))>>31;"
+    @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=m.lw(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + "))>>31;"
 
   r4300i_lwu: (i) ->
-    "{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=m.lw(vAddr);" + @helpers.tRTH(i) + "=0}"
+    @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=m.lw(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + "))&0;"
 
   r4300i_sw: (i, isDelaySlot) ->
     a = undefined
-    string = "{" + @helpers.setVAddr(i) + "m.sw(" + @helpers.RT(i) + "," + @helpers.RS(i) + "+" + @helpers.soffset_imm(i)
+    string = "m.sw(" + @helpers.RT(i) + "," + @helpers.RS(i) + "+" + @helpers.soffset_imm(i)
     
     #So we can process exceptions
     if isDelaySlot is true
       a = (@p + offset + 4) | 0
-      string += ", " + a + ", true)}"
+      string += ", " + a + ", true);"
     else
       a = (@p + offset) | 0
-      string += ", " + a + ")}"
+      string += ", " + a + ");"
     string
 
   delaySlot: (i, likely) ->
@@ -497,23 +500,23 @@ class C1964jsEmulator
 
   r4300i_bne: (i) ->
     @stopCompiling = true
-    "if ((" + @helpers.RS(i) + "!==" + @helpers.RT(i) + ")||(" + @helpers.RSH(i) + "!==" + @helpers.RTH(i) + ")){" + @delaySlot(i, false)
+    "if (" + @helpers.RS(i) + "!==" + @helpers.RT(i) + "||" + @helpers.RSH(i) + "!==" + @helpers.RTH(i) + "){" + @delaySlot(i, false)
 
   r4300i_beq: (i) ->
     @stopCompiling = true
-    "if ((" + @helpers.RS(i) + "===" + @helpers.RT(i) + ")&&(" + @helpers.RSH(i) + "===" + @helpers.RTH(i) + ")){" + @delaySlot(i, false)
+    "if (" + @helpers.RS(i) + "===" + @helpers.RT(i) + "&&" + @helpers.RSH(i) + "===" + @helpers.RTH(i) + "){" + @delaySlot(i, false)
 
   r4300i_bnel: (i) ->
     @stopCompiling = true
-    "if ((" + @helpers.RS(i) + "!==" + @helpers.RT(i) + ")||(" + @helpers.RSH(i) + "!==" + @helpers.RTH(i) + ")){" + @delaySlot(i, true)
+    "if (" + @helpers.RS(i) + "!==" + @helpers.RT(i) + "||" + @helpers.RSH(i) + "!==" + @helpers.RTH(i) + "){" + @delaySlot(i, true)
 
   r4300i_blez: (i) ->
     @stopCompiling = true
-    "if ((" + @helpers.RSH(i) + "<0)||((" + @helpers.RSH(i) + "===0)&&(" + @helpers.RS(i) + "===0))){" + @delaySlot(i, false)
+    "if (" + @helpers.RSH(i) + "<0||(" + @helpers.RSH(i) + "===0&&" + @helpers.RS(i) + "===0)){" + @delaySlot(i, false)
 
   r4300i_blezl: (i) ->
     @stopCompiling = true
-    "if ((" + @helpers.RSH(i) + "<0)||((" + @helpers.RSH(i) + "===0)&&(" + @helpers.RS(i) + "===0))){" + @delaySlot(i, true)
+    "if (" + @helpers.RSH(i) + "<0||(" + @helpers.RSH(i) + "===0&&" + @helpers.RS(i) + "===0)){" + @delaySlot(i, true)
 
   r4300i_bgez: (i) ->
     @stopCompiling = true
@@ -525,7 +528,7 @@ class C1964jsEmulator
 
   r4300i_bgtzl: (i) ->
     @stopCompiling = true
-    "if ((" + @helpers.RSH(i) + ">0)||((" + @helpers.RSH(i) + "===0)&&(" + @helpers.RS(i) + "!==0))){" + @delaySlot(i, true)
+    "if (" + @helpers.RSH(i) + ">0||(" + @helpers.RSH(i) + "===0&&" + @helpers.RS(i) + "!==0)){" + @delaySlot(i, true)
 
   r4300i_bltzl: (i) ->
     @stopCompiling = true
@@ -547,11 +550,11 @@ class C1964jsEmulator
 
   r4300i_bgtz: (i) ->
     @stopCompiling = true
-    "if ((" + @helpers.RSH(i) + ">0)||((" + @helpers.RSH(i) + "===0)&&(" + @helpers.RS(i) + "!==0))){" + @delaySlot(i, false)
+    "if (" + @helpers.RSH(i) + ">0||(" + @helpers.RSH(i) + "===0&&" + @helpers.RS(i) + "!==0)){" + @delaySlot(i, false)
 
   r4300i_beql: (i) ->
     @stopCompiling = true
-    "if ((" + @helpers.RS(i) + "===" + @helpers.RT(i) + ")&&(" + @helpers.RSH(i) + "===" + @helpers.RTH(i) + ")){" + @delaySlot(i, true)
+    "if (" + @helpers.RS(i) + "===" + @helpers.RT(i) + "&&" + @helpers.RSH(i) + "===" + @helpers.RTH(i) + "){" + @delaySlot(i, true)
 
   r4300i_COP1_bc1f: (i) ->
     @stopCompiling = true
@@ -660,19 +663,19 @@ class C1964jsEmulator
     @helpers.tRDH(i) + "=(" + @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>>" + @helpers.sa(i) + ")>>31;"
 
   r4300i_ori: (i) ->
-    "{" + @helpers.tRT(i) + "=" + @helpers.RS(i) + "|" + @helpers.offset_imm(i) + ";" + @helpers.tRTH(i) + "=" + @helpers.RSH(i) + "}"
+    @helpers.tRT(i) + "=" + @helpers.RS(i) + "|" + @helpers.offset_imm(i) + "," + @helpers.tRTH(i) + "=" + @helpers.RSH(i) + ";"
 
   r4300i_xori: (i) ->
-    "{" + @helpers.tRT(i) + "=" + @helpers.RS(i) + "^" + @helpers.offset_imm(i) + ";" + @helpers.tRTH(i) + "=" + @helpers.RSH(i) + "^0}"
+    @helpers.tRT(i) + "=" + @helpers.RS(i) + "^" + @helpers.offset_imm(i) + "," + @helpers.tRTH(i) + "=" + @helpers.RSH(i) + "^0;"
 
   r4300i_andi: (i) ->
-    "{" + @helpers.tRT(i) + "=" + @helpers.RS(i) + "&" + @helpers.offset_imm(i) + ";" + @helpers.tRTH(i) + "=0}"
+    @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=" + @helpers.RS(i) + "&" + @helpers.offset_imm(i) + ")&0;"
 
   r4300i_addi: (i) ->
     @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ")>>31;"
 
   r4300i_addiu: (i) ->
-    "{" + @helpers.tRT(i) + "=" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ";" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31}"
+    @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ")>>31;"
 
   r4300i_slt: (i) ->
     "{if(" + @helpers.RSH(i) + ">" + @helpers.RTH(i) + ")" + @helpers.tRD(i) + "=0;" + "else if(" + @helpers.RSH(i) + "<" + @helpers.RTH(i) + ")" + @helpers.tRD(i) + "=1;" + "else if(" + @helpers.uRS(i) + "<" + @helpers.uRT(i) + ")" + @helpers.tRD(i) + "=1;" + "else " + @helpers.tRD(i) + "=0;" + @helpers.tRDH(i) + "=0}"
@@ -704,16 +707,16 @@ class C1964jsEmulator
     "t.helpers.inter_mult(r,h," + i + ");"
 
   r4300i_mflo: (i) ->
-    "{" + @helpers.tRD(i) + "=r[32];" + @helpers.tRDH(i) + "=h[32]}"
+    @helpers.tRD(i) + "=r[32]," + @helpers.tRDH(i) + "=h[32];"
 
   r4300i_mfhi: (i) ->
-    "{" + @helpers.tRD(i) + "=r[33];" + @helpers.tRDH(i) + "=h[33]}"
+    @helpers.tRD(i) + "=r[33]," + @helpers.tRDH(i) + "=h[33];"
 
   r4300i_mtlo: (i) ->
-    "{r[32]=" + @helpers.RS(i) + ";h[32]=" + @helpers.RSH(i) + "}"
+    "r[32]=" + @helpers.RS(i) + ",h[32]=" + @helpers.RSH(i) + ";"
 
   r4300i_mthi: (i) ->
-    "{r[33]=" + @helpers.RS(i) + ";h[33]=" + @helpers.RSH(i) + "}"
+    "r[33]=" + @helpers.RS(i) + ",h[33]=" + @helpers.RSH(i) + ";"
 
   r4300i_COP0_mfc0: (i) ->
     string = "{"
@@ -763,7 +766,7 @@ class C1964jsEmulator
     @helpers.tRDH(i) + "=(" + @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>(" + @helpers.RS(i) + "&0x1f))>>31;"
 
   r4300i_COP1_cfc1: (i) ->
-    "{" + @helpers.tRT(i) + "=t.cp1Con[" + @helpers.fs(i) + "];" + @helpers.tRTH(i) + "=t.cp1Con[" + @helpers.fs(i) + "]>>31}"  if @helpers.fs(i) is 0 or @helpers.fs(i) is 31
+    @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=t.cp1Con[" + @helpers.fs(i) + "])>>31;" if @helpers.fs(i) is 0 or @helpers.fs(i) is 31
 
   r4300i_COP1_ctc1: (i) ->
     #incomplete:

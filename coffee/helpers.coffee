@@ -182,7 +182,7 @@ C1964jsHelpers = (core, isLittleEndian) ->
     @tRDH(i) + "=("  + @tRD(i) + "=" + @RS(i) + n + @RT(i) + ")>>31;"
 
   @dLogic = (i, n) ->
-    "{" + @tRD(i) + "=" + @RS(i) + n + @RT(i) + ";" + @tRDH(i) + "=" + @RSH(i) + n + @RTH(i) + "}"
+    @tRD(i) + "=" + @RS(i) + n + @RT(i) + "," + @tRDH(i) + "=" + @RSH(i) + n + @RTH(i) + ";"
 
   
   #//////////////////////////
