@@ -669,7 +669,7 @@ class C1964jsEmulator
     @helpers.tRT(i) + "=" + @helpers.RS(i) + "^" + @helpers.offset_imm(i) + "," + @helpers.tRTH(i) + "=" + @helpers.RSH(i) + "^0;"
 
   r4300i_andi: (i) ->
-    @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=" + @helpers.RS(i) + "&" + @helpers.offset_imm(i) + ")&0;"
+    @helpers.tRTH(i) + "=0," + @helpers.tRT(i) + "=" + @helpers.RS(i) + "&" + @helpers.offset_imm(i) + ";"
 
   r4300i_addi: (i) ->
     @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ")>>31;"
@@ -719,7 +719,7 @@ class C1964jsEmulator
     "r[33]=" + @helpers.RS(i) + ",h[33]=" + @helpers.RSH(i) + ";"
 
   r4300i_COP0_mfc0: (i) ->
-    string = "{"
+    string = ""
     switch @helpers.fs(i)
       when consts.RANDOM
         alert "RANDOM"
@@ -727,7 +727,7 @@ class C1964jsEmulator
       
       #string += 't.cp0[' + this.helpers.fs(i) + ']=getCountRegister();';
       else
-    string += @helpers.tRT(i) + "=t.cp0[" + @helpers.fs(i) + "];" + @helpers.tRTH(i) + "=t.cp0[" + @helpers.fs(i) + "]>>31}"
+    string += @helpers.tRT(i) + "=t.cp0[" + @helpers.fs(i) + "]," + @helpers.tRTH(i) + "=t.cp0[" + @helpers.fs(i) + "]>>31;"
 
   r4300i_lb: (i) ->
     #"{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=(m.lb(vAddr)<<24)>>24;" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31}"
@@ -810,10 +810,10 @@ class C1964jsEmulator
     "t.helpers.inter_dmultu(r,h," + i + ");"
 
   r4300i_dsll32: (i) ->
-    "{" + @helpers.tRDH(i) + "=" + @helpers.RT(i) + "<<" + @helpers.sa(i) + ";" + @helpers.tRD(i) + "=0}"
+    @helpers.tRDH(i) + "=" + @helpers.RT(i) + "<<" + @helpers.sa(i) + "," + @helpers.tRD(i) + "=0;"
 
   r4300i_dsra32: (i) ->
-    "{" + @helpers.tRD(i) + "=" + @helpers.RTH(i) + ">>" + @helpers.sa(i) + ";" + @helpers.tRDH(i) + "=" + @helpers.RTH(i) + ">>31}"
+    @helpers.tRD(i) + "=" + @helpers.RTH(i) + ">>" + @helpers.sa(i) + "," + @helpers.tRDH(i) + "=" + @helpers.RTH(i) + ">>31;"
 
   r4300i_ddivu: (i) ->
     "t.helpers.inter_ddivu(r,h," + i + ");"
@@ -887,7 +887,7 @@ class C1964jsEmulator
     string += "m.sw(value,vAddrAligned,false)}"
 
   r4300i_lwc1: (i) ->
-    "{" + @helpers.setVAddr(i) + "t.cp1_i[" + @helpers.FT32ArrayView(i) + "]=m.lw(vAddr)}"
+    "t.cp1_i[" + @helpers.FT32ArrayView(i) + "]=m.lw(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");"
 
   r4300i_ldc1: (i) ->
     string = "{" + @helpers.setVAddr(i) + "t.cp1_i[" + @helpers.FT32ArrayView(i) + "]=m.lw((vAddr+4)|0);"
@@ -895,15 +895,15 @@ class C1964jsEmulator
 
   r4300i_swc1: (i, isDelaySlot) ->
     a = undefined
-    string = "{" + @helpers.setVAddr(i) + "m.sw(t.cp1_i[" + @helpers.FT32ArrayView(i) + "],vAddr"
+    string = "m.sw(t.cp1_i[" + @helpers.FT32ArrayView(i) + "]," + @helpers.RS(i) + "+" + @helpers.soffset_imm(i)
     
     #So we can process exceptions
     if isDelaySlot is true
       a = (@p + offset + 4) | 0
-      string += ", " + a + ", true)}"
+      string += ", " + a + ", true);"
     else
       a = (@p + offset) | 0
-      string += ", " + a + ")}"
+      string += ", " + a + ");"
     string
 
   r4300i_sdc1: (i, isDelaySlot) ->
@@ -932,7 +932,7 @@ class C1964jsEmulator
     "t.cp1_i[" + @helpers.FS32ArrayView(i) + "]=" + @helpers.RT(i) + ";"
 
   r4300i_COP1_mfc1: (i) ->
-    "{" + @helpers.tRT(i) + "=t.cp1_i[" + @helpers.FS32ArrayView(i) + "];" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31}"
+    @helpers.tRT(i) + "=t.cp1_i[" + @helpers.FS32ArrayView(i) + "]," + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31;"
 
   r4300i_COP1_cvts_w: (i) ->
     "t.cp1_f[" + @helpers.FD32ArrayView(i) + "]=t.cp1_i[" + @helpers.FS32ArrayView(i) + "];"
