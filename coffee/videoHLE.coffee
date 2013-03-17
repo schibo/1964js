@@ -785,9 +785,9 @@ C1964jsVideoHLE = (core, glx) ->
 
     colorOffset = @triangleVertexColorBuffer.numItems << 2
     # | 128 is a hack. It makes gfx look better...probably needs lighting?
-    @triColorVertices[colorOffset]     = @N64VertexList[dwV].r|128
-    @triColorVertices[colorOffset + 1] = @N64VertexList[dwV].g|128
-    @triColorVertices[colorOffset + 2] = @N64VertexList[dwV].b|128
+    @triColorVertices[colorOffset]     = @N64VertexList[dwV].r
+    @triColorVertices[colorOffset + 1] = @N64VertexList[dwV].g
+    @triColorVertices[colorOffset + 2] = @N64VertexList[dwV].b
     @triColorVertices[colorOffset + 3] = @N64VertexList[dwV].a
     @triangleVertexColorBuffer.numItems += 1
 	

@@ -80,6 +80,8 @@ C1964jsVideoHLE::getFiddledVertexZ = (pc) ->
   
 #Vertex Struct
 C1964jsVideoHLE::getVertexX = (pc) ->
+  #if ((pc>>>0) > 0x00800000)
+  #  alert "oops"
   (@core.memory.rdramUint8Array[pc] << 24 | @core.memory.rdramUint8Array[pc + 1] << 16) >> 16
   
 C1964jsVideoHLE::getVertexY = (pc) ->
@@ -267,7 +269,7 @@ C1964jsVideoHLE::getOtherModeL = (pc) ->
   @core.memory.getInt32(@core.memory.rdramUint8Array, pc) & 0x00FF
 
 C1964jsVideoHLE::getOtherModeH = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array+4, pc) & 0x00FF
+  @core.memory.getInt32(@core.memory.rdramUint8Array, pc+4) & 0x00FF
 
 #
 #typedef struct {
