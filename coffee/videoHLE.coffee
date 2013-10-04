@@ -727,10 +727,10 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::DLParser_SetBlendColor = (pc) ->
     @blendColor = []
-    @blendColor.push @getSetFillColorR(pc)/255.0;
-    @blendColor.push @getSetFillColorG(pc)/255.0;
-    @blendColor.push @getSetFillColorB(pc)/255.0;
-    @blendColor.push @getSetFillColorA(pc)/255.0;
+    @blendColor.push @getSetFillColorR(pc)/255.0
+    @blendColor.push @getSetFillColorG(pc)/255.0
+    @blendColor.push @getSetFillColorB(pc)/255.0
+    @blendColor.push @getSetFillColorA(pc)/255.0
     return
 
   C1964jsVideoHLE::blendFunc = (src, dest) ->
@@ -739,9 +739,9 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::DLParser_SetPrimColor = (pc) ->
     @primColor = []
-    @primColor.push @getSetPrimColorR(pc)/255;
-    @primColor.push @getSetPrimColorG(pc)/255;
-    @primColor.push @getSetPrimColorB(pc)/255;
+    @primColor.push (@getSetPrimColorR(pc))/255;
+    @primColor.push (@getSetPrimColorG(pc))/255;
+    @primColor.push (@getSetPrimColorB(pc))/255;
     @primColor.push @getSetPrimColorA(pc)/255;
     #alert @primColor
     #@videoLog "TODO: DLParser_SetPrimColor"
@@ -749,9 +749,9 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::DLParser_SetEnvColor = (pc) ->
     @envColor = []
-    @envColor.push @getSetEnvColorR(pc)/255.0;
-    @envColor.push @getSetEnvColorG(pc)/255.0;
-    @envColor.push @getSetEnvColorB(pc)/255.0;
+    @envColor.push (@getSetEnvColorR(pc))/255.0;
+    @envColor.push (@getSetEnvColorG(pc))/255.0;
+    @envColor.push (@getSetEnvColorB(pc))/255.0;
     @envColor.push @getSetEnvColorA(pc)/255.0;
 
     #@videoLog "TODO: DLParser_SetEnvColor"
@@ -784,11 +784,10 @@ C1964jsVideoHLE = (core, glx) ->
     @triangleVertexPositionBuffer.numItems += 1
 
     colorOffset = @triangleVertexColorBuffer.numItems << 2
-    # | 128 is a hack. It makes gfx look better...probably needs lighting?
-    @triColorVertices[colorOffset]     = @N64VertexList[dwV].r
-    @triColorVertices[colorOffset + 1] = @N64VertexList[dwV].g
-    @triColorVertices[colorOffset + 2] = @N64VertexList[dwV].b
-    @triColorVertices[colorOffset + 3] = @N64VertexList[dwV].a
+    @triColorVertices[colorOffset]     = @N64VertexList[dwV].r | 128;
+    @triColorVertices[colorOffset + 1] = @N64VertexList[dwV].g | 128;
+    @triColorVertices[colorOffset + 2] = @N64VertexList[dwV].b | 128;
+    @triColorVertices[colorOffset + 3] = @N64VertexList[dwV].a;
     @triangleVertexColorBuffer.numItems += 1
 	
     texOffset = @triangleVertexTextureCoordBuffer.numItems << 1
@@ -1178,7 +1177,7 @@ C1964jsVideoHLE = (core, glx) ->
       @gl.uniform4fv @core.webGL.shaderProgram.uEnvColor, @envColor  
 
     if @blendColor.length > 0
-      @gl.uniform4fv @core.webGL.shaderProgram.uBlendColor, @blendColor  
+      @gl.uniform4iv @core.webGL.shaderProgram.uBlendColor, @blendColor  
 
     @gl.uniform1i @core.webGL.shaderProgram.otherModeL, @otherModeL
     @gl.uniform1i @core.webGL.shaderProgram.otherModeH, @otherModeH
