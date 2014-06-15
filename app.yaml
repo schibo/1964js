@@ -5,6 +5,10 @@ api_version: 1
 threadsafe: true
 
 handlers:
+
+- url: /blog
+  static_dir: blog
+
 - url: /css
   static_dir: css
 
