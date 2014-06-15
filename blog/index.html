@@ -1,0 +1,326 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<title>1964 N64 Emulator</title>
+</head>
+<body bgcolor="#000000" text="#ffffff" link="#ffa953" vlink="#ffa953" alink="#ff0000" onload="webGLStart(); loadRom()">
+<script language="Javascript" type="text/javascript">// <![CDATA[
+if (document.images) 
+{
+   var but1  = new Image();  but1.src = "icon1_1.gif" 
+   var but1  = new Image();  but1.src = "icon1_2.gif" 
+   var but2  = new Image();  but2.src = "icon2_1.gif" 
+   var but2  = new Image();  but2.src = "icon2_2.gif" 
+   var but3  = new Image();  but3.src = "icon3_1.gif" 
+   var but3  = new Image();  but3.src = "icon3_2.gif" 
+   var but4  = new Image();  but4.src = "icon4_1.gif" 
+   var but4  = new Image();  but4.src = "icon4_2.gif" 
+   var but5  = new Image();  but5.src = "icon5_1.gif" 
+   var but5  = new Image();  but5.src = "icon5_2.gif" 
+      }
+// ]]></script>
+<script id="shader-fs" type="x-shader/x-fragment">// <![CDATA[
+precision mediump float;
+    void main(void) {
+        gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+    }
+// ]]></script>
+<script id="shader-vs" type="x-shader/x-vertex">// <![CDATA[
+attribute vec3 aVertexPosition;
+    uniform mat4 uMVMatrix;
+    uniform mat4 uPMatrix;
+    void main(void) {
+        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+    }
+// ]]></script>
+<div id="speedScrubber" style="opacity: 0.0; z-index: 2000; position: fixed; top: 10; left: 10; background-color: #cc8822; border: 2px solid #aa6600; font-size: 13px; color: white; font-weight: bold; font-family: Arial,Helvetica,sans-serif;">
+	Slower (less CPU)<input id="speed" name="Speed" min="0" max="131072" value="65535" step="100" onchange="changeSpeed(this.value)" type="range"/>Faster (more CPU)
+</div>
+<p>
+</p>
+<p>
+	<canvas id="Canvas3D" style="width: 100%; height: 100%; position: fixed; z-index: -999; top: 0; left: 0; margin: 0;" width="800" height="600">I'm sorry your browser does not support the HTML5 canvas element.</canvas>
+</p>
+<table style="opacity: 0.6; z-index: -10;" align="center" border="0">
+<tbody>
+<tr valign="top">
+	<!-- note: canvas textures need to be powers of 2 for WebGL -->
+	<td>
+		<canvas id="DebugCanvas" style="z-index: -250; position: fixed;" width="320" height="240"></canvas>
+	</td>
+</tr>
+</tbody>
+</table>
+<div align="center">
+	<center>
+	<table border="0" cellpadding="0" cellspacing="0" width="760">
+	<tbody>
+	<tr>
+		<td>
+			<div align="right">
+			</div>
+		</td>
+	</tr>
+	<tr style="opacity: 0.8;">
+		<td>
+			<br/>
+			<div align="center">
+				<center>
+				<table bgcolor="#303030" border="0" cellpadding="5" cellspacing="1" width="600">
+				<tbody>
+				<tr>
+					<td>
+						<b><span style="font-family: Arial; font-size: small;" face="Arial" size="2"><a href="http://www.emutalk.net">Forums</a> | <a href="http://code.google.com/p/1964js">1964js on Google Code</a> | <a href="download.html">1964 Downloads</a></span></b>
+						<table id="AutoNumber2" bgcolor="#222222" border="0" cellpadding="5" cellspacing="1" width="600">
+						<tbody>
+
+						<tr>
+							<td>
+								<table style="width: 6.25in; -webkit-background-clip: initial; -webkit-background-origin: initial;" class="MsoNormalTable" border="0" cellpadding="0" cellspacing="1" width="600">
+								<tbody>
+								<tr>
+									<td style="padding: 3.75pt;">
+										<p style="margin: 0in 0in 0pt; color: white; font-size: 12pt;" class="MsoNormal">
+											<b><span style="font-family: Arial; font-size: 20pt;"><img src="img/chrome48x48.png"/><img src="img/firefox48x48.png"/><img src="img/safari48x48.png"/><img src="img/opera48x48.png"/>1964js 0.1.0 - December 9, 2012</span></b><o:p></o:p>
+										</p>
+									</td>
+								</tr>
+							</td>
+						</tr>
+						<tr>
+							<td style="padding: 3.75pt;">
+								<p style="color: white; font-size: 12pt;">
+								</p>
+								<p style="color: white; font-size: 12pt;">
+									<span style="font-family: Verdana; font-size: 10pt;"> Mario in game. (Wireframe..Needs lots of work on graphics, but nice progress)
+									<iframe class="restrain" title="YouTube video player" src="http://www.youtube.com/embed/2z_MuLm3G58?wmode=opaque" frameborder="0" height="390" width="640">
+									</iframe>
+									<br/><br/> -schibo</span>
+								</p>
+								<hr/>
+							</td>
+						</tr>
+
+						<tr>
+							<td>
+								<table style="width: 6.25in; -webkit-background-clip: initial; -webkit-background-origin: initial;" class="MsoNormalTable" border="0" cellpadding="0" cellspacing="1" width="600">
+								<tbody>
+								<tr>
+									<td style="padding: 3.75pt;">
+										<p style="margin: 0in 0in 0pt; color: white; font-size: 12pt;" class="MsoNormal">
+											<b><span style="font-family: Arial; font-size: 20pt;"><img src="img/chrome48x48.png"/><img src="img/firefox48x48.png"/><img src="img/safari48x48.png"/><img src="img/opera48x48.png"/>1964js - August 13, 2012</span></b><o:p></o:p>
+										</p>
+									</td>
+								</tr>
+							</td>
+						</tr>
+						<tr>
+							<td style="padding: 3.75pt;">
+								<p style="color: white; font-size: 12pt;">
+								</p>
+								<p style="color: white; font-size: 12pt;">
+									<span style="font-family: Verdana; font-size: 10pt;"> Work is getting done on this..here and there.
+									<iframe class="restrain" title="YouTube video player" src="http://www.youtube.com/embed/AwNLKogdaEE?wmode=opaque" frameborder="0" height="390" width="640">
+									</iframe>
+									<br/><br/> -schibo</span>
+								</p>
+								<hr/>
+							</td>
+						</tr>
+
+						<tr>
+							<td style="padding: 3.75pt;">
+								<p style="margin: 0in 0in 0pt; color: white; font-size: 12pt;" class="MsoNormal">
+									<b><span style="font-family: Arial; font-size: 20pt;"><img src="img/chrome48x48.png"/><img src="img/firefox48x48.png"/><img src="img/safari48x48.png"/><img src="img/opera48x48.png"/>1964js - July 30, 2012</span></b><o:p></o:p>
+								</p>
+							</td>
+						</tr>
+					</td>
+				</tr>
+				<tr>
+					<td style="padding: 3.75pt;">
+						<p style="color: white; font-size: 12pt;">
+						</p>
+						<p style="color: white; font-size: 12pt;">
+							<span style="font-family: Verdana; font-size: 10pt;"> 1964js now works in the latest versions of Safari and Opera. <br/><br/> -schibo</span>
+						</p>
+						<hr/>
+					</td>
+				</tr>
+				<tr>
+					<td style="padding: 3.75pt;">
+						<p style="margin: 0in 0in 0pt; color: white; font-size: 12pt;" class="MsoNormal">
+							<b><span style="font-family: Arial; font-size: 20pt;"><img src="img/chrome48x48.png"/><img src="img/firefox48x48.png"/>1964js - April 21, 2012</span></b><o:p></o:p>
+						</p>
+					</td>
+				</tr>
+				</center>
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<td style="padding: 3.75pt;">
+			<p style="color: white; font-size: 12pt;">
+			</p>
+			<p style="color: white; font-size: 12pt;">
+				<span style="font-family: Verdana; font-size: 10pt;"> If you have Chrome or Firefox, try these links (Chrome will run this faster): <br/><a href="http://1964js.com?rom=unofficial_roms/rotate.zip">Rotate Demo</a><br/><a href="http://1964js.com?rom=unofficial_roms/sp_crap.zip">Absolute crap #2 demo by Lem</a><br/><a href="http://1964js.com?rom=unofficial_roms/liner.zip">liner demo controls: [i,j,k,l, w,a,s,d, 0=start]</a><br/><a href="http://1964js.com?rom=unofficial_roms/n64stars.zip">N64 Stars</a><br/><a href="http://1964js.com?rom=unofficial_roms/DynamixReadme.zip">Dynamix Readme Demo</a><br/><a href="http://code.google.com/p/1964js/">What is this?</a><br/><br/> -schibo</span>
+			</p>
+			<hr/>
+		</td>
+	</tr>
+	<tr>
+		<td style="padding: 3.75pt;">
+			<p style="margin: 0in 0in 0pt; color: white; font-size: 12pt;" class="MsoNormal">
+				<b><span style="font-family: Arial; font-size: 20pt;"><img src="img/windows48x48.png"/>1964 - June 7, 2009</span></b><o:p></o:p>
+			</p>
+		</td>
+	</tr>
+	<tr>
+		<td style="padding: 3.75pt;">
+			<p style="color: white; font-size: 12pt;">
+			</p>
+			<p style="color: white; font-size: 12pt;">
+				<span style="font-family: Verdana; font-size: 10pt;">We've released the source to 1964 1.1. (1964 1.0 was an experimental compiler which breaks games like Perfect Dark and Banjo Tooie. Please use version 1.1) We also did this to support the efforts of the Surreal64 team. Please bear in mind that most of the source has not been touched in over five years. </span>
+			</p>
+			<p style="color: white; font-size: 12pt;">
+				<b><span style="font-family: Verdana; font-size: 10pt;">Improvements:</span></b><o:p></o:p>
+			</p>
+			<ul style="margin-bottom: 0in;" type="disc">
+				<li style="margin: 0in 0in 0pt; color: white; font-size: 12pt;" class="MsoNormal"><span style="font-family: Verdana; font-size: 10pt;">Kirby's face doesn't stay smashed in with block-linking set to on in Kirby64 - The Crystal Shards.</span></li>
+				<li style="margin: 0in 0in 0pt; color: white; font-size: 12pt;" class="MsoNormal"><span style="font-family: Verdana; font-size: 10pt;">Loading from a save state would sometimes cause the audio to disappear.</span></li>
+				<li style="margin: 0in 0in 0pt; color: white; font-size: 12pt;" class="MsoNormal"><span style="font-family: Verdana; font-size: 10pt;">LLE RSP audio<span class="Apple-converted-space">&nbsp;</span><span class="SpellE">plugin</span><span class="Apple-converted-space">&nbsp;</span>(<span class="SpellE">1964</span><span class="Apple-converted-space">&nbsp;</span>audio 2.7). We created a code generator that reverses RSP<span class="Apple-converted-space">&nbsp;</span><span class="SpellE">microcodes</span><span class="Apple-converted-space">&nbsp;</span>to C.<span class="Apple-converted-space">&nbsp;</span><span class="GramE">The</span><span class="Apple-converted-space">&nbsp;</span>generated C source is provided but we are not currently releasing portions of the code generator that creates the C files (namely<span class="SpellE"> Gerrit's</span><span class="Apple-converted-space">&nbsp;</span>DSP<span class="Apple-converted-space">&nbsp;</span><span class="SpellE">opcode</span><span class="Apple-converted-space">&nbsp;</span>source). Fear not, we provided enough for you to build the project.</span></li>
+				<li style="margin: 0in 0in 0pt; color: white; font-size: 12pt;" class="MsoNormal"><span style="font-family: Verdana; font-size: 10pt;">Speed - although running with the RSP LLE audio<span class="Apple-converted-space">&nbsp;</span><span class="SpellE">plugin</span><span class="Apple-converted-space">&nbsp;</span>will slow things down.</span></li>
+				<li style="margin: 0in 0in 0pt; font-family: 'arial'; color: white; font-size: 12pt;" class="MsoNormal"><span style="font-family: Verdana; font-size: 10pt;">Plenty of other things I am<span class="Apple-converted-space">&nbsp;</span><span class="GramE">forgetting<span>&nbsp;<span class="Apple-converted-space">&nbsp;</span></span>since</span><span class="Apple-converted-space">&nbsp;</span>it's been so long.</span></li>
+			</ul>
+			<p style="color: white; font-size: 12pt;">
+				Grab the source from<span class="Apple-converted-space">&nbsp;</span><span class="GramE">the<span class="Apple-converted-space">&nbsp;</span><a style="color: #ffa953; text-decoration: underline;" href="download.html">downloads</a></span><span style="color: white; font-size: 12pt;"><span>&nbsp;</span>page!</span>
+			</p>
+			<p>
+				-schibo
+			</p>
+		</td>
+	</tr>
+	</tbody>
+	</table>
+	<p>
+		&nbsp;
+	</p>
+	<hr/>
+	<p style="font-family: Arial; font-size: 20pt; color: white;">
+		<img src="img/windows48x48.png"/>January 1, 2004 - Happy New Year!
+	</p>
+	<p align="left">
+	</p>
+	<p align="left">
+		<span style="font-family: Verdana; font-size: small;" face="Verdana" size="2">Here's your new year's gift. 1964 v0.9.9 is here. With over one year in private development since the release 1964 0.8.5. and with over 3 months in beta testing, 1964 0.9.9 features hundreds of fixes and enhancements. <b>Note: If you have an ATI Radeon video card, download the latest Rice Video plugin from www.emutalk.net, since the older version in the 0.9.9 distribution will have issues for you.</b></span>
+	</p>
+	<p>
+		<b><span style="font-family: Verdana; font-size: small;" face="Verdana" size="2">Major new 1964 features include:</span></b>
+	</p>
+	<ul type="disc">
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l4 level1 lfo1; tab-stops: list .5in;"><span style="font-family: Verdana; font-size: 10pt;">A new friendlier user interface makes finding options easy</span></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l4 level1 lfo1; tab-stops: list .5in;"><span style="font-family: Verdana; font-size: 10pt;">Fixes and support for many new games including Turok3, Donkey Kong 64, and Top Gear Overdrive</span></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l4 level1 lfo1; tab-stops: list .5in;"><span style="font-family: Verdana; font-size: 10pt;">New ini configuration settings</span></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l4 level1 lfo1; tab-stops: list .5in;"><span style="font-family: Verdana; font-size: 10pt;">ROM Browser caching for fast loading of 1964</span></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l4 level1 lfo1; tab-stops: list .5in;"><span style="font-family: Verdana; font-size: 10pt;">Tweak 1964's speed at the touch of a key</span></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l4 level1 lfo1; tab-stops: list .5in;"><span style="font-family: Verdana; font-size: 10pt;">Frameskip and AutoCF features for slower machines</span></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l4 level1 lfo1; tab-stops: list .5in;"><span style="font-family: Verdana; font-size: 10pt;">A new Help Manual</span></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l4 level1 lfo1; tab-stops: list .5in;"><span style="font-family: Verdana; font-size: 10pt;">Multiple Language support</span></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l4 level1 lfo1; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">An improved CPU core with many bug fixes and is much faster</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l4 level1 lfo1; tab-stops: list .5in;"><span style="font-family: Verdana; font-size: 10pt;">An I</span><tt><span style="font-family: Verdana; font-size: 10pt;">mproved 32bit CPU core, linker and faster overall code generation</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l4 level1 lfo1; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Reworked core/audio synchronization and major improvements in audio quality and speed</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l4 level1 lfo1; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Completely reworked Kaillera netplay</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l4 level1 lfo1; tab-stops: list .5in;"><span style="font-family: Verdana; font-size: 10pt;">Packaged with N-Rage's input plugin</span></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l4 level1 lfo1; tab-stops: list .5in;"><span style="font-family: Verdana; font-size: 10pt;">CPU Frame buffer read/write notification for video plug-ins</span></li>
+	</ul>
+	<p>
+		<span style="font-family: Verdana; font-size: 10pt; mso-bidi-font-family: 'Courier New';"><tt><b><span style="font-family: Verdana;">Minor GUI features:</span></b></tt><b><tt><span style="font-family: Verdana;">&nbsp;</span></tt></b></span>
+	</p>
+	<ul type="disc">
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l1 level1 lfo2; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Download plugin online</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l1 level1 lfo2; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">ROM specific plugin selection</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l1 level1 lfo2; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">More Toolbar buttons</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l1 level1 lfo2; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Remembers and restores the current selected ROM and its position in the ROM Browser</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l1 level1 lfo2; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Remembers and restores the selected ROM and its position at 1964 exit and start</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l1 level1 lfo2; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Added "Number of players" as a new column in the ROM Browser. "Number of players" can be set in the INI file, but not through option dialog box.</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l1 level1 lfo2; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Checks if plug-ins are loaded correctly. If not, then pops up the plugin configuration dialog box to select plug-ins</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l1 level1 lfo2; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">When 1964.099 runs the first time:</span></tt><span style="font-family: Verdana; font-size: 10pt; mso-bidi-font-family: 'Courier New';"><br/><tt><span style="font-family: Verdana;">&nbsp; Automatically pops up the ROM folder dialog box to select a folder</span></tt><br/><tt><span style="font-family: Verdana;">&nbsp; Selects only the most important columns to display in the ROM list</span></tt><br/><tt><span style="font-family: Verdana;">&nbsp; Verifies plug-ins are loaded correctly</span></tt></span></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l1 level1 lfo2; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Disables plugin selection during netplay</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l1 level1 lfo2; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Disables many menus if they are not supposed to be used when a game is not running or a game is running</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l1 level1 lfo2; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Automatically enables/disables the RSP config menu according to whether or not the RSP plugin is loaded</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l1 level1 lfo2; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Calls RSP CloseDLL() at a better place for it to save its configuration</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l1 level1 lfo2; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">New ROM Browser icons</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l1 level1 lfo2; tab-stops: list .5in;"><span style="font-family: Verdana; font-size: 10pt;">RSP plug-in selection</span></li>
+	</ul>
+	<p>
+		<span style="font-family: Verdana; font-size: 10pt; mso-bidi-font-family: 'Courier New';"><tt><b><span style="font-family: Verdana;">Minor core features:</span></b></tt><b><tt><span style="font-family: Verdana;">&nbsp;</span></tt></b></span>
+	</p>
+	<ul type="disc">
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l0 level1 lfo3; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Variable speed emulation</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l0 level1 lfo3; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">SSE detection and support in CPU core</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l0 level1 lfo3; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">FPU register caching if SSE is detected</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l0 level1 lfo3; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">NetPlay</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l0 level1 lfo3; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">New save state file format</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l0 level1 lfo3; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Supports earlier versions of save states</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l0 level1 lfo3; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Supports saving save states to an earlier version</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l0 level1 lfo3; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Double-checks and creates necessary folders for game saves</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l0 level1 lfo3; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Screen shots are taken at a better time</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l0 level1 lfo3; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Reworked CP1 Unusable exceptions, many games are working better</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l0 level1 lfo3; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Improved CPU timing</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l0 level1 lfo3; tab-stops: list .5in;"><span style="font-family: Verdana; font-size: 10pt;">TLB error handling for 2-pass compiler</span></li>
+	</ul>
+	<p>
+		<span style="font-family: Verdana; font-size: 10pt; mso-bidi-font-family: 'Courier New';"><tt><b><span style="font-family: Verdana;">Netplay features:</span></b></tt><b><tt><span style="font-family: Verdana;">&nbsp;</span></tt></b></span>
+	</p>
+	<ul type="disc">
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l2 level1 lfo4; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Based on Kaillera network</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l2 level1 lfo4; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Supports audio for netplay</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l2 level1 lfo4; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Realtime gameplay with feasible network connection required</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l2 level1 lfo4; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Automatic retransmission request and lost packet recovery</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l2 level1 lfo4; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Automatic game setting synchronization among players</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l2 level1 lfo4; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Automatic game save synchronization among players</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l2 level1 lfo4; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Support for N64 native game saves</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l2 level1 lfo4; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Support for cheat codes in netplay</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l2 level1 lfo4; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Automatic cheat code synchronization among players</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l2 level1 lfo4; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Notification if a player drops out, and allows for other players to continue the game</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l2 level1 lfo4; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">CPU and network usage displayed on status bar</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l2 level1 lfo4; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Enable / disable various settings to avoid changes that may cause netplay games to desync</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l2 level1 lfo4; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Always disable AutoCF for netplay</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l2 level1 lfo4; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">CF menus disabled during netplay. CF won't be allowed to be change for any player</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l2 level1 lfo4; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Disabled lag menu during netplay</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l2 level1 lfo4; tab-stops: list .5in;"><span style="font-family: Verdana; font-size: 10pt;">Disabled </span><tt><span style="font-family: Verdana; font-size: 10pt;">cheat menu <i>during</i> netplay. Cheat codes are not allowed to be modified during game play</span></tt></li>
+	</ul>
+	<p>
+		<tt><span style="font-family: Verdana; font-size: 10pt;"></span></tt><span style="font-family: Verdana; font-size: 10pt; mso-bidi-font-family: 'Courier New';"><tt><b><span style="font-family: Verdana;">Important bugs fixed:</span></b></tt><b><tt><span style="font-family: Verdana;">&nbsp;</span></tt></b></span>
+	</p>
+	<ul type="disc">
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l3 level1 lfo5; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Activated cheat codes may cause game to not boot or reset</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l3 level1 lfo5; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Fixed dynamic compiler buffer overrun-related errors</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l3 level1 lfo5; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Fixed problems loading PJ64 save states</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l3 level1 lfo5; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Cleaned duplicated INI entries</span></tt></li>
+		<li class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto; mso-list: l3 level1 lfo5; tab-stops: list .5in;"><tt><span style="font-family: Verdana; font-size: 10pt;">Support for Japanese characters in INI file</span></tt></li>
+	</ul>
+	<p style="font-family: Verdana; font-size: 10pt;">
+		Grab it from the <a href="download.html">downloads</a> page!
+	</p>
+	<span style="font-family: Arial; font-size: small;" face="Arial" size="2">-</span><a href="contact.htm"><span style="font-family: Arial; font-size: small;" face="Arial" size="2">schibo</span></a></center>
+</div>
+<p>
+</p>
+<div align="center">
+	<center>
+	<table style="border-collapse: collapse;" id="AutoNumber1" border="0" cellpadding="0" cellspacing="0" width="600">
+	<tbody>
+	<tr>
+		<td>
+			<span style="font-family: Verdana; font-size: small;" face="Verdana" size="2">1964 Copyright 2012 Joel Middendorf. 1964 has no affiliation with Nintendo. All logos and trademarks are the property of their respective owners.</span>
+		</td>
+	</tr>
+	</tbody>
+	</table>
+	</center>
+</div>
+<script src="js/1964js-0.0.3.min.js" type="text/javascript"></script>
+</body>
+</html>
