@@ -1,0 +1,30 @@
+application: s~emu-1964
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+- url: /css
+  static_dir: css
+
+- url: /js
+  static_dir: js
+
+- url: /lib
+  static_dir: lib
+
+- url: /shaders
+  static_dir: shaders
+
+- url: /unofficial_roms
+  static_dir: unofficial_roms
+
+- url: /.*
+  script: 1964js.application
+
+libraries:
+- name: webapp2
+  version: latest
+- name: jinja2
+  version: latest
