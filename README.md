@@ -13,7 +13,7 @@ Prerequisites:
 
 The script is known to work on MacOS X Yosemite. It hasn't been tested on other platforms but it shouldn't be difficult to make it work on other platforms.
 
-1964js is (kind of) a port of our N64 emulator for Windows called 1964. 1964 was written in C and C++ for Windows. You can still grab that here.
+1964js is (kind of) a port of our N64 emulator for Windows called 1964. 1964 was written in C and C++ for Windows. You can still grab that <a href="http://1964emu.emulation64.com">here</a>.
 
 This project is still in the early stages. The initial goal of this project was to see how well Google Chrome's V8 JavaScript compiler performs.
 Instead of building a traditional dynarec (JIT compiler) as we did for 1964 for Windows which translated MIPS directly to x86, 1964js dynamically writes JavaScript to the web page by reversing MIPS code to JavaScript. This JavaScript represents blocks of rom code. Then, if using Chrome for instance, Google's V8 compiler compiles the JavaScript to native code for us automatically.
