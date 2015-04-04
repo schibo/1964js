@@ -2,14 +2,16 @@
   <head>
     <title>1964 and 1964js Home page</title>
     <link href="css/style.css" rel="stylesheet" type="text/css" />
-    <script type="text/javascript">var _gaq = _gaq || [];
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
       _gaq.push(['_setAccount', 'UA-31090418-4']);
       _gaq.push(['_trackPageview']);
       (function() {
         var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
         ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
         var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-      })();</script>
+      })();
+    </script>
     <meta content="1964js - N64 emulator in JavaScript" property="og:title" />
     <meta content="game" property="og:type" />
     <meta content="http://www.1964js.com" property="og:url" />
@@ -19,7 +21,8 @@
   </head>
   <body alink="#ff0000" bgcolor="#000000" link="#ffa953" onLoad="start1964({wireframe:true})" onunload="i1964js.stopEmulatorAndCleanup()" text="#ffffff" vlink="#ffa953">
     <div id="fb-root"></div>
-    <script type="text/javascript">window.fbAsyncInit = function() {
+    <script type="text/javascript">
+      window.fbAsyncInit = function() {
         FB.init({
           appId : '518018268224773', // App ID
           channelUrl : '//www.1964js.com/channel.html', // Channel File
@@ -43,15 +46,48 @@
         js = d.createElement(s); js.id = id;
         js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=518018268224773";
         fjs.parentNode.insertBefore(js, fjs);
-      }(document, 'script', 'facebook-jssdk'));</script>
+      }(document, 'script', 'facebook-jssdk'));
+    </script>
     <p></p>
     <div style="position: absolute; left: -600 px; top: -600 px"></div>
     <canvas height="240" id="Canvas" width="320"></canvas><canvas height="1024" id="Canvas3D" width="1024"></canvas>
     <div id="user_panel">
       <div class="header">
-        <a href="blog">[Blog]</a>&nbsp;<a href="http://code.google.com/p/1964js">[Code]</a>&nbsp;<a href="http://hulkholden.github.com/n64js/">[Try n64js too!]</a>
-        <h1>1964js<div style="font-size: 10px;">v0.1.21</div>
-          <select onChange="if (this.value !== 'Demos') window.open(this.value, '_self');" style="vertical-align: middle;"><option value="Demos">Demos</option><option value="?rom=unofficial_roms/rotate.zip">Rotate</option><option value="?rom=unofficial_roms/chrome.zip">Chrome</option><option value="?rom=unofficial_roms/dextrose.zip">Dextrose</option><option value="?rom=unofficial_roms/n64stars.zip">N64 Stars</option><option value="?rom=unofficial_roms/liner.zip">Liner (z to start)</option><option value="?rom=unofficial_roms/hardcode.zip">Hard Coded</option><option value="?rom=unofficial_roms/sp_crap.zip">Absolute Crap</option><option value="?rom=unofficial_roms/DynamixReadme.zip">Dynamix</option></select>
+        <a href="http://1964js.com/blog/index.html">[Blog]</a>&nbsp;<a href="https://github.com/schibo/1964js">[Code]</a>&nbsp;<a href="http://hulkholden.github.com/n64js/">[Try n64js too!]</a>
+        <h1>
+          1964js
+          <div style="font-size: 10px;">
+            v0.1.21
+          </div>
+          <select onChange="if (this.value !== &#39;Demos&#39;) window.open(this.value, &#39;_self&#39;);" style="vertical-align: middle;">
+            <option value="Demos">
+              Demos
+            </option>
+            <option value="?rom=unofficial_roms/rotate.zip">
+              Rotate
+            </option>
+            <option value="?rom=unofficial_roms/chrome.zip">
+              Chrome
+            </option>
+            <option value="?rom=unofficial_roms/dextrose.zip">
+              Dextrose
+            </option>
+            <option value="?rom=unofficial_roms/n64stars.zip">
+              N64 Stars
+            </option>
+            <option value="?rom=unofficial_roms/liner.zip">
+              Liner (z to start)
+            </option>
+            <option value="?rom=unofficial_roms/hardcode.zip">
+              Hard Coded
+            </option>
+            <option value="?rom=unofficial_roms/sp_crap.zip">
+              Absolute Crap
+            </option>
+            <option value="?rom=unofficial_roms/DynamixReadme.zip">
+              Dynamix
+            </option>
+          </select>
         </h1>
         <input id="wireframe" type="checkbox">wireframe</input>&nbsp;&nbsp;<input checked="true" id="speedlimit" type="checkbox">speed limit </input>
       </div>
