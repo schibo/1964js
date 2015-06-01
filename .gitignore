@@ -1,6 +1,7 @@
 # Python
 
 __pycache__/
+*.pyc
 *.py[cod]
 *$py.class
 .Python
@@ -35,6 +36,8 @@ var/
 
 #packing-only formats
 *.iso
+*.isz
+*.cso
 *.tar
 
 #package management formats
