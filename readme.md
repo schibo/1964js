@@ -3,7 +3,7 @@ This is the first Nintendo 64 emulator for JavaScript. Visit the <a href="http:/
 
 To build 1964js, run ./compile.sh from the root folder. 
 
-Pre-requisites:
+Prerequisites:
 <ul>
 <li>Slim</li>
 <li>Sass</li>
