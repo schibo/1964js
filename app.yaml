@@ -21,8 +21,8 @@ handlers:
 - url: /shaders
   static_dir: shaders
 
-- url: /unofficial_roms
-  static_dir: unofficial_roms
+- url: /roms/unofficial
+  static_dir: roms/unofficial
 
 - url: /.*
   script: 1964js.application
