@@ -11,7 +11,22 @@ Prerequisites:
 <li>Java</li>
 </ul>
 
-The script is known to work on Mac OS X Yosemite. It hasn't been tested on other platforms but it shouldn't be difficult to make it work on other platforms.
+<h1>To setup your Linux environment:</h1>
+```
+sudo apt-get install ruby
+sudo gem install slim
+sudo gem install sass
+sudo gem install coffeelint
+sudo apt-get install nodejs
+sudo apt-get install nodejs-legacy
+sudo apt-get install npm
+sudo npm install -g coffee-script
+sudo npm install -g coffeelint
+sudo npm install -g java
+sudo apt-get install default-jre
+```
+
+The script is known to work on Mac OS X Yosemite and Ubuntu 14.04 64bit. It should work on other platforms that have a Bash shell.
 
 1964js is (kind of) a port of our Nintendo 64 emulator for Windows called 1964. 1964 was written in C and C++ for Windows. You can still grab that <a href="http://1964emu.emulation64.com">here</a>.
 

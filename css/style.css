@@ -1,7 +1,7 @@
 #progress_bar {
   margin: 10px 0;
   padding: 3px;
-  border: 1px solid black;
+  border: 1px solid #000;
   font-size: 14px;
   clear: both;
   opacity: 0;
@@ -20,7 +20,7 @@
   border: 2px solid #303030;
   text-align: center;
   font-family: "Arial";
-  color: white;
+  color: #FFFFFF;
   width: 380px;
   opacity: 0;
   /* Firefox */
@@ -86,7 +86,7 @@ h1 {
   z-index: -1000;
   top: 0;
   left: 0;
-  background-color: black;
+  background-color: #000000;
   margin: 0; }
 
 #Canvas3D {
@@ -100,5 +100,7 @@ h1 {
   visibility: hidden; }
 
 .dropShadow {
-  text-shadow: 3px 3px 3px #555555;
+  text-shadow: 3px 3px 3px #555;
   font-size: 12px; }
+
+/*# sourceMappingURL=style.css.map */
