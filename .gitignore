@@ -1,3 +1,14 @@
+# Custom
+obj/
+css/
+
+# Binaries/executables
+*.exe
+*.dll
+*.bat
+*.com
+*.cmd
+
 # Python
 
 __pycache__/
@@ -33,6 +44,7 @@ var/
 *.xz
 *.lzma
 *.cab
+*.z
 
 #packing-only formats
 *.iso
