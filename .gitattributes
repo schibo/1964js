@@ -1,0 +1,29 @@
+# Automatically detect text files and perform LF end-of-line normalization
+* text=auto
+
+# Files you want to always be normalized and converted
+# to native line endings on checkout
+*.coffee text
+*.css text
+*.dart text
+*.html text
+*.js text
+*.json text
+*.lock text
+*.md text
+packages text
+*.py text
+*.sass text
+*.sh text
+*.shader text
+*.slim text
+*.yaml text
+
+# All files that are binary and should not be normalized
+
+# Images
+*.ico binary
+*.n64 binary
+*.v64 binary
+*.z64 binary
+*.zip binary
