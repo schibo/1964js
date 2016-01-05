@@ -44,7 +44,7 @@ Run compile.sh in MinGW/MSYS/Cygwin
 
 The script is known to work on Mac OS X 10.10 and Ubuntu 14.04.3 LTS/15.10 64-bit. It should work on any platforms that have a Bash shell.
 
-We are working on Windows build instructions. This is difficult since Java is crappy on Windows and because it has more than a few security issues.
+We are working on Windows build instructions.
 
 # About the emulator
 
@@ -58,7 +58,7 @@ For updates, please check [1964js.com](http://1964js.com "1964js website")!
 
 # Compatibility
 
-Many demos, homebrew, test ROMs, and similar ROMs work fine in 1964js in Chrome. Most will have some bugs and glitches, but it is very promising!
+Many demos, homebrew, test ROMs, and similar ROMs work fine in 1964js in Chrome.
 
 Super Mario 64 is the only known commercial game to boot. You need to hit enter a couple times after the title screen.
 
