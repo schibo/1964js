@@ -70,9 +70,6 @@ class C1964jsMemory
     @rom = `undefined` # set after rom is loaded.
     @rdramArrayBuffer = new ArrayBuffer(0x800000);
     @rdramUint8Array = new Uint8Array(@rdramArrayBuffer);
-    @rdramUint16Array = new Uint16Array(@rdramArrayBuffer);
-    @rdramUint32Array = new Uint32Array(@rdramArrayBuffer);
-    @rdramDataView = new DataView(@rdramArrayBuffer);
 
     @spMemUint8Array = new Uint8Array(0x10000)
     @spReg1Uint8Array = new Uint8Array(0x10000)
