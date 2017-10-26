@@ -463,14 +463,18 @@ class C1964jsEmulator
     @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=" + temp + ")>>31;"
 
   r4300i_lw: (i) ->
-    @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=m.lw(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + "))>>31;"
+ #   @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=m.lw(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + "))>>31;"
+    "a = m.virtualToPhysical(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");" + @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=m.region32[a>>>14](m, a))>>31;"
 
   r4300i_lwu: (i) ->
-    @helpers.tRTH(i) + "=0," + @helpers.tRT(i) + "=m.lw(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");"
+    #@helpers.tRTH(i) + "=0," + @helpers.tRT(i) + "=m.lw(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");"
+    "a = m.virtualToPhysical(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");" + @helpers.tRTH(i) + "=0;" + @helpers.tRT(i) + "=m.region32[a>>>14](m, a);"
 
   r4300i_sw: (i, isDelaySlot) ->
     a = undefined
-    string = "m.sw(" + @helpers.RT(i) + "," + @helpers.RS(i) + "+" + @helpers.soffset_imm(i)
+#    string = "m.sw(" + @helpers.RT(i) + "," + @helpers.RS(i) + "+" + @helpers.soffset_imm(i)
+
+    string = "a = m.virtualToPhysical(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");m.writeRegion32[a>>>14](m, " + @helpers.RT(i) + ",a"
     
     #So we can process exceptions
     if isDelaySlot is true
@@ -731,21 +735,23 @@ class C1964jsEmulator
 
   r4300i_lb: (i) ->
     #"{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=(m.lb(vAddr)<<24)>>24;" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31}"
-    @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=m.lb(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ")<<24>>24)>>8;"
-
+    #@helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=m.lb(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ")<<24>>24)>>8;"
+    "a = m.virtualToPhysical(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");" + @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=m.region[a>>>14](m, a)<<24>>24)>>8;"
 
   r4300i_lbu: (i) ->
     #"{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=(m.lb(vAddr))&0x000000ff;" + @helpers.tRTH(i) + "=0}"
-    @helpers.tRTH(i) + "=0," + @helpers.tRT(i) + "=m.lb(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ")&0x000000ff;"
-
+    #@helpers.tRTH(i) + "=0," + @helpers.tRT(i) + "=m.lb(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ")&0x000000ff;"
+    "a = m.virtualToPhysical(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");" + @helpers.tRTH(i) + "=0;" + @helpers.tRT(i) + "=m.region[a>>>14](m, a)&0x000000ff;"
 
   r4300i_lh: (i) ->
     #"{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=(m.lh(vAddr)<<16)>>16;" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31}"
-    @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=m.lh(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ")<<16>>16)>>16;"
+    #@helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=m.lh(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ")<<16>>16)>>16;"
+    "a = m.virtualToPhysical(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");" + @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=m.region16[a>>>14](m, a)<<16>>16)>>16;"
 
   r4300i_lhu: (i) ->
     #"{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=(m.lh(vAddr))&0x0000ffff;" + @helpers.tRTH(i) + "=0}"
-    @helpers.tRTH(i) + "=0," + @helpers.tRT(i) + "=m.lh(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ")&0x0000ffff;"
+    #@helpers.tRTH(i) + "=0," + @helpers.tRT(i) + "=m.lh(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ")&0x0000ffff;"
+    "a = m.virtualToPhysical(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");" + @helpers.tRTH(i) + "=0;" + @helpers.tRT(i) + "=m.region16[a>>>14](m, a)&0x0000ffff;"
 
   r4300i_sb: (i) ->
     "m.sb(" + @helpers.RT(i) + "," + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");"
