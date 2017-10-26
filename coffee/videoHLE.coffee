@@ -80,7 +80,7 @@ C1964jsVideoHLE = (core, glx) ->
   #todo: different microcodes support
   @currentMicrocodeMap = @microcodeMap0
   i = 0
-  while i< @MAX_TILES
+  while i < @MAX_TILES
     @textureTile[i] = []
     i += 1
   i = 0
@@ -191,9 +191,9 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::setProjection = (mat, bPush, bReplace) ->
-    if bPush
+    if bPush is true
       if @gRSP.projectionMtxTop >= (@RICE_MATRIX_STACK - 1)
-        @gRSP.bMatrixIsUpdated = false
+        @gRSP.bMatrixIsUpdated = true
         return
 
       @gRSP.projectionMtxTop += 1  
@@ -216,7 +216,7 @@ C1964jsVideoHLE = (core, glx) ->
   C1964jsVideoHLE::setWorldView = (mat, bPush, bReplace) ->
     if bPush is true
       if @gRSP.modelViewMtxTop >= (@RICE_MATRIX_STACK - 1)
-        @gRSP.bMatrixIsUpdated = false
+        @gRSP.bMatrixIsUpdated = true
         return
 
       @gRSP.modelViewMtxTop += 1  
