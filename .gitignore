@@ -12,6 +12,7 @@
 *.egg
 *.deb
 *.rpm
+.sass-cache/
 
 # KDE directory preferences
 
