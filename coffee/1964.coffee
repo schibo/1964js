@@ -427,7 +427,7 @@ class C1964jsEmulator
       s.parentNode.insertBefore g, s
       g.text = string
     else
-      wrapEval string
+      @wrapEval string
     @code[fnName]
 
   #purely so v8 can optimize decompileBlock
