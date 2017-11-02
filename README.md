@@ -12,7 +12,7 @@ Required to build:
 * CoffeeScript
 * Java
 
-## To setup your Linux environment:
+## To setup your Linux/Mac environment with a Bash shell:
 ```
 sudo apt-get install ruby
 sudo gem install slim
@@ -30,7 +30,7 @@ Run compile.sh
 
 ## To setup your Windows environment (TODO):
 ```
-Install MinGW/MSYS/Cygwin
+Install MinGW/MSYS/Cygwin/Linux Subsystem For Windows
 Install Ruby
 Install Slim
 Install Sass
@@ -38,21 +38,21 @@ Install CoffeeLint
 Install CoffeeScript
 Install NodeJS
 Install NPM
-Install Java (Security is an issue on Windows, be cautious [12-30-2015])
-Run compile.sh in MinGW/MSYS/Cygwin
+Install Java (causes security issues, be cautious)
+Run compile.sh in MinGW/MSYS/Cygwin/Linux Subsystem For Windows
 ```
 
-The script is known to work on Mac OS X 10.10 and Ubuntu 14.04.3 LTS/15.10 64-bit. It should work on any platforms that have a Bash shell.
+The script should work on any platforms that have a Bash shell.
 
 We are working on Windows build instructions.
 
 # About the emulator
 
-1964js is (kind of) a port of our Nintendo 64 emulator for Windows called 1964. 1964 was written in C and C++ for Windows. You can still grab that [here](http://1964emu.emulation64.com "Emulation64 1964 page").
+1964js is a (kind of) port of our Nintendo 64 emulator for Windows called 1964. 1964 was written in C and C++ for Windows. You can still grab that [here](http://1964emu.emulation64.com "Emulation64 1964 page").
 
-This project is still in the early stages. The initial goal of this project is to see how well Google Chrome's V8 JavaScript compiler performs.
+This project is still in the early stages. The initial goal of this project is to see how well modern JavaScript compilers perform.
 
-Instead of building a traditional dynamic recompiler (Just-In-Time/JIT compiler) as we did for 1964 on Windows, which translated MIPS instructions directly to x86 instructions, 1964js dynamically writes JavaScript to the web page by reversing MIPS code to JavaScript. This JavaScript represents blocks of ROM code. Then, if using Chrome for instance, Google's V8 compiler compiles the JavaScript to native code for us automatically.
+Instead of building a traditional dynamic recompiler (Just-In-Time/JIT compiler) as we did for 1964 on Windows, which translated MIPS instructions directly to x86 instructions, 1964js dynamically writes JavaScript to the web page by reversing MIPS code to JavaScript. This JavaScript represents blocks of ROM code. Then the web browsers JavaScript compiler compiles the JavaScript to native code for us automatically.
 
 For updates, please check [1964js.com](http://1964js.com "1964js website")!
 
