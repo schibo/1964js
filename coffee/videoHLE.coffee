@@ -72,7 +72,7 @@ C1964jsVideoHLE = (core, glx) ->
   @blendColor = []
   @envColor = []
   @triVertices = new Float32Array(16384)
-  @triColorVertices = new Uint8Array(16384)
+  @triColorVertices = new Int8Array(16384)
   @triTextureCoords = new Float32Array(16384)
   @otherModeL = 0
   @otherModeH = 0
@@ -784,9 +784,9 @@ C1964jsVideoHLE = (core, glx) ->
     @triangleVertexPositionBuffer.numItems += 1
 
     colorOffset = @triangleVertexColorBuffer.numItems << 2
-    @triColorVertices[colorOffset]     = @N64VertexList[dwV].r | 128;
-    @triColorVertices[colorOffset + 1] = @N64VertexList[dwV].g | 128;
-    @triColorVertices[colorOffset + 2] = @N64VertexList[dwV].b | 128;
+    @triColorVertices[colorOffset]     = @N64VertexList[dwV].r;
+    @triColorVertices[colorOffset + 1] = @N64VertexList[dwV].g;
+    @triColorVertices[colorOffset + 2] = @N64VertexList[dwV].b;
     @triColorVertices[colorOffset + 3] = @N64VertexList[dwV].a;
     @triangleVertexColorBuffer.numItems += 1
 	
@@ -1136,7 +1136,7 @@ C1964jsVideoHLE = (core, glx) ->
     @gl.enable @gl.DEPTH_TEST
     @gl.depthFunc(@gl.LEQUAL);
     @gl.enable @gl.BLEND
-    @gl.blendFunc @gl.SRC_COLOR, @gl.DST_COLOR
+    @gl.blendFunc @gl.SRC_ALPHA, @gl.GL_ONE_MINUS_DST_ALPHA
     
     if @triangleVertexPositionBuffer.numItems > 0
       @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexPositionBuffer

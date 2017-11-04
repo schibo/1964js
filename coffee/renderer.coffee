@@ -126,9 +126,9 @@ C1964jsRenderer = (settings, glx, webGL) ->
     gl.useProgram webGL.shaderProgram
     
     # basic settings
-    gl.disable gl.DEPTH_TEST
-    gl.enable gl.BLEND
-    gl.blendFunc gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA
+#    gl.disable gl.DEPTH_TEST
+#    gl.enable gl.BLEND
+#    gl.blendFunc gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA
     
     gl.enableVertexAttribArray webGL.shaderProgram.vertexPositionAttribute
     gl.bindBuffer gl.ARRAY_BUFFER, texrectVertexPositionBuffer
