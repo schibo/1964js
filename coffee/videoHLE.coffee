@@ -1136,7 +1136,7 @@ C1964jsVideoHLE = (core, glx) ->
     @gl.enable @gl.DEPTH_TEST
     @gl.depthFunc(@gl.LEQUAL);
     @gl.enable @gl.BLEND
-    #@gl.blendFunc @gl.SRC_ALPHA, @gl.ONE_MINUS_SRC_ALPHA
+    @gl.blendFunc @gl.SRC_COLOR, @gl.DST_COLOR
     
     if @triangleVertexPositionBuffer.numItems > 0
       @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexPositionBuffer
