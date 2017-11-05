@@ -141,23 +141,16 @@ C1964jsVideoHLE::getTextureScaleT = (pc) ->
   
 #Combine Struct
 C1964jsVideoHLE::getCombineA0 = (pc) ->
-  #((@core.memory.rdramUint8Array[pc] << 24 | @core.memory.rdramUint8Array[pc+1] << 16 | @core.memory.rdramUint8Array[pc+2] << 8 | @core.memory.rdramUint8Array[pc+3]) >> 20) & 0x0F
- #uregion[off_] << 24 | uregion[off_ + 1] << 16 | uregion[off_ + 2] << 8 | uregion[off_ + 3]
-  (@core.memory.rdramUint8Array[pc + 1] >> 4 ) & 0x0F
+  ((@core.memory.rdramUint8Array[pc] << 24 | @core.memory.rdramUint8Array[pc+1] << 16 | @core.memory.rdramUint8Array[pc+2] << 8 | @core.memory.rdramUint8Array[pc+3]) >> 20) & 0x0F
   
 C1964jsVideoHLE::getCombineB0 = (pc) ->
-  #((@core.memory.rdramUint8Array[pc+4] << 24 | @core.memory.rdramUint8Array[pc+5] << 16 | @core.memory.rdramUint8Array[pc+6] << 8 | @core.memory.rdramUint8Array[pc+7]) >> 28) & 0x0F
-  (@core.memory.rdramUint8Array[pc + 4] >> 4 ) & 0x0F
-
+  ((@core.memory.rdramUint8Array[pc+4] << 24 | @core.memory.rdramUint8Array[pc+5] << 16 | @core.memory.rdramUint8Array[pc+6] << 8 | @core.memory.rdramUint8Array[pc+7]) >> 28) & 0x0F
   
 C1964jsVideoHLE::getCombineC0 = (pc) ->
-  #(@core.memory.rdramUint8Array[pc] << 24 | @core.memory.rdramUint8Array[pc+1] << 16 | @core.memory.rdramUint8Array[pc+2] << 8 | @core.memory.rdramUint8Array[pc+3]) >> 15 & 0x1F
-  ((@core.memory.rdramUint8Array[pc+1] << 1 ) & 0x1E) | ((@core.memory.rdramUint8Array[pc+2] & 0x80) >>> 7)
-
+  (@core.memory.rdramUint8Array[pc] << 24 | @core.memory.rdramUint8Array[pc+1] << 16 | @core.memory.rdramUint8Array[pc+2] << 8 | @core.memory.rdramUint8Array[pc+3]) >> 15 & 0x1F
   
 C1964jsVideoHLE::getCombineD0 = (pc) ->
-  #((@core.memory.rdramUint8Array[pc+4] << 24 | @core.memory.rdramUint8Array[pc+5] << 16 | @core.memory.rdramUint8Array[pc+6] << 8 | @core.memory.rdramUint8Array[pc+7]) >> 15) & 0x07
-  ((@core.memory.rdramUint8Array[pc+5] << 1 ) & 0x6) | ((@core.memory.rdramUint8Array[pc+6] & 0x80) >>> 7)
+  ((@core.memory.rdramUint8Array[pc+4] << 24 | @core.memory.rdramUint8Array[pc+5] << 16 | @core.memory.rdramUint8Array[pc+6] << 8 | @core.memory.rdramUint8Array[pc+7]) >> 15) & 0x07
 
 C1964jsVideoHLE::getCombineA0a = (pc) ->
   ((@core.memory.rdramUint8Array[pc] << 24 | @core.memory.rdramUint8Array[pc+1] << 16 | @core.memory.rdramUint8Array[pc+2] << 8 | @core.memory.rdramUint8Array[pc+3]) >> 12) & 0x07
@@ -266,10 +259,10 @@ C1964jsVideoHLE::getRspSegmentAddr = (seg) ->
 
 
 C1964jsVideoHLE::getOtherModeL = (pc) ->
-  (@core.memory.rdramUint8Array[pc] << 24 | @core.memory.rdramUint8Array[pc + 1] << 16 | @core.memory.rdramUint8Array[pc + 2] << 8 | @core.memory.rdramUint8Array[pc + 3]) & 0x00FF
+  (@core.memory.rdramUint8Array[pc] << 24 | @core.memory.rdramUint8Array[pc + 1] << 16 | @core.memory.rdramUint8Array[pc + 2] << 8 | @core.memory.rdramUint8Array[pc + 3])
 
 C1964jsVideoHLE::getOtherModeH = (pc) ->
-  @core.memory.getInt32(@core.memory.rdramUint8Array, pc+4) & 0x00FF
+  (@core.memory.rdramUint8Array[pc] << 24 | @core.memory.rdramUint8Array[pc + 1] << 16 | @core.memory.rdramUint8Array[pc + 2] << 8 | @core.memory.rdramUint8Array[pc + 3])
 
 #
 #typedef struct {

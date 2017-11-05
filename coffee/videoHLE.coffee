@@ -72,10 +72,11 @@ C1964jsVideoHLE = (core, glx) ->
   @blendColor = []
   @envColor = []
   @triVertices = new Float32Array(16384)
-  @triColorVertices = new Int8Array(16384)
+  @triColorVertices = new Uint8Array(16384)
   @triTextureCoords = new Float32Array(16384)
-  @otherModeL = 0
+  @otherModeL = 0x00500001
   @otherModeH = 0
+  @cycleType = 0
 
   #todo: different microcodes support
   @currentMicrocodeMap = @microcodeMap0
@@ -462,13 +463,23 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::RSP_GBI1_SetOtherModeH = (pc) ->
     #@videoLog "TODO: DLParser_GBI1_SetOtherModeH"
-    @otherModeH = @getOtherModeH()
+    word0 = @getOtherModeH pc
+    length = word0 & 0xFF
+    shift = ((word0 >>> 8) & 0xFF) - length
+    mask = ((1<<length)-1)<<shift
+    @otherModeH &= ~mask
+    @otherModeH |= @getOtherModeH pc+4
     #alert @otherModeH
     return
 
   C1964jsVideoHLE::RSP_GBI1_SetOtherModeL = (pc) ->
     #@videoLog "TODO: DLParser_GBI1_SetOtherModeL"
-    @otherModeL = @getOtherModeL()
+    word0 = @getOtherModeL pc
+    length = word0 & 0xFF
+    shift = ((word0 >>> 8) & 0xFF) - length
+    mask = ((1<<length)-1)<<shift
+    @otherModeL &= ~mask
+    @otherModeL |= @getOtherModeL pc+4
     #alert dec2hex @otherModeL
     return
 
@@ -544,14 +555,15 @@ C1964jsVideoHLE = (core, glx) ->
     if didSucceed is false
       return
 
-    cmd = @getCommand(pc+8)
-    func = @currentMicrocodeMap[cmd]
+    #cmd = @getCommand(pc+8)
+    #func = @currentMicrocodeMap[cmd]
 
  #   @drawScene(false, 7)
 
   #  if func isnt "RSP_GBI1_Tri1"
   #    @drawScene false, 7
 
+    @setBlendFunc()
     return
 
   C1964jsVideoHLE::RSP_GBI1_Noop = (pc) ->
@@ -713,10 +725,10 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::DLParser_SetFillColor = (pc) ->
     @fillColor = []
-    @fillColor.push @getSetFillColorR(pc)/255.0;
-    @fillColor.push @getSetFillColorG(pc)/255.0;
-    @fillColor.push @getSetFillColorB(pc)/255.0;
-    @fillColor.push @getSetFillColorA(pc)/255.0;
+    @fillColor.push @getSetFillColorR(pc)/255.0
+    @fillColor.push @getSetFillColorG(pc)/255.0
+    @fillColor.push @getSetFillColorB(pc)/255.0
+    @fillColor.push @getSetFillColorA(pc)/255.0
 
     #@videoLog "TODO: DLParser_SetFillColor"
     return
@@ -739,20 +751,20 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::DLParser_SetPrimColor = (pc) ->
     @primColor = []
-    @primColor.push (@getSetPrimColorR(pc))/255;
-    @primColor.push (@getSetPrimColorG(pc))/255;
-    @primColor.push (@getSetPrimColorB(pc))/255;
-    @primColor.push @getSetPrimColorA(pc)/255;
+    @primColor.push @getSetPrimColorR(pc)/255.0
+    @primColor.push @getSetPrimColorG(pc)/255.0
+    @primColor.push @getSetPrimColorB(pc)/255.0
+    @primColor.push @getSetPrimColorA(pc)/255.0
     #alert @primColor
     #@videoLog "TODO: DLParser_SetPrimColor"
     return
 
   C1964jsVideoHLE::DLParser_SetEnvColor = (pc) ->
     @envColor = []
-    @envColor.push (@getSetEnvColorR(pc))/255.0;
-    @envColor.push (@getSetEnvColorG(pc))/255.0;
-    @envColor.push (@getSetEnvColorB(pc))/255.0;
-    @envColor.push @getSetEnvColorA(pc)/255.0;
+    @envColor.push @getSetEnvColorR(pc)/255.0
+    @envColor.push @getSetEnvColorG(pc)/255.0
+    @envColor.push @getSetEnvColorB(pc)/255.0
+    @envColor.push @getSetEnvColorA(pc)/255.0
 
     #@videoLog "TODO: DLParser_SetEnvColor"
     return
@@ -780,7 +792,6 @@ C1964jsVideoHLE = (core, glx) ->
     @triVertices[offset+1] = @N64VertexList[dwV].y
     @triVertices[offset+2] = @N64VertexList[dwV].z - 2.0
 
-
     @triangleVertexPositionBuffer.numItems += 1
 
     colorOffset = @triangleVertexColorBuffer.numItems << 2
@@ -798,345 +809,239 @@ C1964jsVideoHLE = (core, glx) ->
 
 #TODO: Port this code for blend modes
 
-#    C1964jsVideoHLE::initBlenderMode = (blendMode1, blendMode2, cycleType) ->
-#void CBlender::InitBlenderMode(void)          // Set Alpha Blender mode {
-#  //1. Z_COMPARE        -- Enable / Disable Zbuffer compare, SetRenderState( D3DRS_ZENABLE )
-#  //  1   -   Enable ZBuffer
-#  //  0   -   Disable ZBuffer
+  C1964jsVideoHLE::setBlendFunc = () ->
+    CYCLE_TYPE_1 = 0
+    CYCLE_TYPE_2 = 1
+    CYCLE_TYPE_COPY = 2
+    CYCLE_TYPE_FILL = 3
+    CVG_DST_CLAMP = 0
+    CVG_DST_WRAP = 0x100
+    CVG_DST_FULL = 0x200
+    CVG_DST_SAVE = 0x300
+    BLEND_NOOP = 0x0000
+    BLEND_NOOP5 = 0xcc48
+    BLEND_NOOP4 = 0xcc08
+    BLEND_FOG_ASHADE = 0xc800
+    BLEND_FOG_3 = 0xc000
+    BLEND_FOG_MEM = 0xc440
+    BLEND_FOG_APRIM = 0xc400
+    BLEND_BLENDCOLOR = 0x8c88
+    BLEND_BI_AFOG = 0x8400
+    BLEND_BI_AIN = 0x8040
+    BLEND_MEM = 0x4c40
+    BLEND_FOG_MEM_3 = 0x44c0
+    BLEND_NOOP3 = 0x0c48
+    BLEND_PASS = 0x0c08
+    BLEND_FOG_MEM_IN_MEM = 0x0440
+    BLEND_FOG_MEM_FOG_MEM = 0x04c0
+    BLEND_OPA = 0x0044
+    BLEND_XLU = 0x0040
+    BLEND_MEM_ALPHA_IN = 0x4044
 
-#  //2. Z_UPDATE        -- Enable / Disable Zbuffer update, SetRenderState( D3DRS_ZWRITEENABLE )
-#  //  1   -   Enable ZBuffer writeable
-#  //  0   -   Zbuffer not writeable
+    blendMode1 = @otherModeL >>> 16 & 0xCCCC
+    blendMode2 = @otherModeL >>> 16 & 0x3333
+    @cycleType = @otherModeH >> 20 & 0x3
 
-#  //3. AA_EN and IM_RD        -- Anti-Alias
-#  //  AA_EN           -   Enable anti-aliase
-#  //  AA_EN | IM_RD   -   Reduced anti-aliase
-#  //  IM_RD           -   ??
-#  //  -               -   Disable anti-aliase
+    switch @cycleType
+      when CYCLE_TYPE_FILL
+        @gl.disable @gl.BLEND
+      when CYCLE_TYPE_COPY
+        @gl.enable @gl.BLEND
+        gl.blendFunc @gl.ONE, @gl.ZERO
+      when CYCLE_TYPE_2
+        forceBl = @otherModeL >> 14 & 0x1
+        zCmp = @otherModeL >> 4 & 0x1
+        if forceBl is 1 and zCmp is 1
+          @gl.blendFunc @gl.SRC_ALPHA, @gl.ONE_MINUS_SRC_ALPHA
+          @gl.enable @gl.BLEND
+    #    /*
+    #    else if( gRDP.otherMode.alpha_cvg_sel && gRDP.otherMode.cvg_x_alpha==0 )
+    #    {
+    #      BlendFunc(D3DBLEND_ONE, D3DBLEND_ZERO);
+    #      Enable();
+    #      break;
+    #    }
+    #    */
+        else switch blendMode1+blendMode2
+          when (BLEND_PASS+(BLEND_PASS>>2)) || (BLEND_FOG_APRIM+(BLEND_PASS>>2))
+            @gl.blendFunc @gl.ONE, @gl.ZERO
+            @gl.enable @gl.blendFunc
+    #       if( gRDP.otherMode.alpha_cvg_sel )
+    #       {
+    #         Enable();
+    #       }
+    #       else
+    #       {
+    #         Enable();
+    #       }
+    #       break;
+    #     when BLEND_PASS+(BLEND_OPA>>2):
+    #       // 0x0c19
+    #       // Cycle1:  In * 0 + In * 1
+    #       // Cycle2:  In * AIn + Mem * AMem
+    #       if( gRDP.otherMode.cvg_x_alpha && gRDP.otherMode.alpha_cvg_sel )
+    #       {
+    #         BlendFunc(D3DBLEND_SRCALPHA, D3DBLEND_INVSRCALPHA);
+    #         Enable();
+    #       }
+    #       else
+    #       {
+    #         BlendFunc(D3DBLEND_ONE, D3DBLEND_ZERO);
+    #         Enable();
+    #       }
+    #       break;
+    #     when BLEND_PASS + (BLEND_XLU>>2):
+    #       // 0x0c18
+    #       // Cycle1:  In * 0 + In * 1
+    #       // Cycle2:  In * AIn + Mem * 1-A
+    #     when BLEND_FOG_ASHADE + (BLEND_XLU>>2):
+    #       //Cycle1: Fog * AShade + In * 1-A
+    #       //Cycle2: In * AIn + Mem * 1-A  
+    #     when BLEND_FOG_APRIM + (BLEND_XLU>>2):
+    #       //Cycle1: Fog * AFog + In * 1-A
+    #       //Cycle2: In * AIn + Mem * 1-A  
+    #     //when BLEND_FOG_MEM_FOG_MEM + (BLEND_OPA>>2):
+    #       //Cycle1: In * AFog + Fog * 1-A
+    #       //Cycle2: In * AIn + Mem * AMem 
+    #     when BLEND_FOG_MEM_FOG_MEM + (BLEND_PASS>>2):
+    #       //Cycle1: In * AFog + Fog * 1-A
+    #       //Cycle2: In * 0 + In * 1
+    #     when BLEND_XLU + (BLEND_XLU>>2):
+    #       //Cycle1: Fog * AFog + In * 1-A
+    #       //Cycle2: In * AIn + Mem * 1-A  
+    #     when BLEND_BI_AFOG + (BLEND_XLU>>2):
+    #       //Cycle1: Bl * AFog + In * 1-A
+    #       //Cycle2: In * AIn + Mem * 1-A  
+    #     when BLEND_XLU + (BLEND_FOG_MEM_IN_MEM>>2):
+    #       //Cycle1: In * AIn + Mem * 1-A
+    #       //Cycle2: In * AFog + Mem * 1-A 
+    #     when BLEND_PASS + (BLEND_FOG_MEM_IN_MEM>>2):
+    #       //Cycle1: In * 0 + In * 1
+    #       //Cycle2: In * AFog + Mem * 1-A 
+    #       BlendFunc(D3DBLEND_SRCALPHA, D3DBLEND_INVSRCALPHA);
+    #       Enable();
+    #       break;
+    #     when BLEND_FOG_MEM_FOG_MEM + (BLEND_OPA>>2):
+    #       //Cycle1: In * AFog + Fog * 1-A
+    #       //Cycle2: In * AIn + Mem * AMem 
+    #       BlendFunc(D3DBLEND_ONE, D3DBLEND_ZERO);
+    #       Enable();
+    #       break;
 
-#  //4.  ZMode       
-#  //  #define ZMODE_OPA 0           -- Usually used with Z_COMPARE and Z_UPDATE
-#  //                         or used without neither Z_COMPARE or Z_UPDATE
-#  //                         if used with Z_COMPARE and Z_UPDATE, then this is
-#  //                         the regular ZBuffer mode, with compare and update
-#  //  #define ZMODE_INTER 0x400
-#  //  #define ZMODE_XLU 0x800       -- Usually used with Z_COMPARE, but not with Z_UPDATE
-#  //                         Do only compare, no zbuffer update.
-#  //                         Not output if the z value is the same
-#  //  #define ZMODE_DEC 0xc00       -- Usually used with Z_COMPARE, but not with Z_UPDATE
-#  //                         Do only compare, no update, but because this is
-#  //                         decal mode, so image should be updated even
-#  //                         the z value is the same as compared.
-
-#  CRender *render = CRender::g_pRender;
-
-#  //  Alpha Blender Modes 
-
-#  /*
-#6. FORCE_BL     - Alpha blending at blender stage
-#    1   -   Enable alpha blending at blender
-#    0   -   Disable alpha blending at blender
-
-#    Alpha blending at blender is usually used to render XLU surface
-#    if enabled, then use the blending setting of C1 and C2
-
-#7. ALPHA_CVG_SEL    - Output full alpha from the color combiner, usually not used together
-#                      with FORCE_BL. If it is used together with FORCE_BL, then ignore this
-
-#8. CVG_X_ALPHA      - Before output the color from color combiner, mod it with alpha
-
-#9. TEX_EDGE         - Ignore this
-
-#10.CLR_ON_CVG       - Used with XLU surfaces, ignore it
-
-#11.CVG_DST
-#define CVG_DST_CLAMP 0           -   Usually used with OPA surface
-#define CVG_DST_WRAP  0x100       -   Usually used with XLU surface or OPA line
-#define CVG_DST_FULL  0x200       -   ?
-#define CVG_DST_SAVE  0x300       -   ?
-
-
-#Possible Blending Inputs:
-
-#    In  -   Input from color combiner
-#    Mem -   Input from current frame buffer
-#    Fog -   Fog generator
-#    BL  -   Blender
-
-#Possible Blending Factors:
-#    A-IN    -   Alpha from color combiner
-#    A-MEM   -   Alpha from current frame buffer
-#    (1-A)   -   
-#    A-FOG   -   Alpha of fog color
-#    A-SHADE -   Alpha of shade
-#    1   -   1
-#    0   -   0
-#*/
-#define BLEND_NOOP        0x0000
-
-#define BLEND_NOOP5       0xcc48  // Fog * 0 + Mem * 1
-#define BLEND_NOOP4       0xcc08  // Fog * 0 + In * 1
-#define BLEND_FOG_ASHADE    0xc800
-#define BLEND_FOG_3       0xc000  // Fog * AIn + In * 1-A
-#define BLEND_FOG_MEM     0xc440  // Fog * AFog + Mem * 1-A
-#define BLEND_FOG_APRIM     0xc400  // Fog * AFog + In * 1-A
-
-#define BLEND_BLENDCOLOR    0x8c88
-#define BLEND_BI_AFOG     0x8400  // Bl * AFog + In * 1-A
-#define BLEND_BI_AIN      0x8040  // Bl * AIn + Mem * 1-A
-
-#define BLEND_MEM       0x4c40  // Mem*0 + Mem*(1-0)?!
-#define BLEND_FOG_MEM_3     0x44c0  // Mem * AFog + Fog * 1-A
-
-#define BLEND_NOOP3       0x0c48  // In * 0 + Mem * 1
-#define BLEND_PASS        0x0c08  // In * 0 + In * 1
-#define BLEND_FOG_MEM_IN_MEM  0x0440  // In * AFog + Mem * 1-A
-#define BLEND_FOG_MEM_FOG_MEM 0x04c0  // In * AFog + Fog * 1-A
-#define BLEND_OPA       0x0044  //  In * AIn + Mem * AMem
-#define BLEND_XLU       0x0040
-#define BLEND_MEM_ALPHA_IN    0x4044  //  Mem * AIn + Mem * AMem
-
-
-#  uint32 blendmode_1 = uint32( gRDP.otherMode.blender & 0xcccc );
-#  uint32 blendmode_2 = uint32( gRDP.otherMode.blender & 0x3333 );
-#  uint32 cycletype = gRDP.otherMode.cycle_type;
-
-#  switch( cycletype )
-#  {
-#  case CYCLE_TYPE_FILL:
-#    //BlendFunc(D3DBLEND_ONE, D3DBLEND_ZERO);
-#    //Enable();
-#    Disable();
-#    break;
-#  case CYCLE_TYPE_COPY:
-#    //Disable();
-#    BlendFunc(D3DBLEND_ONE, D3DBLEND_ZERO);
-#    Enable();
-#    break;
-#  case CYCLE_TYPE_2:
-#    if( gRDP.otherMode.force_bl && gRDP.otherMode.z_cmp )
-#    {
-#      BlendFunc(D3DBLEND_SRCALPHA, D3DBLEND_INVSRCALPHA);
-#      Enable();
-#      break;
-#    }
-
-#    /*
-#    if( gRDP.otherMode.alpha_cvg_sel && gRDP.otherMode.cvg_x_alpha==0 )
-#    {
-#      BlendFunc(D3DBLEND_ONE, D3DBLEND_ZERO);
-#      Enable();
-#      break;
-#    }
-#    */
-
-#    switch( blendmode_1+blendmode_2 )
-#    {
-#    case BLEND_PASS+(BLEND_PASS>>2):  // In * 0 + In * 1
-#    case BLEND_FOG_APRIM+(BLEND_PASS>>2):
-#      BlendFunc(D3DBLEND_ONE, D3DBLEND_ZERO);
-#      if( gRDP.otherMode.alpha_cvg_sel )
-#      {
-#        Enable();
-#      }
-#      else
-#      {
-#        Enable();
-#      }
-#      break;
-#    case BLEND_PASS+(BLEND_OPA>>2):
-#      // 0x0c19
-#      // Cycle1:  In * 0 + In * 1
-#      // Cycle2:  In * AIn + Mem * AMem
-#      if( gRDP.otherMode.cvg_x_alpha && gRDP.otherMode.alpha_cvg_sel )
-#      {
-#        BlendFunc(D3DBLEND_SRCALPHA, D3DBLEND_INVSRCALPHA);
-#        Enable();
-#      }
-#      else
-#      {
-#        BlendFunc(D3DBLEND_ONE, D3DBLEND_ZERO);
-#        Enable();
-#      }
-#      break;
-#    case BLEND_PASS + (BLEND_XLU>>2):
-#      // 0x0c18
-#      // Cycle1:  In * 0 + In * 1
-#      // Cycle2:  In * AIn + Mem * 1-A
-#    case BLEND_FOG_ASHADE + (BLEND_XLU>>2):
-#      //Cycle1: Fog * AShade + In * 1-A
-#      //Cycle2: In * AIn + Mem * 1-A  
-#    case BLEND_FOG_APRIM + (BLEND_XLU>>2):
-#      //Cycle1: Fog * AFog + In * 1-A
-#      //Cycle2: In * AIn + Mem * 1-A  
-#    //case BLEND_FOG_MEM_FOG_MEM + (BLEND_OPA>>2):
-#      //Cycle1: In * AFog + Fog * 1-A
-#      //Cycle2: In * AIn + Mem * AMem 
-#    case BLEND_FOG_MEM_FOG_MEM + (BLEND_PASS>>2):
-#      //Cycle1: In * AFog + Fog * 1-A
-#      //Cycle2: In * 0 + In * 1
-#    case BLEND_XLU + (BLEND_XLU>>2):
-#      //Cycle1: Fog * AFog + In * 1-A
-#      //Cycle2: In * AIn + Mem * 1-A  
-#    case BLEND_BI_AFOG + (BLEND_XLU>>2):
-#      //Cycle1: Bl * AFog + In * 1-A
-#      //Cycle2: In * AIn + Mem * 1-A  
-#    case BLEND_XLU + (BLEND_FOG_MEM_IN_MEM>>2):
-#      //Cycle1: In * AIn + Mem * 1-A
-#      //Cycle2: In * AFog + Mem * 1-A 
-#    case BLEND_PASS + (BLEND_FOG_MEM_IN_MEM>>2):
-#      //Cycle1: In * 0 + In * 1
-#      //Cycle2: In * AFog + Mem * 1-A 
-#      BlendFunc(D3DBLEND_SRCALPHA, D3DBLEND_INVSRCALPHA);
-#      Enable();
-#      break;
-#    case BLEND_FOG_MEM_FOG_MEM + (BLEND_OPA>>2):
-#      //Cycle1: In * AFog + Fog * 1-A
-#      //Cycle2: In * AIn + Mem * AMem 
-#      BlendFunc(D3DBLEND_ONE, D3DBLEND_ZERO);
-#      Enable();
-#      break;
-
-#    case BLEND_FOG_APRIM + (BLEND_OPA>>2):
-#      // For Golden Eye
-#      //Cycle1: Fog * AFog + In * 1-A
-#      //Cycle2: In * AIn + Mem * AMem 
-#    case BLEND_FOG_ASHADE + (BLEND_OPA>>2):
-#      //Cycle1: Fog * AShade + In * 1-A
-#      //Cycle2: In * AIn + Mem * AMem 
-#    case BLEND_BI_AFOG + (BLEND_OPA>>2):
-#      //Cycle1: Bl * AFog + In * 1-A
-#      //Cycle2: In * AIn + Mem * 1-AMem 
-#    case BLEND_FOG_ASHADE + (BLEND_NOOP>>2):
-#      //Cycle1: Fog * AShade + In * 1-A
-#      //Cycle2: In * AIn + In * 1-A
-#    case BLEND_NOOP + (BLEND_OPA>>2):
-#      //Cycle1: In * AIn + In * 1-A
-#      //Cycle2: In * AIn + Mem * AMem
-#    case BLEND_NOOP4 + (BLEND_NOOP>>2):
-#      //Cycle1: Fog * AIn + In * 1-A
-#      //Cycle2: In * 0 + In * 1
-#    case BLEND_FOG_ASHADE+(BLEND_PASS>>2):
-#      //Cycle1: Fog * AShade + In * 1-A
-#      //Cycle2: In * 0 + In * 1
-#    case BLEND_FOG_3+(BLEND_PASS>>2):
-#      BlendFunc(D3DBLEND_ONE, D3DBLEND_ZERO);
-#      Enable();
-#      break;
-#    case BLEND_FOG_ASHADE+0x0301:
-#      // c800 - Cycle1: Fog * AShade + In * 1-A
-#      // 0301 - Cycle2: In * 0 + In * AMem
-#      BlendFunc(D3DBLEND_SRCALPHA, D3DBLEND_ZERO);
-#      Enable();
-#      break;
-#   case 0x0c08+0x1111:
-#      // 0c08 - Cycle1: In * 0 + In * 1
-#      // 1111 - Cycle2: Mem * AFog + Mem * AMem
-#      BlendFunc(D3DBLEND_ZERO, D3DBLEND_DESTALPHA);
-#      Enable();
-#      break;
-#    default:
-#      if( blendmode_2 == (BLEND_PASS>>2) )
-#      {
-#        BlendFunc(D3DBLEND_ONE, D3DBLEND_ZERO);
-#      }
-#      else
-#      {
-#        BlendFunc(D3DBLEND_SRCALPHA, D3DBLEND_INVSRCALPHA);
-#      }
-#      Enable();
-#      break;
-#    }
-#    break;
-#  default:  // 1/2 Cycle or Copy
-#    if( gRDP.otherMode.force_bl && gRDP.otherMode.z_cmp && blendmode_1 != BLEND_FOG_ASHADE )
-#    {
-#      BlendFunc(D3DBLEND_SRCALPHA, D3DBLEND_INVSRCALPHA);
-#      Enable();
-#      break;
-#    }
-#    if( gRDP.otherMode.force_bl && options.enableHackForGames == HACK_FOR_COMMANDCONQUER )
-#    {
-#      BlendFunc(D3DBLEND_SRCALPHA, D3DBLEND_INVSRCALPHA);
-#      Enable();
-#      break;
-#    }
-
-#    switch ( blendmode_1 )
-#    //switch ( blendmode_2<<2 )
-#    {
-#    case BLEND_XLU: // IN * A_IN + MEM * (1-A_IN)
-#    case BLEND_BI_AIN:  // Bl * AIn + Mem * 1-A
-#    case BLEND_FOG_MEM: // c440 - Cycle1: Fog * AFog + Mem * 1-A
-#    case BLEND_FOG_MEM_IN_MEM:  // c440 - Cycle1: In * AFog + Mem * 1-A
-#    case BLEND_BLENDCOLOR:  //Bl * 0 + Bl * 1
-#    case 0x00c0:  //In * AIn + Fog * 1-A
-#      BlendFunc(D3DBLEND_SRCALPHA, D3DBLEND_INVSRCALPHA);
-#      Enable();
-#      break;
-#    case BLEND_MEM_ALPHA_IN:  //  Mem * AIn + Mem * AMem
-#      BlendFunc(D3DBLEND_ZERO, D3DBLEND_DESTALPHA);
-#      Enable();
-#      break;
-#    case BLEND_PASS:  // IN * 0 + IN * 1
-#      BlendFunc(D3DBLEND_ONE, D3DBLEND_ZERO);
-#      if( gRDP.otherMode.alpha_cvg_sel )
-#      {
-#        Enable();
-#      }
-#      else
-#      {
-#        Disable();
-#      }
-#      break;
-#    case BLEND_OPA:   // IN * A_IN + MEM * A_MEM
-#      if( options.enableHackForGames == HACK_FOR_MARIO_TENNIS )
-#      {
-#        BlendFunc(D3DBLEND_SRCALPHA, D3DBLEND_INVSRCALPHA);
-#      }
-#      else
-#      {
-#        BlendFunc(D3DBLEND_ONE, D3DBLEND_ZERO);
-#      }
-#      Enable();
-#      break;
-#    case BLEND_NOOP:    // IN * A_IN + IN * (1 - A_IN)
-#    case BLEND_FOG_ASHADE:  // Fog * AShade + In * 1-A
-#    case BLEND_FOG_MEM_3: // Mem * AFog + Fog * 1-A
-#    case BLEND_BI_AFOG:   // Bl * AFog + In * 1-A
-#      BlendFunc(D3DBLEND_ONE, D3DBLEND_ZERO);
-#      Enable();
-#      break;
-#    case BLEND_FOG_APRIM: // Fog * AFog + In * 1-A
-#      BlendFunc(D3DBLEND_INVSRCALPHA, D3DBLEND_ZERO);
-#      Enable();
-#      break;
-#    case BLEND_NOOP3:   // In * 0 + Mem * 1
-#    case BLEND_NOOP5:   // Fog * 0 + Mem * 1
-#      BlendFunc(D3DBLEND_ZERO, D3DBLEND_ONE);
-#      Enable();
-#      break;
-#    case BLEND_MEM:   // Mem * 0 + Mem * 1-A
-#      // WaveRace
-#      BlendFunc(D3DBLEND_ZERO, D3DBLEND_ONE);
-#      Enable();
-#      break;
-#    default:
-#      BlendFunc(D3DBLEND_SRCALPHA, D3DBLEND_INVSRCALPHA);
-#      Enable();
-#      render->SetAlphaTestEnable(TRUE);
-#      break;
-#    }
-#  }
-#      return
+    #     when BLEND_FOG_APRIM + (BLEND_OPA>>2):
+    #       // For Golden Eye
+    #       //Cycle1: Fog * AFog + In * 1-A
+    #       //Cycle2: In * AIn + Mem * AMem 
+    #     when BLEND_FOG_ASHADE + (BLEND_OPA>>2):
+    #       //Cycle1: Fog * AShade + In * 1-A
+    #       //Cycle2: In * AIn + Mem * AMem 
+    #     when BLEND_BI_AFOG + (BLEND_OPA>>2):
+    #       //Cycle1: Bl * AFog + In * 1-A
+    #       //Cycle2: In * AIn + Mem * 1-AMem 
+    #     when BLEND_FOG_ASHADE + (BLEND_NOOP>>2):
+    #       //Cycle1: Fog * AShade + In * 1-A
+    #       //Cycle2: In * AIn + In * 1-A
+    #     when BLEND_NOOP + (BLEND_OPA>>2):
+    #       //Cycle1: In * AIn + In * 1-A
+    #       //Cycle2: In * AIn + Mem * AMem
+    #     when BLEND_NOOP4 + (BLEND_NOOP>>2):
+    #       //Cycle1: Fog * AIn + In * 1-A
+    #       //Cycle2: In * 0 + In * 1
+    #     when BLEND_FOG_ASHADE+(BLEND_PASS>>2):
+    #       //Cycle1: Fog * AShade + In * 1-A
+    #       //Cycle2: In * 0 + In * 1
+    #     when BLEND_FOG_3+(BLEND_PASS>>2):
+    #       BlendFunc(D3DBLEND_ONE, D3DBLEND_ZERO);
+    #       Enable();
+    #       break;
+    #     when BLEND_FOG_ASHADE+0x0301:
+    #       // c800 - Cycle1: Fog * AShade + In * 1-A
+    #       // 0301 - Cycle2: In * 0 + In * AMem
+    #       BlendFunc(D3DBLEND_SRCALPHA, D3DBLEND_ZERO);
+    #       Enable();
+    #       break;
+          when 0x0c08+0x1111
+            # 0c08 - Cycle1: In * 0 + In * 1
+            # 1111 - Cycle2: Mem * AFog + Mem * AMem
+            @gl.blendFunc @gl.ZERO, @gl.DEST_ALPHA
+            @gl.enable @gl.BLEND
+          else
+            if blendMode2 == BLEND_PASS>>2
+              @gl.blendFunc @gl.ONE, @g.ZERO
+            else
+              @gl.blendFunc  @gl.SRC_ALPHA, @gl.ONE_MINUS_SRC_ALPHA
+            @gl.enable @gl.BLEND
+      else  # 1/2 Cycle or Copy
+    #    if( gRDP.otherMode.force_bl && gRDP.otherMode.z_cmp && blendmode_1 != BLEND_FOG_ASHADE )
+    #    {
+    #      BlendFunc(D3DBLEND_SRCALPHA, D3DBLEND_INVSRCALPHA);
+    #      Enable();
+    #      break;
+    #    }
+    #    if( gRDP.otherMode.force_bl && options.enableHackForGames == HACK_FOR_COMMANDCONQUER )
+    #    {
+    #      BlendFunc(D3DBLEND_SRCALPHA, D3DBLEND_INVSRCALPHA);
+    #      Enable();
+    #      break;
+    #    }
+        switch blendMode1
+    #    //switch ( blendmode_2<<2 )
+          when BLEND_XLU || BLEND_BI_AIN || BLEND_FOG_MEM || BLEND_FOG_MEM_IN_MEM || BLEND_BLENDCOLOR || 0x00c0
+            @gl.blendFunc @gl.SRC_ALPHA, @gl.ONE_MINUS_SRC_ALPHA
+            @gl.enable @gl.BLEND
+          when BLEND_MEM_ALPHA_IN
+            @gl.blendFunc @gl.ZERO, @gl.DEST_ALPHA
+            @gl.enable @gl.BLEND
+      #   when BLEND_PASS:  // IN * 0 + IN * 1
+      #     BlendFunc(D3DBLEND_ONE, D3DBLEND_ZERO);
+      #     if( gRDP.otherMode.alpha_cvg_sel )
+      #     {
+      #       Enable();
+      #     }
+      #     else
+      #     {
+      #       Disable();
+      #     }
+      #     break;
+      #   when BLEND_OPA:   // IN * A_IN + MEM * A_MEM
+      #     if( options.enableHackForGames == HACK_FOR_MARIO_TENNIS )
+      #     {
+      #       BlendFunc(D3DBLEND_SRCALPHA, D3DBLEND_INVSRCALPHA);
+      #     }
+      #     else
+      #     {
+      #       BlendFunc(D3DBLEND_ONE, D3DBLEND_ZERO);
+      #     }
+      #     Enable();
+      #     break;
+          when BLEND_NOOP || BLEND_FOG_ASHADE || BLEND_FOG_MEM_3 || BLEND_BI_AFOG
+            @gl.blendFunc @gl.ONE, @gl.ZERO
+            @gl.enable @gl.BLEND
+          when BLEND_FOG_APRIM
+            @gl.blendFunc @gl.ONE_MINUS_SRC_ALPHA, @gl.ZERO
+            @gl.enable @gl.BLEND
+          when BLEND_NOOP3 || BLEND_NOOP5
+            @gl.blendFunc @gl.ZERO, @gl.ONE
+            @gl.enable @gl.BLEND
+          when BLEND_MEM
+            # WaveRace
+            @gl.blendFunc @gl.ZERO, @gl.ONE
+            @gl.blendEquation @gl.FUNC_ADD
+            @gl.enable @gl.BLEND
+          else
+            @gl.blendFunc @gl.SRC_ALPHA, @gl.ONE_MINUS_SRC_ALPHA
+            @gl.blendEquation @gl.FUNC_ADD
+            @gl.enable @gl.BLEND
+            #render->SetAlphaTestEnable(TRUE);
+    return
 
   C1964jsVideoHLE::drawScene = (useTexture, tileno) ->
     @gl.useProgram @core.webGL.shaderProgram
 
     @gl.enable @gl.DEPTH_TEST
     @gl.depthFunc(@gl.LEQUAL);
-    @gl.enable @gl.BLEND
-    @gl.blendFunc @gl.SRC_ALPHA, @gl.GL_ONE_MINUS_DST_ALPHA
+    #@gl.enable @gl.BLEND
+    #@gl.blendFunc @gl.SRC_ALPHA, @gl.ONE_MINUS_SRC_ALPHA
     
     if @triangleVertexPositionBuffer.numItems > 0
       @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexPositionBuffer
@@ -1177,10 +1082,11 @@ C1964jsVideoHLE = (core, glx) ->
       @gl.uniform4fv @core.webGL.shaderProgram.uEnvColor, @envColor  
 
     if @blendColor.length > 0
-      @gl.uniform4iv @core.webGL.shaderProgram.uBlendColor, @blendColor  
+      @gl.uniform4fv @core.webGL.shaderProgram.uBlendColor, @blendColor  
 
-    @gl.uniform1i @core.webGL.shaderProgram.otherModeL, @otherModeL
-    @gl.uniform1i @core.webGL.shaderProgram.otherModeH, @otherModeH
+    #@gl.uniform1i @core.webGL.shaderProgram.otherModeL, @otherModeL
+    #@gl.uniform1i @core.webGL.shaderProgram.otherModeH, @otherModeH
+    @gl.uniform1i @core.webGL.shaderProgram.cycleType, @cycleType
 
     @core.webGL.setCombineUniforms @core.webGL.shaderProgram
 
@@ -1203,6 +1109,8 @@ C1964jsVideoHLE = (core, glx) ->
     @triangleVertexPositionBuffer.numItems = 0
     @triangleVertexColorBuffer.numItems = 0
     @triangleVertexTextureCoordBuffer.numItems = 0
+    @otherModeL = 0x00500001
+    @otherModeH = 0
     return
 
   C1964jsVideoHLE::initBuffers = ->
