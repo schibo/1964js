@@ -851,17 +851,15 @@ C1964jsVideoHLE = (core, glx) ->
       when CYCLE_TYPE_2
         forceBl = @otherModeL >> 14 & 0x1
         zCmp = @otherModeL >> 4 & 0x1
+        alphaCvgSel = @otherModeL >> 13 & 0x1
+        cvgXAlpha = @otherModeL >> 12 & 0x1
+
         if forceBl is 1 and zCmp is 1
           @gl.blendFunc @gl.SRC_ALPHA, @gl.ONE_MINUS_SRC_ALPHA
           @gl.enable @gl.BLEND
-    #    /*
-    #    else if( gRDP.otherMode.alpha_cvg_sel && gRDP.otherMode.cvg_x_alpha==0 )
-    #    {
-    #      BlendFunc(D3DBLEND_ONE, D3DBLEND_ZERO);
-    #      Enable();
-    #      break;
-    #    }
-    #    */
+        else if alphaCvgSel is 1 && cvgXAlpha is 0
+          @gl.blendFunc @gl.ONE, @gl.ZERO
+          @gl.enable @gl.BLEND
         else switch blendMode1+blendMode2
           when (BLEND_PASS+(BLEND_PASS>>2)) || (BLEND_FOG_APRIM+(BLEND_PASS>>2))
             @gl.blendFunc @gl.ONE, @gl.ZERO
@@ -875,21 +873,13 @@ C1964jsVideoHLE = (core, glx) ->
     #         Enable();
     #       }
     #       break;
-    #     when BLEND_PASS+(BLEND_OPA>>2):
-    #       // 0x0c19
-    #       // Cycle1:  In * 0 + In * 1
-    #       // Cycle2:  In * AIn + Mem * AMem
-    #       if( gRDP.otherMode.cvg_x_alpha && gRDP.otherMode.alpha_cvg_sel )
-    #       {
-    #         BlendFunc(D3DBLEND_SRCALPHA, D3DBLEND_INVSRCALPHA);
-    #         Enable();
-    #       }
-    #       else
-    #       {
-    #         BlendFunc(D3DBLEND_ONE, D3DBLEND_ZERO);
-    #         Enable();
-    #       }
-    #       break;
+          when BLEND_PASS+(BLEND_OPA>>2)
+            if cvgXAlpha is 1 and alphaCvgSel is 1
+              @gl.blendFunc @gl.SRC_ALPHA, @gl.ONE_MINUS_SRC_ALPHA
+              @gl.enable @gl.BLEND
+            else
+              @gl.blendFunc @gl.ONE, @gl.ZERO
+              @gl.enable @gl.BLEND
     #     when BLEND_PASS + (BLEND_XLU>>2):
     #       // 0x0c18
     #       // Cycle1:  In * 0 + In * 1
