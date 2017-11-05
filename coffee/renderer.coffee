@@ -124,12 +124,7 @@ C1964jsRenderer = (settings, glx, webGL) ->
 
   @draw = (tile, tmem, videoHLE) ->
     gl.useProgram webGL.shaderProgram
-    
-    # basic settings
-#    gl.disable gl.DEPTH_TEST
-#    gl.enable gl.BLEND
-#    gl.blendFunc gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA
-    
+        
     gl.enableVertexAttribArray webGL.shaderProgram.vertexPositionAttribute
     gl.bindBuffer gl.ARRAY_BUFFER, texrectVertexPositionBuffer
     gl.vertexAttribPointer webGL.shaderProgram.vertexPositionAttribute, texrectVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0

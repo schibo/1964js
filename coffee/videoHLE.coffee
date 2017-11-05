@@ -26,23 +26,6 @@ C1964jsVideoHLE = (core, glx) ->
   @core = core #only needed for gfxHelpers prototypes to access.
   @gl = glx
  
-  @DirectX_OGL_BlendFuncMaps = [
-    @gl.SRC_ALPHA,
-    @gl.ZERO,
-    @gl.ONE,
-    @gl.SRC_COLOR,
-    @gl.ONE_MINUS_SRC_COLOR,
-    @gl.SRC_ALPHA,
-    @gl.ONE_MINUS_SRC_ALPHA,
-    @gl.DST_ALPHA,
-    @gl.ONE_MINUS_DST_ALPHA,
-    @gl.DST_COLOR,
-    @gl.ONE_MINUS_DST_COLOR,
-    @gl.SRC_ALPHA_SATURATE,
-    @gl.SRC_ALPHA_SATURATE, 
-    @gl.SRC_ALPHA_SATURATE
-  ]
-
   #todo: make gRSP a class object.
   @RICE_MATRIX_STACK = 60
   @MAX_TEXTURES = 8
@@ -378,34 +361,34 @@ C1964jsVideoHLE = (core, glx) ->
     @combineB0 = @getCombineB0(pc)
     @combineC0 = @getCombineC0(pc)
     @combineD0 = @getCombineD0(pc)
-    #@combineA0 = 0xFF if @combineA0 is 15
-    #@combineB0 = 0xFF if @combineB0 is 15
-    #@combineC0 = 0xFF if @combineC0 is 31
-    #@combineD0 = 0xFF if @combineD0 is 7
+    @combineA0 = 0xFF if @combineA0 is 15
+    @combineB0 = 0xFF if @combineB0 is 15
+    @combineC0 = 0xFF if @combineC0 is 31
+    @combineD0 = 0xFF if @combineD0 is 7
     @combineA0a = @getCombineA0a(pc)
     @combineB0a = @getCombineB0a(pc)
     @combineC0a = @getCombineC0a(pc)
     @combineD0a = @getCombineD0a(pc)
-    #@combineA0a = 0xFF if @combineA0a is 7
-    #@combineB0a = 0xFF if @combineB0a is 7
-    #@combineC0a = 0xFF if @combineC0a is 7
-    #@combineD0a = 0xFF if @combineD0a is 7
+    @combineA0a = 0xFF if @combineA0a is 7
+    @combineB0a = 0xFF if @combineB0a is 7
+    @combineC0a = 0xFF if @combineC0a is 7
+    @combineD0a = 0xFF if @combineD0a is 7
     @combineA1 = @getCombineA1(pc)
     @combineB1 = @getCombineB1(pc)
     @combineC1 = @getCombineC1(pc)
     @combineD1 = @getCombineD1(pc)
-    #@combineA1 = 0xFF if @combineA1 is 15
-    #@combineB1 = 0xFF if @combineB1 is 15
-    #@combineC1 = 0xFF if @combineC1 is 31
-    #@combineD1 = 0xFF if @combineD1 is 7
+    @combineA1 = 0xFF if @combineA1 is 15
+    @combineB1 = 0xFF if @combineB1 is 15
+    @combineC1 = 0xFF if @combineC1 is 31
+    @combineD1 = 0xFF if @combineD1 is 7
     @combineA1a = @getCombineA1a(pc)
     @combineB1a = @getCombineB1a(pc)
     @combineC1a = @getCombineC1a(pc)
     @combineD1a = @getCombineD1a(pc)
-    #@combineA1a = 0xFF if @combineA1a is 7
-    #@combineB1a = 0xFF if @combineB1a is 7
-    #@combineC1a = 0xFF if @combineC1a is 7
-    #@combineD1a = 0xFF if @combineD1a is 7
+    @combineA1a = 0xFF if @combineA1a is 7
+    @combineB1a = 0xFF if @combineB1a is 7
+    @combineC1a = 0xFF if @combineC1a is 7
+    @combineD1a = 0xFF if @combineD1a is 7
 	
     w0 = @core.memory.rdramUint8Array[pc] << 24 | @core.memory.rdramUint8Array[pc + 1] << 16 | @core.memory.rdramUint8Array[pc + 2] << 8 | @core.memory.rdramUint8Array[pc + 3]
     w1 = @core.memory.rdramUint8Array[pc + 4] << 24 | @core.memory.rdramUint8Array[pc + 5] << 16 | @core.memory.rdramUint8Array[pc + 6] << 8 | @core.memory.rdramUint8Array[pc + 7]
@@ -745,10 +728,6 @@ C1964jsVideoHLE = (core, glx) ->
     @blendColor.push @getSetFillColorA(pc)/255.0
     return
 
-  C1964jsVideoHLE::blendFunc = (src, dest) ->
-    @gl.blendFunc DirectX_OGL_BlendFuncMaps[src], DirectX_OGL_BlendFuncMaps[dest]
-    return
-
   C1964jsVideoHLE::DLParser_SetPrimColor = (pc) ->
     @primColor = []
     @primColor.push @getSetPrimColorR(pc)/255.0
@@ -807,8 +786,6 @@ C1964jsVideoHLE = (core, glx) ->
     @triangleVertexTextureCoordBuffer.numItems += 1
     true
 
-#TODO: Port this code for blend modes
-
   C1964jsVideoHLE::setBlendFunc = () ->
     CYCLE_TYPE_1 = 0
     CYCLE_TYPE_2 = 1
@@ -847,7 +824,7 @@ C1964jsVideoHLE = (core, glx) ->
         @gl.disable @gl.BLEND
       when CYCLE_TYPE_COPY
         @gl.enable @gl.BLEND
-        gl.blendFunc @gl.ONE, @gl.ZERO
+        @gl.blendFunc @gl.ONE, @gl.ZERO
       when CYCLE_TYPE_2
         forceBl = @otherModeL >> 14 & 0x1
         zCmp = @otherModeL >> 4 & 0x1
@@ -917,42 +894,13 @@ C1964jsVideoHLE = (core, glx) ->
     #       BlendFunc(D3DBLEND_ONE, D3DBLEND_ZERO);
     #       Enable();
     #       break;
-
-    #     when BLEND_FOG_APRIM + (BLEND_OPA>>2):
-    #       // For Golden Eye
-    #       //Cycle1: Fog * AFog + In * 1-A
-    #       //Cycle2: In * AIn + Mem * AMem 
-    #     when BLEND_FOG_ASHADE + (BLEND_OPA>>2):
-    #       //Cycle1: Fog * AShade + In * 1-A
-    #       //Cycle2: In * AIn + Mem * AMem 
-    #     when BLEND_BI_AFOG + (BLEND_OPA>>2):
-    #       //Cycle1: Bl * AFog + In * 1-A
-    #       //Cycle2: In * AIn + Mem * 1-AMem 
-    #     when BLEND_FOG_ASHADE + (BLEND_NOOP>>2):
-    #       //Cycle1: Fog * AShade + In * 1-A
-    #       //Cycle2: In * AIn + In * 1-A
-    #     when BLEND_NOOP + (BLEND_OPA>>2):
-    #       //Cycle1: In * AIn + In * 1-A
-    #       //Cycle2: In * AIn + Mem * AMem
-    #     when BLEND_NOOP4 + (BLEND_NOOP>>2):
-    #       //Cycle1: Fog * AIn + In * 1-A
-    #       //Cycle2: In * 0 + In * 1
-    #     when BLEND_FOG_ASHADE+(BLEND_PASS>>2):
-    #       //Cycle1: Fog * AShade + In * 1-A
-    #       //Cycle2: In * 0 + In * 1
-    #     when BLEND_FOG_3+(BLEND_PASS>>2):
-    #       BlendFunc(D3DBLEND_ONE, D3DBLEND_ZERO);
-    #       Enable();
-    #       break;
-    #     when BLEND_FOG_ASHADE+0x0301:
-    #       // c800 - Cycle1: Fog * AShade + In * 1-A
-    #       // 0301 - Cycle2: In * 0 + In * AMem
-    #       BlendFunc(D3DBLEND_SRCALPHA, D3DBLEND_ZERO);
-    #       Enable();
-    #       break;
+          when (BLEND_FOG_APRIM + (BLEND_OPA>>2)) || (BLEND_FOG_ASHADE + (BLEND_OPA>>2)) || (BLEND_BI_AFOG + (BLEND_OPA>>2)) || (BLEND_FOG_ASHADE + (BLEND_NOOP>>2)) || (BLEND_NOOP + (BLEND_OPA>>2)) || (BLEND_NOOP4 + (BLEND_NOOP>>2)) || (BLEND_FOG_ASHADE+(BLEND_PASS>>2)) || (BLEND_FOG_3+(BLEND_PASS>>2))
+            @gl.blendFunc @gl.ONE, @gl.ZERO
+            @gl.enable @gl.BLEND
+          when BLEND_FOG_ASHADE+0x0301
+            @gl.blendFunc @gl.SRC_ALPHA, @gl.ZERO
+            @gl.enable @gl.BLEND
           when 0x0c08+0x1111
-            # 0c08 - Cycle1: In * 0 + In * 1
-            # 1111 - Cycle2: Mem * AFog + Mem * AMem
             @gl.blendFunc @gl.ZERO, @gl.DEST_ALPHA
             @gl.enable @gl.BLEND
           else
@@ -962,19 +910,18 @@ C1964jsVideoHLE = (core, glx) ->
               @gl.blendFunc  @gl.SRC_ALPHA, @gl.ONE_MINUS_SRC_ALPHA
             @gl.enable @gl.BLEND
       else  # 1/2 Cycle or Copy
-    #    if( gRDP.otherMode.force_bl && gRDP.otherMode.z_cmp && blendmode_1 != BLEND_FOG_ASHADE )
-    #    {
-    #      BlendFunc(D3DBLEND_SRCALPHA, D3DBLEND_INVSRCALPHA);
-    #      Enable();
-    #      break;
-    #    }
+        forceBl = @otherModeL >> 14 & 0x1
+        zCmp = @otherModeL >> 4 & 0x1
+        if forceBl is 1 and zCmp is 1 and blendMode1 isnt BLEND_FOG_ASHADE
+          @gl.blendFunc @gl.SRC_ALPHA, @gl.ONE_MINUS_SRC_ALPHA
+          @gl.enable @gl.BLEND
     #    if( gRDP.otherMode.force_bl && options.enableHackForGames == HACK_FOR_COMMANDCONQUER )
     #    {
     #      BlendFunc(D3DBLEND_SRCALPHA, D3DBLEND_INVSRCALPHA);
     #      Enable();
     #      break;
     #    }
-        switch blendMode1
+        else switch blendMode1
     #    //switch ( blendmode_2<<2 )
           when BLEND_XLU || BLEND_BI_AIN || BLEND_FOG_MEM || BLEND_FOG_MEM_IN_MEM || BLEND_BLENDCOLOR || 0x00c0
             @gl.blendFunc @gl.SRC_ALPHA, @gl.ONE_MINUS_SRC_ALPHA
