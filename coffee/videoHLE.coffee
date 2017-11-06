@@ -356,13 +356,13 @@ C1964jsVideoHLE = (core, glx) ->
       if @bLightingEnable is true
         # TODO: lighting
         normalMat = mat4.create()
-        normalMat[0] = @getVertexNormalX(a)/255.0
-        normalMat[1] = @getVertexNormalY(a)/255.0
-        normalMat[2] = @getVertexNormalZ(a)/255.0
+        normalMat[0] = @getVertexNormalX(a)
+        normalMat[1] = @getVertexNormalY(a)
+        normalMat[2] = @getVertexNormalZ(a)
         normalMat[3] = 0 # dummy
 
         # transform normal
-        mat4.multiply @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], normalMat, @lightingMat
+        mat4.multiply normalMat, @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], @lightingMat
         vertColor = @lightVert @lightingMat
 
         @N64VertexList[i].r = vertColor[0]
@@ -522,7 +522,7 @@ C1964jsVideoHLE = (core, glx) ->
       g = 255.0
     if b > 255.0
       b = 255.0
-    return [0xff000000,r>>>0<<16,g>>>0<<8,b>>>0]
+    return [r>>>0, g>>>0, b>>>0, 255]
 
   C1964jsVideoHLE::RSP_MoveMemLight = (dwLight, dwAddr) ->
     if dwLight >= 16
