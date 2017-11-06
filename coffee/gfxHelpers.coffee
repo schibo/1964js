@@ -240,18 +240,17 @@ C1964jsVideoHLE::getTexRectDsDx = (pc) ->
 C1964jsVideoHLE::getTexRectDtDy = (pc) ->
   @core.memory.getInt32(@core.memory.rdramUint8Array, pc + 20) & 0xFFFF
 
+#is this right?
 C1964jsVideoHLE::getGbi1Type = (pc) ->
+  (@core.memory.rdramUint8Array[pc] << 24 | @core.memory.rdramUint8Array[pc+1] << 16 | @core.memory.rdramUint8Array[pc+2] << 8 | @core.memory.rdramUint8Array[pc+3]) >>> 16 & 0x0FF
 
-
-#    return this.core.memory.rdramView.getInt32(pc+4, false) >>> 16 & 0x00ff;
+#is this right?
 C1964jsVideoHLE::getGbi1Length = (pc) ->
+  (@core.memory.rdramUint8Array[pc] << 24 | @core.memory.rdramUint8Array[pc] << 16 | @core.memory.rdramUint8Array[pc] << 8 | @core.memory.rdramUint8Array[pc]) & 0xFFFF
 
-
-#    return this.core.memory.rdramView.getInt32(pc+4, false) & 0xffff;
 C1964jsVideoHLE::getGbi1RspSegmentAddr = (pc) ->
+  @getRspSegmentAddr(pc+4)
 
-
-#    return this.core.memory.rdramView.getInt32(pc, false);
 C1964jsVideoHLE::getRspSegmentAddr = (seg) ->
   
   #TODO: May need to mask with rdram size - 1
