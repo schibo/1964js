@@ -85,6 +85,7 @@
       uniform int uCombineA0a, uCombineB0a, uCombineC0a, uCombineD0a;
       uniform int uCombineA1, uCombineB1, uCombineC1, uCombineD1;
       uniform int uCombineA1a, uCombineB1a, uCombineC1a, uCombineD1a;
+      uniform int uAlphaTestEnabled;
       uniform vec4 uPrimColor, uFillColor, uEnvColor, uBlendColor;
       vec4 green = vec4(0.0, 1.0, 0.0, 1.0);
       vec4 a0, b0, c0, d0;
@@ -250,6 +251,8 @@
            //vec4 combined = (a0-b0) * c0 + d0; 
       
            gl_FragColor = (a0-b0) * c0 + d0;
+           if (uAlphaTestEnabled == 1 && gl_FragColor.a < uBlendColor.a)
+             discard;
       
            if (cycleType == 1) //2-cycle
            {
@@ -409,6 +412,8 @@
                d1.a = 0.0;
       
              gl_FragColor = (a1-b1) * c1 + d1;
+             if (uAlphaTestEnabled == 1 && gl_FragColor.a < uBlendColor.a)
+               discard;
            }            
          }
        }

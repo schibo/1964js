@@ -104,6 +104,8 @@ C1964jsWebGL = (core, wireframe) ->
     shaderProgram.uBlendColor = @gl.getUniformLocation(shaderProgram, "uBlendColor")
     #shaderProgram.otherModeL = @gl.getUniformLocation(shaderProgram, "otherModeL")
     #shaderProgram.otherModeH = @gl.getUniformLocation(shaderProgram, "otherModeH")
+    shaderProgram.cycleType = @gl.getUniformLocation(shaderProgram, "cycleType")
+    shaderProgram.uAlphaTestEnabled = @gl.getUniformLocation(shaderProgram, "uAlphaTestEnabled")
     shaderProgram
 
   C1964jsWebGL::setCombineUniforms = (shaderProgram) ->

@@ -60,6 +60,7 @@ C1964jsVideoHLE = (core, glx) ->
   @otherModeL = 0x00500001
   @otherModeH = 0
   @cycleType = 0
+  @alphaTestEnabled = 0
 
   #todo: different microcodes support
   @currentMicrocodeMap = @microcodeMap0
@@ -726,6 +727,7 @@ C1964jsVideoHLE = (core, glx) ->
     @blendColor.push @getSetFillColorG(pc)/255.0
     @blendColor.push @getSetFillColorB(pc)/255.0
     @blendColor.push @getSetFillColorA(pc)/255.0
+    @alphaTestEnabled = 1
     return
 
   C1964jsVideoHLE::DLParser_SetPrimColor = (pc) ->
@@ -1024,6 +1026,7 @@ C1964jsVideoHLE = (core, glx) ->
     #@gl.uniform1i @core.webGL.shaderProgram.otherModeL, @otherModeL
     #@gl.uniform1i @core.webGL.shaderProgram.otherModeH, @otherModeH
     @gl.uniform1i @core.webGL.shaderProgram.cycleType, @cycleType
+    @gl.uniform1i @core.webGL.shaderProgram.uAlphaTestEnabled, @alphaTestEnabled
 
     @core.webGL.setCombineUniforms @core.webGL.shaderProgram
 
@@ -1048,6 +1051,7 @@ C1964jsVideoHLE = (core, glx) ->
     @triangleVertexTextureCoordBuffer.numItems = 0
     @otherModeL = 0x00500001
     @otherModeH = 0
+    @alphaTestEnabled = 0
     return
 
   C1964jsVideoHLE::initBuffers = ->
