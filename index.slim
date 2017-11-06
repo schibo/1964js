@@ -232,7 +232,6 @@ html
             //if (uCombineC0a == 15)
             //  c0.a = uPrimColor.a;
 
-
             if (uCombineA0 == 6)
               a0.rgb = vec3(1.0, 1.0, 1.0);
             if (uCombineA0a == 6)
@@ -241,6 +240,10 @@ html
               d0.rgb = vec3(1.0, 1.0, 1.0);
             if (uCombineD0a == 6)
               d0.a = 1.0;
+            if (uCombineD0 == 7)
+              d0.rgb = vec3(0.0, 0.0, 0.0);
+            if (uCombineD0a == 7)
+              d0.a = 0.0;
 
             if (uCombineA0 >= 8 && uCombineA0 <= 15)
               a0.rgb = vec3(0.0, 0.0, 0.0);
@@ -254,10 +257,6 @@ html
               c0.rgb = vec3(0.0, 0.0, 0.0);
             if (uCombineC0a >= 16 && uCombineC0a <= 31)
               c0.a = 0.0;
-            if (uCombineD0 == 7)
-              d0.rgb = vec3(0.0, 0.0, 0.0);
-            if (uCombineD0a == 7)
-              d0.a = 0.0;
 
             //vec4 combined = (a0-b0) * c0 + d0; 
 
@@ -285,7 +284,6 @@ html
                 d1.rgb = gl_FragColor.rgb;
               if (uCombineD1a == combined)
                 d1.a = gl_FragColor.a;
-
 
               if (uCombineA1 == tex0)
                 a1.rgb = texture2D(uSampler, vec2(vTextureCoord.st)).rgb;
@@ -373,6 +371,8 @@ html
                 d1.a = uEnvColor.a;
 
               // alpha combiner
+              if (uCombineC1a == 7)
+                c1.a = gl_FragColor.a;
               if (uCombineC1a == 8)
                 c1.a = texture2D(uSampler, vec2(vTextureCoord.st)).a;
               if (uCombineC1a == 9)
@@ -404,6 +404,10 @@ html
                 d1.rgb = vec3(1.0, 1.0, 1.0);
               if (uCombineD1a == 6)
                 d1.a = 1.0;
+              if (uCombineD1 == 7)
+                d1.rgb = vec3(0.0, 0.0, 0.0);
+              if (uCombineD1a == 7)
+                d1.a = 0.0;
 
               if (uCombineA1 >= 8 && uCombineA1 <= 15)
                 a1.rgb = vec3(0.0, 0.0, 0.0);
@@ -417,10 +421,6 @@ html
                 c1.rgb = vec3(0.0, 0.0, 0.0);
               if (uCombineC1a >= 16 && uCombineC1a <= 31)
                 c1.a = 0.0;
-              if (uCombineD1 == 7)
-                d1.rgb = vec3(0.0, 0.0, 0.0);
-              if (uCombineD1a == 7)
-                d1.a = 0.0;
 
               gl_FragColor = (a1-b1) * c1 + d1;
               if (uAlphaTestEnabled == 1 && gl_FragColor.a < uBlendColor.a)
