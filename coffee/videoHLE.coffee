@@ -495,12 +495,31 @@ C1964jsVideoHLE = (core, glx) ->
     data = @getClearGeometryMode(pc)
     @geometryMode &= ~data
     #@videoLog "TODO: RSP_GBI1_ClearGeometryMode"
+    @initGeometryMode()
     return
 
   C1964jsVideoHLE::RSP_GBI1_SetGeometryMode = (pc) ->
     data = @getSetGeometryMode(pc)
     @geometryMode |= data
     #@videoLog "TODO: RSP_GBI1_SetGeometryMode"
+    @initGeometryMode()
+    return
+
+  C1964jsVideoHLE::initGeometryMode = () ->
+    bCullFront = @geometryMode & consts.G_CULL_FRONT
+    bCullBack = @geometryMode & consts.G_CULL_BACK
+    if bCullBack isnt 0 and bCullFront isnt 0
+      @gl.enable @gl.CULL_FACE
+      @gl.cullFace @gl.FRONT_AND_BACK
+    else if bCullBack isnt 0
+      @gl.enable @gl.CULL_FACE
+      @gl.cullFace @gl.BACK
+    else if bCullBack isnt 0
+      @gl.enable @gl.CULL_FACE
+      @gl.cullFace @gl.FRONT
+    else
+      @gl.disable @gl.CULL_FACE
+
     return
 
   C1964jsVideoHLE::RSP_GBI1_EndDL = (pc) ->
