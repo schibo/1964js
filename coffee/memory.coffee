@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.###
 
-  #segments must be at least 64KB in size for lookup table.
+#segments must be at least 64KB in size for lookup table.
 `/** @const */ var MEMORY_START_RDRAM = 0x00000000`
 `/** @const */ var MEMORY_SIZE_RDRAM = 0x800000` #4MB RDRAM + 4MB Expansion = 8MB
 `/** @const */ var MEMORY_START_RAMREGS4 = 0x03F04000`
@@ -133,7 +133,7 @@ class C1964jsMemory
     while start < end
       @region[start] = readRegion8
       @region16[start] = readRegion16
-      @region32[start] = readRegion32     
+      @region32[start] = readRegion32
       @writeRegion8[start] = writeRegion8
       @writeRegion16[start] = writeRegion16
       @writeRegion32[start] = writeRegion32
@@ -286,7 +286,7 @@ class C1964jsMemory
   readAi8: (that, a) ->
     off_ = a - MEMORY_START_AI
     that.core.interrupts.readAI off_
-  
+
   readAi16: (that, a) ->
     off_ = a - MEMORY_START_AI
     that.core.interrupts.readAI off_
@@ -298,7 +298,7 @@ class C1964jsMemory
   readPi8: (that, a) ->
     off_ = a - MEMORY_START_PI
     that.piUint8Array[off_]
-  
+
   readPi16: (that, a) ->
     off_ = (a-MEMORY_START_PI)
     that.piUint8Array[off_] << 8 | that.piUint8Array[off_ + 1]
@@ -823,7 +823,7 @@ class C1964jsMemory
     #uncomment to see where we're loading/storing
     #if ((((a & 0xF0000000)>>>0) isnt 0x80000000) and (((a & 0xF0000000)>>>0) isnt 0xA0000000))
     #  alert(dec2hex(a))
-    
+
     #uncomment to verify non-tlb lookup.
     #if dec2hex(a) != dec2hex(((physRegion[a>>>12]<<16) | a&0x0000ffff))
     #  alert dec2hex(a) + ' ' + dec2hex(((physRegion[a>>>12]<<16) | a&0x0000ffff))

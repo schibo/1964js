@@ -179,7 +179,7 @@ handleFileSelect = (evt) ->
     #todo: add zip support (from index.html)
     uncompressAndRun fileName, reader.result
     return
-  
+
   # Read in the file as an array buffer.
   reader.readAsArrayBuffer evt.target.files[0]
   return
