@@ -61,6 +61,10 @@ C1964jsVideoHLE = (core, glx) ->
   @otherModeH = 0
   @cycleType = 0
   @alphaTestEnabled = 0
+  @bTextureGen = false
+  @bLightingEnable = false
+  @bFogEnable = false
+  @bZBufferEnable = false
 
   #todo: different microcodes support
   @currentMicrocodeMap = @microcodeMap0
@@ -506,6 +510,7 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::initGeometryMode = () ->
+    # cull face
     bCullFront = @geometryMode & consts.G_CULL_FRONT
     bCullBack = @geometryMode & consts.G_CULL_BACK
     if bCullBack isnt 0 and bCullFront isnt 0
@@ -520,6 +525,20 @@ C1964jsVideoHLE = (core, glx) ->
     else
       @gl.disable @gl.CULL_FACE
 
+    # shading
+    #this doesn't exist in WebGL, so find a replacement if 
+    #we need flat-shading.
+    #bShade = @geometryMode & consts.G_SHADE
+    #bShadeSmooth = @geometryMode & consts.G_SHADING_SMOOTH
+    #if bShade isnt 0 and bShadeSmooth isnt 0
+    #  @gl.shadeModel @gl.SMOOTH
+    #else
+    #  @gl.shadeModel @gl.FLAT
+
+    @bTextureGen = @geometryMode & consts.G_TEXTURE_GEN ? true : false
+    @bLightingEnable = @geometryMode & consts.G_LIGHTING ? true : false
+    @bFogEnable = @geometryMode & consts.G_FOG ? true : false
+    @bZBufferEnable = @geometryMode & consts.G_ZBUFFER ? true : false
     return
 
   C1964jsVideoHLE::RSP_GBI1_EndDL = (pc) ->
