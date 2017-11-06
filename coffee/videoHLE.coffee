@@ -61,6 +61,7 @@ C1964jsVideoHLE = (core, glx) ->
   @otherModeH = 0
   @cycleType = 0
   @alphaTestEnabled = 0
+  @bShade = false
   @bTextureGen = false
   @bLightingEnable = false
   @bFogEnable = false
@@ -327,12 +328,25 @@ C1964jsVideoHLE = (core, glx) ->
 	  
       @N64VertexList[i].s = @getVertexS(a)/32 / texWidth
       @N64VertexList[i].t = @getVertexT(a)/32 / texHeight
-	  
-      @N64VertexList[i].r = @getVertexColorR(a)
-      @N64VertexList[i].g = @getVertexColorG(a)
-      @N64VertexList[i].b = @getVertexColorB(a)
-      @N64VertexList[i].a = @getVertexAlpha(a)
-	  
+
+      if @bLightingEnable is true
+        @N64VertexList[i].r = 255.0
+        @N64VertexList[i].g = 255.0
+        @N64VertexList[i].b = 255.0
+        @N64VertexList[i].a = 255.0
+      else
+        if @bShade is false
+          @N64VertexList[i].r = @primColor[0]
+          @N64VertexList[i].g = @primColor[1]
+          @N64VertexList[i].b = @primColor[2]
+          @N64VertexList[i].a = @primColor[3]
+        else	  
+          @N64VertexList[i].r = @getVertexColorR(a)
+          @N64VertexList[i].g = @getVertexColorG(a)
+          @N64VertexList[i].b = @getVertexColorB(a)
+          @N64VertexList[i].a = @getVertexAlpha(a)
+
+
       #until we use it..
       #@N64VertexList[i].nx = (@toSByte @getVertexNormalX(a))
       #@N64VertexList[i].ny = (@toSByte @getVertexNormalY(a))
@@ -525,20 +539,31 @@ C1964jsVideoHLE = (core, glx) ->
     else
       @gl.disable @gl.CULL_FACE
 
-    # shading
+    @bShade = @geometryMode & consts.G_SHADE ? true : false
     #this doesn't exist in WebGL, so find a replacement if 
     #we need flat-shading.
-    #bShade = @geometryMode & consts.G_SHADE
     #bShadeSmooth = @geometryMode & consts.G_SHADING_SMOOTH
     #if bShade isnt 0 and bShadeSmooth isnt 0
     #  @gl.shadeModel @gl.SMOOTH
     #else
     #  @gl.shadeModel @gl.FLAT
 
-    @bTextureGen = @geometryMode & consts.G_TEXTURE_GEN ? true : false
-    @bLightingEnable = @geometryMode & consts.G_LIGHTING ? true : false
-    @bFogEnable = @geometryMode & consts.G_FOG ? true : false
-    @bZBufferEnable = @geometryMode & consts.G_ZBUFFER ? true : false
+    if @geometryMode & consts.G_TEXTURE_GEN isnt 0
+      @bTextureGen = true
+    else
+      @bTexueGen = false
+    if @geometryMode & consts.G_LIGHTING isnt 0
+      @bLightingEnable = true
+    else
+      @bLightingEnable = false
+    if @geometryMode & consts.G_FOG isnt 0
+      @bFogEnable = true
+    else
+      @bFogEnable = false
+    if @geometryMode & consts.G_ZBUFFER isnt 0
+      @bZBufferEnable = true
+    else
+      @bZBufferEnable = false
     return
 
   C1964jsVideoHLE::RSP_GBI1_EndDL = (pc) ->
