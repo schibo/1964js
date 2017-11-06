@@ -859,43 +859,12 @@ C1964jsVideoHLE = (core, glx) ->
             else
               @gl.blendFunc @gl.ONE, @gl.ZERO
               @gl.enable @gl.BLEND
-    #     when BLEND_PASS + (BLEND_XLU>>2):
-    #       // 0x0c18
-    #       // Cycle1:  In * 0 + In * 1
-    #       // Cycle2:  In * AIn + Mem * 1-A
-    #     when BLEND_FOG_ASHADE + (BLEND_XLU>>2):
-    #       //Cycle1: Fog * AShade + In * 1-A
-    #       //Cycle2: In * AIn + Mem * 1-A  
-    #     when BLEND_FOG_APRIM + (BLEND_XLU>>2):
-    #       //Cycle1: Fog * AFog + In * 1-A
-    #       //Cycle2: In * AIn + Mem * 1-A  
-    #     //when BLEND_FOG_MEM_FOG_MEM + (BLEND_OPA>>2):
-    #       //Cycle1: In * AFog + Fog * 1-A
-    #       //Cycle2: In * AIn + Mem * AMem 
-    #     when BLEND_FOG_MEM_FOG_MEM + (BLEND_PASS>>2):
-    #       //Cycle1: In * AFog + Fog * 1-A
-    #       //Cycle2: In * 0 + In * 1
-    #     when BLEND_XLU + (BLEND_XLU>>2):
-    #       //Cycle1: Fog * AFog + In * 1-A
-    #       //Cycle2: In * AIn + Mem * 1-A  
-    #     when BLEND_BI_AFOG + (BLEND_XLU>>2):
-    #       //Cycle1: Bl * AFog + In * 1-A
-    #       //Cycle2: In * AIn + Mem * 1-A  
-    #     when BLEND_XLU + (BLEND_FOG_MEM_IN_MEM>>2):
-    #       //Cycle1: In * AIn + Mem * 1-A
-    #       //Cycle2: In * AFog + Mem * 1-A 
-    #     when BLEND_PASS + (BLEND_FOG_MEM_IN_MEM>>2):
-    #       //Cycle1: In * 0 + In * 1
-    #       //Cycle2: In * AFog + Mem * 1-A 
-    #       BlendFunc(D3DBLEND_SRCALPHA, D3DBLEND_INVSRCALPHA);
-    #       Enable();
-    #       break;
-    #     when BLEND_FOG_MEM_FOG_MEM + (BLEND_OPA>>2):
-    #       //Cycle1: In * AFog + Fog * 1-A
-    #       //Cycle2: In * AIn + Mem * AMem 
-    #       BlendFunc(D3DBLEND_ONE, D3DBLEND_ZERO);
-    #       Enable();
-    #       break;
+          when (BLEND_PASS + (BLEND_XLU>>2)) || (BLEND_FOG_ASHADE + (BLEND_XLU>>2)) || (BLEND_FOG_APRIM + (BLEND_XLU>>2)) || (BLEND_FOG_MEM_FOG_MEM + (BLEND_PASS>>2)) || (BLEND_XLU + (BLEND_XLU>>2)) || (BLEND_BI_AFOG + (BLEND_XLU>>2)) || (BLEND_XLU + (BLEND_FOG_MEM_IN_MEM>>2)) || (BLEND_PASS + (BLEND_FOG_MEM_IN_MEM>>2))
+            @gl.blendFunc @gl.SRC_ALPHA, @gl.ONE_MINUS_SRC_ALPHA
+            @gl.enable @gl.BLEND
+          when BLEND_FOG_MEM_FOG_MEM + (BLEND_OPA>>2)
+            @gl.blendFunc @gl.ONE, @gl.ZERO
+            @gl.enable @gl.BLEND
           when (BLEND_FOG_APRIM + (BLEND_OPA>>2)) || (BLEND_FOG_ASHADE + (BLEND_OPA>>2)) || (BLEND_BI_AFOG + (BLEND_OPA>>2)) || (BLEND_FOG_ASHADE + (BLEND_NOOP>>2)) || (BLEND_NOOP + (BLEND_OPA>>2)) || (BLEND_NOOP4 + (BLEND_NOOP>>2)) || (BLEND_FOG_ASHADE+(BLEND_PASS>>2)) || (BLEND_FOG_3+(BLEND_PASS>>2))
             @gl.blendFunc @gl.ONE, @gl.ZERO
             @gl.enable @gl.BLEND
@@ -931,28 +900,23 @@ C1964jsVideoHLE = (core, glx) ->
           when BLEND_MEM_ALPHA_IN
             @gl.blendFunc @gl.ZERO, @gl.DEST_ALPHA
             @gl.enable @gl.BLEND
-      #   when BLEND_PASS:  // IN * 0 + IN * 1
-      #     BlendFunc(D3DBLEND_ONE, D3DBLEND_ZERO);
-      #     if( gRDP.otherMode.alpha_cvg_sel )
-      #     {
-      #       Enable();
-      #     }
-      #     else
-      #     {
-      #       Disable();
-      #     }
-      #     break;
-      #   when BLEND_OPA:   // IN * A_IN + MEM * A_MEM
-      #     if( options.enableHackForGames == HACK_FOR_MARIO_TENNIS )
-      #     {
-      #       BlendFunc(D3DBLEND_SRCALPHA, D3DBLEND_INVSRCALPHA);
-      #     }
-      #     else
-      #     {
-      #       BlendFunc(D3DBLEND_ONE, D3DBLEND_ZERO);
-      #     }
-      #     Enable();
-      #     break;
+          when BLEND_PASS
+            alphaCvgSel = @otherModeL >> 13 & 0x1
+            @gl.blendFunc @gl.ONE, @gl.ZERO
+            if alphaCvgSel != 0
+              @gl.enable @gl.BLEND
+            else
+              @gl.disable @gl.BLEND
+          when BLEND_OPA
+          #  if( options.enableHackForGames == HACK_FOR_MARIO_TENNIS )
+          #  {
+          #    BlendFunc(D3DBLEND_SRCALPHA, D3DBLEND_INVSRCALPHA);
+          #  }
+          #  else
+          #  {
+            @gl.blendFunc @gl.ONE, @gl.ZERO
+          #  }
+            @gl.enable @gl.BLEND
           when BLEND_NOOP || BLEND_FOG_ASHADE || BLEND_FOG_MEM_3 || BLEND_BI_AFOG
             @gl.blendFunc @gl.ONE, @gl.ZERO
             @gl.enable @gl.BLEND
@@ -976,11 +940,8 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::drawScene = (useTexture, tileno) ->
     @gl.useProgram @core.webGL.shaderProgram
-
     @gl.enable @gl.DEPTH_TEST
-    @gl.depthFunc(@gl.LEQUAL);
-    #@gl.enable @gl.BLEND
-    #@gl.blendFunc @gl.SRC_ALPHA, @gl.ONE_MINUS_SRC_ALPHA
+    @gl.depthFunc @gl.LEQUAL
     
     if @triangleVertexPositionBuffer.numItems > 0
       @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexPositionBuffer
