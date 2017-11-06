@@ -41,7 +41,11 @@ C1964jsVideoHLE = (core, glx) ->
   @vtxProjected5 = []
   @geometryMode = 0
   @gRSP = {}
+  @gRSPlights = [{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]
+  @gRSPn64lights = [{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]
+  @gRSPnumLights = 0
   @matToLoad = mat4.create()
+  @lightingMat = mat4.create()
   @gRSPworldProject = mat4.create()
   @triangleVertexPositionBuffer = `undefined`
   @triangleVertexColorBuffer = `undefined`
@@ -87,7 +91,14 @@ C1964jsVideoHLE = (core, glx) ->
     i += 1
   @gRSP.projectionMtxs = []
   @gRSP.modelviewMtxs = []
-  
+  @gRSP.ambientLightIndex = 0
+  @gRSP.ambientLightColor = 0
+  @gRSP.fAmbientLightA = 0
+  @gRSP.fAmbientLightR = 0
+  @gRSP.fAmbientLightG = 0
+  @gRSP.fAmbientLightB = 0
+
+
   #todo: allocate on-demand
   i = 0
   while i < @RICE_MATRIX_STACK
@@ -169,7 +180,20 @@ C1964jsVideoHLE = (core, glx) ->
     type = @getGbi1Type(pc)
     length = @getGbi1Length(pc)
     addr = @getGbi1RspSegmentAddr(pc)
-    #@videoLog "movemem type=" + type + ", length=" + length + " addr=" + addr
+    switch type
+      when consts.RSP_GBI1_MV_MEM_VIEWPORT
+        @RSP_MoveMemViewport addr
+      #case RSP_GBI1_MV_MEM_LOOKATY:
+      #break;
+      #case RSP_GBI1_MV_MEM_LOOKATX:
+      #break;
+      when consts.RSP_GBI1_MV_MEM_L0 || consts.RSP_GBI1_MV_MEM_L1 || consts.RSP_GBI1_MV_MEM_L2 || consts.RSP_GBI1_MV_MEM_L3 || consts.RSP_GBI1_MV_MEM_L4 || consts.RSP_GBI1_MV_MEM_L5 || consts.RSP_GBI1_MV_MEM_L6 || consts.RSP_GBI1_MV_MEM_L7
+        dwLight = (type-consts.RSP_GBI1_MV_MEM_L0)/2
+        @RSP_MoveMemLight dwLight, addr
+    return
+
+  C1964jsVideoHLE::RSP_MoveMemViewport = (addr) ->
+    #todo
     return
 
   C1964jsVideoHLE::RSP_GBI1_SpNoop = (pc) ->
@@ -330,16 +354,27 @@ C1964jsVideoHLE = (core, glx) ->
       @N64VertexList[i].t = @getVertexT(a)/32 / texHeight
 
       if @bLightingEnable is true
-        @N64VertexList[i].r = 255.0
-        @N64VertexList[i].g = 255.0
-        @N64VertexList[i].b = 255.0
-        @N64VertexList[i].a = 255.0
+        # TODO: lighting
+        normalMat = mat4.create()
+        normalMat[0] = @getVertexNormalX(a)/255.0
+        normalMat[1] = @getVertexNormalY(a)/255.0
+        normalMat[2] = @getVertexNormalZ(a)/255.0
+        normalMat[3] = 0 # dummy
+
+        # transform normal
+        mat4.multiply @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], normalMat, @lightingMat
+        vertColor = @lightVert @lightingMat
+
+        @N64VertexList[i].r = vertColor[0]
+        @N64VertexList[i].g = vertColor[1]
+        @N64VertexList[i].b = vertColor[2]
+        @N64VertexList[i].a = @getVertexAlpha(a)
       else
         if @bShade is false
-          @N64VertexList[i].r = @primColor[0]
-          @N64VertexList[i].g = @primColor[1]
-          @N64VertexList[i].b = @primColor[2]
-          @N64VertexList[i].a = @primColor[3]
+          @N64VertexList[i].r = @primColor[0] * 255.0
+          @N64VertexList[i].g = @primColor[1] * 255.0
+          @N64VertexList[i].b = @primColor[2] * 255.0
+          @N64VertexList[i].a = @primColor[3] * 255.0
         else	  
           @N64VertexList[i].r = @getVertexColorR(a)
           @N64VertexList[i].g = @getVertexColorG(a)
@@ -428,7 +463,100 @@ C1964jsVideoHLE = (core, glx) ->
         dwSegment = (@getGbi0MoveWordOffset(pc) >> 2) & 0x0F
         dwBase = @getGbi0MoveWordValue(pc) & 0x00FFFFFF
         @segments[dwSegment] = dwBase
+      when consts.RSP_MOVE_WORD_NUMLIGHT
+        dwNumLights = ((@getGbi0MoveWordValue(pc)-0x80000000)/32)-1
+        @gRSP.ambientLightIndex = dwNumLights
+        @gRSPnumLights = dwNumLights
+      when consts.RSP_MOVE_WORD_LIGHTCOL
+        light = @getGbi0MoveWordValue(pc) / 32
+        field = @getGbi0MoveWordValue(pc) & 0x7
+        if field is 0
+          if light is @gRSP.ambientLightIndex
+            @setAmbientLight @getGbi0MoveWordValue(pc)>>8
+          else
+            @setLightCol light, @getGbi0MoveWordValue(pc)
+    return
+
+  C1964jsVideoHLE::setAmbientLight = (col) ->
+    @gRSP.ambientLightColor = col
+    @gRSP.fAmbientLightA = (col >> 24) & 0xff
+    @gRSP.fAmbientLightR = (col >> 16) & 0xff
+    @gRSP.fAmbientLightG = (col >> 8) & 0xff
+    @gRSP.fAmbientLightB = col & 0xff
+    return
+
+  C1964jsVideoHLE::setLightCol = (dwLight, dwCol) ->
+    @gRSPlights[dwLight].r = (dwCol >> 24)&0xFF
+    @gRSPlights[dwLight].g = (dwCol >> 16)&0xFF
+    @gRSPlights[dwLight].b = (dwCol >>  8)&0xFF
+    @gRSPlights[dwLight].a = 255  # Ignore light alpha
+    @gRSPlights[dwLight].fr = @gRSPlights[dwLight].r / 255.0
+    @gRSPlights[dwLight].fg = @gRSPlights[dwLight].g / 255.0
+    @gRSPlights[dwLight].fb = @gRSPlights[dwLight].b / 255.0
+    @gRSPlights[dwLight].fa = 255 # Ignore light alpha
+    return
+
+  C1964jsVideoHLE::setLightDirection = (dwLight, x, y, z) ->
+    w = Math.sqrt(x*x+y*y+z*z)
+
+    @gRSPlights[dwLight].x = x/w
+    @gRSPlights[dwLight].y = y/w
+    @gRSPlights[dwLight].z = z/w
+    return
+
+  C1964jsVideoHLE::lightVert = (norm) ->
+    r = @gRSP.fAmbientLightR
+    g = @gRSP.fAmbientLightG
+    b = @gRSP.fAmbientLightB
+
+    for l in [0..@gRSPnumLights]
+      fCosT = norm[0]*@gRSPlights[l].x + norm[1]*@gRSPlights[l].y + norm[2]*@gRSPlights[l].z
+      if fCosT > 0
+        r += @gRSPlights[l].fr * fCosT
+        g += @gRSPlights[l].fg * fCosT
+        b += @gRSPlights[l].fb * fCosT
+
+    if r > 255.0
+      r = 255.0
+    if g > 255.0
+      g = 255.0
+    if b > 255.0
+      b = 255.0
+    return [0xff000000,r>>>0<<16,g>>>0<<8,b>>>0]
+
+  C1964jsVideoHLE::RSP_MoveMemLight = (dwLight, dwAddr) ->
+    if dwLight >= 16
+      return
+
+    @gRSPn64lights[dwLight].dwRGBA = @getGbi0MoveWordValue(dwAddr)
+    @gRSPn64lights[dwLight].dwRGBACopy = @getGbi0MoveWordValue(dwAddr+4)
+    @gRSPn64lights[dwLight].x = @getCommand(dwAddr+8)
+    @gRSPn64lights[dwLight].y = @getCommand(dwAddr+9)
+    @gRSPn64lights[dwLight].z = @getCommand(dwAddr+10)
+
+    # disabled in Rice's code.
+    # /*
+    # {
+    #   // Normalize light
+    #   double sum = (double)gRSPn64lights[dwLight].x * gRSPn64lights[dwLight].x;
+    #   sum += (double)gRSPn64lights[dwLight].y * gRSPn64lights[dwLight].y;
+    #   sum += (double)gRSPn64lights[dwLight].z * gRSPn64lights[dwLight].z;
+    #   sum = sqrt(sum);
+    #   sum = sum/128.0;
+    #   gRSPn64lights[dwLight].x /= sum;
+    #   gRSPn64lights[dwLight].y /= sum;
+    #   gRSPn64lights[dwLight].z /= sum;
+    # }
+    # */
+
+    if dwLight == @gRSP.ambientLightIndex
+      dwCol = @gRSPn64lights[dwLight].dwRGBA | 0xFF # force full alpha
+      @setAmbientLight dwCol
+    else
+      @setLightCol dwLight, @gRSPn64lights[dwLight].dwRGBA
+      if @getGbi0MoveWordValue(dwAddr+8) is 0  # Direction is 0!
       else
+        @setLightDirection dwLight, @gRSPn64lights[dwLight].x, @gRSPn64lights[dwLight].y, @gRSPn64lights[dwLight].z
     return
 
   C1964jsVideoHLE::renderReset = ->
