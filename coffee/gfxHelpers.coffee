@@ -121,16 +121,16 @@ C1964jsVideoHLE::getVertexAlpha = (pc) ->
   @core.memory.rdramUint8Array[pc+15] >>> 0
 
 C1964jsVideoHLE::getVertexNormalX = (pc) ->
-  (@core.memory.rdramUint8Array[pc+12] << 24 | @core.memory.rdramUint8Array[pc+13] << 16 | @core.memory.rdramUint8Array[pc+14] << 8 | @core.memory.rdramUint8Array[pc+15]) >>> 24
+  (@core.memory.rdramUint8Array[pc+12] << 24 | @core.memory.rdramUint8Array[pc+13] << 16 | @core.memory.rdramUint8Array[pc+14] << 8 | @core.memory.rdramUint8Array[pc+15]) >> 24
 
 C1964jsVideoHLE::getVertexNormalY = (pc) ->
-  (@core.memory.rdramUint8Array[pc+12] << 24 | @core.memory.rdramUint8Array[pc+13] << 16 | @core.memory.rdramUint8Array[pc+14] << 8 | @core.memory.rdramUint8Array[pc+15]) << 8 >>> 24
+  (@core.memory.rdramUint8Array[pc+12] << 24 | @core.memory.rdramUint8Array[pc+13] << 16 | @core.memory.rdramUint8Array[pc+14] << 8 | @core.memory.rdramUint8Array[pc+15]) << 8 >> 24
 
 C1964jsVideoHLE::getVertexNormalZ = (pc) ->
-  (@core.memory.rdramUint8Array[pc+12] << 24 | @core.memory.rdramUint8Array[pc+13] << 16 | @core.memory.rdramUint8Array[pc+14] << 8 | @core.memory.rdramUint8Array[pc+15]) << 16 >>> 24
+  (@core.memory.rdramUint8Array[pc+12] << 24 | @core.memory.rdramUint8Array[pc+13] << 16 | @core.memory.rdramUint8Array[pc+14] << 8 | @core.memory.rdramUint8Array[pc+15]) << 16 >> 24
 
 C1964jsVideoHLE::getVertexNormalA = (pc) ->
-  (@core.memory.rdramUint8Array[pc+12] << 24 | @core.memory.rdramUint8Array[pc+13] << 16 | @core.memory.rdramUint8Array[pc+14] << 8 | @core.memory.rdramUint8Array[pc+15]) << 24 >>> 24
+  (@core.memory.rdramUint8Array[pc+12] << 24 | @core.memory.rdramUint8Array[pc+13] << 16 | @core.memory.rdramUint8Array[pc+14] << 8 | @core.memory.rdramUint8Array[pc+15]) << 24 >> 24
 
 
 C1964jsVideoHLE::toSByte = (ub) ->

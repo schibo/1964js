@@ -359,21 +359,31 @@ C1964jsVideoHLE = (core, glx) ->
       @N64VertexList[i].t = @getVertexT(a)/32 / texHeight
 
       if @bLightingEnable is true
-        @normalMat[0] = @getVertexNormalX(a) >>> 0
-        @normalMat[1] = @getVertexNormalY(a) >>> 0
-        @normalMat[2] = @getVertexNormalZ(a) >>> 0
+        @normalMat[0] = @getVertexNormalX(a)
+        @normalMat[1] = @getVertexNormalY(a)
+        @normalMat[2] = @getVertexNormalZ(a)
         @normalMat[3] = 0
         modelViewtransposedInverse = mat4.create()
         mat4.inverse @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], modelViewtransposedInverse
         mat4.transpose modelViewtransposedInverse, modelViewtransposedInverse
+
         #mat4.transpose modelViewtransposedInverse, @normalMat
         @normalMat = vec3.normalize @normalMat
         @normalMat = mat4.multiply modelViewtransposedInverse, @normalMat
+
+
+        worldViewtransposedInverse = mat4.create()
+        mat4.inverse @gRSP.projectionMtxs[@gRSP.projectionMtxTop], worldViewtransposedInverse
+        mat4.transpose worldViewtransposedInverse, worldViewtransposedInverse
+        @normalMat = mat4.multiply worldViewtransposedInverse, @normalMat
+
+
+
         vertColor = @lightVertex @normalMat
         @N64VertexList[i].r = vertColor[0]
         @N64VertexList[i].g = vertColor[1]
         @N64VertexList[i].b = vertColor[2]
-        @N64VertexList[i].a = @getVertexAlpha a
+        @N64VertexList[i].a = vertColor[3]
       else if @bShade is false
         @N64VertexList[i].r = @primColor[0] * 255.0
         @N64VertexList[i].g = @primColor[1] * 255.0
@@ -483,21 +493,21 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::setAmbientLight = (col) ->
     @gRSP.ambientLightColor = col
-    @gRSP.fAmbientLightA = (col >>> 24) & 0xff
-    @gRSP.fAmbientLightR = (col >>> 16) & 0xff
-    @gRSP.fAmbientLightG = (col >>> 8) & 0xff
-    @gRSP.fAmbientLightB = col & 0xff
+    @gRSP.fAmbientLightR = (col >>> 24) & 0xff
+    @gRSP.fAmbientLightG = (col >>> 16) & 0xff
+    @gRSP.fAmbientLightB = (col >>> 8) & 0xff
+    @gRSP.fAmbientLightA = col & 0xff
     return
 
   C1964jsVideoHLE::setLightCol = (dwLight, dwCol) ->
     @gRSPlights[dwLight].r = (dwCol >>> 24)&0xFF
     @gRSPlights[dwLight].g = (dwCol >>> 16)&0xFF
     @gRSPlights[dwLight].b = (dwCol >>>  8)&0xFF
-    @gRSPlights[dwLight].a = 255  # Ignore light alpha
+    @gRSPlights[dwLight].a = @gRSPlights[dwLight].b
     @gRSPlights[dwLight].fr = @gRSPlights[dwLight].r
     @gRSPlights[dwLight].fg = @gRSPlights[dwLight].g
     @gRSPlights[dwLight].fb = @gRSPlights[dwLight].b
-    @gRSPlights[dwLight].fa = 255.0 # Ignore light alpha
+    @gRSPlights[dwLight].fa = @gRSPlights[dwLight].a
     return
 
   C1964jsVideoHLE::setLightDirection = (dwLight, x, y, z) ->
@@ -512,6 +522,7 @@ C1964jsVideoHLE = (core, glx) ->
     r = @gRSP.fAmbientLightR
     g = @gRSP.fAmbientLightG
     b = @gRSP.fAmbientLightB
+    a = @gRSP.fAmbientLightA
 
     for l in [0...@gRSPnumLights]
       fCosT = norm[0]*@gRSPlights[l].x + norm[1]*@gRSPlights[l].y + norm[2]*@gRSPlights[l].z
@@ -519,6 +530,7 @@ C1964jsVideoHLE = (core, glx) ->
         r += @gRSPlights[l].fr * fCosT
         g += @gRSPlights[l].fg * fCosT
         b += @gRSPlights[l].fb * fCosT
+        a += @gRSPlights[l].fa * fCosT
 
     if r < 0.0
       r = 0.0
@@ -526,12 +538,17 @@ C1964jsVideoHLE = (core, glx) ->
       g = 0.0
     if b < 0.0
       b = 0.0
+    if a < 0.0
+      a = 0.0
     if r > 255.0
       r = 255.0
     if g > 255.0
       g = 255.0
     if b > 255.0
       b = 255.0
+    if a > 255.0
+      a = 255.0
+
     return [r, g, b, 255.0]
 
   C1964jsVideoHLE::RSP_MoveMemLight = (dwLight, dwAddr) ->
