@@ -25,7 +25,7 @@ C1964jsVideoHLE = (core, glx) ->
   i = undefined
   @core = core #only needed for gfxHelpers prototypes to access.
   @gl = glx
- 
+
   #todo: make gRSP a class object.
   @RICE_MATRIX_STACK = 60
   @MAX_TEXTURES = 8
@@ -41,7 +41,11 @@ C1964jsVideoHLE = (core, glx) ->
   @vtxProjected5 = []
   @geometryMode = 0
   @gRSP = {}
+  @gRSPlights = [{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]
+  @gRSPn64lights = [{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]
+  @gRSPnumLights = 0
   @matToLoad = mat4.create()
+  @lightingMat = mat4.create()
   @gRSPworldProject = mat4.create()
   @triangleVertexPositionBuffer = `undefined`
   @triangleVertexColorBuffer = `undefined`
@@ -67,6 +71,11 @@ C1964jsVideoHLE = (core, glx) ->
   @bFogEnable = false
   @bZBufferEnable = false
 
+  @normalMat = mat4.create()
+  @transformed = mat4.create()
+  @nonTransformed = mat4.create()
+
+
   #todo: different microcodes support
   @currentMicrocodeMap = @microcodeMap0
   i = 0
@@ -87,7 +96,14 @@ C1964jsVideoHLE = (core, glx) ->
     i += 1
   @gRSP.projectionMtxs = []
   @gRSP.modelviewMtxs = []
-  
+  @gRSP.ambientLightIndex = 0
+  @gRSP.ambientLightColor = 0
+  @gRSP.fAmbientLightA = 0
+  @gRSP.fAmbientLightR = 0
+  @gRSP.fAmbientLightG = 0
+  @gRSP.fAmbientLightB = 0
+
+
   #todo: allocate on-demand
   i = 0
   while i < @RICE_MATRIX_STACK
@@ -169,7 +185,20 @@ C1964jsVideoHLE = (core, glx) ->
     type = @getGbi1Type(pc)
     length = @getGbi1Length(pc)
     addr = @getGbi1RspSegmentAddr(pc)
-    #@videoLog "movemem type=" + type + ", length=" + length + " addr=" + addr
+    switch type
+      when consts.RSP_GBI1_MV_MEM_VIEWPORT
+        @RSP_MoveMemViewport addr
+      #case RSP_GBI1_MV_MEM_LOOKATY:
+      #break;
+      #case RSP_GBI1_MV_MEM_LOOKATX:
+      #break;
+      when consts.RSP_GBI1_MV_MEM_L0, consts.RSP_GBI1_MV_MEM_L1, consts.RSP_GBI1_MV_MEM_L2, consts.RSP_GBI1_MV_MEM_L3, consts.RSP_GBI1_MV_MEM_L4, consts.RSP_GBI1_MV_MEM_L5, consts.RSP_GBI1_MV_MEM_L6, consts.RSP_GBI1_MV_MEM_L7
+        dwLight = (type-consts.RSP_GBI1_MV_MEM_L0)/2
+        @RSP_MoveMemLight dwLight, addr
+    return
+
+  C1964jsVideoHLE::RSP_MoveMemViewport = (addr) ->
+    #todo
     return
 
   C1964jsVideoHLE::RSP_GBI1_SpNoop = (pc) ->
@@ -186,7 +215,7 @@ C1964jsVideoHLE = (core, glx) ->
         @gRSP.bMatrixIsUpdated = true
         return
 
-      @gRSP.projectionMtxTop += 1  
+      @gRSP.projectionMtxTop += 1
       if bReplace
 
         # Load projection matrix
@@ -195,7 +224,7 @@ C1964jsVideoHLE = (core, glx) ->
         mat4.multiply @gRSP.projectionMtxs[@gRSP.projectionMtxTop - 1], mat, @gRSP.projectionMtxs[@gRSP.projectionMtxTop]
     else
       if bReplace
-        
+
         # Load projection matrix
         mat4.set mat, @gRSP.projectionMtxs[@gRSP.projectionMtxTop]
       else
@@ -209,7 +238,7 @@ C1964jsVideoHLE = (core, glx) ->
         @gRSP.bMatrixIsUpdated = true
         return
 
-      @gRSP.modelViewMtxTop += 1  
+      @gRSP.modelViewMtxTop += 1
       # We should store the current projection matrix...
       if bReplace
 
@@ -217,20 +246,20 @@ C1964jsVideoHLE = (core, glx) ->
         mat4.set mat, @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop]
       else # Multiply projection matrix
         mat4.multiply @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop - 1], mat, @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop]
-    
+
     #  this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop] = mat * this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop-1];
     else # NoPush
       if bReplace
-        
+
         # Load projection matrix
         mat4.set mat, @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop]
       else
-        
+
         # Multiply projection matrix
         mat4.multiply @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], mat, @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop]
-    
+
     #this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop] = mat * this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop];
-    
+
     #gRSPmodelViewTop = this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop];
     @gRSP.bMatrixIsUpdated = true
     return
@@ -283,9 +312,9 @@ C1964jsVideoHLE = (core, glx) ->
     #console.log "SetTImg: Format:"+ @texImg.format + " Size:" + @texImg.size + " Width: "+ @texImg.width
     #@videoLog "TODO: DLParser_SetTImg"
     return
-  
+
   #this.videoLog('Texture: format=' + this.texImg.format + ' size=' + this.texImg.size + ' ' + 'width=' + this.texImg.width + ' addr=' + this.texImg.addr + ' bpl=' + this.texImg.bpl);
-  
+
   C1964jsVideoHLE::RSP_GBI0_Vtx = (pc) ->
     v0 = undefined
     seg = undefined
@@ -295,7 +324,7 @@ C1964jsVideoHLE = (core, glx) ->
     seg = @getGbi0DlistAddr(pc)
     addr = @getRspSegmentAddr(seg)
     num = 32 - v0  if (v0 + num) > 80
-    
+
     #TODO: check that address is valid
     @processVertexData addr, v0, num
     return
@@ -307,7 +336,7 @@ C1964jsVideoHLE = (core, glx) ->
       vmtx = @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop]
       pmtx = @gRSP.projectionMtxs[@gRSP.projectionMtxTop]
       mat4.multiply pmtx, vmtx, @gRSPworldProject
-      
+
       #this.gRSPworldProject = this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop] * this.gRSP.projectionMtxs[this.gRSP.projectionMtxTop];
       @gRSP.bMatrixIsUpdated = false
     return
@@ -321,37 +350,64 @@ C1964jsVideoHLE = (core, glx) ->
     texHeight = @textureTile[@activeTile].height
     while i < v0 + num
       a = addr + 16 * (i - v0)
-	  
+
       @N64VertexList[i].x = @getVertexX(a)
       @N64VertexList[i].y = @getVertexY(a)
       @N64VertexList[i].z = @getVertexZ(a)
-	  
+
       @N64VertexList[i].s = @getVertexS(a)/32 / texWidth
       @N64VertexList[i].t = @getVertexT(a)/32 / texHeight
 
-      if @bLightingEnable is true
-        @N64VertexList[i].r = 255.0
-        @N64VertexList[i].g = 255.0
-        @N64VertexList[i].b = 255.0
-        @N64VertexList[i].a = 255.0
+      # if @bLightingEnable is true
+      #   @normalMat[0] = @getVertexNormalX(a)
+      #   @normalMat[1] = @getVertexNormalY(a)
+      #   @normalMat[2] = @getVertexNormalZ(a)
+      #   @normalMat[3] = 0 # dummy
+
+      #   # @nonTransformed[0] = @N64VertexList[i].x
+      #   # @nonTransformed[1] = @N64VertexList[i].y
+      #   # @nonTransformed[2] = @N64VertexList[i].z
+      #   # @nonTransformed[3] = 255.0 # dummy full alpha
+
+      #   modelViewtransposedInverse = mat4.create()
+      #   mat4.inverse(@gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], modelViewtransposedInverse)
+      #   mat4.transpose(modelViewtransposedInverse, modelViewtransposedInverse)
+      #   transformNormal = mat4.transpose(modelViewtransposedInverse, @normalMat)
+      #   #transformNormal = @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop]
+      #   #mat4.multiply @normalMat, transformNormal, @transformed
+      #   #@transformed = vec3.normalize @transformed
+
+      #   #mat4.multiply @normalMat, @gRSP.projectionMtxs[@gRSP.projectionMtxTop], @transformed
+
+      #   # g_vecProjected[i].w = 1.0f / g_vtxTransformed[i].w;
+      #   # g_vecProjected[i].x = g_vtxTransformed[i].x * g_vecProjected[i].w;
+      #   # g_vecProjected[i].y = g_vtxTransformed[i].y * g_vecProjected[i].w;
+
+      #   #mat4.multiply @normalMat, @transformed, @lightingMat
+      #   vertColor = @lightVertex @transformed
+
+      #   @N64VertexList[i].r = vertColor[0]
+      #   @N64VertexList[i].g = vertColor[1]
+      #   @N64VertexList[i].b = vertColor[2]
+      #   @N64VertexList[i].a = @getVertexAlpha(a)
+      #else 
+      if @bShade is false
+        @N64VertexList[i].r = @primColor[0] * 255.0
+        @N64VertexList[i].g = @primColor[1] * 255.0
+        @N64VertexList[i].b = @primColor[2] * 255.0
+        @N64VertexList[i].a = @primColor[3] * 255.0
       else
-        if @bShade is false
-          @N64VertexList[i].r = @primColor[0]
-          @N64VertexList[i].g = @primColor[1]
-          @N64VertexList[i].b = @primColor[2]
-          @N64VertexList[i].a = @primColor[3]
-        else	  
-          @N64VertexList[i].r = @getVertexColorR(a)
-          @N64VertexList[i].g = @getVertexColorG(a)
-          @N64VertexList[i].b = @getVertexColorB(a)
-          @N64VertexList[i].a = @getVertexAlpha(a)
+        @N64VertexList[i].r = @getVertexColorR(a)
+        @N64VertexList[i].g = @getVertexColorG(a)
+        @N64VertexList[i].b = @getVertexColorB(a)
+        @N64VertexList[i].a = @getVertexAlpha(a)
 
 
       #until we use it..
       #@N64VertexList[i].nx = (@toSByte @getVertexNormalX(a))
       #@N64VertexList[i].ny = (@toSByte @getVertexNormalY(a))
       #@N64VertexList[i].nz = (@toSByte @getVertexNormalZ(a))
-	  
+
       #console.log "Vertex "+i+": XYZ("+@N64VertexList[i].x+" , "+@N64VertexList[i].y+" , "+@N64VertexList[i].z+") ST("+@N64VertexList[i].s+" , "+@N64VertexList[i].t+") RGBA("+@N64VertexList[i].r+" , "+@N64VertexList[i].g+" , "+@N64VertexList[i].b+" , "+@N64VertexList[i].a+") N("+@N64VertexList[i].nx+" , "+@N64VertexList[i].ny+" , "+@N64VertexList[i].nz+")"
 
       i += 1
@@ -367,7 +423,7 @@ C1964jsVideoHLE = (core, glx) ->
     seg = @getGbi0DlistAddr(pc)
     addr = @getRspSegmentAddr(seg)
     #@videoLog "dlist address = " + dec2hex(addr)
-    
+
     #TODO: address adjust
     param = @getGbi0DlistParam(pc)
     @dlistStackPointer += 1  if param is consts.RSP_DLIST_PUSH
@@ -408,13 +464,13 @@ C1964jsVideoHLE = (core, glx) ->
     # @combineB1a = 0xFF if @combineB1a is 7
     # @combineC1a = 0xFF if @combineC1a is 7
     # @combineD1a = 0xFF if @combineD1a is 7
-	
+
     w0 = @core.memory.rdramUint8Array[pc] << 24 | @core.memory.rdramUint8Array[pc + 1] << 16 | @core.memory.rdramUint8Array[pc + 2] << 8 | @core.memory.rdramUint8Array[pc + 3]
     w1 = @core.memory.rdramUint8Array[pc + 4] << 24 | @core.memory.rdramUint8Array[pc + 5] << 16 | @core.memory.rdramUint8Array[pc + 6] << 8 | @core.memory.rdramUint8Array[pc + 7]
-    
+
     #if (@combineD0 == 4)
     #  console.log " a0:" + @combineA0 + " b0:" + @combineB0 + " c0:" + @combineC0 + " d0:" + @combineD0 + " a0a:" + @combineA0a + " b0a:" + @combineB0a + " c0a:" + @combineC0a + " d0a:" + @combineD0a + " a1:" + @combineA1 + " b1:" + @combineB1 + " c1:" + @combineC1 + " d1:" + @combineD1 + " a1a:" + @combineA1a + " b1a:" + @combineB1a + " c1a:" + @combineC1a + " d1a:" + @combineD1a
-    
+
     #@videoLog "TODO: DLParser_SetCombine"
     return
 
@@ -428,14 +484,123 @@ C1964jsVideoHLE = (core, glx) ->
         dwSegment = (@getGbi0MoveWordOffset(pc) >> 2) & 0x0F
         dwBase = @getGbi0MoveWordValue(pc) & 0x00FFFFFF
         @segments[dwSegment] = dwBase
+      when consts.RSP_MOVE_WORD_NUMLIGHT
+        dwNumLights = (@getGbi0MoveWordValue(pc)<< 1 >>> 6)-1
+        @gRSP.ambientLightIndex = dwNumLights
+        @gRSPnumLights = dwNumLights
+      when consts.RSP_MOVE_WORD_LIGHTCOL
+        light = @getGbi0MoveWordOffset(pc) >>> 5
+        field = @getGbi0MoveWordOffset(pc)>>>0 & 0x7
+        if field is 0
+          if light is @gRSP.ambientLightIndex
+            @setAmbientLight @getGbi0MoveWordValue(pc)>>8
+          else
+            @setLightCol light, @getGbi0MoveWordValue(pc)
+    return
+
+  C1964jsVideoHLE::setAmbientLight = (col) ->
+    @gRSP.ambientLightColor = col
+    @gRSP.fAmbientLightA = (col >>> 24) & 0xff
+    @gRSP.fAmbientLightR = (col >>> 16) & 0xff
+    @gRSP.fAmbientLightG = (col >>> 8) & 0xff
+    @gRSP.fAmbientLightB = col & 0xff
+    return
+
+  C1964jsVideoHLE::setLightCol = (dwLight, dwCol) ->
+    @gRSPlights[dwLight].r = (dwCol >>> 24)&0xFF
+    @gRSPlights[dwLight].g = (dwCol >>> 16)&0xFF
+    @gRSPlights[dwLight].b = (dwCol >>>  8)&0xFF
+    @gRSPlights[dwLight].a = 255  # Ignore light alpha
+    @gRSPlights[dwLight].fr = @gRSPlights[dwLight].r
+    @gRSPlights[dwLight].fg = @gRSPlights[dwLight].g
+    @gRSPlights[dwLight].fb = @gRSPlights[dwLight].b
+    @gRSPlights[dwLight].fa = 255.0 # Ignore light alpha
+    return
+
+  C1964jsVideoHLE::setLightDirection = (dwLight, x, y, z) ->
+    w = Math.sqrt(x*x+y*y+z*z)
+
+    @gRSPlights[dwLight].x = x/w
+    @gRSPlights[dwLight].y = y/w
+    @gRSPlights[dwLight].z = z/w
+    return
+
+  C1964jsVideoHLE::lightVertex = (norm) ->
+    r = @gRSP.fAmbientLightR
+    g = @gRSP.fAmbientLightG
+    b = @gRSP.fAmbientLightB
+
+    for l in [0...@gRSPnumLights]
+      fCosT = norm[0]*@gRSPlights[l].x + norm[1]*@gRSPlights[l].y + norm[2]*@gRSPlights[l].z
+      if fCosT > 0
+        r += @gRSPlights[l].fr * fCosT
+        g += @gRSPlights[l].fg * fCosT
+        b += @gRSPlights[l].fb * fCosT
+
+    if r < 0.0
+      r = 0.0
+    if g < 0.0
+      g = 0.0
+    if b < 0.0
+      b = 0.0
+    if r > 255.0
+      r = 255.0
+    if g > 255.0
+      g = 255.0
+    if b > 255.0
+      b = 255.0
+    return [r, g, b, 255.0]
+
+  C1964jsVideoHLE::RSP_MoveMemLight = (dwLight, dwAddr) ->
+    if dwLight >= 16
+      return
+
+    @gRSPn64lights[dwLight].dwRGBA = @getGbi0MoveWordValue(dwAddr)
+    @gRSPn64lights[dwLight].dwRGBACopy = @getGbi0MoveWordValue(dwAddr+4)
+    @gRSPn64lights[dwLight].x = @getCommand(dwAddr+8)
+    @gRSPn64lights[dwLight].y = @getCommand(dwAddr+9)
+    @gRSPn64lights[dwLight].z = @getCommand(dwAddr+10)
+
+    # disabled in Rice's code.
+    # /*
+    # {
+    #   // Normalize light
+    #   double sum = (double)gRSPn64lights[dwLight].x * gRSPn64lights[dwLight].x;
+    #   sum += (double)gRSPn64lights[dwLight].y * gRSPn64lights[dwLight].y;
+    #   sum += (double)gRSPn64lights[dwLight].z * gRSPn64lights[dwLight].z;
+    #   sum = sqrt(sum);
+    #   sum = sum/128.0;
+    #   gRSPn64lights[dwLight].x /= sum;
+    #   gRSPn64lights[dwLight].y /= sum;
+    #   gRSPn64lights[dwLight].z /= sum;
+    # }
+    # */
+
+    # normalize light
+    # sum = @gRSPn64lights[dwLight].x * @gRSPn64lights[dwLight].x
+    # sum += @gRSPn64lights[dwLight].y * @gRSPn64lights[dwLight].y
+    # sum += @gRSPn64lights[dwLight].z * @gRSPn64lights[dwLight].z
+    # sum = Math.sqrt(sum)
+    # sum = sum/128.0
+    # @gRSPn64lights[dwLight].x /= sum
+    # @gRSPn64lights[dwLight].y /= sum
+    # @gRSPn64lights[dwLight].z /= sum
+
+    if dwLight == @gRSP.ambientLightIndex
+      dwCol = @gRSPn64lights[dwLight].dwRGBA
+      @setAmbientLight dwCol
+    else
+      @setLightCol dwLight, @gRSPn64lights[dwLight].dwRGBA
+      if @getGbi0MoveWordValue(dwAddr+8) is 0  # Direction is 0!
       else
+        @setLightDirection dwLight, @gRSPn64lights[dwLight].x, @gRSPn64lights[dwLight].y, @gRSPn64lights[dwLight].z
     return
 
   C1964jsVideoHLE::renderReset = ->
-    
+
     #UpdateClipRectangle();
     @resetMatrices()
-    
+
     #SetZBias(0);
     @gRSP.numVertices = 0
     @gRSP.curTile = 0
@@ -465,9 +630,9 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::RSP_GBI1_SetOtherModeH = (pc) ->
     #@videoLog "TODO: DLParser_GBI1_SetOtherModeH"
-    word0 = @getOtherModeH pc
-    length = word0 & 0xFF
-    shift = ((word0 >>> 8) & 0xFF) - length
+    word0 = @getOtherModeH(pc) >>> 0
+    length = (word0 >>> 0) & 0xFF
+    shift = ((word0 >>> 8) & 0xFF)
     mask = ((1<<length)-1)<<shift
     @otherModeH &= ~mask
     @otherModeH |= @getOtherModeH pc+4
@@ -476,9 +641,9 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::RSP_GBI1_SetOtherModeL = (pc) ->
     #@videoLog "TODO: DLParser_GBI1_SetOtherModeL"
-    word0 = @getOtherModeL pc
-    length = word0 & 0xFF
-    shift = ((word0 >>> 8) & 0xFF) - length
+    word0 = @getOtherModeL(pc) >>> 0
+    length = (word0 >>> 0) & 0xFF
+    shift = ((word0 >>> 8) & 0xFF)
     mask = ((1<<length)-1)<<shift
     @otherModeL &= ~mask
     @otherModeL |= @getOtherModeL pc+4
@@ -510,16 +675,14 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::RSP_GBI1_ClearGeometryMode = (pc) ->
-    data = @getClearGeometryMode(pc)
+    data = @getClearGeometryMode(pc)>>>0
     @geometryMode &= ~data
-    #@videoLog "TODO: RSP_GBI1_ClearGeometryMode"
     @initGeometryMode()
     return
 
   C1964jsVideoHLE::RSP_GBI1_SetGeometryMode = (pc) ->
-    data = @getSetGeometryMode(pc)
+    data = @getSetGeometryMode(pc)>>>0
     @geometryMode |= data
-    #@videoLog "TODO: RSP_GBI1_SetGeometryMode"
     @initGeometryMode()
     return
 
@@ -533,14 +696,17 @@ C1964jsVideoHLE = (core, glx) ->
     else if bCullBack isnt 0
       @gl.enable @gl.CULL_FACE
       @gl.cullFace @gl.BACK
-    else if bCullBack isnt 0
+    else if bCullFront isnt 0
       @gl.enable @gl.CULL_FACE
       @gl.cullFace @gl.FRONT
     else
       @gl.disable @gl.CULL_FACE
 
-    @bShade = @geometryMode & consts.G_SHADE ? true : false
-    #this doesn't exist in WebGL, so find a replacement if 
+    if @geometryMode & consts.G_SHADE isnt 0
+      @bShade = true
+    else
+      @bShade = false
+    #this doesn't exist in WebGL, so find a replacement if
     #we need flat-shading.
     #bShadeSmooth = @geometryMode & consts.G_SHADING_SMOOTH
     #if bShade isnt 0 and bShadeSmooth isnt 0
@@ -598,7 +764,7 @@ C1964jsVideoHLE = (core, glx) ->
     flag = @getGbi0Tri1Flag(pc)
     #console.log "Tri1: "+v0+", "+v1+", "+v2+"   Flag: "+flag
     didSucceed = @prepareTriangle v0, v1, v2
-    
+
     if didSucceed is false
       return
 
@@ -844,7 +1010,7 @@ C1964jsVideoHLE = (core, glx) ->
     @triColorVertices[colorOffset + 2] = @N64VertexList[dwV].b;
     @triColorVertices[colorOffset + 3] = @N64VertexList[dwV].a;
     @triangleVertexColorBuffer.numItems += 1
-	
+
     texOffset = @triangleVertexTextureCoordBuffer.numItems << 1
     @triTextureCoords[texOffset]     = @N64VertexList[dwV].s
     @triTextureCoords[texOffset + 1] = @N64VertexList[dwV].t
@@ -903,7 +1069,7 @@ C1964jsVideoHLE = (core, glx) ->
           @gl.blendFunc @gl.ONE, @gl.ZERO
           @gl.enable @gl.BLEND
         else switch blendMode1+blendMode2
-          when (BLEND_PASS+(BLEND_PASS>>2)) || (BLEND_FOG_APRIM+(BLEND_PASS>>2))
+          when (BLEND_PASS+(BLEND_PASS>>2)), (BLEND_FOG_APRIM+(BLEND_PASS>>2))
             @gl.blendFunc @gl.ONE, @gl.ZERO
             @gl.enable @gl.blendFunc
     #       if( gRDP.otherMode.alpha_cvg_sel )
@@ -922,13 +1088,13 @@ C1964jsVideoHLE = (core, glx) ->
             else
               @gl.blendFunc @gl.ONE, @gl.ZERO
               @gl.enable @gl.BLEND
-          when (BLEND_PASS + (BLEND_XLU>>2)) || (BLEND_FOG_ASHADE + (BLEND_XLU>>2)) || (BLEND_FOG_APRIM + (BLEND_XLU>>2)) || (BLEND_FOG_MEM_FOG_MEM + (BLEND_PASS>>2)) || (BLEND_XLU + (BLEND_XLU>>2)) || (BLEND_BI_AFOG + (BLEND_XLU>>2)) || (BLEND_XLU + (BLEND_FOG_MEM_IN_MEM>>2)) || (BLEND_PASS + (BLEND_FOG_MEM_IN_MEM>>2))
+          when (BLEND_PASS + (BLEND_XLU>>2)), (BLEND_FOG_ASHADE + (BLEND_XLU>>2)), (BLEND_FOG_APRIM + (BLEND_XLU>>2)), (BLEND_FOG_MEM_FOG_MEM + (BLEND_PASS>>2)), (BLEND_XLU + (BLEND_XLU>>2)), (BLEND_BI_AFOG + (BLEND_XLU>>2)), (BLEND_XLU + (BLEND_FOG_MEM_IN_MEM>>2)), (BLEND_PASS + (BLEND_FOG_MEM_IN_MEM>>2))
             @gl.blendFunc @gl.SRC_ALPHA, @gl.ONE_MINUS_SRC_ALPHA
             @gl.enable @gl.BLEND
           when BLEND_FOG_MEM_FOG_MEM + (BLEND_OPA>>2)
             @gl.blendFunc @gl.ONE, @gl.ZERO
             @gl.enable @gl.BLEND
-          when (BLEND_FOG_APRIM + (BLEND_OPA>>2)) || (BLEND_FOG_ASHADE + (BLEND_OPA>>2)) || (BLEND_BI_AFOG + (BLEND_OPA>>2)) || (BLEND_FOG_ASHADE + (BLEND_NOOP>>2)) || (BLEND_NOOP + (BLEND_OPA>>2)) || (BLEND_NOOP4 + (BLEND_NOOP>>2)) || (BLEND_FOG_ASHADE+(BLEND_PASS>>2)) || (BLEND_FOG_3+(BLEND_PASS>>2))
+          when (BLEND_FOG_APRIM + (BLEND_OPA>>2)), (BLEND_FOG_ASHADE + (BLEND_OPA>>2)), (BLEND_BI_AFOG + (BLEND_OPA>>2)), (BLEND_FOG_ASHADE + (BLEND_NOOP>>2)), (BLEND_NOOP + (BLEND_OPA>>2)), (BLEND_NOOP4 + (BLEND_NOOP>>2)), (BLEND_FOG_ASHADE+(BLEND_PASS>>2)), (BLEND_FOG_3+(BLEND_PASS>>2))
             @gl.blendFunc @gl.ONE, @gl.ZERO
             @gl.enable @gl.BLEND
           when BLEND_FOG_ASHADE+0x0301
@@ -957,7 +1123,7 @@ C1964jsVideoHLE = (core, glx) ->
     #    }
         else switch blendMode1
     #    //switch ( blendmode_2<<2 )
-          when BLEND_XLU || BLEND_BI_AIN || BLEND_FOG_MEM || BLEND_FOG_MEM_IN_MEM || BLEND_BLENDCOLOR || 0x00c0
+          when BLEND_XLU, BLEND_BI_AIN, BLEND_FOG_MEM, BLEND_FOG_MEM_IN_MEM, BLEND_BLENDCOLOR, 0x00c0
             @gl.blendFunc @gl.SRC_ALPHA, @gl.ONE_MINUS_SRC_ALPHA
             @gl.enable @gl.BLEND
           when BLEND_MEM_ALPHA_IN
@@ -980,13 +1146,13 @@ C1964jsVideoHLE = (core, glx) ->
             @gl.blendFunc @gl.ONE, @gl.ZERO
           #  }
             @gl.enable @gl.BLEND
-          when BLEND_NOOP || BLEND_FOG_ASHADE || BLEND_FOG_MEM_3 || BLEND_BI_AFOG
+          when BLEND_NOOP, BLEND_FOG_ASHADE, BLEND_FOG_MEM_3, BLEND_BI_AFOG
             @gl.blendFunc @gl.ONE, @gl.ZERO
             @gl.enable @gl.BLEND
           when BLEND_FOG_APRIM
             @gl.blendFunc @gl.ONE_MINUS_SRC_ALPHA, @gl.ZERO
             @gl.enable @gl.BLEND
-          when BLEND_NOOP3 || BLEND_NOOP5
+          when BLEND_NOOP3, BLEND_NOOP5
             @gl.blendFunc @gl.ZERO, @gl.ONE
             @gl.enable @gl.BLEND
           when BLEND_MEM
@@ -1005,7 +1171,7 @@ C1964jsVideoHLE = (core, glx) ->
     @gl.useProgram @core.webGL.shaderProgram
     @gl.enable @gl.DEPTH_TEST
     @gl.depthFunc @gl.LEQUAL
-    
+
     if @triangleVertexPositionBuffer.numItems > 0
       @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexPositionBuffer
       @gl.bufferData @gl.ARRAY_BUFFER, @triVertices.subarray(0, @triangleVertexPositionBuffer.numItems*@triangleVertexPositionBuffer.itemSize*4), @gl.STATIC_DRAW
@@ -1025,7 +1191,7 @@ C1964jsVideoHLE = (core, glx) ->
       @gl.vertexAttribPointer @core.webGL.shaderProgram.textureCoordAttribute, @triangleVertexTextureCoordBuffer.itemSize, @gl.FLOAT, false, 0, 0
       tile = @textureTile[@activeTile]
       canvaswidth = @pow2roundup tile.width
-      canvasheight = @pow2roundup tile.height	
+      canvasheight = @pow2roundup tile.height
       texture = @renderer.formatTexture(tile, @tmem, canvaswidth, canvasheight)
       colorsTexture = @gl.createTexture()
       @gl.activeTexture(@gl.TEXTURE0)
@@ -1039,13 +1205,13 @@ C1964jsVideoHLE = (core, glx) ->
       @gl.uniform4fv @core.webGL.shaderProgram.uPrimColor, @primColor
 
     if @fillColor.length > 0
-      @gl.uniform4fv @core.webGL.shaderProgram.uFillColor, @fillColor  
+      @gl.uniform4fv @core.webGL.shaderProgram.uFillColor, @fillColor
 
     if @envColor.length > 0
-      @gl.uniform4fv @core.webGL.shaderProgram.uEnvColor, @envColor  
+      @gl.uniform4fv @core.webGL.shaderProgram.uEnvColor, @envColor
 
     if @blendColor.length > 0
-      @gl.uniform4fv @core.webGL.shaderProgram.uBlendColor, @blendColor  
+      @gl.uniform4fv @core.webGL.shaderProgram.uBlendColor, @blendColor
 
     #@gl.uniform1i @core.webGL.shaderProgram.otherModeL, @otherModeL
     #@gl.uniform1i @core.webGL.shaderProgram.otherModeH, @otherModeH
@@ -1055,7 +1221,7 @@ C1964jsVideoHLE = (core, glx) ->
     @core.webGL.setCombineUniforms @core.webGL.shaderProgram
 
     @gl.uniform1i @core.webGL.shaderProgram.wireframeUniform, if @core.settings.wireframe then 1 else 0
-    
+
     # Matrix Uniforms
     @gl.uniformMatrix4fv(@core.webGL.shaderProgram.pMatrixUniform, false, @gRSP.projectionMtxs[@gRSP.projectionMtxTop]);
     @gl.uniformMatrix4fv(@core.webGL.shaderProgram.mvMatrixUniform, false, @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop]);
@@ -1075,6 +1241,8 @@ C1964jsVideoHLE = (core, glx) ->
     @triangleVertexTextureCoordBuffer.numItems = 0
     @otherModeL = 0x00500001
     @otherModeH = 0
+   # @geometryMode = 0
+    @initGeometryMode()
     @alphaTestEnabled = 0
     return
 
