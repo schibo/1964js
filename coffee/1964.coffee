@@ -336,7 +336,7 @@ class C1964jsEmulator
             #  @lastLoop = thisLoop;            #@fps = thisLoop
             #  break if (frameTime > 30.0)
             if document.getElementById("speedlimit").checked is true
-              rate = 15
+              rate = 60
               return if @settings.speedLimitMs is rate 
               @settings.speedLimitMs = rate
               clearInterval @mySetInterval
@@ -364,7 +364,7 @@ class C1964jsEmulator
             #in javascript?
             fn = @decompileBlock(@p)
             fn = fn(@r, @h, @memory, this)
-    ), @settings.speedLimitMs
+    ), 1000.0/@settings.speedLimitMs
     this
 
   run: (fn, r, h) ->
