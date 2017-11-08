@@ -358,40 +358,23 @@ C1964jsVideoHLE = (core, glx) ->
       @N64VertexList[i].s = @getVertexS(a)/32 / texWidth
       @N64VertexList[i].t = @getVertexT(a)/32 / texHeight
 
-      # if @bLightingEnable is true
-      #   @normalMat[0] = @getVertexNormalX(a)
-      #   @normalMat[1] = @getVertexNormalY(a)
-      #   @normalMat[2] = @getVertexNormalZ(a)
-      #   @normalMat[3] = 0 # dummy
-
-      #   # @nonTransformed[0] = @N64VertexList[i].x
-      #   # @nonTransformed[1] = @N64VertexList[i].y
-      #   # @nonTransformed[2] = @N64VertexList[i].z
-      #   # @nonTransformed[3] = 255.0 # dummy full alpha
-
-      #   modelViewtransposedInverse = mat4.create()
-      #   mat4.inverse(@gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], modelViewtransposedInverse)
-      #   mat4.transpose(modelViewtransposedInverse, modelViewtransposedInverse)
-      #   transformNormal = mat4.transpose(modelViewtransposedInverse, @normalMat)
-      #   #transformNormal = @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop]
-      #   #mat4.multiply @normalMat, transformNormal, @transformed
-      #   #@transformed = vec3.normalize @transformed
-
-      #   #mat4.multiply @normalMat, @gRSP.projectionMtxs[@gRSP.projectionMtxTop], @transformed
-
-      #   # g_vecProjected[i].w = 1.0f / g_vtxTransformed[i].w;
-      #   # g_vecProjected[i].x = g_vtxTransformed[i].x * g_vecProjected[i].w;
-      #   # g_vecProjected[i].y = g_vtxTransformed[i].y * g_vecProjected[i].w;
-
-      #   #mat4.multiply @normalMat, @transformed, @lightingMat
-      #   vertColor = @lightVertex @transformed
-
-      #   @N64VertexList[i].r = vertColor[0]
-      #   @N64VertexList[i].g = vertColor[1]
-      #   @N64VertexList[i].b = vertColor[2]
-      #   @N64VertexList[i].a = @getVertexAlpha(a)
-      #else 
-      if @bShade is false
+      if @bLightingEnable is true
+        @normalMat[0] = @getVertexNormalX(a) >>> 0
+        @normalMat[1] = @getVertexNormalY(a) >>> 0
+        @normalMat[2] = @getVertexNormalZ(a) >>> 0
+        @normalMat[3] = 0
+        modelViewtransposedInverse = mat4.create()
+        mat4.inverse @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], modelViewtransposedInverse
+        mat4.transpose modelViewtransposedInverse, modelViewtransposedInverse
+        #mat4.transpose modelViewtransposedInverse, @normalMat
+        @normalMat = vec3.normalize @normalMat
+        @normalMat = mat4.multiply modelViewtransposedInverse, @normalMat
+        vertColor = @lightVertex @normalMat
+        @N64VertexList[i].r = vertColor[0]
+        @N64VertexList[i].g = vertColor[1]
+        @N64VertexList[i].b = vertColor[2]
+        @N64VertexList[i].a = @getVertexAlpha a
+      else if @bShade is false
         @N64VertexList[i].r = @primColor[0] * 255.0
         @N64VertexList[i].g = @primColor[1] * 255.0
         @N64VertexList[i].b = @primColor[2] * 255.0
