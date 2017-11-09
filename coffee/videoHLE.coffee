@@ -702,7 +702,7 @@ C1964jsVideoHLE = (core, glx) ->
     else
       @gl.disable @gl.CULL_FACE
 
-    if @geometryMode & consts.G_SHADE isnt 0
+    if (@geometryMode & consts.G_SHADE) isnt 0
       @bShade = true
     else
       @bShade = false
@@ -714,19 +714,19 @@ C1964jsVideoHLE = (core, glx) ->
     #else
     #  @gl.shadeModel @gl.FLAT
 
-    if @geometryMode & consts.G_TEXTURE_GEN isnt 0
+    if (@geometryMode & consts.G_TEXTURE_GEN) isnt 0
       @bTextureGen = true
     else
       @bTexueGen = false
-    if @geometryMode & consts.G_LIGHTING isnt 0
+    if (@geometryMode & consts.G_LIGHTING) isnt 0
       @bLightingEnable = true
     else
       @bLightingEnable = false
-    if @geometryMode & consts.G_FOG isnt 0
+    if (@geometryMode & consts.G_FOG) isnt 0
       @bFogEnable = true
     else
       @bFogEnable = false
-    if @geometryMode & consts.G_ZBUFFER isnt 0
+    if (@geometryMode & consts.G_ZBUFFER) isnt 0
       @bZBufferEnable = true
     else
       @bZBufferEnable = false
