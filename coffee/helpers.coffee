@@ -196,19 +196,19 @@ C1964jsHelpers = (core, isLittleEndian) ->
   #//////////////////////////
   #Interpreted opcode helpers
   #//////////////////////////
-  
+
   #called function, not compiled
   @inter_mtc0 = (r, f, rt, isDelaySlot, pc, cp0, interrupts) ->
-    
+
     #incomplete:
     switch f
       when consts.CAUSE
         cp0[f] &= ~0x300
         cp0[f] |= r[rt] & 0x300
-        
+
         #      if (((r[rt] & 1)===1) && (cp0[f] & 1)===0) //possible fix over 1964cpp?
         interrupts.setException consts.EXC_INT, 0, pc, isDelaySlot  if (cp0[consts.CAUSE] & cp0[consts.STATUS] & 0x0000FF00) isnt 0  if r[rt] & 0x300
-      
+
       #interrupts.processException(pc, isDelaySlot);
       when consts.COUNT
         cp0[f] = r[rt]
@@ -220,14 +220,14 @@ C1964jsHelpers = (core, isLittleEndian) ->
           if (cp0[consts.CAUSE] & cp0[consts.STATUS] & 0x0000FF00) isnt 0
             cp0[f] = r[rt]
             interrupts.setException consts.EXC_INT, 0, pc, isDelaySlot
-            
+
             #interrupts.processException(pc, isDelaySlot);
             return
         if ((r[rt] & consts.IE) is 1) and ((cp0[f] & consts.IE) is 0)
           if (cp0[consts.CAUSE] & cp0[consts.STATUS] & 0x0000FF00) isnt 0
             cp0[f] = r[rt]
             interrupts.setException consts.EXC_INT, 0, pc, isDelaySlot
-            
+
             #interrupts.processException(pc, isDelaySlot);
             return
         cp0[f] = r[rt]
@@ -328,7 +328,7 @@ C1964jsHelpers = (core, isLittleEndian) ->
     if r[@rt(i)] is 0
       alert "divide by zero"
       return
-    
+
     #todo: handle div by zero
     r[32] = r[@rs(i)] / r[@rt(i)] #lo
     h[32] = r[32] >> 31 #hi
@@ -361,20 +361,20 @@ C1964jsHelpers = (core, isLittleEndian) ->
     r[33] = mod.getLowBits() #lo
     h[33] = mod.getHighBits() #hi
     return
-  
+
   #alert('ddiv: '+rs64+'/'+rt64+'='+dec2hex(h[33]) +' '+dec2hex(r[33])+' '+dec2hex(h[32])+' '+dec2hex(r[32]));
   @inter_divu = (r, h, i) ->
     if r[@rt(i)] is 0
       alert "divide by zero"
       return
-    
+
     #todo: handle div by zero
     r[32] = (r[@rs(i)] >>> 0) / (r[@rt(i)] >>> 0) #lo
     h[32] = 0 #hi
     r[33] = (r[@rs(i)] >>> 0) % (r[@rt(i)] >>> 0) #lo
     h[33] = 0 #hi
     return
-  
+
   #alert('divu: '+r[this.rs(i)]+'/'+r[this.rt(i)]+'='+dec2hex(h[33]) +' '+dec2hex(r[33])+' '+dec2hex(h[32])+' '+dec2hex(r[32]));
   @inter_dmult = (r, h, i) ->
     #this is wrong..i think BigInt it will treat hex as unsigned?
@@ -546,7 +546,7 @@ C1964jsHelpers = (core, isLittleEndian) ->
     cond1 = undefined
     cond2 = undefined
     cond3 = undefined
-    
+
     # CHK_ODD_FPR_2_REG(RD_FS, RT_FT);
     cond0 = (instruction) & 0x1
     cond1 = (instruction >> 1) & 0x1
@@ -595,7 +595,7 @@ C1964jsHelpers = (core, isLittleEndian) ->
   @buildTLBHelper = (start, end, entry, mask, clear) ->
     i = start>>>12
     lend = end>>>12
-  
+
     if (clear is true) #clear unconditionally or if (entry & 3)? If so, why?
       while i < lend
         @core.memory.physRegion[i] = (i & 0x1ffff) >>> 4
@@ -623,7 +623,7 @@ C1964jsHelpers = (core, isLittleEndian) ->
     @buildTLB tlb, true if tlb.valid is 1 #clear old tlb
     @writeTLBEntry tlb, cp0
     tlb.valid = 0
-    tlb.valid = 1 if cp0[consts.ENTRYLO1] & consts.TLBLO_V or cp0[consts.ENTRYLO0] & consts.TLBLO_V
+    tlb.valid = 1 if (cp0[consts.ENTRYLO1] & consts.TLBLO_V) or (cp0[consts.ENTRYLO0] & consts.TLBLO_V)
     @buildTLB tlb if tlb.valid is 1
     return
 

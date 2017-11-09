@@ -93,7 +93,7 @@ class C1964jsEmulator
     @cp1_f64 = new Float64Array(@cp1Buffer)
     @cp1Con = new Int32Array(32)
     @LLbit = 0
-  
+
     #var docElement, errorElement, g, s, interval, stopCompiling, offset, programCounter, romLength, redrawDebug=0;
     @terminate = false
     @NUM_CHANNELS = 1
@@ -254,7 +254,7 @@ class C1964jsEmulator
     #get origin
     k = @memory.getInt32(@memory.viUint8Array, consts.VI_ORIGIN_REG) & 0x00FFFFFF
     out = ImDat.data
-    
+
     #endian-safe blit: rgba5551
     y = -240 * 320
     while y isnt 0
@@ -304,7 +304,7 @@ class C1964jsEmulator
     @mySetInterval = setInterval (=>
       #@request = requestAnimFrame(@runLoop)  if @terminate is false
       if @terminate is true
-        clearInterval @mySetInterval 
+        clearInterval @mySetInterval
         return
       @interrupts.checkInterrupts()
 
@@ -337,12 +337,12 @@ class C1964jsEmulator
             #  break if (frameTime > 30.0)
             if document.getElementById("speedlimit").checked is true
               rate = 60
-              return if @settings.speedLimitMs is rate 
+              return if @settings.speedLimitMs is rate
               @settings.speedLimitMs = rate
               clearInterval @mySetInterval
               @runLoop()
             else
-              return if @settings.speedLimitMs is 0          
+              return if @settings.speedLimitMs is 0
               @settings.speedLimitMs = 0
               clearInterval @mySetInterval
               @runLoop()
@@ -415,7 +415,7 @@ class C1964jsEmulator
       offset += 4
       throw Error "too many instructions! bailing."  if offset > 10000
     @stopCompiling = false
-    
+
     #close out the function
     string += "t.m+=" + @cnt + ";"
     string += "t.p=" + ((pc + offset) >> 0)
@@ -474,7 +474,7 @@ class C1964jsEmulator
     a = undefined
 #    string = "m.sw(" + @helpers.RT(i) + "," + @helpers.RS(i) + "+" + @helpers.soffset_imm(i)
     string = @helpers.virtualToPhysical("" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + "") + "m.writeRegion32[a>>>14](m, " + @helpers.RT(i) + ",a"
-    
+
     #So we can process exceptions
     if isDelaySlot is true
       a = (@p + offset + 4) | 0
@@ -615,7 +615,7 @@ class C1964jsEmulator
     string = "{var temp=" + @helpers.RS(i) + ";"
     link = (@p + offset + 8) >> 0
     string += @helpers.tRD(i) + "=" + link + ";" + @helpers.tRDH(i) + "=" + (link >> 31) + ";"
-    
+
     #delay slot
     instruction = @memory.lw((@p + offset + 4) | 0)
     opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
@@ -629,14 +629,14 @@ class C1964jsEmulator
     instruction = undefined
     opcode = undefined
     string = "{var temp=" + @helpers.RS(i) + ";"
-    
+
     #delay slot
     instruction = @memory.lw((@p + offset + 4) | 0)
     opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     string += opcode
     string += "t.m+=1;"
     string += "t.p=temp;return t.code[\"_\"+(temp>>>2)]}"
- 
+
   UNUSED: (i) ->
     @log "warning: UNUSED"
     ""
@@ -646,7 +646,7 @@ class C1964jsEmulator
     string = "{if((t.cp0[" + consts.STATUS + "]&" + consts.ERL + ")!==0){alert(\"error epc\");t.p=t.cp0[" + consts.ERROREPC + "];"
     string += "t.cp0[" + consts.STATUS + "]&=~" + consts.ERL + "}else{t.p=t.cp0[" + consts.EPC + "];t.cp0[" + consts.STATUS + "]&=~" + consts.EXL + "}"
     string += "t.LLbit=0;return t.code[\"_\"+(t.p>>>2)]}"
- 
+
   r4300i_COP0_mtc0: (i, isDelaySlot) ->
     delaySlot = undefined
     lpc = undefined
@@ -702,7 +702,7 @@ class C1964jsEmulator
     @log "todo: r4300i_cache"
     @stopCompiling = true
     ""
-  
+
   r4300i_multu: (i) ->
     "t.helpers.inter_multu(r,h," + i + ");"
 
@@ -727,7 +727,7 @@ class C1964jsEmulator
       when consts.RANDOM
         alert "RANDOM"
       when consts.COUNT
-      
+
       #string += 't.cp0[' + this.helpers.fs(i) + ']=getCountRegister();';
       else
     string += @helpers.tRT(i) + "=t.cp0[" + @helpers.fs(i) + "]," + @helpers.tRTH(i) + "=t.cp0[" + @helpers.fs(i) + "]>>31;"
@@ -769,7 +769,7 @@ class C1964jsEmulator
   r4300i_sh: (i, isDelaySlot) ->
     #"m.sh(" + @helpers.RT(i) + "," + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");"
     string = @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + "m.writeRegion16[a>>>14](m, " + @helpers.RT(i) + ",a"
-    
+
     #So we can process exceptions
     if isDelaySlot is true
       a = (@p + offset + 4) | 0
@@ -812,7 +812,7 @@ class C1964jsEmulator
     #lo
     a = undefined
     string = "{" + @helpers.setVAddr(i) + "m.sw(" + @helpers.RT(i) + ",(vAddr+4)|0"
-  
+
     #So we can process exceptions
     if isDelaySlot is true
       a = (@p + offset + 4) | 0
@@ -820,7 +820,7 @@ class C1964jsEmulator
     else
       a = (@p + offset) | 0
       string += ", " + a + ");"
-    
+
     #hi
     string += "m.sw(" + @helpers.RTH(i) + ",vAddr"
 
@@ -923,7 +923,7 @@ class C1964jsEmulator
   r4300i_swc1: (i, isDelaySlot) ->
     a = undefined
     string = "m.sw(t.cp1_i[" + @helpers.FT32ArrayView(i) + "]," + @helpers.RS(i) + "+" + @helpers.soffset_imm(i)
-    
+
     #So we can process exceptions
     if isDelaySlot is true
       a = (@p + offset + 4) | 0
@@ -936,7 +936,7 @@ class C1964jsEmulator
   r4300i_sdc1: (i, isDelaySlot) ->
     a = undefined
     string = "{" + @helpers.setVAddr(i) + "m.sw(t.cp1_i[" + @helpers.FT32ArrayView(i) + "],(vAddr+4)|0"
-    
+
     #So we can process exceptions
     if isDelaySlot is true
       a = (@p + offset + 4) | 0
@@ -945,7 +945,7 @@ class C1964jsEmulator
       a = (@p + offset) | 0
       string += ", " + a + ");"
     string += "m.sw(t.cp1_i[" + @helpers.FT32HIArrayView(i) + "],(vAddr)|0"
-    
+
     #So we can process exceptions
     if isDelaySlot is true
       a = (@p + offset + 4) | 0

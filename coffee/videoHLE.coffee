@@ -184,7 +184,8 @@ C1964jsVideoHLE = (core, glx) ->
     length = undefined
     type = @getGbi1Type(pc)
     length = @getGbi1Length(pc)
-    addr = @getGbi1RspSegmentAddr(pc)
+    seg = @getGbi0DlistAddr(pc)
+    addr = @getGbi1RspSegmentAddr(seg)
     switch type
       when consts.RSP_GBI1_MV_MEM_VIEWPORT
         @RSP_MoveMemViewport addr
@@ -358,40 +359,30 @@ C1964jsVideoHLE = (core, glx) ->
       @N64VertexList[i].s = @getVertexS(a)/32 / texWidth
       @N64VertexList[i].t = @getVertexT(a)/32 / texHeight
 
-      # if @bLightingEnable is true
-      #   @normalMat[0] = @getVertexNormalX(a)
-      #   @normalMat[1] = @getVertexNormalY(a)
-      #   @normalMat[2] = @getVertexNormalZ(a)
-      #   @normalMat[3] = 0 # dummy
+      if @bLightingEnable is true
+        @normalMat[0] = @getVertexNormalX(a)
+        @normalMat[1] = @getVertexNormalY(a)
+        @normalMat[2] = @getVertexNormalZ(a)
+        @normalMat[3] = 0
+        modelViewtransposedInverse = mat4.create()
+        mat4.inverse @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], modelViewtransposedInverse
+        mat4.transpose modelViewtransposedInverse, modelViewtransposedInverse
 
-      #   # @nonTransformed[0] = @N64VertexList[i].x
-      #   # @nonTransformed[1] = @N64VertexList[i].y
-      #   # @nonTransformed[2] = @N64VertexList[i].z
-      #   # @nonTransformed[3] = 255.0 # dummy full alpha
+        #mat4.transpose modelViewtransposedInverse, @normalMat
+        @normalMat = vec3.normalize @normalMat
+        @normalMat = mat4.multiply modelViewtransposedInverse, @normalMat
 
-      #   modelViewtransposedInverse = mat4.create()
-      #   mat4.inverse(@gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], modelViewtransposedInverse)
-      #   mat4.transpose(modelViewtransposedInverse, modelViewtransposedInverse)
-      #   transformNormal = mat4.transpose(modelViewtransposedInverse, @normalMat)
-      #   #transformNormal = @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop]
-      #   #mat4.multiply @normalMat, transformNormal, @transformed
-      #   #@transformed = vec3.normalize @transformed
+        worldViewtransposedInverse = mat4.create()
+        mat4.inverse @gRSP.projectionMtxs[@gRSP.projectionMtxTop], worldViewtransposedInverse
+        mat4.transpose worldViewtransposedInverse, worldViewtransposedInverse
+        @normalMat = mat4.multiply worldViewtransposedInverse, @normalMat
 
-      #   #mat4.multiply @normalMat, @gRSP.projectionMtxs[@gRSP.projectionMtxTop], @transformed
-
-      #   # g_vecProjected[i].w = 1.0f / g_vtxTransformed[i].w;
-      #   # g_vecProjected[i].x = g_vtxTransformed[i].x * g_vecProjected[i].w;
-      #   # g_vecProjected[i].y = g_vtxTransformed[i].y * g_vecProjected[i].w;
-
-      #   #mat4.multiply @normalMat, @transformed, @lightingMat
-      #   vertColor = @lightVertex @transformed
-
-      #   @N64VertexList[i].r = vertColor[0]
-      #   @N64VertexList[i].g = vertColor[1]
-      #   @N64VertexList[i].b = vertColor[2]
-      #   @N64VertexList[i].a = @getVertexAlpha(a)
-      #else 
-      if @bShade is false
+        vertColor = @lightVertex @normalMat
+        @N64VertexList[i].r = vertColor[0]
+        @N64VertexList[i].g = vertColor[1]
+        @N64VertexList[i].b = vertColor[2]
+        @N64VertexList[i].a = vertColor[3]
+      else if @bShade is false
         @N64VertexList[i].r = @primColor[0] * 255.0
         @N64VertexList[i].g = @primColor[1] * 255.0
         @N64VertexList[i].b = @primColor[2] * 255.0
@@ -500,21 +491,17 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::setAmbientLight = (col) ->
     @gRSP.ambientLightColor = col
-    @gRSP.fAmbientLightA = (col >>> 24) & 0xff
-    @gRSP.fAmbientLightR = (col >>> 16) & 0xff
-    @gRSP.fAmbientLightG = (col >>> 8) & 0xff
-    @gRSP.fAmbientLightB = col & 0xff
+    @gRSP.fAmbientLightR = (col >>> 24) & 0xff
+    @gRSP.fAmbientLightG = (col >>> 16) & 0xff
+    @gRSP.fAmbientLightB = (col >>> 8) & 0xff
+    @gRSP.fAmbientLightA = col & 0xff
     return
 
   C1964jsVideoHLE::setLightCol = (dwLight, dwCol) ->
-    @gRSPlights[dwLight].r = (dwCol >>> 24)&0xFF
-    @gRSPlights[dwLight].g = (dwCol >>> 16)&0xFF
-    @gRSPlights[dwLight].b = (dwCol >>>  8)&0xFF
-    @gRSPlights[dwLight].a = 255  # Ignore light alpha
-    @gRSPlights[dwLight].fr = @gRSPlights[dwLight].r
-    @gRSPlights[dwLight].fg = @gRSPlights[dwLight].g
-    @gRSPlights[dwLight].fb = @gRSPlights[dwLight].b
-    @gRSPlights[dwLight].fa = 255.0 # Ignore light alpha
+    @gRSPlights[dwLight].r = ((dwCol >>> 24) & 0xFF) / 255.0
+    @gRSPlights[dwLight].g = ((dwCol >>> 16) & 0xFF) / 255.0
+    @gRSPlights[dwLight].b = ((dwCol >>> 8) & 0xFF) / 255.0
+    @gRSPlights[dwLight].a = ((dwCol >>> 0) & 0xFF) / 255.0
     return
 
   C1964jsVideoHLE::setLightDirection = (dwLight, x, y, z) ->
@@ -529,13 +516,15 @@ C1964jsVideoHLE = (core, glx) ->
     r = @gRSP.fAmbientLightR
     g = @gRSP.fAmbientLightG
     b = @gRSP.fAmbientLightB
+    a = @gRSP.fAmbientLightA
 
     for l in [0...@gRSPnumLights]
       fCosT = norm[0]*@gRSPlights[l].x + norm[1]*@gRSPlights[l].y + norm[2]*@gRSPlights[l].z
       if fCosT > 0
-        r += @gRSPlights[l].fr * fCosT
-        g += @gRSPlights[l].fg * fCosT
-        b += @gRSPlights[l].fb * fCosT
+        r += @gRSPlights[l].r * fCosT
+        g += @gRSPlights[l].g * fCosT
+        b += @gRSPlights[l].b * fCosT
+        a += @gRSPlights[l].a * fCosT
 
     if r < 0.0
       r = 0.0
@@ -543,12 +532,17 @@ C1964jsVideoHLE = (core, glx) ->
       g = 0.0
     if b < 0.0
       b = 0.0
+    if a < 0.0
+      a = 0.0
     if r > 255.0
       r = 255.0
     if g > 255.0
       g = 255.0
     if b > 255.0
       b = 255.0
+    if a > 255.0
+      a = 255.0
+
     return [r, g, b, 255.0]
 
   C1964jsVideoHLE::RSP_MoveMemLight = (dwLight, dwAddr) ->
@@ -702,7 +696,7 @@ C1964jsVideoHLE = (core, glx) ->
     else
       @gl.disable @gl.CULL_FACE
 
-    if @geometryMode & consts.G_SHADE isnt 0
+    if (@geometryMode & consts.G_SHADE) isnt 0
       @bShade = true
     else
       @bShade = false
@@ -714,19 +708,19 @@ C1964jsVideoHLE = (core, glx) ->
     #else
     #  @gl.shadeModel @gl.FLAT
 
-    if @geometryMode & consts.G_TEXTURE_GEN isnt 0
+    if (@geometryMode & consts.G_TEXTURE_GEN) isnt 0
       @bTextureGen = true
     else
       @bTexueGen = false
-    if @geometryMode & consts.G_LIGHTING isnt 0
+    if (@geometryMode & consts.G_LIGHTING) isnt 0
       @bLightingEnable = true
     else
       @bLightingEnable = false
-    if @geometryMode & consts.G_FOG isnt 0
+    if (@geometryMode & consts.G_FOG) isnt 0
       @bFogEnable = true
     else
       @bFogEnable = false
-    if @geometryMode & consts.G_ZBUFFER isnt 0
+    if (@geometryMode & consts.G_ZBUFFER) isnt 0
       @bZBufferEnable = true
     else
       @bZBufferEnable = false
