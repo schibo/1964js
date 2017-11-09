@@ -184,7 +184,8 @@ C1964jsVideoHLE = (core, glx) ->
     length = undefined
     type = @getGbi1Type(pc)
     length = @getGbi1Length(pc)
-    addr = @getGbi1RspSegmentAddr(pc)
+    seg = @getGbi0DlistAddr(pc)
+    addr = @getGbi1RspSegmentAddr(seg)
     switch type
       when consts.RSP_GBI1_MV_MEM_VIEWPORT
         @RSP_MoveMemViewport addr
@@ -371,13 +372,10 @@ C1964jsVideoHLE = (core, glx) ->
         @normalMat = vec3.normalize @normalMat
         @normalMat = mat4.multiply modelViewtransposedInverse, @normalMat
 
-
         worldViewtransposedInverse = mat4.create()
         mat4.inverse @gRSP.projectionMtxs[@gRSP.projectionMtxTop], worldViewtransposedInverse
         mat4.transpose worldViewtransposedInverse, worldViewtransposedInverse
         @normalMat = mat4.multiply worldViewtransposedInverse, @normalMat
-
-
 
         vertColor = @lightVertex @normalMat
         @N64VertexList[i].r = vertColor[0]
@@ -500,14 +498,10 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::setLightCol = (dwLight, dwCol) ->
-    @gRSPlights[dwLight].r = (dwCol >>> 24)&0xFF
-    @gRSPlights[dwLight].g = (dwCol >>> 16)&0xFF
-    @gRSPlights[dwLight].b = (dwCol >>>  8)&0xFF
-    @gRSPlights[dwLight].a = @gRSPlights[dwLight].b
-    @gRSPlights[dwLight].fr = @gRSPlights[dwLight].r
-    @gRSPlights[dwLight].fg = @gRSPlights[dwLight].g
-    @gRSPlights[dwLight].fb = @gRSPlights[dwLight].b
-    @gRSPlights[dwLight].fa = @gRSPlights[dwLight].a
+    @gRSPlights[dwLight].r = ((dwCol >>> 24) & 0xFF) / 255.0
+    @gRSPlights[dwLight].g = ((dwCol >>> 16) & 0xFF) / 255.0
+    @gRSPlights[dwLight].b = ((dwCol >>> 8) & 0xFF) / 255.0
+    @gRSPlights[dwLight].a = ((dwCol >>> 0) & 0xFF) / 255.0
     return
 
   C1964jsVideoHLE::setLightDirection = (dwLight, x, y, z) ->
@@ -527,10 +521,10 @@ C1964jsVideoHLE = (core, glx) ->
     for l in [0...@gRSPnumLights]
       fCosT = norm[0]*@gRSPlights[l].x + norm[1]*@gRSPlights[l].y + norm[2]*@gRSPlights[l].z
       if fCosT > 0
-        r += @gRSPlights[l].fr * fCosT
-        g += @gRSPlights[l].fg * fCosT
-        b += @gRSPlights[l].fb * fCosT
-        a += @gRSPlights[l].fa * fCosT
+        r += @gRSPlights[l].r * fCosT
+        g += @gRSPlights[l].g * fCosT
+        b += @gRSPlights[l].b * fCosT
+        a += @gRSPlights[l].a * fCosT
 
     if r < 0.0
       r = 0.0
