@@ -498,10 +498,10 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::setLightCol = (dwLight, dwCol) ->
-    @gRSPlights[dwLight].r = ((dwCol >>> 24) & 0xFF) / 255.0
-    @gRSPlights[dwLight].g = ((dwCol >>> 16) & 0xFF) / 255.0
-    @gRSPlights[dwLight].b = ((dwCol >>> 8) & 0xFF) / 255.0
-    @gRSPlights[dwLight].a = ((dwCol >>> 0) & 0xFF) / 255.0
+    @gRSPlights[dwLight].r = ((dwCol >>> 24) & 0xFF)
+    @gRSPlights[dwLight].g = ((dwCol >>> 16) & 0xFF)
+    @gRSPlights[dwLight].b = ((dwCol >>> 8) & 0xFF)
+    @gRSPlights[dwLight].a = ((dwCol >>> 0) & 0xFF)
     return
 
   C1964jsVideoHLE::setLightDirection = (dwLight, x, y, z) ->
