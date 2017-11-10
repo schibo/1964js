@@ -74,6 +74,8 @@ C1964jsVideoHLE = (core, glx) ->
   @normalMat = mat4.create()
   @transformed = mat4.create()
   @nonTransformed = mat4.create()
+  @modelViewtransposedInverse = mat4.create()
+  @worldViewtransposedInverse = mat4.create()
 
 
   #todo: different microcodes support
@@ -364,18 +366,16 @@ C1964jsVideoHLE = (core, glx) ->
         @normalMat[1] = @getVertexNormalY(a)
         @normalMat[2] = @getVertexNormalZ(a)
         @normalMat[3] = 0
-        modelViewtransposedInverse = mat4.create()
-        mat4.inverse @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], modelViewtransposedInverse
-        mat4.transpose modelViewtransposedInverse, modelViewtransposedInverse
+        mat4.inverse @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], @modelViewtransposedInverse
+        mat4.transpose @modelViewtransposedInverse, @modelViewtransposedInverse
 
-        #mat4.transpose modelViewtransposedInverse, @normalMat
+        #mat4.transpose @modelViewtransposedInverse, @normalMat
         @normalMat = vec3.normalize @normalMat
-        @normalMat = mat4.multiply modelViewtransposedInverse, @normalMat
+        @normalMat = mat4.multiply @modelViewtransposedInverse, @normalMat
 
-        worldViewtransposedInverse = mat4.create()
-        mat4.inverse @gRSP.projectionMtxs[@gRSP.projectionMtxTop], worldViewtransposedInverse
-        mat4.transpose worldViewtransposedInverse, worldViewtransposedInverse
-        @normalMat = mat4.multiply worldViewtransposedInverse, @normalMat
+        mat4.inverse @gRSP.projectionMtxs[@gRSP.projectionMtxTop], @worldViewtransposedInverse
+        mat4.transpose @worldViewtransposedInverse, @worldViewtransposedInverse
+        @normalMat = mat4.multiply @worldViewtransposedInverse, @normalMat
 
         vertColor = @lightVertex @normalMat
         @N64VertexList[i].r = vertColor[0]
