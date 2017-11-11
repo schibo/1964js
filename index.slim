@@ -444,7 +444,6 @@ html
         |&nbsp;
         a href="http://hulkholden.github.com/n64js/" [Try n64js too!]
 
-
         h1
           | 1964js
           div style="font-size: 10px;"
@@ -475,7 +474,14 @@ html
           br/
 
       .footer
-        .fb-like data-colorscheme="dark" data-send="false" data-show-faces="false" data-width="300"
+        - useFacebookLike = false
+        - if useFacebookLike == true
+          .fb-like data-colorscheme="dark" data-send="false" data-show-faces="false" data-width="300"
+          br/
+          br/
+        |Supports Super Mario 64
+        |&nbsp;&nbsp;&nbsp;
+        a href="https://www.google.com/chrome/" [Best with Chrome]
 
     - outputMode = "release"
     - ARGV.each do|a|
