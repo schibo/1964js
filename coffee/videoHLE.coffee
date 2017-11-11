@@ -497,7 +497,6 @@ C1964jsVideoHLE = (core, glx) ->
     @gRSP.fAmbientLightG = g
     @gRSP.fAmbientLightB = b
     @gRSP.fAmbientLightA = a
-
     return
 
   C1964jsVideoHLE::setLightCol = (dwLight, dwCol) ->
