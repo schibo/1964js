@@ -74,6 +74,8 @@ C1964jsVideoHLE = (core, glx) ->
   @normalMat = mat4.create()
   @transformed = mat4.create()
   @nonTransformed = mat4.create()
+  @modelViewtransposedInverse = mat4.create()
+  @worldViewtransposedInverse = mat4.create()
 
 
   #todo: different microcodes support
@@ -366,7 +368,7 @@ C1964jsVideoHLE = (core, glx) ->
         #mat4.inverse @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], modelViewtransposedInverse
         #mat4.transpose modelViewtransposedInverse, modelViewtransposedInverse
 
-        #mat4.transpose modelViewtransposedInverse, @normalMat
+        #mat4.transpose @modelViewtransposedInverse, @normalMat
         @normalMat = vec3.normalize @normalMat
         #vec3.multiply modelViewtransposedInverse, @normalMat, @normalMat
 
