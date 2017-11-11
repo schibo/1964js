@@ -62,7 +62,7 @@ C1964jsRenderer = (settings, glx, webGL) ->
     texturesize = canvasheight * canvaswidth * 4
     #hacky texture cache unique id (want to see how fast we currently are)
     
-    @useTextureCache = true #change to true to try texture cache
+    @useTextureCache = false #change to true to try texture cache
     if @useTextureCache is true
       randomPixel = canvasheight * canvaswidth
       textureId = (tmem[randomPixel]>>>0) << 24 | (tmem[randomPixel+canvaswidth+1]>>>0) << 16 | (tmem[randomPixel+canvaswidth*2+1]>>>0) << 8 | tmem[randomPixel+canvaswidth*3+1]>>>0 
@@ -74,10 +74,10 @@ C1964jsRenderer = (settings, glx, webGL) ->
     if @useTextureCache is true
       @textureCache[textureId] = texture
     switch tile.fmt
-      when 0
+      when consts.TXT_FMT_RGBA # rgba
         switch tile.siz
-          when 2
-            width = tile.width;
+          when consts.TXT_SIZE_16b # 5551
+            width = tile.width
             j=0
             while j < tile.height
               i=0
@@ -88,10 +88,9 @@ C1964jsRenderer = (settings, glx, webGL) ->
                 texture[base4]     = fivetoeight[color16 >> 11 & 0x1F]
                 texture[base4 + 1] = fivetoeight[color16 >> 6 & 0x1F]
                 texture[base4 + 2] = fivetoeight[color16 >> 1 & 0x1F]
-                texture[base4 + 3] = if color16 & 0x01 == 0 then 0x00 else 0xFF
+                texture[base4 + 3] = if ((color16 & 0x01) is 0) then 0x00 else 0xFF
                 i++
               j++
-
    # if @useTextureCache is true
    #   return @textureCache[textureId]
     return texture

@@ -322,6 +322,9 @@ C1964jsVideoHLE::getSetTilePal = (pc) ->
 C1964jsVideoHLE::getSetTileCmt = (pc) ->
   (@core.memory.rdramUint8Array[pc+4] << 24 | @core.memory.rdramUint8Array[pc+5] << 16 | @core.memory.rdramUint8Array[pc+6] << 8 | @core.memory.rdramUint8Array[pc+7]) >> 18 & 0x03
 
+C1964jsVideoHLE::getSetTileMirrorT = (pc) ->
+  (@core.memory.rdramUint8Array[pc+4] << 24 | @core.memory.rdramUint8Array[pc+5] << 16 | @core.memory.rdramUint8Array[pc+6] << 8 | @core.memory.rdramUint8Array[pc+7]) >> 15 & 0x01
+
 C1964jsVideoHLE::getSetTileMaskt = (pc) ->
   (@core.memory.rdramUint8Array[pc+4] << 24 | @core.memory.rdramUint8Array[pc+5] << 16 | @core.memory.rdramUint8Array[pc+6] << 8 | @core.memory.rdramUint8Array[pc+7]) >> 14 & 0x0F
 
@@ -330,6 +333,9 @@ C1964jsVideoHLE::getSetTileShiftt = (pc) ->
 
 C1964jsVideoHLE::getSetTileCms = (pc) ->
   (@core.memory.rdramUint8Array[pc+4] << 24 | @core.memory.rdramUint8Array[pc+5] << 16 | @core.memory.rdramUint8Array[pc+6] << 8 | @core.memory.rdramUint8Array[pc+7]) >> 8 & 0x03
+
+C1964jsVideoHLE::getSetTileMirrorS = (pc) ->
+  (@core.memory.rdramUint8Array[pc+4] << 24 | @core.memory.rdramUint8Array[pc+5] << 16 | @core.memory.rdramUint8Array[pc+6] << 8 | @core.memory.rdramUint8Array[pc+7]) >> 5 & 0x01
 
 C1964jsVideoHLE::getSetTileMasks = (pc) ->
   (@core.memory.rdramUint8Array[pc+4] << 24 | @core.memory.rdramUint8Array[pc+5] << 16 | @core.memory.rdramUint8Array[pc+6] << 8 | @core.memory.rdramUint8Array[pc+7]) >> 4 & 0x0F
