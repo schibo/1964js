@@ -71,26 +71,86 @@ C1964jsRenderer = (settings, glx, webGL) ->
     buffer = new ArrayBuffer(texturesize)
     texture = new Uint8Array(buffer)
 
+    mirrorS = tile.mirrorS & (~tile.masks & consts.RDP_TXT_MIRROR)
+    mirrorT = tile.mirrorT & (~tile.masks & consts.RDP_TXT_MIRROR)
+
     if @useTextureCache is true
       @textureCache[textureId] = texture
     switch tile.fmt
-      when 0
+      when consts.TXT_FMT_RGBA # rgba
         switch tile.siz
-          when 2
-            width = tile.width;
-            j=0
-            while j < tile.height
-              i=0
-              while i < tile.width
-                base2 = (j*width*2) + (i*2)
-                base4 = (j*canvaswidth*4) + (i*4) 
-                color16 = tmem[base2]<<8 | tmem[base2+1]           
-                texture[base4]     = fivetoeight[color16 >> 11 & 0x1F]
-                texture[base4 + 1] = fivetoeight[color16 >> 6 & 0x1F]
-                texture[base4 + 2] = fivetoeight[color16 >> 1 & 0x1F]
-                texture[base4 + 3] = if color16 & 0x01 == 0 then 0x00 else 0xFF
-                i++
-              j++
+          when consts.TXT_SIZE_16b # 5551
+            if (mirrorS is 0) and (mirrorT is 0)
+              width = tile.width
+              j=0
+              while j < tile.height
+                i=0
+                while i < tile.width
+                  base2 = (j*width*2) + (i*2)
+                  base4 = (j*canvaswidth*4) + (i*4) 
+                  color16 = tmem[base2]<<8 | tmem[base2+1]           
+                  texture[base4]     = fivetoeight[color16 >> 11 & 0x1F]
+                  texture[base4 + 1] = fivetoeight[color16 >> 6 & 0x1F]
+                  texture[base4 + 2] = fivetoeight[color16 >> 1 & 0x1F]
+                  texture[base4 + 3] = if ((color16 & 0x01) is 0) then 0x00 else 0xFF
+                  i++
+                j++
+            else if (mirrorS is 1) and (mirrorT is 0)
+              width = tile.width
+              j=0
+              while j < tile.height
+                i=0
+                x=tile.width - 1
+                while i < tile.width
+                  base2 = (j*width*2) + (i*2)
+                  base4 = (j*canvaswidth*4) + (x*4) 
+                  color16 = tmem[base2]<<8 | tmem[base2+1]           
+                  texture[base4]     = fivetoeight[color16 >> 11 & 0x1F]
+                  texture[base4 + 1] = fivetoeight[color16 >> 6 & 0x1F]
+                  texture[base4 + 2] = fivetoeight[color16 >> 1 & 0x1F]
+                  texture[base4 + 3] = if ((color16 & 0x01) is 0) then 0x00 else 0xFF
+                  i++
+                  x--
+                j++
+            else if (mirrorS) is 0 and (mirrorT is 1)
+              width = tile.width
+              j=0
+              y=tile.height-1
+              while j < tile.height
+                i=0
+                while i < tile.width
+                  base2 = (j*width*2) + (i*2)
+                  base4 = (y*canvaswidth*4) + (i*4) 
+                  color16 = tmem[base2]<<8 | tmem[base2+1]           
+                  texture[base4]     = fivetoeight[color16 >> 11 & 0x1F]
+                  texture[base4 + 1] = fivetoeight[color16 >> 6 & 0x1F]
+                  texture[base4 + 2] = fivetoeight[color16 >> 1 & 0x1F]
+                  texture[base4 + 3] = if ((color16 & 0x01) is 0) then 0x00 else 0xFF
+                  i++
+                j++
+                y--
+            else
+              width = tile.width
+              j=0
+              y=tile.height-1
+              while j < tile.height
+                i=0
+                x=tile.width - 1
+                while i < tile.width
+                  base2 = (j*width*2) + (i*2)
+                  base4 = (y*canvaswidth*4) + (x*4) 
+                  color16 = tmem[base2]<<8 | tmem[base2+1]           
+                  texture[base4]     = fivetoeight[color16 >> 11 & 0x1F]
+                  texture[base4 + 1] = fivetoeight[color16 >> 6 & 0x1F]
+                  texture[base4 + 2] = fivetoeight[color16 >> 1 & 0x1F]
+                  texture[base4 + 3] = if ((color16 & 0x01) is 0) then 0x00 else 0xFF
+                  i++
+                  x--
+                j++
+                y--
+
+
+
 
    # if @useTextureCache is true
    #   return @textureCache[textureId]
