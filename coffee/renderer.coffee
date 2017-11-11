@@ -71,8 +71,8 @@ C1964jsRenderer = (settings, glx, webGL) ->
     buffer = new ArrayBuffer(texturesize)
     texture = new Uint8Array(buffer)
 
-    mirrorS = tile.mirrorS & (~tile.masks & consts.RDP_TXT_MIRROR)
-    mirrorT = tile.mirrorT & (~tile.maskt & consts.RDP_TXT_MIRROR)
+    mirrorS = ((~tile.masks & tile.cms) == consts.RDP_TXT_MIRROR)
+    mirrorT = ((~tile.maskt & tile.cms) == consts.RDP_TXT_MIRROR)
 
     if @useTextureCache is true
       @textureCache[textureId] = texture
