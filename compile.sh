@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export version1964="0.1.25"
+export version1964="0.1.26"
 minified="1964js-$version1964.min.js"
 
 echo Compiling index.html

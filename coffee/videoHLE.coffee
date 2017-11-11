@@ -197,7 +197,7 @@ C1964jsVideoHLE = (core, glx) ->
       #break;
       when consts.RSP_GBI1_MV_MEM_L0, consts.RSP_GBI1_MV_MEM_L1, consts.RSP_GBI1_MV_MEM_L2, consts.RSP_GBI1_MV_MEM_L3, consts.RSP_GBI1_MV_MEM_L4, consts.RSP_GBI1_MV_MEM_L5, consts.RSP_GBI1_MV_MEM_L6, consts.RSP_GBI1_MV_MEM_L7
         dwLight = (type-consts.RSP_GBI1_MV_MEM_L0)/2
-        @RSP_MoveMemLight dwLight, addr
+        @RSP_MoveMemLight dwLight, addr, pc
     return
 
   C1964jsVideoHLE::RSP_MoveMemViewport = (addr) ->
@@ -346,7 +346,6 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::processVertexData = (addr, v0, num) ->
     a = undefined
-    i = v0
     @updateCombinedMatrix()
     i = v0
     texWidth = @textureTile[@activeTile].width
@@ -357,7 +356,6 @@ C1964jsVideoHLE = (core, glx) ->
       @N64VertexList[i].x = @getVertexX(a)
       @N64VertexList[i].y = @getVertexY(a)
       @N64VertexList[i].z = @getVertexZ(a)
-
       @N64VertexList[i].s = @getVertexS(a)/32 / texWidth
       @N64VertexList[i].t = @getVertexT(a)/32 / texHeight
 
@@ -366,16 +364,18 @@ C1964jsVideoHLE = (core, glx) ->
         @normalMat[1] = @getVertexNormalY(a)
         @normalMat[2] = @getVertexNormalZ(a)
         @normalMat[3] = 0
-        mat4.inverse @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], @modelViewtransposedInverse
-        mat4.transpose @modelViewtransposedInverse, @modelViewtransposedInverse
+        #modelViewtransposedInverse = mat4.create()
+        #mat4.inverse @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], modelViewtransposedInverse
+        #mat4.transpose modelViewtransposedInverse, modelViewtransposedInverse
 
         #mat4.transpose @modelViewtransposedInverse, @normalMat
         @normalMat = vec3.normalize @normalMat
-        @normalMat = mat4.multiply @modelViewtransposedInverse, @normalMat
+        #vec3.multiply modelViewtransposedInverse, @normalMat, @normalMat
 
-        mat4.inverse @gRSP.projectionMtxs[@gRSP.projectionMtxTop], @worldViewtransposedInverse
-        mat4.transpose @worldViewtransposedInverse, @worldViewtransposedInverse
-        @normalMat = mat4.multiply @worldViewtransposedInverse, @normalMat
+        #worldViewtransposedInverse = mat4.create()
+        #mat4.inverse @gRSP.projectionMtxs[@gRSP.projectionMtxTop], worldViewtransposedInverse
+        #mat4.transpose worldViewtransposedInverse, worldViewtransposedInverse
+        #vec3.multiply worldViewtransposedInverse, @normalMat, @normalMat
 
         vertColor = @lightVertex @normalMat
         @N64VertexList[i].r = vertColor[0]
@@ -393,14 +393,12 @@ C1964jsVideoHLE = (core, glx) ->
         @N64VertexList[i].b = @getVertexColorB(a)
         @N64VertexList[i].a = @getVertexAlpha(a)
 
-
       #until we use it..
       #@N64VertexList[i].nx = (@toSByte @getVertexNormalX(a))
       #@N64VertexList[i].ny = (@toSByte @getVertexNormalY(a))
       #@N64VertexList[i].nz = (@toSByte @getVertexNormalZ(a))
 
       #console.log "Vertex "+i+": XYZ("+@N64VertexList[i].x+" , "+@N64VertexList[i].y+" , "+@N64VertexList[i].z+") ST("+@N64VertexList[i].s+" , "+@N64VertexList[i].t+") RGBA("+@N64VertexList[i].r+" , "+@N64VertexList[i].g+" , "+@N64VertexList[i].b+" , "+@N64VertexList[i].a+") N("+@N64VertexList[i].nx+" , "+@N64VertexList[i].ny+" , "+@N64VertexList[i].nz+")"
-
       i += 1
     return
 
@@ -484,32 +482,42 @@ C1964jsVideoHLE = (core, glx) ->
         field = @getGbi0MoveWordOffset(pc)>>>0 & 0x7
         if field is 0
           if light is @gRSP.ambientLightIndex
-            @setAmbientLight @getGbi0MoveWordValue(pc)>>8
+            @setAmbientLight @getGbi0MoveWordValue(pc)
           else
             @setLightCol light, @getGbi0MoveWordValue(pc)
     return
 
   C1964jsVideoHLE::setAmbientLight = (col) ->
     @gRSP.ambientLightColor = col
-    @gRSP.fAmbientLightR = (col >>> 24) & 0xff
-    @gRSP.fAmbientLightG = (col >>> 16) & 0xff
-    @gRSP.fAmbientLightB = (col >>> 8) & 0xff
-    @gRSP.fAmbientLightA = col & 0xff
+    r = (col >>> 24) & 0xff
+    g = (col >>> 16) & 0xff
+    b = (col >>> 8) & 0xff
+    a = col & 0xff
+    @gRSP.fAmbientLightR = r
+    @gRSP.fAmbientLightG = g
+    @gRSP.fAmbientLightB = b
+    @gRSP.fAmbientLightA = a
     return
 
   C1964jsVideoHLE::setLightCol = (dwLight, dwCol) ->
-    @gRSPlights[dwLight].r = ((dwCol >>> 24) & 0xFF)
-    @gRSPlights[dwLight].g = ((dwCol >>> 16) & 0xFF)
-    @gRSPlights[dwLight].b = ((dwCol >>> 8) & 0xFF)
-    @gRSPlights[dwLight].a = ((dwCol >>> 0) & 0xFF)
+    r = ((dwCol >>> 24) & 0xFF)
+    g = ((dwCol >>> 16) & 0xFF)
+    b = ((dwCol >>> 8) & 0xFF)
+    a = ((dwCol >>> 0) & 0xFF)
+    @gRSPlights[dwLight].r = r
+    @gRSPlights[dwLight].g = g
+    @gRSPlights[dwLight].b = b
+    @gRSPlights[dwLight].a = a
+
     return
 
   C1964jsVideoHLE::setLightDirection = (dwLight, x, y, z) ->
-    w = Math.sqrt(x*x+y*y+z*z)
+    lightVec = [x, y, z]
+    lightVec = vec3.normalize(lightVec)
 
-    @gRSPlights[dwLight].x = x/w
-    @gRSPlights[dwLight].y = y/w
-    @gRSPlights[dwLight].z = z/w
+    @gRSPlights[dwLight].x = lightVec[0]
+    @gRSPlights[dwLight].y = lightVec[1]
+    @gRSPlights[dwLight].z = lightVec[2]
     return
 
   C1964jsVideoHLE::lightVertex = (norm) ->
@@ -520,7 +528,7 @@ C1964jsVideoHLE = (core, glx) ->
 
     for l in [0...@gRSPnumLights]
       fCosT = norm[0]*@gRSPlights[l].x + norm[1]*@gRSPlights[l].y + norm[2]*@gRSPlights[l].z
-      if fCosT > 0
+      if fCosT > 0.0
         r += @gRSPlights[l].r * fCosT
         g += @gRSPlights[l].g * fCosT
         b += @gRSPlights[l].b * fCosT
@@ -545,15 +553,15 @@ C1964jsVideoHLE = (core, glx) ->
 
     return [r, g, b, 255.0]
 
-  C1964jsVideoHLE::RSP_MoveMemLight = (dwLight, dwAddr) ->
+  C1964jsVideoHLE::RSP_MoveMemLight = (dwLight, dwAddr, pc) ->
     if dwLight >= 16
       return
 
     @gRSPn64lights[dwLight].dwRGBA = @getGbi0MoveWordValue(dwAddr)
     @gRSPn64lights[dwLight].dwRGBACopy = @getGbi0MoveWordValue(dwAddr+4)
-    @gRSPn64lights[dwLight].x = @getCommand(dwAddr+8)
-    @gRSPn64lights[dwLight].y = @getCommand(dwAddr+9)
-    @gRSPn64lights[dwLight].z = @getCommand(dwAddr+10)
+    @gRSPn64lights[dwLight].x = @getCommand(pc+8)
+    @gRSPn64lights[dwLight].y = @getCommand(pc+9)
+    @gRSPn64lights[dwLight].z = @getCommand(pc+10)
 
     # disabled in Rice's code.
     # /*
@@ -605,8 +613,6 @@ C1964jsVideoHLE = (core, glx) ->
   C1964jsVideoHLE::resetMatrices = ->
     @gRSP.projectionMtxTop = 0
     @gRSP.modelViewMtxTop = 0
-    @gRSP.projectionMtxs[0] = mat4.create()
-    @gRSP.modelviewMtxs[0] = mat4.create()
     mat4.identity @gRSP.modelviewMtxs[0]
     mat4.identity @gRSP.projectionMtxs[0]
     @gRSP.bMatrixIsUpdated = true
