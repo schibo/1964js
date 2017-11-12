@@ -24,6 +24,22 @@ C1964jsRenderer = (settings, glx, webGL) ->
   texrectVertexIndexBuffer = undefined
   @videoHLE = undefined
   fivetoeight = [0x00,0x08,0x10,0x18,0x21,0x29,0x31,0x39,0x42,0x4A,0x52,0x5A,0x63,0x6B,0x73,0x7B,0x84,0x8C,0x94,0x9C,0xA5,0xAD,0xB5,0xBD,0xC6,0xCE,0xD6,0xDE,0xE7,0xEF,0xF7,0xFF]
+  fourtoeight = [0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xaa,0xbb,0xcc,0xdd,0xee,0xff]
+  threetoeight = [
+    0x00,   # 000 -> 00 00 00 00
+    0x24,   # 001 -> 00 10 01 00
+    0x49,   # 010 -> 01 00 10 01
+    0x6d,   # 011 -> 01 10 11 01
+    0x92,   # 100 -> 10 01 00 10
+    0xb6,   # 101 -> 10 11 01 10
+    0xdb,   # 110 -> 11 01 10 11
+    0xff    # 111 -> 11 11 11 11
+  ]
+  onetoeight = [
+    0x00,   # 0 -> 00 00 00 00
+    0xff    # 1 -> 11 11 11 11
+  ]
+
   @textureCache = new Object()
 
   @texRect = (xl, yl, xh, yh, s, t, dsdx, dtdy, tile, tmem, videoHLE) ->
@@ -71,26 +87,120 @@ C1964jsRenderer = (settings, glx, webGL) ->
     buffer = new ArrayBuffer(texturesize)
     texture = new Uint8Array(buffer)
 
+    dstRowOffset = 0
+    dstRowStride = canvaswidth * 4
+    srcRowStride = tile.line<<3
+    srcRowOffset = tile.tmem
+
     if @useTextureCache is true
       @textureCache[textureId] = texture
     switch tile.fmt
       when consts.TXT_FMT_RGBA # rgba
         switch tile.siz
-          when consts.TXT_SIZE_16b # 5551
-            width = tile.width
+          when consts.TXT_SIZE_16b # rgba5551
             j=0
             while j < tile.height
               i=0
+              srcOffset = srcRowOffset
+              dstOffset = dstRowOffset
               while i < tile.width
-                base2 = (j*width*2) + (i*2)
-                base4 = (j*canvaswidth*4) + (i*4) 
-                color16 = tmem[base2]<<8 | tmem[base2+1]           
-                texture[base4]     = fivetoeight[color16 >> 11 & 0x1F]
-                texture[base4 + 1] = fivetoeight[color16 >> 6 & 0x1F]
-                texture[base4 + 2] = fivetoeight[color16 >> 1 & 0x1F]
-                texture[base4 + 3] = if ((color16 & 0x01) is 0) then 0x00 else 0xFF
+                color16 = tmem[srcOffset]<<8 | tmem[srcOffset+1]           
+                texture[dstOffset] = fivetoeight[color16 >> 11 & 0x1F]
+                texture[dstOffset + 1] = fivetoeight[color16 >> 6 & 0x1F]
+                texture[dstOffset + 2] = fivetoeight[color16 >> 1 & 0x1F]
+                texture[dstOffset + 3] = if ((color16 & 0x01) is 0) then 0x00 else 0xFF
                 i++
+                srcOffset += 2
+                dstOffset += 4
               j++
+              srcRowOffset += srcRowStride
+              dstRowOffset += dstRowStride
+          else 
+            console.error "TODO: tile format " + tile.fmt + ", tile.size:" + tile.siz
+      when consts.TXT_FMT_IA # ia
+        switch tile.siz
+          when consts.TXT_SIZE_8b # ia8
+            j=0
+            while j < tile.height
+              i=0
+              srcOffset = srcRowOffset
+              dstOffset = dstRowOffset
+              while i < tile.width
+                b = tmem[srcOffset]           
+                I = fourtoeight[(b >>> 4)& 0x0F]
+                a = fourtoeight[b & 0x0F]
+                texture[dstOffset] = I
+                texture[dstOffset + 1] = I
+                texture[dstOffset + 2] = I
+                texture[dstOffset + 3] = a
+                i++
+                srcOffset += 1
+                dstOffset += 4
+              j++
+              srcRowOffset += srcRowStride
+              dstRowOffset += dstRowStride
+          when consts.TXT_SIZE_4b # ia4
+            j=0
+            while j < tile.height
+              i=0
+              srcOffset = srcRowOffset
+              dstOffset = dstRowOffset
+              while i < tile.width
+                b = tmem[srcOffset]           
+                I0 = threetoeight[(b & 0xe0)>>>5]
+                a0 = onetoeight[(b & 0x10)>>>4]
+                I1 = threetoeight[(b & 0xe0)>>>1]
+                a1 = onetoeight[(b & 0x01)>>>0]
+                texture[dstOffset] = I0
+                texture[dstOffset + 1] = I0
+                texture[dstOffset + 2] = I0
+                texture[dstOffset + 3] = a0
+                texture[dstOffset + 4] = I1
+                texture[dstOffset + 5] = I1
+                texture[dstOffset + 6] = I1
+                texture[dstOffset + 7] = a1
+                i+=2
+                srcOffset += 1
+                dstOffset += 8
+              if tile.width & 1
+                I0 = threetoeight[(b & 0xe0)>>>5]
+                a0 = onetoeight[(b & 0x10)>>>4]
+                texture[dstOffset] = I0
+                texture[dstOffset + 1] = I0
+                texture[dstOffset + 2] = I0
+                texture[dstOffset + 3] = a0
+                srcOffset += 1
+                dstOffset += 4
+              j++
+              srcRowOffset += srcRowStride
+              dstRowOffset += dstRowStride
+          when consts.TXT_SIZE_16b # ia16
+            j=0
+            while j < tile.height
+              i=0
+              srcOffset = srcRowOffset
+              dstOffset = dstRowOffset
+              while i < tile.width
+                I = tmem[srcOffset]
+                a = tmem[srcOffset+1]
+                texture[dstOffset] = I
+                texture[dstOffset + 1] = I
+                texture[dstOffset + 2] = I
+                texture[dstOffset + 3] = a
+                i++
+                srcOffset += 2
+                dstOffset += 4
+              j++
+              srcRowOffset += srcRowStride
+              dstRowOffset += dstRowStride
+
+          else 
+            console.error "TODO: tile format " + tile.fmt + ", tile.size" + tile.siz
+      else 
+        console.error "TODO: tile format " + tile.fmt + ", tile.size" + tile.siz
+
+
+
    # if @useTextureCache is true
    #   return @textureCache[textureId]
     return texture
