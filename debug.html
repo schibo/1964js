@@ -66,7 +66,7 @@
          } 
          else
          {
-           a0 = b0 = c0 = d0 = vec4(0.0, 0.0, 0.0, 0.0);
+           a0 = b0 = c0 = d0 = vec4(1.0, 1.0, 1.0, 0.0);
            if (uCombineA0 == tex0)
              a0.rgb = texture2D(uSampler, vec2(vTextureCoord.st)).rgb;
            if (uCombineA0a == tex0)
@@ -205,12 +205,12 @@
            //vec4 combined = (a0-b0) * c0 + d0; 
       
            gl_FragColor = (a0-b0) * c0 + d0;
-           if (uAlphaTestEnabled == 1 && gl_FragColor.a < uBlendColor.a)
-             discard;
+         //  if (uAlphaTestEnabled == 1 && gl_FragColor.a < uBlendColor.a)
+         //    discard;
       
            if (cycleType == 1) //2-cycle
            {
-             a1 = b1 = c1 = d1 = vec4(0.0, 0.0, 0.0, 0.0);
+             a1 = b1 = c1 = d1 = vec4(1.0, 1.0, 1.0, 0.0);
       
              if (uCombineA1 == combined)
                a1.rgb = gl_FragColor.rgb;
@@ -366,9 +366,9 @@
              if (uCombineC1a >= 16 && uCombineC1a <= 31)
                c1.a = 0.0;
       
-             gl_FragColor = (a1-b1) * c1 + d1;
-             if (uAlphaTestEnabled == 1 && gl_FragColor.a < uBlendColor.a)
-               discard;
+             gl_FragColor.a = 0.5;
+           //  if (uAlphaTestEnabled == 1 && gl_FragColor.a < uBlendColor.a)
+           //    discard;
            }            
          }
        }
