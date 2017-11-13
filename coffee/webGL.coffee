@@ -27,13 +27,11 @@ C1964jsWebGL = (core, wireframe) ->
 
 (->
   "use strict"
-  nMatrix = undefined
   pMatrix = undefined
   mvMatrixStack = undefined
   mvMatrix = mat4.create()
   mvMatrixStack = []
   pMatrix = mat4.create()
-  nMatrix = mat4.create()
   C1964jsWebGL::initGL = (canvas) ->
     try
       log "canvas = " + canvas
@@ -76,7 +74,6 @@ C1964jsWebGL = (core, wireframe) ->
     shaderProgram.vertexColorAttribute = @gl.getAttribLocation(shaderProgram, "aVertexColor")
     shaderProgram.pMatrixUniform = @gl.getUniformLocation(shaderProgram, "uPMatrix")
     shaderProgram.mvMatrixUniform = @gl.getUniformLocation(shaderProgram, "uMVMatrix")
-    shaderProgram.nMatrixUniform = @gl.getUniformLocation(shaderProgram, "uNormalMatrix")
     shaderProgram.textureCoordAttribute = @gl.getAttribLocation(shaderProgram, "aTextureCoord")
     shaderProgram.samplerUniform = @gl.getUniformLocation(shaderProgram, "uSampler")
     shaderProgram.wireframeUniform = @gl.getUniformLocation(shaderProgram, "uWireframe")
@@ -131,31 +128,14 @@ C1964jsWebGL = (core, wireframe) ->
   C1964jsWebGL::beginDList = ->
     @gl.viewport 0, 0, @gl.viewportWidth, @gl.viewportHeight
     @gl.clear @gl.COLOR_BUFFER_BIT | @gl.DEPTH_BUFFER_BIT
-    mat4.perspective 45, @gl.viewportWidth / @gl.viewportHeight, 0.1, 100.0, pMatrix
+    mat4.perspective 45, 320.0/240.0, 0.1, 100.0, pMatrix
     mat4.identity mvMatrix
     mat4.translate mvMatrix, [0.0, 0.0, -2.4]
-    mat4.set mvMatrix, nMatrix
-    mat4.inverse nMatrix, nMatrix
-    mat4.transpose nMatrix
-    # mvPushMatrix();
-    mat4.translate mvMatrix, [0.0, 0.0, -1.0]
     return
 
   C1964jsWebGL::setMatrixUniforms = (shaderProgram) ->
     @gl.uniformMatrix4fv shaderProgram.pMatrixUniform, false, pMatrix
     @gl.uniformMatrix4fv shaderProgram.mvMatrixUniform, false, mvMatrix
-    @gl.uniformMatrix4fv shaderProgram.nMatrixUniform, false, nMatrix
-    return
-
-  C1964jsWebGL::mvPushMatrix = ->
-    copy = mat4.create()
-    mat4.set mvMatrix, copy
-    mvMatrixStack.push copy
-    return
-
-  C1964jsWebGL::mvPopMatrix = ->
-    throw Error "Invalid popMatrix!"  if mvMatrixStack.length is 0
-    mvMatrix = mvMatrixStack.pop()
     return
 
   C1964jsWebGL::webGLStart = (wireframe) ->

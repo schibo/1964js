@@ -178,7 +178,7 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::RSP_RDP_Nothing = (pc) ->
     #@videoLog "RSP RDP NOTHING"
-    @dlistStackPointer -= 1
+    #@dlistStackPointer -= 1
     return
 
   C1964jsVideoHLE::RSP_GBI1_MoveMem = (pc) ->
