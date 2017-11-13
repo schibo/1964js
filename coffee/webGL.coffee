@@ -52,7 +52,7 @@ C1964jsWebGL = (core, wireframe) ->
     success = @gl.getShaderParameter(shader, @gl.COMPILE_STATUS)
     if success
       return shader
- 
+
     console.log @gl.getShaderInfoLog shader
     @gl.deleteShader shader
     return
@@ -63,7 +63,7 @@ C1964jsWebGL = (core, wireframe) ->
     fragmentShaderSource = document.getElementById("fragment-shader").text
     vertexShader = @createShader(@gl.VERTEX_SHADER, vertexShaderSource)
     fragmentShader = @createShader(@gl.FRAGMENT_SHADER, fragmentShaderSource)
- 
+
     shaderProgram = @gl.createProgram()
     @gl.attachShader shaderProgram, vertexShader
     @gl.attachShader shaderProgram, fragmentShader
@@ -77,8 +77,8 @@ C1964jsWebGL = (core, wireframe) ->
     shaderProgram.textureCoordAttribute = @gl.getAttribLocation(shaderProgram, "aTextureCoord")
     shaderProgram.samplerUniform = @gl.getUniformLocation(shaderProgram, "uSampler")
     shaderProgram.wireframeUniform = @gl.getUniformLocation(shaderProgram, "uWireframe")
-	
-    shaderProgram.uCombineA0 = @gl.getUniformLocation(shaderProgram, "uCombineA0")	
+
+    shaderProgram.uCombineA0 = @gl.getUniformLocation(shaderProgram, "uCombineA0")
     shaderProgram.uCombineB0 = @gl.getUniformLocation(shaderProgram, "uCombineB0")
     shaderProgram.uCombineC0 = @gl.getUniformLocation(shaderProgram, "uCombineC0")
     shaderProgram.uCombineD0 = @gl.getUniformLocation(shaderProgram, "uCombineD0")
@@ -86,7 +86,7 @@ C1964jsWebGL = (core, wireframe) ->
     shaderProgram.uCombineB0a = @gl.getUniformLocation(shaderProgram, "uCombineB0a")
     shaderProgram.uCombineC0a = @gl.getUniformLocation(shaderProgram, "uCombineC0a")
     shaderProgram.uCombineD0a = @gl.getUniformLocation(shaderProgram, "uCombineD0a")
-    shaderProgram.uCombineA1 = @gl.getUniformLocation(shaderProgram, "uCombineA1")	
+    shaderProgram.uCombineA1 = @gl.getUniformLocation(shaderProgram, "uCombineA1")
     shaderProgram.uCombineB1 = @gl.getUniformLocation(shaderProgram, "uCombineB1")
     shaderProgram.uCombineC1 = @gl.getUniformLocation(shaderProgram, "uCombineC1")
     shaderProgram.uCombineD1 = @gl.getUniformLocation(shaderProgram, "uCombineD1")
@@ -124,10 +124,10 @@ C1964jsWebGL = (core, wireframe) ->
     @gl.uniform1i shaderProgram.uCombineC1a, vhle.combineC1a
     @gl.uniform1i shaderProgram.uCombineD1a, vhle.combineD1a
     return
-	
+
   C1964jsWebGL::beginDList = ->
     @gl.viewport 0, 0, @gl.viewportWidth, @gl.viewportHeight
-    @gl.clear @gl.COLOR_BUFFER_BIT | @gl.DEPTH_BUFFER_BIT
+    #@gl.clear @gl.COLOR_BUFFER_BIT | @gl.DEPTH_BUFFER_BIT
     mat4.perspective 45, 320.0/240.0, 0.1, 100.0, pMatrix
     mat4.identity mvMatrix
     #mat4.translate mvMatrix, [0.0, 0.0, 1.0]

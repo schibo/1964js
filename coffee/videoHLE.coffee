@@ -633,9 +633,9 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::RSP_GBI1_SetOtherModeH = (pc) ->
     #@videoLog "TODO: DLParser_GBI1_SetOtherModeH"
-    word0 = @getOtherModeH(pc) >>> 0
+    word0 = @getOtherModeH pc
     length = (word0 >>> 0) & 0xFF
-    shift = ((word0 >>> 8) & 0xFF)
+    shift = (word0 >>> 8) & 0xFF
     mask = ((1<<length)-1)<<shift
     @otherModeH &= ~mask
     @otherModeH |= @getOtherModeH pc+4
@@ -644,9 +644,9 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::RSP_GBI1_SetOtherModeL = (pc) ->
     #@videoLog "TODO: DLParser_GBI1_SetOtherModeL"
-    word0 = @getOtherModeL(pc) >>> 0
+    word0 = @getOtherModeL pc
     length = (word0 >>> 0) & 0xFF
-    shift = ((word0 >>> 8) & 0xFF)
+    shift = (word0 >>> 8) & 0xFF
     mask = ((1<<length)-1)<<shift
     @otherModeL &= ~mask
     @otherModeL |= @getOtherModeL pc+4
@@ -739,7 +739,6 @@ C1964jsVideoHLE = (core, glx) ->
     #@videoLog "RSP_GBI1_EndDL"
     @RDP_GFX_PopDL()
     @drawScene(false, 7)
-
     #alert "EndFrame"
     return
 
@@ -821,7 +820,13 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_TexRect = (pc) ->
-    @setDepthTest()
+    depthTestEnabled = true
+    if depthTestEnabled
+      #@setDepthTest()
+      @gl.enable @gl.DEPTH_TEST
+      @gl.depthFunc @gl.LEQUAL
+    else
+      @gl.disable @gl.DEPTH_TEST
 
     #@videoLog "TODO: DLParser_TexRect"
     xh = @getTexRectXh(pc) / 4
@@ -835,12 +840,12 @@ C1964jsVideoHLE = (core, glx) ->
     dtdy = @getTexRectDtDy(pc) / 1024
     #console.log "Texrect: UL("+xl+","+yl+") LR("+xh+","+yh+") Tile:"+tileno+" TexCoord:("+s+","+t+") TexSlope:("+dsdx+","+dtdy+")"
     @renderer.texRect xl, yl, xh, yh, s, t, dsdx, dtdy, @textureTile[tileno], @tmem, this
-    @dlistStack[@dlistStackPointer].pc += 8
+    @dlistStack[@dlistStackPointer].pc += 16
     @hasTexture = true
     return
 
   C1964jsVideoHLE::DLParser_TexRectFlip = (pc) ->
-    @dlistStack[@dlistStackPointer].pc += 8
+    @dlistStack[@dlistStackPointer].pc += 16
     #@videoLog "TODO: DLParser_TexRectFlip"
     return
 
@@ -1177,24 +1182,19 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::setDepthTest = () ->
-    zBuffer = @geometryMode 
-
-    zBufferEnabled = (@geometryMode & consts.G_ZBUFFER) isnt 0
+    zBufferMode = (@geometryMode & consts.G_ZBUFFER) isnt 0
     zCmp = (@otherModeL & consts.Z_COMPARE) isnt 0
     zUpd = (@otherModeL & consts.Z_UPDATE) isnt 0
-
-    if ((zBufferEnabled and zCmp) or zU)
+    if ((zBufferMode and zCmp) or zUpd)
       @gl.enable @gl.DEPTH_TEST
-      @gl.depthMask zUpd
+      @gl.depthFunc @gl.LEQUAL
     else
       @gl.disable @gl.DEPTH_TEST
-      @gl.depthMask false
-
-    
+    @gl.depthMask zUpd
 
   C1964jsVideoHLE::drawScene = (useTexture, tileno) ->
     @gl.useProgram @core.webGL.shaderProgram
-    @setDepthTest()
+    #@setDepthTest()
 
     if @triangleVertexPositionBuffer.numItems > 0
       @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexPositionBuffer
@@ -1231,7 +1231,7 @@ C1964jsVideoHLE = (core, glx) ->
         wrapT = @gl.CLAMP_TO_EDGE
       else if tile.cms is consts.RDP_TXT_MIRROR
         wrapT = @gl.MIRRORED_REPEAT
-      
+
       @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_WRAP_S, wrapS)
       @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_WRAP_T, wrapT)
       @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MAG_FILTER, @gl.LINEAR)
