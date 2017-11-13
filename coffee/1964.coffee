@@ -295,7 +295,6 @@ class C1964jsEmulator
     lastDTLBIndex = 0
 
     @memory.initPhysRegions()
-
     return
 
   runLoop: () ->
@@ -523,15 +522,15 @@ class C1964jsEmulator
 
   r4300i_bgez: (i) ->
     @stopCompiling = true
-    "if(" + @helpers.RSH(i) + ">=0){" + @delaySlot(i, false)
+    "if(" + @helpers.RSH(i) + ">0||(" + @helpers.RSH(i) + "===0&&" + @helpers.RS(i) + ">=0)){" + @delaySlot(i, false)
 
   r4300i_bgezl: (i) ->
     @stopCompiling = true
-    "if(" + @helpers.RSH(i) + ">=0){" + @delaySlot(i, true)
+    "if(" + @helpers.RSH(i) + ">0||(" + @helpers.RSH(i) + "===0&&" + @helpers.RS(i) + ">=0)){" + @delaySlot(i, true)
 
   r4300i_bgtzl: (i) ->
     @stopCompiling = true
-    "if(" + @helpers.RSH(i) + ">0||(" + @helpers.RSH(i) + "===0&&" + @helpers.RS(i) + "!==0)){" + @delaySlot(i, true)
+    "if(" + @helpers.RSH(i) + ">0||(" + @helpers.RSH(i) + "===0&&" + @helpers.RS(i) + ">=0)){" + @delaySlot(i, true)
 
   r4300i_bltzl: (i) ->
     @stopCompiling = true
@@ -540,12 +539,12 @@ class C1964jsEmulator
   r4300i_bgezal: (i) ->
     @stopCompiling = true
     link = (@p + offset + 8) >> 0
-    "if(" + @helpers.RSH(i) + ">=0){" + "r[31]=" + link + ";" + "h[31]=" + (link >> 31) + ";" + @delaySlot(i, false)
+    "if(" + @helpers.RSH(i) + ">0||(" + @helpers.RSH(i) + "===0&&" + @helpers.RS(i) + ">=0)){" + "r[31]=" + link + ";" + "h[31]=" + (link >> 31) + ";" + @delaySlot(i, false)
 
   r4300i_bgezall: (i) ->
     @stopCompiling = true
     link = (@p + offset + 8) >> 0
-    "if(" + @helpers.RSH(i) + ">=0){" + "r[31]=" + link + ";" + "h[31]=" + (link >> 31) + ";" + @delaySlot(i, true)
+    "if(" + @helpers.RSH(i) + ">0||(" + @helpers.RSH(i) + "===0&&" + @helpers.RS(i) + ">=0)){{" + "r[31]=" + link + ";" + "h[31]=" + (link >> 31) + ";" + @delaySlot(i, true)
 
   r4300i_bltz: (i) ->
     @stopCompiling = true

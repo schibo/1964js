@@ -227,9 +227,7 @@ C1964jsRenderer = (settings, glx, webGL) ->
     gl.bufferData gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(texrectVertexIndices), gl.STATIC_DRAW
     texrectVertexIndexBuffer.itemSize = 1
     texrectVertexIndexBuffer.numItems = 6
-	
     return
-  
 
   @draw = (tile, tmem, videoHLE) ->
     gl.useProgram webGL.shaderProgram
