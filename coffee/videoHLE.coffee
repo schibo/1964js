@@ -508,7 +508,6 @@ C1964jsVideoHLE = (core, glx) ->
     @gRSPlights[dwLight].g = g
     @gRSPlights[dwLight].b = b
     @gRSPlights[dwLight].a = a
-
     return
 
   C1964jsVideoHLE::setLightDirection = (dwLight, x, y, z) ->
@@ -1176,7 +1175,7 @@ C1964jsVideoHLE = (core, glx) ->
 
     if @triangleVertexPositionBuffer.numItems > 0
       @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexPositionBuffer
-      @gl.bufferData @gl.ARRAY_BUFFER, @triVertices.subarray(0, @triangleVertexPositionBuffer.numItems*@triangleVertexPositionBuffer.itemSize*4), @gl.STATIC_DRAW
+      @gl.bufferData @gl.ARRAY_BUFFER, @triVertices.subarray(0, @triangleVertexPositionBuffer.numItems*@triangleVertexPositionBuffer.itemSize), @gl.STATIC_DRAW
       @gl.enableVertexAttribArray @core.webGL.shaderProgram.vertexPositionAttribute
       @gl.vertexAttribPointer @core.webGL.shaderProgram.vertexPositionAttribute, @triangleVertexPositionBuffer.itemSize, @gl.FLOAT, false, 0, 0
 
@@ -1188,7 +1187,7 @@ C1964jsVideoHLE = (core, glx) ->
 
     if @triangleVertexTextureCoordBuffer.numItems > 0
       @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexTextureCoordBuffer
-      @gl.bufferData @gl.ARRAY_BUFFER, @triTextureCoords.subarray(0, @triangleVertexTextureCoordBuffer.numItems*@triangleVertexTextureCoordBuffer.itemSize*4), @gl.STATIC_DRAW
+      @gl.bufferData @gl.ARRAY_BUFFER, @triTextureCoords.subarray(0, @triangleVertexTextureCoordBuffer.numItems*@triangleVertexTextureCoordBuffer.itemSize), @gl.STATIC_DRAW
       @gl.enableVertexAttribArray @core.webGL.shaderProgram.textureCoordAttribute
       @gl.vertexAttribPointer @core.webGL.shaderProgram.textureCoordAttribute, @triangleVertexTextureCoordBuffer.itemSize, @gl.FLOAT, false, 0, 0
       tile = @textureTile[@activeTile]
