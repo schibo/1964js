@@ -130,7 +130,7 @@ C1964jsWebGL = (core, wireframe) ->
     @gl.clear @gl.COLOR_BUFFER_BIT | @gl.DEPTH_BUFFER_BIT
     mat4.perspective 45, 320.0/240.0, 0.1, 100.0, pMatrix
     mat4.identity mvMatrix
-    mat4.translate mvMatrix, [0.0, 0.0, -2.4]
+    #mat4.translate mvMatrix, [0.0, 0.0, 1.0]
     return
 
   C1964jsWebGL::setMatrixUniforms = (shaderProgram) ->

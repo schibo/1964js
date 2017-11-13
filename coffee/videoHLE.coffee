@@ -105,6 +105,10 @@ C1964jsVideoHLE = (core, glx) ->
   @gRSP.fAmbientLightG = 0
   @gRSP.fAmbientLightB = 0
 
+  @gl.clearColor 0.0, 0.0, 0.0, 1.0
+  @gl.depthFunc @gl.LEQUAL
+  @gl.clearDepth 1.0
+
 
   #todo: allocate on-demand
   i = 0
@@ -757,6 +761,8 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::RSP_GBI1_Tri1 = (pc) ->
+    @setDepthTest()
+
     v0 = @getGbi0Tri1V0(pc) / @gRSP.vertexMult
     v1 = @getGbi0Tri1V1(pc) / @gRSP.vertexMult
     v2 = @getGbi0Tri1V2(pc) / @gRSP.vertexMult
@@ -815,6 +821,8 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_TexRect = (pc) ->
+    @setDepthTest()
+
     #@videoLog "TODO: DLParser_TexRect"
     xh = @getTexRectXh(pc) / 4
     yh = @getTexRectYh(pc) / 4
@@ -1001,7 +1009,7 @@ C1964jsVideoHLE = (core, glx) ->
     offset = 3 * (@triangleVertexPositionBuffer.numItems)
     @triVertices[offset] = @N64VertexList[dwV].x
     @triVertices[offset+1] = @N64VertexList[dwV].y
-    @triVertices[offset+2] = @N64VertexList[dwV].z - 2.0
+    @triVertices[offset+2] = @N64VertexList[dwV].z
 
     @triangleVertexPositionBuffer.numItems += 1
 
@@ -1168,10 +1176,25 @@ C1964jsVideoHLE = (core, glx) ->
             #render->SetAlphaTestEnable(TRUE);
     return
 
+  C1964jsVideoHLE::setDepthTest = () ->
+    zBuffer = @geometryMode 
+
+    zBufferEnabled = (@geometryMode & consts.G_ZBUFFER) isnt 0
+    zCmp = (@otherModeL & consts.Z_COMPARE) isnt 0
+    zUpd = (@otherModeL & consts.Z_UPDATE) isnt 0
+
+    if ((zBufferEnabled and zCmp) or zU)
+      @gl.enable @gl.DEPTH_TEST
+      @gl.depthMask zUpd
+    else
+      @gl.disable @gl.DEPTH_TEST
+      @gl.depthMask false
+
+    
+
   C1964jsVideoHLE::drawScene = (useTexture, tileno) ->
     @gl.useProgram @core.webGL.shaderProgram
-    @gl.enable @gl.DEPTH_TEST
-    @gl.depthFunc @gl.LEQUAL
+    @setDepthTest()
 
     if @triangleVertexPositionBuffer.numItems > 0
       @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexPositionBuffer
