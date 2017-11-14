@@ -683,7 +683,7 @@ C1964jsVideoHLE = (core, glx) ->
     @geometryMode &= ~data
     @initGeometryMode()
     @setDepthTest()
-    @drawScene false, 7
+    #@drawScene false, 7
     return
 
   C1964jsVideoHLE::RSP_GBI1_SetGeometryMode = (pc) ->
@@ -691,7 +691,7 @@ C1964jsVideoHLE = (core, glx) ->
     @geometryMode |= data
     @initGeometryMode()
     @setDepthTest()
-    @drawScene false, 7
+    #@drawScene false, 7
     return
 
   C1964jsVideoHLE::initGeometryMode = () ->
@@ -768,35 +768,32 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::RSP_GBI1_Tri1 = (pc) ->
     shouldContinue = false
-  # loop
-    v0 = @getGbi0Tri1V0(pc) / @gRSP.vertexMult
-    v1 = @getGbi0Tri1V1(pc) / @gRSP.vertexMult
-    v2 = @getGbi0Tri1V2(pc) / @gRSP.vertexMult
-    flag = @getGbi0Tri1Flag(pc)
-    #console.log "Tri1: "+v0+", "+v1+", "+v2+"   Flag: "+flag
-    didSucceed = @prepareTriangle v0, v1, v2
+    loop
+      v0 = @getGbi0Tri1V0(pc) / @gRSP.vertexMult
+      v1 = @getGbi0Tri1V1(pc) / @gRSP.vertexMult
+      v2 = @getGbi0Tri1V2(pc) / @gRSP.vertexMult
+      flag = @getGbi0Tri1Flag(pc)
+      #console.log "Tri1: "+v0+", "+v1+", "+v2+"   Flag: "+flag
+      didSucceed = @prepareTriangle v0, v1, v2
 
-    if didSucceed is false
-      return
+      if didSucceed is false
+        return
 
-    # shouldContinue = false
-    # if @dlistStackPointer >= 0
-    #   @dlistStack[@dlistStackPointer].countdown -= 1
-    #   if @dlistStack[@dlistStackPointer].countdown >= 0
-    #     @dlistStackPointer -= 1  
-    #     pc = @dlistStack[@dlistStackPointer].pc
-    #     cmd = @getCommand(pc)
-    #     func = @currentMicrocodeMap[cmd]
-    #     if func is "RSP_GBI1_Tri1"
-    #       @dlistStack[@dlistStackPointer].pc += 8
-    #       shouldContinue = true
-    #     else
-    #       @dlistStackPointer += 1
-    #   else
-    #     @dlistStack[@dlistStackPointer].countdown += 1
-    
-    # unless shouldContinue is true
-    #   break
+      shouldContinue = false
+      if @dlistStackPointer >= 0
+        @dlistStack[@dlistStackPointer].countdown -= 1
+        if @dlistStack[@dlistStackPointer].countdown >= 0
+          pc = @dlistStack[@dlistStackPointer].pc
+          cmd = @getCommand(pc)
+          func = @currentMicrocodeMap[cmd]
+          if func is "RSP_GBI1_Tri1"
+            @dlistStack[@dlistStackPointer].pc += 8
+            shouldContinue = true
+        else
+          @dlistStack[@dlistStackPointer].countdown += 1
+
+      unless shouldContinue is true
+        break
     @setBlendFunc()
     @drawScene false, 7
 
@@ -929,11 +926,11 @@ C1964jsVideoHLE = (core, glx) ->
     tile = @getLoadBlockTile(pc)
     uls = @getLoadBlockUls(pc)
     ult = @getLoadBlockUlt(pc)
-    lrs = @getLoadBlockLrs(pc)+1
+    lrs = @getLoadBlockLrs(pc)
     dxt = @getLoadBlockDxt(pc)
     #console.log "LoadBlock: Tile:"+tile+" UL("+uls+"/"+ult+") LRS:"+lrs+" DXT: 0x"+dec2hex(dxt)
     #textureAddr = @core.memory.rdramUint8Array[@texImg.addr])
-    bytesToXfer = lrs * @textureTile[tile].siz
+    bytesToXfer = (lrs+1) * @textureTile[tile].siz
     if bytesToXfer > 4096
       console.error "LoadBlock is making too large of a transfer. "+bytesToXfer+" bytes"
     i=0
