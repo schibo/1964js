@@ -70,6 +70,7 @@ C1964jsVideoHLE = (core, glx) ->
   @bLightingEnable = false
   @bFogEnable = false
   @bZBufferEnable = false
+  @colorsTexture = @gl.createTexture()
 
   @normalMat = mat4.create()
   @transformed = mat4.create()
@@ -681,12 +682,16 @@ C1964jsVideoHLE = (core, glx) ->
     data = @getClearGeometryMode(pc)>>>0
     @geometryMode &= ~data
     @initGeometryMode()
+    @setDepthTest()
+    @drawScene false, 7
     return
 
   C1964jsVideoHLE::RSP_GBI1_SetGeometryMode = (pc) ->
     data = @getSetGeometryMode(pc)>>>0
     @geometryMode |= data
     @initGeometryMode()
+    @setDepthTest()
+    @drawScene false, 7
     return
 
   C1964jsVideoHLE::initGeometryMode = () ->
@@ -739,6 +744,8 @@ C1964jsVideoHLE = (core, glx) ->
     #@videoLog "RSP_GBI1_EndDL"
     @RDP_GFX_PopDL()
     @drawScene(false, 7)
+    @resetState()
+
     #alert "EndFrame"
     return
 
@@ -760,8 +767,8 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::RSP_GBI1_Tri1 = (pc) ->
-    @setDepthTest()
-
+    shouldContinue = false
+  # loop
     v0 = @getGbi0Tri1V0(pc) / @gRSP.vertexMult
     v1 = @getGbi0Tri1V1(pc) / @gRSP.vertexMult
     v2 = @getGbi0Tri1V2(pc) / @gRSP.vertexMult
@@ -772,15 +779,27 @@ C1964jsVideoHLE = (core, glx) ->
     if didSucceed is false
       return
 
-    #cmd = @getCommand(pc+8)
-    #func = @currentMicrocodeMap[cmd]
-
- #   @drawScene(false, 7)
-
-  #  if func isnt "RSP_GBI1_Tri1"
-  #    @drawScene false, 7
-
+    # shouldContinue = false
+    # if @dlistStackPointer >= 0
+    #   @dlistStack[@dlistStackPointer].countdown -= 1
+    #   if @dlistStack[@dlistStackPointer].countdown >= 0
+    #     @dlistStackPointer -= 1  
+    #     pc = @dlistStack[@dlistStackPointer].pc
+    #     cmd = @getCommand(pc)
+    #     func = @currentMicrocodeMap[cmd]
+    #     if func is "RSP_GBI1_Tri1"
+    #       @dlistStack[@dlistStackPointer].pc += 8
+    #       shouldContinue = true
+    #     else
+    #       @dlistStackPointer += 1
+    #   else
+    #     @dlistStack[@dlistStackPointer].countdown += 1
+    
+    # unless shouldContinue is true
+    #   break
     @setBlendFunc()
+    @drawScene false, 7
+
     return
 
   C1964jsVideoHLE::RSP_GBI1_Noop = (pc) ->
@@ -842,6 +861,9 @@ C1964jsVideoHLE = (core, glx) ->
     @renderer.texRect xl, yl, xh, yh, s, t, dsdx, dtdy, @textureTile[tileno], @tmem, this
     @dlistStack[@dlistStackPointer].pc += 16
     @hasTexture = true
+    #@setDepthTest()
+    @drawScene false, 7
+
     return
 
   C1964jsVideoHLE::DLParser_TexRectFlip = (pc) ->
@@ -1217,9 +1239,8 @@ C1964jsVideoHLE = (core, glx) ->
       canvaswidth = @pow2roundup tile.width
       canvasheight = @pow2roundup tile.height
       texture = @renderer.formatTexture(tile, @tmem, canvaswidth, canvasheight)
-      colorsTexture = @gl.createTexture()
       @gl.activeTexture(@gl.TEXTURE0)
-      @gl.bindTexture(@gl.TEXTURE_2D, colorsTexture)
+      @gl.bindTexture(@gl.TEXTURE_2D, @colorsTexture)
       @gl.texImage2D(@gl.TEXTURE_2D, 0, @gl.RGBA, tile.width, tile.height, 0, @gl.RGBA, @gl.UNSIGNED_BYTE, texture)
       wrapS = @gl.REPEAT
       wrapT = @gl.REPEAT
@@ -1236,7 +1257,7 @@ C1964jsVideoHLE = (core, glx) ->
       @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_WRAP_T, wrapT)
       @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MAG_FILTER, @gl.LINEAR)
       @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MIN_FILTER, @gl.NEAREST)
-      @gl.uniform1i @core.webGL.shaderProgram.samplerUniform, colorsTexture
+      @gl.uniform1i @core.webGL.shaderProgram.samplerUniform, @colorsTexture
 
     if @primColor.length > 0
       @gl.uniform4fv @core.webGL.shaderProgram.uPrimColor, @primColor
@@ -1269,13 +1290,12 @@ C1964jsVideoHLE = (core, glx) ->
       else
         @gl.drawArrays @gl.TRIANGLES, 0, @triangleVertexPositionBuffer.numItems
 
-    @resetState()
-    return
-
-  C1964jsVideoHLE::resetState = ->
     @triangleVertexPositionBuffer.numItems = 0
     @triangleVertexColorBuffer.numItems = 0
     @triangleVertexTextureCoordBuffer.numItems = 0
+    return
+
+  C1964jsVideoHLE::resetState = ->
     @otherModeL = 0x00500001
     @otherModeH = 0
    # @geometryMode = 0
