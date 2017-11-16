@@ -54,10 +54,11 @@ C1964jsVideoHLE = (core, glx) ->
   @renderer = new C1964jsRenderer(@core.settings, @core.webGL.gl, @core.webGL)
   @texImg = {}
   @segments = []
-  @primColor = []
-  @fillColor = []
-  @blendColor = []
-  @envColor = []
+  @gl.useProgram @core.webGL.shaderProgram
+  @primColor = [0.0, 0.0, 0.0, 0.0]
+  @fillColor = [0.0, 0.0, 0.0, 0.0]
+  @blendColor = [0.0, 0.0, 0.0, 0.0]
+  @envColor = [0.0, 0.0, 0.0, 0.0]
   @triVertices = new Float32Array(16384)
   @triColorVertices = new Uint8Array(16384)
   @triTextureCoords = new Float32Array(16384)
@@ -361,7 +362,7 @@ C1964jsVideoHLE = (core, glx) ->
 
       @N64VertexList[i].x = @getVertexX(a)
       @N64VertexList[i].y = @getVertexY(a)
-      @N64VertexList[i].z = @getVertexZ(a) - 2
+      @N64VertexList[i].z = @getVertexZ(a) - 2.0 # -2.0 is a hack. We need to fix the zDepth bugs
       @N64VertexList[i].s = @getVertexS(a)/32 / texWidth
       @N64VertexList[i].t = @getVertexT(a)/32 / texHeight
 
@@ -691,7 +692,6 @@ C1964jsVideoHLE = (core, glx) ->
     @geometryMode &= ~data
     @initGeometryMode()
     #@setDepthTest()
-    #@drawScene false, 7
     return
 
   C1964jsVideoHLE::RSP_GBI1_SetGeometryMode = (pc) ->
@@ -702,7 +702,6 @@ C1964jsVideoHLE = (core, glx) ->
     @geometryMode |= data
     @initGeometryMode()
     #@setDepthTest()
-    #@drawScene false, 7
     return
 
   C1964jsVideoHLE::initGeometryMode = () ->
@@ -778,37 +777,24 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::RSP_GBI1_Tri1 = (pc) ->
-    shouldContinue = false
-    loop
-      v0 = @getGbi0Tri1V0(pc) / @gRSP.vertexMult
-      v1 = @getGbi0Tri1V1(pc) / @gRSP.vertexMult
-      v2 = @getGbi0Tri1V2(pc) / @gRSP.vertexMult
-      flag = @getGbi0Tri1Flag(pc)
-      #console.log "Tri1: "+v0+", "+v1+", "+v2+"   Flag: "+flag
-      didSucceed = @prepareTriangle v0, v1, v2
+    v0 = @getGbi0Tri1V0(pc) / @gRSP.vertexMult
+    v1 = @getGbi0Tri1V1(pc) / @gRSP.vertexMult
+    v2 = @getGbi0Tri1V2(pc) / @gRSP.vertexMult
+    flag = @getGbi0Tri1Flag(pc)
+    #console.log "Tri1: "+v0+", "+v1+", "+v2+"   Flag: "+flag
+    didSucceed = @prepareTriangle v0, v1, v2
 
-      if didSucceed is false
-        return
+    if didSucceed is false
+      return
 
-      shouldContinue = false
-      if @dlistStackPointer >= 0
-        @dlistStack[@dlistStackPointer].countdown -= 1
-        if @dlistStack[@dlistStackPointer].countdown >= 0
-          pc = @dlistStack[@dlistStackPointer].pc
-          cmd = @getCommand(pc)
-          func = @currentMicrocodeMap[cmd]
-          if func is "RSP_GBI1_Tri1"
-            @dlistStack[@dlistStackPointer].pc += 8
-            shouldContinue = true
-        else
-          @dlistStack[@dlistStackPointer].countdown += 1
+    pc = @dlistStack[@dlistStackPointer].pc
+    cmd = @getCommand(pc)
+    func = @currentMicrocodeMap[cmd]
+    if func is "RSP_GBI1_Tri1"
+      return #loops until not tri1, then it will drawScene
 
-      unless shouldContinue is true
-        break
-
-      if @renderStateChanged is true
-        @drawScene false, 7
-
+    if @renderStateChanged is true
+      @drawScene false, 7
     return
 
   C1964jsVideoHLE::RSP_GBI1_Noop = (pc) ->
@@ -848,14 +834,15 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_TexRect = (pc) ->
+    @dlistStack[@dlistStackPointer].pc += 16
     return
-    depthTestEnabled = true
-    if depthTestEnabled
-      #@setDepthTest()
-      @gl.enable @gl.DEPTH_TEST
-      @gl.depthFunc @gl.LEQUAL
-    else
-      @gl.disable @gl.DEPTH_TEST
+    # depthTestEnabled = true
+    # if depthTestEnabled
+    #   #@setDepthTest()
+    #   @gl.enable @gl.DEPTH_TEST
+    #   @gl.depthFunc @gl.LEQUAL
+    # else
+    #   @gl.disable @gl.DEPTH_TEST
 
     #@videoLog "TODO: DLParser_TexRect"
     xh = @getTexRectXh(pc) / 4
@@ -869,11 +856,9 @@ C1964jsVideoHLE = (core, glx) ->
     dtdy = @getTexRectDtDy(pc) / 1024
     #console.log "Texrect: UL("+xl+","+yl+") LR("+xh+","+yh+") Tile:"+tileno+" TexCoord:("+s+","+t+") TexSlope:("+dsdx+","+dtdy+")"
     @renderer.texRect xl, yl, xh, yh, s, t, dsdx, dtdy, @textureTile[tileno], @tmem, this
-    @dlistStack[@dlistStackPointer].pc += 16
     @hasTexture = true
     #@setDepthTest()
     #@drawScene false, 7
-
     return
 
   C1964jsVideoHLE::DLParser_TexRectFlip = (pc) ->
@@ -958,6 +943,7 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_SetTile = (pc) ->
+    #@renderStateChanged = true
     tile = @getSetTileTile(pc)
     @activeTile = tile
     @textureTile[tile].fmt = @getSetTileFmt(pc);
@@ -1005,7 +991,6 @@ C1964jsVideoHLE = (core, glx) ->
     @gl.uniform4fv @core.webGL.shaderProgram.uBlendColor, @blendColor
     @alphaTestEnabled = 1
     @renderStateChanged = true
-
     return
 
   C1964jsVideoHLE::DLParser_SetPrimColor = (pc) ->
@@ -1018,7 +1003,6 @@ C1964jsVideoHLE = (core, glx) ->
     #@videoLog "TODO: DLParser_SetPrimColor"
     @gl.uniform4fv @core.webGL.shaderProgram.uPrimColor, @primColor
     @renderStateChanged = true
-
     return
 
   C1964jsVideoHLE::DLParser_SetEnvColor = (pc) ->
@@ -1225,7 +1209,7 @@ C1964jsVideoHLE = (core, glx) ->
     zUpd = (@otherModeL & consts.Z_UPDATE) isnt 0
     if ((zBufferMode and zCmp) or zUpd)
       @gl.enable @gl.DEPTH_TEST
-      @gl.depthFunc @gl.LESS
+      @gl.depthFunc @gl.LEQUAL
     else
       @gl.disable @gl.DEPTH_TEST
     @gl.depthMask zUpd
@@ -1234,7 +1218,6 @@ C1964jsVideoHLE = (core, glx) ->
     @gl.enable @gl.DEPTH_TEST
     @gl.depthFunc @gl.LEQUAL
 
-    @gl.useProgram @core.webGL.shaderProgram
     @setBlendFunc()
 
     #@setDepthTest()
@@ -1312,6 +1295,7 @@ C1964jsVideoHLE = (core, glx) ->
    # @geometryMode = 0
     @initGeometryMode()
     @alphaTestEnabled = 0
+    @renderStateChanged = true
     return
 
   C1964jsVideoHLE::initBuffers = ->

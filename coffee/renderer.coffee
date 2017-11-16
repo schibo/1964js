@@ -192,7 +192,6 @@ C1964jsRenderer = (settings, glx, webGL) ->
               j++
               srcRowOffset += srcRowStride
               dstRowOffset += dstRowStride
-
           else 
             console.error "TODO: tile format " + tile.fmt + ", tile.size" + tile.siz
       else 
@@ -203,7 +202,6 @@ C1964jsRenderer = (settings, glx, webGL) ->
     return texture
             
   initQuad = (xl, yl, xh, yh, sl, tl, sh, th, videoHLE) ->
-    return;
     vertices = [xh, yh, 0.0, xh, yl, 0.0, xl, yl, 0.0, xl, yh, 0.0]
     texrectVertexPositionBuffer = gl.createBuffer()
     gl.bindBuffer gl.ARRAY_BUFFER, texrectVertexPositionBuffer
