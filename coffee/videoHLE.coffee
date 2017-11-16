@@ -71,6 +71,7 @@ C1964jsVideoHLE = (core, glx) ->
   @bFogEnable = false
   @bZBufferEnable = false
   @colorsTexture = @gl.createTexture()
+  @renderStateChanged = false
 
   @normalMat = mat4.create()
   @transformed = mat4.create()
@@ -360,7 +361,7 @@ C1964jsVideoHLE = (core, glx) ->
 
       @N64VertexList[i].x = @getVertexX(a)
       @N64VertexList[i].y = @getVertexY(a)
-      @N64VertexList[i].z = @getVertexZ(a)
+      @N64VertexList[i].z = @getVertexZ(a) - 2
       @N64VertexList[i].s = @getVertexS(a)/32 / texWidth
       @N64VertexList[i].t = @getVertexT(a)/32 / texHeight
 
@@ -426,6 +427,8 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_SetCombine = (pc) ->
+    @renderStateChanged = true
+
     @combineA0 = @getCombineA0(pc)
     @combineB0 = @getCombineB0(pc)
     @combineC0 = @getCombineC0(pc)
@@ -466,6 +469,7 @@ C1964jsVideoHLE = (core, glx) ->
     #  console.log " a0:" + @combineA0 + " b0:" + @combineB0 + " c0:" + @combineC0 + " d0:" + @combineD0 + " a0a:" + @combineA0a + " b0a:" + @combineB0a + " c0a:" + @combineC0a + " d0a:" + @combineD0a + " a1:" + @combineA1 + " b1:" + @combineB1 + " c1:" + @combineC1 + " d1:" + @combineD1 + " a1a:" + @combineA1a + " b1a:" + @combineB1a + " c1a:" + @combineC1a + " d1a:" + @combineD1a
 
     #@videoLog "TODO: DLParser_SetCombine"
+    @core.webGL.setCombineUniforms @core.webGL.shaderProgram
     return
 
   C1964jsVideoHLE::RSP_GBI1_MoveWord = (pc) ->
@@ -634,6 +638,7 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::RSP_GBI1_SetOtherModeH = (pc) ->
     #@videoLog "TODO: DLParser_GBI1_SetOtherModeH"
+    @renderStateChanged = true
     word0 = @getOtherModeH pc
     length = (word0 >>> 0) & 0xFF
     shift = (word0 >>> 8) & 0xFF
@@ -645,6 +650,7 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::RSP_GBI1_SetOtherModeL = (pc) ->
     #@videoLog "TODO: DLParser_GBI1_SetOtherModeL"
+    @renderStateChanged = true
     word0 = @getOtherModeL pc
     length = (word0 >>> 0) & 0xFF
     shift = (word0 >>> 8) & 0xFF
@@ -679,18 +685,23 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::RSP_GBI1_ClearGeometryMode = (pc) ->
+    @renderStateChanged = true
+
     data = @getClearGeometryMode(pc)>>>0
     @geometryMode &= ~data
     @initGeometryMode()
-    @setDepthTest()
+    #@setDepthTest()
     #@drawScene false, 7
     return
 
   C1964jsVideoHLE::RSP_GBI1_SetGeometryMode = (pc) ->
+    # state will change. draw.
+    @renderStateChanged = true
+
     data = @getSetGeometryMode(pc)>>>0
     @geometryMode |= data
     @initGeometryMode()
-    @setDepthTest()
+    #@setDepthTest()
     #@drawScene false, 7
     return
 
@@ -794,8 +805,9 @@ C1964jsVideoHLE = (core, glx) ->
 
       unless shouldContinue is true
         break
-    @setBlendFunc()
-    @drawScene false, 7
+
+      if @renderStateChanged is true
+        @drawScene false, 7
 
     return
 
@@ -836,6 +848,7 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_TexRect = (pc) ->
+    return
     depthTestEnabled = true
     if depthTestEnabled
       #@setDepthTest()
@@ -859,7 +872,7 @@ C1964jsVideoHLE = (core, glx) ->
     @dlistStack[@dlistStackPointer].pc += 16
     @hasTexture = true
     #@setDepthTest()
-    @drawScene false, 7
+    #@drawScene false, 7
 
     return
 
@@ -975,8 +988,8 @@ C1964jsVideoHLE = (core, glx) ->
     @fillColor.push @getSetFillColorG(pc)/255.0
     @fillColor.push @getSetFillColorB(pc)/255.0
     @fillColor.push @getSetFillColorA(pc)/255.0
-
-    #@videoLog "TODO: DLParser_SetFillColor"
+    @gl.uniform4fv @core.webGL.shaderProgram.uFillColor, @fillColor
+    @renderStateChanged = true
     return
 
   C1964jsVideoHLE::DLParser_SetFogColor = (pc) ->
@@ -989,7 +1002,10 @@ C1964jsVideoHLE = (core, glx) ->
     @blendColor.push @getSetFillColorG(pc)/255.0
     @blendColor.push @getSetFillColorB(pc)/255.0
     @blendColor.push @getSetFillColorA(pc)/255.0
+    @gl.uniform4fv @core.webGL.shaderProgram.uBlendColor, @blendColor
     @alphaTestEnabled = 1
+    @renderStateChanged = true
+
     return
 
   C1964jsVideoHLE::DLParser_SetPrimColor = (pc) ->
@@ -1000,6 +1016,9 @@ C1964jsVideoHLE = (core, glx) ->
     @primColor.push @getSetPrimColorA(pc)/255.0
     #alert @primColor
     #@videoLog "TODO: DLParser_SetPrimColor"
+    @gl.uniform4fv @core.webGL.shaderProgram.uPrimColor, @primColor
+    @renderStateChanged = true
+
     return
 
   C1964jsVideoHLE::DLParser_SetEnvColor = (pc) ->
@@ -1008,8 +1027,8 @@ C1964jsVideoHLE = (core, glx) ->
     @envColor.push @getSetEnvColorG(pc)/255.0
     @envColor.push @getSetEnvColorB(pc)/255.0
     @envColor.push @getSetEnvColorA(pc)/255.0
-
-    #@videoLog "TODO: DLParser_SetEnvColor"
+    @gl.uniform4fv @core.webGL.shaderProgram.uEnvColor, @envColor
+    @renderStateChanged = true
     return
 
   C1964jsVideoHLE::DLParser_SetZImg = (pc) ->
@@ -1206,14 +1225,21 @@ C1964jsVideoHLE = (core, glx) ->
     zUpd = (@otherModeL & consts.Z_UPDATE) isnt 0
     if ((zBufferMode and zCmp) or zUpd)
       @gl.enable @gl.DEPTH_TEST
-      @gl.depthFunc @gl.LEQUAL
+      @gl.depthFunc @gl.LESS
     else
       @gl.disable @gl.DEPTH_TEST
     @gl.depthMask zUpd
 
   C1964jsVideoHLE::drawScene = (useTexture, tileno) ->
+    @gl.enable @gl.DEPTH_TEST
+    @gl.depthFunc @gl.LEQUAL
+
     @gl.useProgram @core.webGL.shaderProgram
+    @setBlendFunc()
+
     #@setDepthTest()
+
+    @renderStateChanged = false
 
     if @triangleVertexPositionBuffer.numItems > 0
       @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexPositionBuffer
@@ -1256,24 +1282,12 @@ C1964jsVideoHLE = (core, glx) ->
       @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MIN_FILTER, @gl.NEAREST)
       @gl.uniform1i @core.webGL.shaderProgram.samplerUniform, @colorsTexture
 
-    if @primColor.length > 0
-      @gl.uniform4fv @core.webGL.shaderProgram.uPrimColor, @primColor
 
-    if @fillColor.length > 0
-      @gl.uniform4fv @core.webGL.shaderProgram.uFillColor, @fillColor
-
-    if @envColor.length > 0
-      @gl.uniform4fv @core.webGL.shaderProgram.uEnvColor, @envColor
-
-    if @blendColor.length > 0
-      @gl.uniform4fv @core.webGL.shaderProgram.uBlendColor, @blendColor
 
     #@gl.uniform1i @core.webGL.shaderProgram.otherModeL, @otherModeL
     #@gl.uniform1i @core.webGL.shaderProgram.otherModeH, @otherModeH
     @gl.uniform1i @core.webGL.shaderProgram.cycleType, @cycleType
     @gl.uniform1i @core.webGL.shaderProgram.uAlphaTestEnabled, @alphaTestEnabled
-
-    @core.webGL.setCombineUniforms @core.webGL.shaderProgram
 
     @gl.uniform1i @core.webGL.shaderProgram.wireframeUniform, if @core.settings.wireframe then 1 else 0
 
