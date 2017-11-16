@@ -54,10 +54,11 @@ C1964jsVideoHLE = (core, glx) ->
   @renderer = new C1964jsRenderer(@core.settings, @core.webGL.gl, @core.webGL)
   @texImg = {}
   @segments = []
-  @primColor = []
-  @fillColor = []
-  @blendColor = []
-  @envColor = []
+  @gl.useProgram @core.webGL.shaderProgram
+  @primColor = [0.0, 0.0, 0.0, 0.0]
+  @fillColor = [0.0, 0.0, 0.0, 0.0]
+  @blendColor = [0.0, 0.0, 0.0, 0.0]
+  @envColor = [0.0, 0.0, 0.0, 0.0]
   @triVertices = new Float32Array(16384)
   @triColorVertices = new Uint8Array(16384)
   @triTextureCoords = new Float32Array(16384)
@@ -70,6 +71,8 @@ C1964jsVideoHLE = (core, glx) ->
   @bLightingEnable = false
   @bFogEnable = false
   @bZBufferEnable = false
+  @colorsTexture = @gl.createTexture()
+  @renderStateChanged = false
 
   @normalMat = mat4.create()
   @transformed = mat4.create()
@@ -104,6 +107,10 @@ C1964jsVideoHLE = (core, glx) ->
   @gRSP.fAmbientLightR = 0
   @gRSP.fAmbientLightG = 0
   @gRSP.fAmbientLightB = 0
+
+  @gl.clearColor 0.0, 0.0, 0.0, 1.0
+  @gl.depthFunc @gl.LEQUAL
+  @gl.clearDepth 1.0
 
 
   #todo: allocate on-demand
@@ -355,7 +362,7 @@ C1964jsVideoHLE = (core, glx) ->
 
       @N64VertexList[i].x = @getVertexX(a)
       @N64VertexList[i].y = @getVertexY(a)
-      @N64VertexList[i].z = @getVertexZ(a)
+      @N64VertexList[i].z = @getVertexZ(a) - 2.0 # -2.0 is a hack. We need to fix the zDepth bugs
       @N64VertexList[i].s = @getVertexS(a)/32 / texWidth
       @N64VertexList[i].t = @getVertexT(a)/32 / texHeight
 
@@ -421,6 +428,8 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_SetCombine = (pc) ->
+    @renderStateChanged = true
+
     @combineA0 = @getCombineA0(pc)
     @combineB0 = @getCombineB0(pc)
     @combineC0 = @getCombineC0(pc)
@@ -461,6 +470,7 @@ C1964jsVideoHLE = (core, glx) ->
     #  console.log " a0:" + @combineA0 + " b0:" + @combineB0 + " c0:" + @combineC0 + " d0:" + @combineD0 + " a0a:" + @combineA0a + " b0a:" + @combineB0a + " c0a:" + @combineC0a + " d0a:" + @combineD0a + " a1:" + @combineA1 + " b1:" + @combineB1 + " c1:" + @combineC1 + " d1:" + @combineD1 + " a1a:" + @combineA1a + " b1a:" + @combineB1a + " c1a:" + @combineC1a + " d1a:" + @combineD1a
 
     #@videoLog "TODO: DLParser_SetCombine"
+    @core.webGL.setCombineUniforms @core.webGL.shaderProgram
     return
 
   C1964jsVideoHLE::RSP_GBI1_MoveWord = (pc) ->
@@ -629,9 +639,10 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::RSP_GBI1_SetOtherModeH = (pc) ->
     #@videoLog "TODO: DLParser_GBI1_SetOtherModeH"
-    word0 = @getOtherModeH(pc) >>> 0
+    @renderStateChanged = true
+    word0 = @getOtherModeH pc
     length = (word0 >>> 0) & 0xFF
-    shift = ((word0 >>> 8) & 0xFF)
+    shift = (word0 >>> 8) & 0xFF
     mask = ((1<<length)-1)<<shift
     @otherModeH &= ~mask
     @otherModeH |= @getOtherModeH pc+4
@@ -640,9 +651,10 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::RSP_GBI1_SetOtherModeL = (pc) ->
     #@videoLog "TODO: DLParser_GBI1_SetOtherModeL"
-    word0 = @getOtherModeL(pc) >>> 0
+    @renderStateChanged = true
+    word0 = @getOtherModeL pc
     length = (word0 >>> 0) & 0xFF
-    shift = ((word0 >>> 8) & 0xFF)
+    shift = (word0 >>> 8) & 0xFF
     mask = ((1<<length)-1)<<shift
     @otherModeL &= ~mask
     @otherModeL |= @getOtherModeL pc+4
@@ -674,15 +686,22 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::RSP_GBI1_ClearGeometryMode = (pc) ->
+    @renderStateChanged = true
+
     data = @getClearGeometryMode(pc)>>>0
     @geometryMode &= ~data
     @initGeometryMode()
+    #@setDepthTest()
     return
 
   C1964jsVideoHLE::RSP_GBI1_SetGeometryMode = (pc) ->
+    # state will change. draw.
+    @renderStateChanged = true
+
     data = @getSetGeometryMode(pc)>>>0
     @geometryMode |= data
     @initGeometryMode()
+    #@setDepthTest()
     return
 
   C1964jsVideoHLE::initGeometryMode = () ->
@@ -735,6 +754,7 @@ C1964jsVideoHLE = (core, glx) ->
     #@videoLog "RSP_GBI1_EndDL"
     @RDP_GFX_PopDL()
     @drawScene(false, 7)
+    @resetState()
 
     #alert "EndFrame"
     return
@@ -767,15 +787,14 @@ C1964jsVideoHLE = (core, glx) ->
     if didSucceed is false
       return
 
-    #cmd = @getCommand(pc+8)
-    #func = @currentMicrocodeMap[cmd]
+    pc = @dlistStack[@dlistStackPointer].pc
+    cmd = @getCommand(pc)
+    func = @currentMicrocodeMap[cmd]
+    if func is "RSP_GBI1_Tri1"
+      return #loops until not tri1, then it will drawScene
 
- #   @drawScene(false, 7)
-
-  #  if func isnt "RSP_GBI1_Tri1"
-  #    @drawScene false, 7
-
-    @setBlendFunc()
+    if @renderStateChanged is true
+      @drawScene false, 7
     return
 
   C1964jsVideoHLE::RSP_GBI1_Noop = (pc) ->
@@ -815,6 +834,16 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_TexRect = (pc) ->
+    @dlistStack[@dlistStackPointer].pc += 16
+    return
+    # depthTestEnabled = true
+    # if depthTestEnabled
+    #   #@setDepthTest()
+    #   @gl.enable @gl.DEPTH_TEST
+    #   @gl.depthFunc @gl.LEQUAL
+    # else
+    #   @gl.disable @gl.DEPTH_TEST
+
     #@videoLog "TODO: DLParser_TexRect"
     xh = @getTexRectXh(pc) / 4
     yh = @getTexRectYh(pc) / 4
@@ -827,12 +856,13 @@ C1964jsVideoHLE = (core, glx) ->
     dtdy = @getTexRectDtDy(pc) / 1024
     #console.log "Texrect: UL("+xl+","+yl+") LR("+xh+","+yh+") Tile:"+tileno+" TexCoord:("+s+","+t+") TexSlope:("+dsdx+","+dtdy+")"
     @renderer.texRect xl, yl, xh, yh, s, t, dsdx, dtdy, @textureTile[tileno], @tmem, this
-    @dlistStack[@dlistStackPointer].pc += 8
     @hasTexture = true
+    #@setDepthTest()
+    #@drawScene false, 7
     return
 
   C1964jsVideoHLE::DLParser_TexRectFlip = (pc) ->
-    @dlistStack[@dlistStackPointer].pc += 8
+    @dlistStack[@dlistStackPointer].pc += 16
     #@videoLog "TODO: DLParser_TexRectFlip"
     return
 
@@ -894,11 +924,11 @@ C1964jsVideoHLE = (core, glx) ->
     tile = @getLoadBlockTile(pc)
     uls = @getLoadBlockUls(pc)
     ult = @getLoadBlockUlt(pc)
-    lrs = @getLoadBlockLrs(pc)+1
+    lrs = @getLoadBlockLrs(pc)
     dxt = @getLoadBlockDxt(pc)
     #console.log "LoadBlock: Tile:"+tile+" UL("+uls+"/"+ult+") LRS:"+lrs+" DXT: 0x"+dec2hex(dxt)
     #textureAddr = @core.memory.rdramUint8Array[@texImg.addr])
-    bytesToXfer = lrs * @textureTile[tile].siz
+    bytesToXfer = (lrs+1) * @textureTile[tile].siz
     if bytesToXfer > 4096
       console.error "LoadBlock is making too large of a transfer. "+bytesToXfer+" bytes"
     i=0
@@ -913,6 +943,7 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_SetTile = (pc) ->
+    #@renderStateChanged = true
     tile = @getSetTileTile(pc)
     @activeTile = tile
     @textureTile[tile].fmt = @getSetTileFmt(pc);
@@ -943,8 +974,8 @@ C1964jsVideoHLE = (core, glx) ->
     @fillColor.push @getSetFillColorG(pc)/255.0
     @fillColor.push @getSetFillColorB(pc)/255.0
     @fillColor.push @getSetFillColorA(pc)/255.0
-
-    #@videoLog "TODO: DLParser_SetFillColor"
+    @gl.uniform4fv @core.webGL.shaderProgram.uFillColor, @fillColor
+    @renderStateChanged = true
     return
 
   C1964jsVideoHLE::DLParser_SetFogColor = (pc) ->
@@ -957,7 +988,9 @@ C1964jsVideoHLE = (core, glx) ->
     @blendColor.push @getSetFillColorG(pc)/255.0
     @blendColor.push @getSetFillColorB(pc)/255.0
     @blendColor.push @getSetFillColorA(pc)/255.0
+    @gl.uniform4fv @core.webGL.shaderProgram.uBlendColor, @blendColor
     @alphaTestEnabled = 1
+    @renderStateChanged = true
     return
 
   C1964jsVideoHLE::DLParser_SetPrimColor = (pc) ->
@@ -968,6 +1001,8 @@ C1964jsVideoHLE = (core, glx) ->
     @primColor.push @getSetPrimColorA(pc)/255.0
     #alert @primColor
     #@videoLog "TODO: DLParser_SetPrimColor"
+    @gl.uniform4fv @core.webGL.shaderProgram.uPrimColor, @primColor
+    @renderStateChanged = true
     return
 
   C1964jsVideoHLE::DLParser_SetEnvColor = (pc) ->
@@ -976,8 +1011,8 @@ C1964jsVideoHLE = (core, glx) ->
     @envColor.push @getSetEnvColorG(pc)/255.0
     @envColor.push @getSetEnvColorB(pc)/255.0
     @envColor.push @getSetEnvColorA(pc)/255.0
-
-    #@videoLog "TODO: DLParser_SetEnvColor"
+    @gl.uniform4fv @core.webGL.shaderProgram.uEnvColor, @envColor
+    @renderStateChanged = true
     return
 
   C1964jsVideoHLE::DLParser_SetZImg = (pc) ->
@@ -1001,7 +1036,7 @@ C1964jsVideoHLE = (core, glx) ->
     offset = 3 * (@triangleVertexPositionBuffer.numItems)
     @triVertices[offset] = @N64VertexList[dwV].x
     @triVertices[offset+1] = @N64VertexList[dwV].y
-    @triVertices[offset+2] = @N64VertexList[dwV].z - 2.0
+    @triVertices[offset+2] = @N64VertexList[dwV].z
 
     @triangleVertexPositionBuffer.numItems += 1
 
@@ -1168,10 +1203,26 @@ C1964jsVideoHLE = (core, glx) ->
             #render->SetAlphaTestEnable(TRUE);
     return
 
+  C1964jsVideoHLE::setDepthTest = () ->
+    zBufferMode = (@geometryMode & consts.G_ZBUFFER) isnt 0
+    zCmp = (@otherModeL & consts.Z_COMPARE) isnt 0
+    zUpd = (@otherModeL & consts.Z_UPDATE) isnt 0
+    if ((zBufferMode and zCmp) or zUpd)
+      @gl.enable @gl.DEPTH_TEST
+      @gl.depthFunc @gl.LEQUAL
+    else
+      @gl.disable @gl.DEPTH_TEST
+    @gl.depthMask zUpd
+
   C1964jsVideoHLE::drawScene = (useTexture, tileno) ->
-    @gl.useProgram @core.webGL.shaderProgram
     @gl.enable @gl.DEPTH_TEST
     @gl.depthFunc @gl.LEQUAL
+
+    @setBlendFunc()
+
+    #@setDepthTest()
+
+    @renderStateChanged = false
 
     if @triangleVertexPositionBuffer.numItems > 0
       @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexPositionBuffer
@@ -1194,9 +1245,8 @@ C1964jsVideoHLE = (core, glx) ->
       canvaswidth = @pow2roundup tile.width
       canvasheight = @pow2roundup tile.height
       texture = @renderer.formatTexture(tile, @tmem, canvaswidth, canvasheight)
-      colorsTexture = @gl.createTexture()
       @gl.activeTexture(@gl.TEXTURE0)
-      @gl.bindTexture(@gl.TEXTURE_2D, colorsTexture)
+      @gl.bindTexture(@gl.TEXTURE_2D, @colorsTexture)
       @gl.texImage2D(@gl.TEXTURE_2D, 0, @gl.RGBA, tile.width, tile.height, 0, @gl.RGBA, @gl.UNSIGNED_BYTE, texture)
       wrapS = @gl.REPEAT
       wrapT = @gl.REPEAT
@@ -1208,31 +1258,19 @@ C1964jsVideoHLE = (core, glx) ->
         wrapT = @gl.CLAMP_TO_EDGE
       else if tile.cms is consts.RDP_TXT_MIRROR
         wrapT = @gl.MIRRORED_REPEAT
-      
+
       @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_WRAP_S, wrapS)
       @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_WRAP_T, wrapT)
       @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MAG_FILTER, @gl.LINEAR)
       @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MIN_FILTER, @gl.NEAREST)
-      @gl.uniform1i @core.webGL.shaderProgram.samplerUniform, colorsTexture
+      @gl.uniform1i @core.webGL.shaderProgram.samplerUniform, @colorsTexture
 
-    if @primColor.length > 0
-      @gl.uniform4fv @core.webGL.shaderProgram.uPrimColor, @primColor
 
-    if @fillColor.length > 0
-      @gl.uniform4fv @core.webGL.shaderProgram.uFillColor, @fillColor
-
-    if @envColor.length > 0
-      @gl.uniform4fv @core.webGL.shaderProgram.uEnvColor, @envColor
-
-    if @blendColor.length > 0
-      @gl.uniform4fv @core.webGL.shaderProgram.uBlendColor, @blendColor
 
     #@gl.uniform1i @core.webGL.shaderProgram.otherModeL, @otherModeL
     #@gl.uniform1i @core.webGL.shaderProgram.otherModeH, @otherModeH
     @gl.uniform1i @core.webGL.shaderProgram.cycleType, @cycleType
     @gl.uniform1i @core.webGL.shaderProgram.uAlphaTestEnabled, @alphaTestEnabled
-
-    @core.webGL.setCombineUniforms @core.webGL.shaderProgram
 
     @gl.uniform1i @core.webGL.shaderProgram.wireframeUniform, if @core.settings.wireframe then 1 else 0
 
@@ -1246,18 +1284,18 @@ C1964jsVideoHLE = (core, glx) ->
       else
         @gl.drawArrays @gl.TRIANGLES, 0, @triangleVertexPositionBuffer.numItems
 
-    @resetState()
-    return
-
-  C1964jsVideoHLE::resetState = ->
     @triangleVertexPositionBuffer.numItems = 0
     @triangleVertexColorBuffer.numItems = 0
     @triangleVertexTextureCoordBuffer.numItems = 0
+    return
+
+  C1964jsVideoHLE::resetState = ->
     @otherModeL = 0x00500001
     @otherModeH = 0
    # @geometryMode = 0
     @initGeometryMode()
     @alphaTestEnabled = 0
+    @renderStateChanged = true
     return
 
   C1964jsVideoHLE::initBuffers = ->

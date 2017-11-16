@@ -94,7 +94,7 @@ C1964jsVideoHLE::getVertexX = (pc) ->
   (@core.memory.rdramUint8Array[pc] << 24 | @core.memory.rdramUint8Array[pc + 1] << 16) >> 16
 
 C1964jsVideoHLE::getVertexY = (pc) ->
-  (@core.memory.rdramUint8Array[pc + 2] << 8 | @core.memory.rdramUint8Array[pc + 3]) << 16 >> 16
+  (@core.memory.rdramUint8Array[pc + 2] << 24 | @core.memory.rdramUint8Array[pc + 3] << 16) >> 16
 
 C1964jsVideoHLE::getVertexZ = (pc) ->
   (@core.memory.rdramUint8Array[pc + 4] << 24 | @core.memory.rdramUint8Array[pc + 5] << 16) >> 16

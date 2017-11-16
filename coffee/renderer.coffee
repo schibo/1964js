@@ -68,7 +68,6 @@ C1964jsRenderer = (settings, glx, webGL) ->
     yh = -(yh-120)/120 
 	
     initQuad xl, yl, xh, yh, sl, tl, sh, th, videoHLE
-    @draw tile, tmem, videoHLE
     return
 
   @formatTexture = (tile, tmem, cw, ch) ->
@@ -193,20 +192,16 @@ C1964jsRenderer = (settings, glx, webGL) ->
               j++
               srcRowOffset += srcRowStride
               dstRowOffset += dstRowStride
-
           else 
             console.error "TODO: tile format " + tile.fmt + ", tile.size" + tile.siz
       else 
         console.error "TODO: tile format " + tile.fmt + ", tile.size" + tile.siz
-
-
 
    # if @useTextureCache is true
    #   return @textureCache[textureId]
     return texture
             
   initQuad = (xl, yl, xh, yh, sl, tl, sh, th, videoHLE) ->
-  
     vertices = [xh, yh, 0.0, xh, yl, 0.0, xl, yl, 0.0, xl, yh, 0.0]
     texrectVertexPositionBuffer = gl.createBuffer()
     gl.bindBuffer gl.ARRAY_BUFFER, texrectVertexPositionBuffer
@@ -226,58 +221,7 @@ C1964jsRenderer = (settings, glx, webGL) ->
     gl.bindBuffer gl.ELEMENT_ARRAY_BUFFER, texrectVertexIndexBuffer
     gl.bufferData gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(texrectVertexIndices), gl.STATIC_DRAW
     texrectVertexIndexBuffer.itemSize = 1
-    texrectVertexIndexBuffer.numItems = 6
-	
-    return
-  
-
-  @draw = (tile, tmem, videoHLE) ->
-    gl.useProgram webGL.shaderProgram
-        
-    gl.enableVertexAttribArray webGL.shaderProgram.vertexPositionAttribute
-    gl.bindBuffer gl.ARRAY_BUFFER, texrectVertexPositionBuffer
-    gl.vertexAttribPointer webGL.shaderProgram.vertexPositionAttribute, texrectVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0
-
-    gl.enableVertexAttribArray webGL.shaderProgram.textureCoordAttribute
-    gl.bindBuffer gl.ARRAY_BUFFER, texrectVertexTextureCoordBuffer
-    gl.vertexAttribPointer webGL.shaderProgram.textureCoordAttribute, texrectVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0
-	
-    canvaswidth = videoHLE.pow2roundup tile.width
-    canvasheight = videoHLE.pow2roundup tile.height
-    #console.log "Binding Texture Size: "+tile.width+" x "+tile.height+" -> "+canvaswidth+" x "+canvasheight
-    
-    texture = @formatTexture(tile, tmem, canvaswidth, canvasheight)
-    if texture isnt undefined
-      colorsTexture = gl.createTexture()
-      gl.activeTexture(gl.TEXTURE0)
-      gl.bindTexture(gl.TEXTURE_2D, colorsTexture)
-      gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, canvaswidth, canvasheight, 0, gl.RGBA, gl.UNSIGNED_BYTE, texture)
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-      gl.uniform1i webGL.shaderProgram.samplerUniform, colorsTexture
-      
-      if videoHLE.primColor.length > 0
-        gl.uniform4fv webGL.shaderProgram.uPrimColor, videoHLE.primColor   
-        
-      if videoHLE.fillColor.length > 0
-        gl.uniform4fv webGL.shaderProgram.uFillColor, videoHLE.fillColor
-
-      if videoHLE.blendColor.length > 0
-        gl.uniform4fv webGL.shaderProgram.uBlendColor, videoHLE.blendColor
-
-      if videoHLE.envColor.length > 0
-        gl.uniform4fv webGL.shaderProgram.uEnvColor, videoHLE.envColor
-
-      gl.bindBuffer gl.ELEMENT_ARRAY_BUFFER, texrectVertexIndexBuffer
-      webGL.setMatrixUniforms webGL.shaderProgram
-      webGL.setCombineUniforms webGL.shaderProgram
-      gl.uniform1i webGL.shaderProgram.wireframeUniform, if settings.wireframe then 1 else 0
-    
-      if settings.wireframe is true
-        gl.drawElements gl.LINE_LOOP, texrectVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0
-      else
-        gl.drawElements gl.TRIANGLES, texrectVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0
-	  
+    texrectVertexIndexBuffer.numItems = 6	
     return
   return this
 #hack global space until we export classes properly
