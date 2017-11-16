@@ -94,6 +94,7 @@ uncompressAndRun = (romPath, response) ->
 @start1964 = (settings) ->
   g_settings = settings
   document.getElementById("user_panel").className = "show"
+
   vars = getUrlVars()
   romPath = undefined
   i = 0
@@ -106,6 +107,7 @@ uncompressAndRun = (romPath, response) ->
     xhr.responseType = "arraybuffer"
     xhr.send()
     xhr.onload = (e) =>
+      # hide the user panel
       uncompressAndRun romPath, e.target.response
   return
 
@@ -175,8 +177,8 @@ handleFileSelect = (evt) ->
     unless @progress is `undefined`
       @progress.style.width = "100%"
       @progress.textContent = "100%"
-    setTimeout "document.getElementById('progress_bar').className='';document.getElementById('user_panel').className='';", 1000  unless @progressBar is `undefined`
-    #todo: add zip support (from index.html)
+    #setTimeout "document.getElementById('progress_bar').className='';document.getElementById('user_panel').className='';", 1000  unless @progressBar is `undefined`
+    setTimeout "document.getElementById('files').disabled = true;document.getElementById('user_panel').className='';", 1000
     uncompressAndRun fileName, reader.result
     return
 
@@ -186,9 +188,11 @@ handleFileSelect = (evt) ->
 
 document.getElementById("user_panel").onmousemove = ->
   document.getElementById("user_panel").className = "show"
+  document.getElementById("files").disabled = false
 
 document.getElementById("user_panel").ontouchend = (event) ->
   document.getElementById("user_panel").className = "show"
+  document.getElementById("files").disabled = false
   event.cancelBubble = true
   event.stopPropagation() if event.stopPropagation
 
@@ -197,9 +201,19 @@ document.getElementById("user_panel").onmouseup = (event) ->
   event.stopPropagation() if event.stopPropagation
 
 document.onmouseup = (event) ->
-  document.getElementById("user_panel").className = if document.getElementById("user_panel").className is "" then "show" else ""
+  if document.getElementById("user_panel").className is "" 
+    document.getElementById("user_panel").className = "show"
+    document.getElementById("files").disabled = false
+  else if document.getElementById("user_panel").className is "show"
+    document.getElementById("user_panel").className = ""
+    document.getElementById("files").disabled = true
 
 document.ontouchend = (event) ->
-  document.getElementById("user_panel").className = if document.getElementById("user_panel").className is "" then "show" else ""
+  if document.getElementById("user_panel").className is "" 
+    document.getElementById("user_panel").className = "show"
+    document.getElementById("files").disabled = false
+  else if document.getElementById("user_panel").className is "show"
+    document.getElementById("user_panel").className = ""
+    document.getElementById("files").disabled = true
 
 document.getElementById("files").addEventListener "change", handleFileSelect, false
