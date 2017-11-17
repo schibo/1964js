@@ -134,23 +134,27 @@ C1964jsWebGL = (core, wireframe) ->
     return
 
   C1964jsWebGL::webGLStart = (wireframe) ->
-    canvas = document.getElementById("Canvas3D")
-    @initGL canvas
+    canvas3D = document.getElementById("Canvas3D")
+    @initGL canvas3D
     @shaderProgram = @initShaders("fragment-shader", "vertex-shader")
 
     if @gl
       @gl.clearColor 0.0, 0.0, 0.0, 1.0
-    canvas.style.visibility = "hidden"
+    canvas3D.style.visibility = "hidden"
     return
 
   C1964jsWebGL::show3D = ->
     canvas3D = document.getElementById("Canvas3D")
     canvas3D.style.visibility = "visible"
+    canvas2D = document.getElementById("Canvas")
+    canvas2D.style.visibility = "hidden"
     return
 
   C1964jsWebGL::hide3D = ->
     canvas3D = document.getElementById("Canvas3D")
     canvas3D.style.visibility = "hidden"
+    canvas2D = document.getElementById("Canvas")
+    canvas2D.style.visibility = "visible"
     return
 )()
 #hack global space until we export classes properly
