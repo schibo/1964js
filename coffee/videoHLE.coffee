@@ -34,6 +34,8 @@ C1964jsVideoHLE = (core, glx) ->
   @tmem = new Uint8Array(1024 * 4)
   @activeTile = 0
   @textureTile = []
+  @zDepthImage = {fmt: 0, siz: 0, width: 0, addr: 0}
+  @zColorImage = {fmt: 0, siz: 0, width: 0, addr: 0}
   @N64VertexList = []
   @vtxTransformed = []
   @vtxNonTransformed = []
@@ -108,9 +110,10 @@ C1964jsVideoHLE = (core, glx) ->
   @gRSP.fAmbientLightG = 0
   @gRSP.fAmbientLightB = 0
 
-  @gl.clearColor 0.0, 0.0, 0.0, 1.0
+  @gl.clearColor 0.0, 0.0, 0.0, 0.0
   @gl.depthFunc @gl.LEQUAL
   @gl.clearDepth 1.0
+  @gl.disable @gl.DEPTH_TEST
 
 
   #todo: allocate on-demand
@@ -362,7 +365,7 @@ C1964jsVideoHLE = (core, glx) ->
 
       @N64VertexList[i].x = @getVertexX(a)
       @N64VertexList[i].y = @getVertexY(a)
-      @N64VertexList[i].z = @getVertexZ(a) - 2.0 # -2.0 is a hack. We need to fix the zDepth bugs
+      @N64VertexList[i].z = @getVertexZ(a) # -2.0 is a hack. We need to fix the zDepth bugs
       @N64VertexList[i].s = @getVertexS(a)/32 / texWidth
       @N64VertexList[i].t = @getVertexT(a)/32 / texHeight
 
@@ -410,7 +413,19 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_SetCImg = (pc) ->
-    #@videoLog "TODO: DLParser_SetCImg"
+    @zColorImage.fmt = @getSetTileFmt pc
+    @zColorImage.siz = @getSetTileSiz pc
+    @zColorImage.width = @getTImgWidth(pc) + 1
+    seg = @getGbi0DlistAddr(pc)
+    @zColorImage.addr = @getGbi1RspSegmentAddr(seg)
+    return
+
+  C1964jsVideoHLE::DLParser_SetZImg = (pc) ->
+    @zDepthImage.fmt = @getSetTileFmt pc
+    @zDepthImage.siz = @getSetTileSiz pc
+    @zDepthImage.width = @getTImgWidth(pc) + 1
+    seg = @getGbi0DlistAddr(pc)
+    @zDepthImage.addr = @getGbi1RspSegmentAddr(seg)
     return
 
   #Gets new display list address
@@ -691,7 +706,7 @@ C1964jsVideoHLE = (core, glx) ->
     data = @getClearGeometryMode(pc)>>>0
     @geometryMode &= ~data
     @initGeometryMode()
-    #@setDepthTest()
+    @setDepthTest()
     return
 
   C1964jsVideoHLE::RSP_GBI1_SetGeometryMode = (pc) ->
@@ -701,7 +716,7 @@ C1964jsVideoHLE = (core, glx) ->
     data = @getSetGeometryMode(pc)>>>0
     @geometryMode |= data
     @initGeometryMode()
-    #@setDepthTest()
+    @setDepthTest()
     return
 
   C1964jsVideoHLE::initGeometryMode = () ->
@@ -834,26 +849,25 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_TexRect = (pc) ->
-    @dlistStack[@dlistStackPointer].pc += 16
     return
-    # depthTestEnabled = true
-    # if depthTestEnabled
-    #   #@setDepthTest()
-    #   @gl.enable @gl.DEPTH_TEST
-    #   @gl.depthFunc @gl.LEQUAL
-    # else
-    #   @gl.disable @gl.DEPTH_TEST
+    depthTestEnabled = true
+    if depthTestEnabled
+      #@setDepthTest()
+      @gl.enable @gl.DEPTH_TEST
+      @gl.depthFunc @gl.LEQUAL
+    else
+      @gl.disable @gl.DEPTH_TEST
 
     #@videoLog "TODO: DLParser_TexRect"
-    xh = @getTexRectXh(pc) / 4
-    yh = @getTexRectYh(pc) / 4
+    xh = @getTexRectXh(pc) >>> 2
+    yh = @getTexRectYh(pc) >>> 2
     tileno = @getTexRectTileNo(pc)
-    xl = @getTexRectXl(pc) / 4
-    yl = @getTexRectYl(pc) / 4
-    s = @getTexRectS(pc) / 32
-    t = @getTexRectT(pc) / 32
-    dsdx = @getTexRectDsDx(pc) / 1024
-    dtdy = @getTexRectDtDy(pc) / 1024
+    xl = @getTexRectXl(pc) >>> 2
+    yl = @getTexRectYl(pc) >>> 2
+    s = @getTexRectS(pc) >>> 5
+    t = @getTexRectT(pc) >>> 5
+    dsdx = @getTexRectDsDx(pc) >>> 10
+    dtdy = @getTexRectDtDy(pc) >>> 10
     #console.log "Texrect: UL("+xl+","+yl+") LR("+xh+","+yh+") Tile:"+tileno+" TexCoord:("+s+","+t+") TexSlope:("+dsdx+","+dtdy+")"
     @renderer.texRect xl, yl, xh, yh, s, t, dsdx, dtdy, @textureTile[tileno], @tmem, this
     @hasTexture = true
@@ -862,7 +876,6 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_TexRectFlip = (pc) ->
-    @dlistStack[@dlistStackPointer].pc += 16
     #@videoLog "TODO: DLParser_TexRectFlip"
     return
 
@@ -965,7 +978,16 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_FillRect = (pc) ->
-    #@videoLog "TODO: DLParser_FillRect"
+    xl   = @getTexRectXl(pc) >>> 2
+    yl   = @getTexRectYl(pc) >>> 2
+    xh   = @getTexRectXh(pc) >>> 2
+    yh   = @getTexRectYh(pc) >>> 2
+
+    # if @zDepthImage.addr == @zColorImage.addr
+    #   @gl.clearDepth 1.0
+    #   #@gl.clear @gl.DEPTH_BUFFER_BIT
+    #   @gl.depthMask true
+
     return
 
   C1964jsVideoHLE::DLParser_SetFillColor = (pc) ->
@@ -1013,10 +1035,6 @@ C1964jsVideoHLE = (core, glx) ->
     @envColor.push @getSetEnvColorA(pc)/255.0
     @gl.uniform4fv @core.webGL.shaderProgram.uEnvColor, @envColor
     @renderStateChanged = true
-    return
-
-  C1964jsVideoHLE::DLParser_SetZImg = (pc) ->
-    #@videoLog "TODO: DLParser_SetZImg"
     return
 
   C1964jsVideoHLE::prepareTriangle = (dwV0, dwV1, dwV2) ->
@@ -1209,18 +1227,12 @@ C1964jsVideoHLE = (core, glx) ->
     zUpd = (@otherModeL & consts.Z_UPDATE) isnt 0
     if ((zBufferMode and zCmp) or zUpd)
       @gl.enable @gl.DEPTH_TEST
-      @gl.depthFunc @gl.LEQUAL
     else
       @gl.disable @gl.DEPTH_TEST
     @gl.depthMask zUpd
 
   C1964jsVideoHLE::drawScene = (useTexture, tileno) ->
-    @gl.enable @gl.DEPTH_TEST
-    @gl.depthFunc @gl.LEQUAL
-
     @setBlendFunc()
-
-    #@setDepthTest()
 
     @renderStateChanged = false
 
@@ -1290,8 +1302,6 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::resetState = ->
-    @otherModeL = 0x00500001
-    @otherModeH = 0
    # @geometryMode = 0
     @initGeometryMode()
     @alphaTestEnabled = 0
