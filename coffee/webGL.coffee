@@ -128,7 +128,7 @@ C1964jsWebGL = (core, wireframe) ->
   C1964jsWebGL::beginDList = ->
     @gl.viewport 0, 0, @gl.viewportWidth, @gl.viewportHeight
     #@gl.clear @gl.COLOR_BUFFER_BIT | @gl.DEPTH_BUFFER_BIT
-    mat4.perspective 45, 320.0/240.0, 10.0, 100.0, pMatrix
+    mat4.perspective 45, 320.0/240.0, 1.0, 100.0, pMatrix
     mat4.identity mvMatrix
     #mat4.translate mvMatrix, [0.0, 0.0, 1.0]
     return

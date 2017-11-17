@@ -26,6 +26,8 @@ C1964jsVideoHLE = (core, glx) ->
   @core = core #only needed for gfxHelpers prototypes to access.
   @gl = glx
 
+  @fogIsImplemented = false #enable this when we supoort fog
+
   #todo: make gRSP a class object.
   @RICE_MATRIX_STACK = 60
   @MAX_TEXTURES = 8
@@ -64,7 +66,7 @@ C1964jsVideoHLE = (core, glx) ->
   @triVertices = new Float32Array(16384)
   @triColorVertices = new Uint8Array(16384)
   @triTextureCoords = new Float32Array(16384)
-  @otherModeL = 0x00500001
+  @otherModeL = 0
   @otherModeH = 0
   @cycleType = 0
   @alphaTestEnabled = 0
@@ -983,10 +985,15 @@ C1964jsVideoHLE = (core, glx) ->
     xh   = @getTexRectXh(pc) >>> 2
     yh   = @getTexRectYh(pc) >>> 2
 
+    #todo
+
+
     # if @zDepthImage.addr == @zColorImage.addr
     #   @gl.clearDepth 1.0
     #   #@gl.clear @gl.DEPTH_BUFFER_BIT
     #   @gl.depthMask true
+
+
 
     return
 
@@ -1119,13 +1126,15 @@ C1964jsVideoHLE = (core, glx) ->
         if forceBl is 1 and zCmp is 1
           @gl.blendFunc @gl.SRC_ALPHA, @gl.ONE_MINUS_SRC_ALPHA
           @gl.enable @gl.BLEND
-        else if alphaCvgSel is 1 && cvgXAlpha is 0
-          @gl.blendFunc @gl.ONE, @gl.ZERO
-          @gl.enable @gl.BLEND
+        # else if alphaCvgSel is 1 && cvgXAlpha is 0
+        #   @gl.blendFunc @gl.ONE, @gl.ZERO
+        #   @gl.enable @gl.BLEND
         else switch blendMode1+blendMode2
           when (BLEND_PASS+(BLEND_PASS>>2)), (BLEND_FOG_APRIM+(BLEND_PASS>>2))
             @gl.blendFunc @gl.ONE, @gl.ZERO
             @gl.enable @gl.blendFunc
+            if @cvgXAlpha is 1
+              @gl.blendFunc @gl.ALPHA, @gl.ONE_MINUS_SRC_ALPHA
     #       if( gRDP.otherMode.alpha_cvg_sel )
     #       {
     #         Enable();
@@ -1146,11 +1155,21 @@ C1964jsVideoHLE = (core, glx) ->
             @gl.blendFunc @gl.SRC_ALPHA, @gl.ONE_MINUS_SRC_ALPHA
             @gl.enable @gl.BLEND
           when BLEND_FOG_MEM_FOG_MEM + (BLEND_OPA>>2)
-            @gl.blendFunc @gl.ONE, @gl.ZERO
-            @gl.enable @gl.BLEND
+            if @fogIsImplemented
+              @gl.blendFunc @gl.ONE, @gl.ZERO
+              @gl.enable @gl.BLEND
+            else
+              @gl.blendFunc @gl.SRC_ALPHA, @gl.ONE_MINUS_SRC_ALPHA
+              @gl.enable @gl.BLEND
+
           when (BLEND_FOG_APRIM + (BLEND_OPA>>2)), (BLEND_FOG_ASHADE + (BLEND_OPA>>2)), (BLEND_BI_AFOG + (BLEND_OPA>>2)), (BLEND_FOG_ASHADE + (BLEND_NOOP>>2)), (BLEND_NOOP + (BLEND_OPA>>2)), (BLEND_NOOP4 + (BLEND_NOOP>>2)), (BLEND_FOG_ASHADE+(BLEND_PASS>>2)), (BLEND_FOG_3+(BLEND_PASS>>2))
-            @gl.blendFunc @gl.ONE, @gl.ZERO
-            @gl.enable @gl.BLEND
+            if @fogIsImplemented
+              @gl.blendFunc @gl.ONE, @gl.ZERO
+              @gl.enable @gl.BLEND
+            else
+              @gl.blendFunc @gl.SRC_ALPHA, @gl.ONE_MINUS_SRC_ALPHA
+              @gl.enable @gl.BLEND
+
           when BLEND_FOG_ASHADE+0x0301
             @gl.blendFunc @gl.SRC_ALPHA, @gl.ZERO
             @gl.enable @gl.BLEND
@@ -1191,14 +1210,11 @@ C1964jsVideoHLE = (core, glx) ->
             else
               @gl.disable @gl.BLEND
           when BLEND_OPA
-          #  if( options.enableHackForGames == HACK_FOR_MARIO_TENNIS )
-          #  {
-          #    BlendFunc(D3DBLEND_SRCALPHA, D3DBLEND_INVSRCALPHA);
-          #  }
-          #  else
-          #  {
-            @gl.blendFunc @gl.ONE, @gl.ZERO
-          #  }
+            HACK_FOR_MARIO_TENNIS = true
+            if HACK_FOR_MARIO_TENNIS
+              @gl.blendFunc @gl.SRC_ALPHA, @gl.ONE_MINUS_SRC_ALPHA
+            else
+              @gl.blendFunc @gl.ONE, @gl.ZERO
             @gl.enable @gl.BLEND
           when BLEND_NOOP, BLEND_FOG_ASHADE, BLEND_FOG_MEM_3, BLEND_BI_AFOG
             @gl.blendFunc @gl.ONE, @gl.ZERO
