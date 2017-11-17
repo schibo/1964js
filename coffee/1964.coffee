@@ -727,7 +727,7 @@ class C1964jsEmulator
       when consts.RANDOM
         alert "RANDOM"
       when consts.COUNT
-        string += 't.cp0[' + this.helpers.fs(i) + ']-=t.m*2;';
+        string += 't.cp0[' + this.helpers.fs(i) + ']-=t.m*2;'; # should this be t.m * 2?
       else
     string += @helpers.tRT(i) + "=t.cp0[" + @helpers.fs(i) + "]," + @helpers.tRTH(i) + "=t.cp0[" + @helpers.fs(i) + "]>>31;"
 

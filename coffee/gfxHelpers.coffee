@@ -276,6 +276,13 @@ C1964jsVideoHLE::getOtherModeL = (pc) ->
 C1964jsVideoHLE::getOtherModeH = (pc) ->
   (@core.memory.rdramUint8Array[pc] << 24 | @core.memory.rdramUint8Array[pc + 1] << 16 | @core.memory.rdramUint8Array[pc + 2] << 8 | @core.memory.rdramUint8Array[pc + 3])
 
+
+C1964jsVideoHLE::getWord0 = (pc) ->
+  (@core.memory.rdramUint8Array[pc] << 24 | @core.memory.rdramUint8Array[pc + 1] << 16 | @core.memory.rdramUint8Array[pc + 2] << 8 | @core.memory.rdramUint8Array[pc + 3])
+
+C1964jsVideoHLE::getWord1 = (pc) ->
+  (@core.memory.rdramUint8Array[pc + 4] << 24 | @core.memory.rdramUint8Array[pc + 5] << 16 | @core.memory.rdramUint8Array[pc + 6] << 8 | @core.memory.rdramUint8Array[pc + 7])
+
 #
 #typedef struct {
 #    unsigned int    width:12;

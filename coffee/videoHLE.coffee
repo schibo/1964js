@@ -26,6 +26,8 @@ C1964jsVideoHLE = (core, glx) ->
   @core = core #only needed for gfxHelpers prototypes to access.
   @gl = glx
 
+  @fogIsImplemented = false #enable this when we supoort fog
+
   #todo: make gRSP a class object.
   @RICE_MATRIX_STACK = 60
   @MAX_TEXTURES = 8
@@ -34,6 +36,8 @@ C1964jsVideoHLE = (core, glx) ->
   @tmem = new Uint8Array(1024 * 4)
   @activeTile = 0
   @textureTile = []
+  @zDepthImage = {fmt: 0, siz: 0, width: 0, addr: 0}
+  @zColorImage = {fmt: 0, siz: 0, width: 0, addr: 0}
   @N64VertexList = []
   @vtxTransformed = []
   @vtxNonTransformed = []
@@ -62,7 +66,7 @@ C1964jsVideoHLE = (core, glx) ->
   @triVertices = new Float32Array(16384)
   @triColorVertices = new Uint8Array(16384)
   @triTextureCoords = new Float32Array(16384)
-  @otherModeL = 0x00500001
+  @otherModeL = 0
   @otherModeH = 0
   @cycleType = 0
   @alphaTestEnabled = 0
@@ -108,9 +112,10 @@ C1964jsVideoHLE = (core, glx) ->
   @gRSP.fAmbientLightG = 0
   @gRSP.fAmbientLightB = 0
 
-  @gl.clearColor 0.0, 0.0, 0.0, 1.0
+  @gl.clearColor 0.0, 0.0, 0.0, 0.0
   @gl.depthFunc @gl.LEQUAL
   @gl.clearDepth 1.0
+  @gl.disable @gl.DEPTH_TEST
 
 
   #todo: allocate on-demand
@@ -362,7 +367,7 @@ C1964jsVideoHLE = (core, glx) ->
 
       @N64VertexList[i].x = @getVertexX(a)
       @N64VertexList[i].y = @getVertexY(a)
-      @N64VertexList[i].z = @getVertexZ(a) - 2.0 # -2.0 is a hack. We need to fix the zDepth bugs
+      @N64VertexList[i].z = @getVertexZ(a) # -2.0 is a hack. We need to fix the zDepth bugs
       @N64VertexList[i].s = @getVertexS(a)/32 / texWidth
       @N64VertexList[i].t = @getVertexT(a)/32 / texHeight
 
@@ -410,7 +415,19 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_SetCImg = (pc) ->
-    #@videoLog "TODO: DLParser_SetCImg"
+    @zColorImage.fmt = @getSetTileFmt pc
+    @zColorImage.siz = @getSetTileSiz pc
+    @zColorImage.width = @getTImgWidth(pc) + 1
+    seg = @getGbi0DlistAddr(pc)
+    @zColorImage.addr = @getGbi1RspSegmentAddr(seg)
+    return
+
+  C1964jsVideoHLE::DLParser_SetZImg = (pc) ->
+    @zDepthImage.fmt = @getSetTileFmt pc
+    @zDepthImage.siz = @getSetTileSiz pc
+    @zDepthImage.width = @getTImgWidth(pc) + 1
+    seg = @getGbi0DlistAddr(pc)
+    @zDepthImage.addr = @getGbi1RspSegmentAddr(seg)
     return
 
   #Gets new display list address
@@ -691,7 +708,7 @@ C1964jsVideoHLE = (core, glx) ->
     data = @getClearGeometryMode(pc)>>>0
     @geometryMode &= ~data
     @initGeometryMode()
-    #@setDepthTest()
+    @setDepthTest()
     return
 
   C1964jsVideoHLE::RSP_GBI1_SetGeometryMode = (pc) ->
@@ -701,7 +718,7 @@ C1964jsVideoHLE = (core, glx) ->
     data = @getSetGeometryMode(pc)>>>0
     @geometryMode |= data
     @initGeometryMode()
-    #@setDepthTest()
+    @setDepthTest()
     return
 
   C1964jsVideoHLE::initGeometryMode = () ->
@@ -834,26 +851,25 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_TexRect = (pc) ->
-    @dlistStack[@dlistStackPointer].pc += 16
     return
-    # depthTestEnabled = true
-    # if depthTestEnabled
-    #   #@setDepthTest()
-    #   @gl.enable @gl.DEPTH_TEST
-    #   @gl.depthFunc @gl.LEQUAL
-    # else
-    #   @gl.disable @gl.DEPTH_TEST
+    depthTestEnabled = true
+    if depthTestEnabled
+      #@setDepthTest()
+      @gl.enable @gl.DEPTH_TEST
+      @gl.depthFunc @gl.LEQUAL
+    else
+      @gl.disable @gl.DEPTH_TEST
 
     #@videoLog "TODO: DLParser_TexRect"
-    xh = @getTexRectXh(pc) / 4
-    yh = @getTexRectYh(pc) / 4
+    xh = @getTexRectXh(pc) >>> 2
+    yh = @getTexRectYh(pc) >>> 2
     tileno = @getTexRectTileNo(pc)
-    xl = @getTexRectXl(pc) / 4
-    yl = @getTexRectYl(pc) / 4
-    s = @getTexRectS(pc) / 32
-    t = @getTexRectT(pc) / 32
-    dsdx = @getTexRectDsDx(pc) / 1024
-    dtdy = @getTexRectDtDy(pc) / 1024
+    xl = @getTexRectXl(pc) >>> 2
+    yl = @getTexRectYl(pc) >>> 2
+    s = @getTexRectS(pc) >>> 5
+    t = @getTexRectT(pc) >>> 5
+    dsdx = @getTexRectDsDx(pc) >>> 10
+    dtdy = @getTexRectDtDy(pc) >>> 10
     #console.log "Texrect: UL("+xl+","+yl+") LR("+xh+","+yh+") Tile:"+tileno+" TexCoord:("+s+","+t+") TexSlope:("+dsdx+","+dtdy+")"
     @renderer.texRect xl, yl, xh, yh, s, t, dsdx, dtdy, @textureTile[tileno], @tmem, this
     @hasTexture = true
@@ -862,7 +878,6 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_TexRectFlip = (pc) ->
-    @dlistStack[@dlistStackPointer].pc += 16
     #@videoLog "TODO: DLParser_TexRectFlip"
     return
 
@@ -965,7 +980,21 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_FillRect = (pc) ->
-    #@videoLog "TODO: DLParser_FillRect"
+    xl   = @getTexRectXl(pc) >>> 2
+    yl   = @getTexRectYl(pc) >>> 2
+    xh   = @getTexRectXh(pc) >>> 2
+    yh   = @getTexRectYh(pc) >>> 2
+
+    #todo
+
+
+    # if @zDepthImage.addr == @zColorImage.addr
+    #   @gl.clearDepth 1.0
+    #   #@gl.clear @gl.DEPTH_BUFFER_BIT
+    #   @gl.depthMask true
+
+
+
     return
 
   C1964jsVideoHLE::DLParser_SetFillColor = (pc) ->
@@ -1013,10 +1042,6 @@ C1964jsVideoHLE = (core, glx) ->
     @envColor.push @getSetEnvColorA(pc)/255.0
     @gl.uniform4fv @core.webGL.shaderProgram.uEnvColor, @envColor
     @renderStateChanged = true
-    return
-
-  C1964jsVideoHLE::DLParser_SetZImg = (pc) ->
-    #@videoLog "TODO: DLParser_SetZImg"
     return
 
   C1964jsVideoHLE::prepareTriangle = (dwV0, dwV1, dwV2) ->
@@ -1101,13 +1126,15 @@ C1964jsVideoHLE = (core, glx) ->
         if forceBl is 1 and zCmp is 1
           @gl.blendFunc @gl.SRC_ALPHA, @gl.ONE_MINUS_SRC_ALPHA
           @gl.enable @gl.BLEND
-        else if alphaCvgSel is 1 && cvgXAlpha is 0
-          @gl.blendFunc @gl.ONE, @gl.ZERO
-          @gl.enable @gl.BLEND
+        # else if alphaCvgSel is 1 && cvgXAlpha is 0
+        #   @gl.blendFunc @gl.ONE, @gl.ZERO
+        #   @gl.enable @gl.BLEND
         else switch blendMode1+blendMode2
           when (BLEND_PASS+(BLEND_PASS>>2)), (BLEND_FOG_APRIM+(BLEND_PASS>>2))
             @gl.blendFunc @gl.ONE, @gl.ZERO
             @gl.enable @gl.blendFunc
+            if @cvgXAlpha is 1
+              @gl.blendFunc @gl.ALPHA, @gl.ONE_MINUS_SRC_ALPHA
     #       if( gRDP.otherMode.alpha_cvg_sel )
     #       {
     #         Enable();
@@ -1128,11 +1155,21 @@ C1964jsVideoHLE = (core, glx) ->
             @gl.blendFunc @gl.SRC_ALPHA, @gl.ONE_MINUS_SRC_ALPHA
             @gl.enable @gl.BLEND
           when BLEND_FOG_MEM_FOG_MEM + (BLEND_OPA>>2)
-            @gl.blendFunc @gl.ONE, @gl.ZERO
-            @gl.enable @gl.BLEND
+            if @fogIsImplemented
+              @gl.blendFunc @gl.ONE, @gl.ZERO
+              @gl.enable @gl.BLEND
+            else
+              @gl.blendFunc @gl.SRC_ALPHA, @gl.ONE_MINUS_SRC_ALPHA
+              @gl.enable @gl.BLEND
+
           when (BLEND_FOG_APRIM + (BLEND_OPA>>2)), (BLEND_FOG_ASHADE + (BLEND_OPA>>2)), (BLEND_BI_AFOG + (BLEND_OPA>>2)), (BLEND_FOG_ASHADE + (BLEND_NOOP>>2)), (BLEND_NOOP + (BLEND_OPA>>2)), (BLEND_NOOP4 + (BLEND_NOOP>>2)), (BLEND_FOG_ASHADE+(BLEND_PASS>>2)), (BLEND_FOG_3+(BLEND_PASS>>2))
-            @gl.blendFunc @gl.ONE, @gl.ZERO
-            @gl.enable @gl.BLEND
+            if @fogIsImplemented
+              @gl.blendFunc @gl.ONE, @gl.ZERO
+              @gl.enable @gl.BLEND
+            else
+              @gl.blendFunc @gl.SRC_ALPHA, @gl.ONE_MINUS_SRC_ALPHA
+              @gl.enable @gl.BLEND
+
           when BLEND_FOG_ASHADE+0x0301
             @gl.blendFunc @gl.SRC_ALPHA, @gl.ZERO
             @gl.enable @gl.BLEND
@@ -1173,14 +1210,11 @@ C1964jsVideoHLE = (core, glx) ->
             else
               @gl.disable @gl.BLEND
           when BLEND_OPA
-          #  if( options.enableHackForGames == HACK_FOR_MARIO_TENNIS )
-          #  {
-          #    BlendFunc(D3DBLEND_SRCALPHA, D3DBLEND_INVSRCALPHA);
-          #  }
-          #  else
-          #  {
-            @gl.blendFunc @gl.ONE, @gl.ZERO
-          #  }
+            HACK_FOR_MARIO_TENNIS = true
+            if HACK_FOR_MARIO_TENNIS
+              @gl.blendFunc @gl.SRC_ALPHA, @gl.ONE_MINUS_SRC_ALPHA
+            else
+              @gl.blendFunc @gl.ONE, @gl.ZERO
             @gl.enable @gl.BLEND
           when BLEND_NOOP, BLEND_FOG_ASHADE, BLEND_FOG_MEM_3, BLEND_BI_AFOG
             @gl.blendFunc @gl.ONE, @gl.ZERO
@@ -1209,18 +1243,12 @@ C1964jsVideoHLE = (core, glx) ->
     zUpd = (@otherModeL & consts.Z_UPDATE) isnt 0
     if ((zBufferMode and zCmp) or zUpd)
       @gl.enable @gl.DEPTH_TEST
-      @gl.depthFunc @gl.LEQUAL
     else
       @gl.disable @gl.DEPTH_TEST
     @gl.depthMask zUpd
 
   C1964jsVideoHLE::drawScene = (useTexture, tileno) ->
-    @gl.enable @gl.DEPTH_TEST
-    @gl.depthFunc @gl.LEQUAL
-
     @setBlendFunc()
-
-    #@setDepthTest()
 
     @renderStateChanged = false
 
@@ -1290,8 +1318,6 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::resetState = ->
-    @otherModeL = 0x00500001
-    @otherModeH = 0
    # @geometryMode = 0
     @initGeometryMode()
     @alphaTestEnabled = 0
