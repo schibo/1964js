@@ -343,7 +343,7 @@ class C1964jsEmulator
               @endTime = Date.now()
               if delta < 0
                 delta = 1000.0/60
-              delta = 1000.0/60.0 - (@endTime - @startTime)*2
+              delta = 1000.0/60.0 - (@endTime - @startTime)
               @settings.rateWithDelta = delta
               @runLoop()
             else
