@@ -82,12 +82,12 @@ C1964jsInterrupts = (core, cp0) ->
       #log "Exception happens in CPU delay slot, pc=" + pc
       cp0[consts.CAUSE] |= consts.BD
       cp0[consts.EPC] = pc - 4
-    
+
     # throw 'interrupt';
     else
       cp0[consts.CAUSE] &= ~consts.BD
       cp0[consts.EPC] = pc
-    
+
     #throw 'interrupt';
     core.flushDynaCache()  if core.doOnce is 0
     core.doOnce = 1
@@ -151,14 +151,14 @@ C1964jsInterrupts = (core, cp0) ->
   @readVI = (offset) ->
     switch offset
       when consts.VI_CURRENT_REG
-        
+
         #hack for berney demo
         currentHack = 0  if (currentHack += 1) is 625
-        
+
         #  triggerVIInterrupt(pc, isFromDelaySlot);
         #warning: need to refactor. triggerVIInterrupt
         #can service an interrupt immediately without setting rt[i]
-        
+
         #return currentHack;
         #return ((core.memory.getInt32(core.memory.viUint8Array, offset) & 0xfffffffe) + currentHack) | 0
         return (((core.memory.viUint8Array[offset] << 24 | core.memory.viUint8Array[offset + 1] << 16 | core.memory.viUint8Array[offset + 2] << 8 | core.memory.viUint8Array[offset + 3]) & 0xfffffffe) + currentHack) | 0
@@ -489,7 +489,7 @@ C1964jsInterrupts = (core, cp0) ->
       if core.memory.getUint32(core.memory.piUint8Array, consts.PI_STATUS_REG) & (consts.PI_STATUS_IO_BUSY | consts.PI_STATUS_DMA_BUSY) #Is PI busy?
         #Reset the PIC
         core.memory.setInt32 core.memory.piUint8Array, consts.PI_STATUS_REG, 0
-        
+
         #Reset finished, set PI Interrupt
         @triggerPIInterrupt pc, isFromDelaySlot
       else
@@ -508,21 +508,25 @@ C1964jsInterrupts = (core, cp0) ->
         core.videoHLE = new C1964jsVideoHLE(core, core.webGL.gl)  if core.videoHLE is null or core.videoHLE is `undefined`
         core.settings.wireframe = document.getElementById("wireframe").checked
         if core.terminate is false
-          core.videoHLE.processDisplayList()
+          window.requestAnimationFrame(=>
+            core.videoHLE.processDisplayList()
+            @triggerRspBreak()
+          )
       when consts.SND_TASK
         @processAudioList()
+        @triggerRspBreak()
       when consts.JPG_TASK
         @processJpegTask()
+        @triggerRspBreak()
       else
         #log "unhandled sp task: " + spDmemTask
         break
     @checkInterrupts()
-    @triggerRspBreak()
     return
 
   @processAudioList = ->
     #log "todo: process Audio List"
-    
+
     #just clear flags now to get the gfx tasks :)
     #see UpdateFifoFlag in 1964cpp's AudioLLE main.cpp.
     @clrFlag core.memory.aiUint8Array, consts.AI_STATUS_REG, consts.AI_STATUS_FIFO_FULL
