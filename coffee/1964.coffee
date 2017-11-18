@@ -377,6 +377,13 @@ class C1964jsEmulator
     return
 
   startEmulator: () ->
+
+    window.requestAnimationFrame = window.requestAnimationFrame or
+    window.mozRequestAnimationFrame or
+    window.webkitRequestAnimationFrame or
+    window.msRequestAnimationFrame or (f) =>
+      return setTimeout f, 0.0
+
     @terminate = false
     @log "startEmulator"
     @runLoop()
