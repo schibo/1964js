@@ -302,6 +302,7 @@ class C1964jsEmulator
     #setTimeout to be a good citizen..don't allow for the cpu to be pegged at 100%.
     #8ms idle time will be 50% cpu max if a 60FPS game is slow.
     @mySetInterval = setInterval (=>
+      @startTime = Date.now();
       #@request = requestAnimFrame(@runLoop)  if @terminate is false
       if @terminate is true
         clearInterval @mySetInterval
@@ -337,11 +338,14 @@ class C1964jsEmulator
             #  break if (frameTime > 30.0)
             if document.getElementById("speedlimit").checked is true
               rate = 60
-              return if @settings.speedLimitMs is rate
               @settings.speedLimitMs = rate
               clearInterval @mySetInterval
+              @endTime = Date.now()
+              delta = 1000.0/60.0 - (@endTime - @startTime)*2
+              @settings.rateWithDelta = delta
               @runLoop()
             else
+              @settings.rateWithDelta = 0
               return if @settings.speedLimitMs is 0
               @settings.speedLimitMs = 0
               clearInterval @mySetInterval
@@ -364,7 +368,7 @@ class C1964jsEmulator
             #in javascript?
             fn = @decompileBlock(@p)
             fn = fn(@r, @h, @memory, this)
-    ), 1000.0/@settings.speedLimitMs
+    ), @settings.rateWithDelta
     this
 
   run: (fn, r, h) ->
@@ -386,6 +390,8 @@ class C1964jsEmulator
 
     @terminate = false
     @log "startEmulator"
+    @settings.rateWithDelta = 0.0
+    @settings.rateWithDelta = 100.0/60.0 if document.getElementById("speedlimit").checked is true
     @runLoop()
     return
 
