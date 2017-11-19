@@ -76,8 +76,10 @@ C1964jsRenderer = (settings, glx, webGL) ->
   @formatTexture = (tile, tmem, videoHLE) ->
     @videoHLE = videoHLE
 
-    if (tile.width < 0) or (tile.height < 0)
-      alert "Funky tile! width: " + tile.width + ", height: " + tile.height
+    if tile.width is undefined or tile.height is undefined
+      tile.width = 2
+      tile.height = 2
+      return new Uint8Array([0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0, 0, 255, 0, 0])
 
     nextPow2Width = @videoHLE.pow2roundup tile.width
     nextPow2Height = @videoHLE.pow2roundup tile.height
@@ -214,6 +216,7 @@ C1964jsRenderer = (settings, glx, webGL) ->
       else
         console.error "TODO: tile format " + tile.fmt + ", tile.size" + tile.siz
 
+    console.log "tile: w: " + tile.width + ", h: " + tile.height + ", pow2w: " + nextPow2Width + ", pow2H: " + nextPow2Height
    # if @useTextureCache is true
    #   return @textureCache[textureId]
     if (nextPow2Width isnt tile.width) or (nextPow2Height isnt tile.height)
