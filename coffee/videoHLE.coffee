@@ -851,7 +851,6 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_TexRect = (pc) ->
-    return
     depthTestEnabled = true
     if depthTestEnabled
       #@setDepthTest()
@@ -1272,28 +1271,30 @@ C1964jsVideoHLE = (core, glx) ->
       tile = @textureTile[@activeTile]
       canvaswidth = @pow2roundup tile.width
       canvasheight = @pow2roundup tile.height
-      texture = @renderer.formatTexture(tile, @tmem, canvaswidth, canvasheight)
-      @gl.activeTexture(@gl.TEXTURE0)
-      @gl.bindTexture(@gl.TEXTURE_2D, @colorsTexture)
-      @gl.texImage2D(@gl.TEXTURE_2D, 0, @gl.RGBA, tile.width, tile.height, 0, @gl.RGBA, @gl.UNSIGNED_BYTE, texture)
-      wrapS = @gl.REPEAT
-      wrapT = @gl.REPEAT
-      if ((tile.cms is consts.RDP_TXT_CLAMP) or (tile.masks is 0))
-        wrapS = @gl.CLAMP_TO_EDGE
-      else if tile.cms is consts.RDP_TXT_MIRROR
-        wrapS = @gl.MIRRORED_REPEAT
-      if ((tile.cmt is consts.RDP_TXT_CLAMP) or (tile.maskt is 0))
-        wrapT = @gl.CLAMP_TO_EDGE
-      else if tile.cms is consts.RDP_TXT_MIRROR
-        wrapT = @gl.MIRRORED_REPEAT
-
-      @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_WRAP_S, wrapS)
-      @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_WRAP_T, wrapT)
-      @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MAG_FILTER, @gl.LINEAR)
-      @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MIN_FILTER, @gl.NEAREST)
-      @gl.uniform1i @core.webGL.shaderProgram.samplerUniform, @colorsTexture
-
-
+      textureData = @renderer.formatTexture(tile, @tmem, this)
+      if textureData isnt undefined
+        @gl.activeTexture(@gl.TEXTURE0)
+        @gl.bindTexture(@gl.TEXTURE_2D, @colorsTexture)
+        wrapS = @gl.REPEAT
+        wrapT = @gl.REPEAT
+        if ((tile.cms is consts.RDP_TXT_CLAMP) or (tile.masks is 0))
+          wrapS = @gl.CLAMP_TO_EDGE
+        else if tile.cms is consts.RDP_TXT_MIRROR
+          wrapS = @gl.MIRRORED_REPEAT
+        if ((tile.cmt is consts.RDP_TXT_CLAMP) or (tile.maskt is 0))
+          wrapT = @gl.CLAMP_TO_EDGE
+        else if tile.cms is consts.RDP_TXT_MIRROR
+          wrapT = @gl.MIRRORED_REPEAT
+        @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_WRAP_S, wrapS)
+        @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_WRAP_T, wrapT)
+        @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MAG_FILTER, @gl.LINEAR)
+        @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MIN_FILTER, @gl.NEAREST)
+        @gl.uniform1i @core.webGL.shaderProgram.samplerUniform, @colorsTexture
+        if textureData instanceof HTMLElement
+          # it's a canvas element
+          @gl.texImage2D(@gl.TEXTURE_2D, 0, @gl.RGBA, @gl.RGBA, @gl.UNSIGNED_BYTE, textureData)
+        else
+          @gl.texImage2D(@gl.TEXTURE_2D, 0, @gl.RGBA, tile.width, tile.height, 0, @gl.RGBA, @gl.UNSIGNED_BYTE, textureData)
 
     #@gl.uniform1i @core.webGL.shaderProgram.otherModeL, @otherModeL
     #@gl.uniform1i @core.webGL.shaderProgram.otherModeH, @otherModeH
