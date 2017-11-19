@@ -216,7 +216,6 @@ C1964jsRenderer = (settings, glx, webGL) ->
       else
         console.error "TODO: tile format " + tile.fmt + ", tile.size" + tile.siz
 
-    console.log "tile: w: " + tile.width + ", h: " + tile.height + ", pow2w: " + nextPow2Width + ", pow2H: " + nextPow2Height
    # if @useTextureCache is true
    #   return @textureCache[textureId]
     if (nextPow2Width isnt tile.width) or (nextPow2Height isnt tile.height)
