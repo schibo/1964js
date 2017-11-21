@@ -21,9 +21,9 @@ C1964jsRenderer = (settings, glx, webGL) ->
   gl = glx
   @canvas = undefined
 
-  texrectVertexPositionBuffer = undefined
-  texrectVertexTextureCoordBuffer = undefined
-  texrectVertexIndexBuffer = undefined
+  texrectVertexPositionBuffer = gl.createBuffer()
+  texrectVertexTextureCoordBuffer = gl.createBuffer()
+  texrectVertexIndexBuffer = gl.createBuffer()
   @videoHLE = undefined
   fivetoeight = [0x00,0x08,0x10,0x18,0x21,0x29,0x31,0x39,0x42,0x4A,0x52,0x5A,0x63,0x6B,0x73,0x7B,0x84,0x8C,0x94,0x9C,0xA5,0xAD,0xB5,0xBD,0xC6,0xCE,0xD6,0xDE,0xE7,0xEF,0xF7,0xFF]
   fourtoeight = [0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xaa,0xbb,0xcc,0xdd,0xee,0xff]
@@ -225,21 +225,18 @@ C1964jsRenderer = (settings, glx, webGL) ->
 
   initQuad = (xl, yl, xh, yh, sl, tl, sh, th, videoHLE) ->
     vertices = [xh, yh, 0.0, xh, yl, 0.0, xl, yl, 0.0, xl, yh, 0.0]
-    texrectVertexPositionBuffer = gl.createBuffer()
     gl.bindBuffer gl.ARRAY_BUFFER, texrectVertexPositionBuffer
     gl.bufferData gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW
     texrectVertexPositionBuffer.itemSize = 3
     texrectVertexPositionBuffer.numItems = 4
 
     textureCoords = [sh, th, sh, tl, sl, tl, sl, th]
-    texrectVertexTextureCoordBuffer = gl.createBuffer()
     gl.bindBuffer gl.ARRAY_BUFFER, texrectVertexTextureCoordBuffer
     gl.bufferData gl.ARRAY_BUFFER, new Float32Array(textureCoords), gl.STATIC_DRAW
     texrectVertexTextureCoordBuffer.itemSize = 2
     texrectVertexTextureCoordBuffer.numItems = 4
 
     texrectVertexIndices = [0, 1, 2, 0, 2, 3]
-    texrectVertexIndexBuffer = gl.createBuffer()
     gl.bindBuffer gl.ELEMENT_ARRAY_BUFFER, texrectVertexIndexBuffer
     gl.bufferData gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(texrectVertexIndices), gl.STATIC_DRAW
     texrectVertexIndexBuffer.itemSize = 1
