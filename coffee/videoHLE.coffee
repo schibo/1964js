@@ -154,8 +154,6 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::dlParserProcess = ->
     @dlistStackPointer = 0
-
-
     @dlistStack[@dlistStackPointer].pc = (@core.memory.spMemUint8Array[consts.TASK_DATA_PTR] << 24 | @core.memory.spMemUint8Array[consts.TASK_DATA_PTR + 1] << 16 | @core.memory.spMemUint8Array[consts.TASK_DATA_PTR + 2] << 8 | @core.memory.spMemUint8Array[consts.TASK_DATA_PTR + 3])>>>0
     @dlistStack[@dlistStackPointer].countdown = consts.MAX_DL_COUNT
 
@@ -179,7 +177,6 @@ C1964jsVideoHLE = (core, glx) ->
       if @dlistStackPointer >= 0
         @dlistStack[@dlistStackPointer].countdown -= 1
         @dlistStackPointer -= 1  if @dlistStack[@dlistStackPointer].countdown < 0
-    #@videoLog "finished dlist"
     @core.interrupts.triggerSPInterrupt 0, false
     return
 
@@ -218,7 +215,7 @@ C1964jsVideoHLE = (core, glx) ->
     @RSP_GBI0_Mtx pc
 
   C1964jsVideoHLE::RSP_MoveMemViewport = (addr) ->
-    #todo
+    @videoLog "RSP_MoveMemViewport"
     return
 
   C1964jsVideoHLE::RSP_GBI1_SpNoop = (pc) ->
@@ -330,7 +327,6 @@ C1964jsVideoHLE = (core, glx) ->
     @texImg.bpl = @texImg.width << @texImg.size >> 1
     @texImg.changed = true #no texture cache
     #console.log "SetTImg: Format:"+ @texImg.format + " Size:" + @texImg.size + " Width: "+ @texImg.width
-    #@videoLog "TODO: DLParser_SetTImg"
     return
 
   #this.videoLog('Texture: format=' + this.texImg.format + ' size=' + this.texImg.size + ' ' + 'width=' + this.texImg.width + ' addr=' + this.texImg.addr + ' bpl=' + this.texImg.bpl);
@@ -372,7 +368,7 @@ C1964jsVideoHLE = (core, glx) ->
 
       @N64VertexList[i].x = @getVertexX(a)
       @N64VertexList[i].y = @getVertexY(a)
-      @N64VertexList[i].z = @getVertexZ(a) # -2.0 is a hack. We need to fix the zDepth bugs
+      @N64VertexList[i].z = @getVertexZ(a)
       @N64VertexList[i].s = @getVertexS(a)/32 / texWidth
       @N64VertexList[i].t = @getVertexT(a)/32 / texHeight
 
@@ -656,11 +652,10 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_SetScissor = (pc) ->
-    #@videoLog "TODO: DLParser_SetScissor"
+    @videoLog "TODO: DLParser_SetScissor"
     return
 
   C1964jsVideoHLE::RSP_GBI1_SetOtherModeH = (pc) ->
-    #@videoLog "TODO: DLParser_GBI1_SetOtherModeH"
     @renderStateChanged = true
     word0 = @getOtherModeH pc
     length = (word0 >>> 0) & 0xFF
@@ -672,7 +667,6 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::RSP_GBI1_SetOtherModeL = (pc) ->
-    #@videoLog "TODO: DLParser_GBI1_SetOtherModeL"
     @renderStateChanged = true
     word0 = @getOtherModeL pc
     length = (word0 >>> 0) & 0xFF
@@ -684,27 +678,27 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::RSP_GBI0_Sprite2DBase = (pc) ->
-    #@videoLog "TODO: RSP_GBI0_Sprite2DBase"
+    @videoLog "TODO: RSP_GBI0_Sprite2DBase"
     return
 
   C1964jsVideoHLE::RSP_GBI0_Tri4 = (pc) ->
-    #@videoLog "TODO: RSP_GBI0_Tri4"
+    @videoLog "TODO: RSP_GBI0_Tri4"
     return
 
   C1964jsVideoHLE::RSP_GBI1_RDPHalf_Cont = (pc) ->
-    #@videoLog "TODO: RSP_GBI1_RDPHalf_Cont"
+    @videoLog "TODO: RSP_GBI1_RDPHalf_Cont"
     return
 
   C1964jsVideoHLE::RSP_GBI1_RDPHalf_2 = (pc) ->
-    #@videoLog "TODO: RSP_GBI1_RDPHalf_2"
+    @videoLog "TODO: RSP_GBI1_RDPHalf_2"
     return
 
   C1964jsVideoHLE::RSP_GBI1_RDPHalf_1 = (pc) ->
-    #@videoLog "TODO: RSP_GBI1_RDPHalf_1"
+    @videoLog "TODO: RSP_GBI1_RDPHalf_1"
     return
 
   C1964jsVideoHLE::RSP_GBI1_Line3D = (pc) ->
-    #@videoLog "TODO: RSP_GBI1_Line3D"
+    @videoLog "TODO: RSP_GBI1_Line3D"
     return
 
   C1964jsVideoHLE::RSP_GBI1_ClearGeometryMode = (pc) ->
@@ -773,12 +767,9 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::RSP_GBI1_EndDL = (pc) ->
-    #@videoLog "RSP_GBI1_EndDL"
     @RDP_GFX_PopDL()
     @drawScene(false, 7)
     @resetState()
-
-    #alert "EndFrame"
     return
 
   C1964jsVideoHLE::RSP_GBI1_Texture = (pc) ->
@@ -808,7 +799,7 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::RSP_GBI1_CullDL = (pc) ->
-    #@videoLog "TODO: RSP_GBI1_CullDL"
+    @videoLog "TODO: RSP_GBI1_CullDL"
     return
 
   C1964jsVideoHLE::RSP_GBI1_Tri1 = (pc) ->
@@ -877,7 +868,6 @@ C1964jsVideoHLE = (core, glx) ->
     else
       @gl.disable @gl.DEPTH_TEST
 
-    #@videoLog "TODO: DLParser_TexRect"
     xh = @getTexRectXh(pc) >>> 2
     yh = @getTexRectYh(pc) >>> 2
     tileno = @getTexRectTileNo(pc)
@@ -911,7 +901,6 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_RDPFullSynch = (pc) ->
-    #@videoLog "TODO: DLParser_RDPFullSynch"
     @core.interrupts.triggerDPInterrupt 0, false
     #@drawScene(7, false)
     return
@@ -991,7 +980,6 @@ C1964jsVideoHLE = (core, glx) ->
     @textureTile[tile].shifts = @getSetTileShifts(pc);
     #if @combineD0 == 4
     #console.log "SetTile:"+tile+" FMT:"+@textureTile[tile].fmt+" SIZ:"+@textureTile[tile].siz+" LINE: "+@textureTile[tile].line+" TMEM:"+@textureTile[tile].tmem+" PAL:"+@textureTile[tile].pal+" CMS/T:"+@textureTile[tile].cms+"/"+@textureTile[tile].cmt+" MASKS/T:"+@textureTile[tile].masks+"/"+@textureTile[tile].maskt+" SHIFTS/T:"+@textureTile[tile].shifts+"/"+@textureTile[tile].shiftt
-    #@videoLog "TODO: DLParser_SetTile"
     return
 
   C1964jsVideoHLE::DLParser_FillRect = (pc) ->
