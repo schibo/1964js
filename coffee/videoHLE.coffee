@@ -373,17 +373,17 @@ C1964jsVideoHLE = (core, glx) ->
       @N64VertexList[i].t = @getVertexT(a)/32 / texHeight
 
       if @bLightingEnable is true
-        @normalMat[0] = @getVertexNormalX(a)
-        @normalMat[1] = @getVertexNormalY(a)
-        @normalMat[2] = @getVertexNormalZ(a)
+        @normalMat[0] = -@getVertexNormalX(a)
+        @normalMat[1] = -@getVertexNormalY(a)
+        @normalMat[2] = -@getVertexNormalZ(a)
         @normalMat[3] = 0
         #modelViewtransposedInverse = mat4.create()
-        #mat4.inverse @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], modelViewtransposedInverse
+        #mat4.set @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], modelViewtransposedInverse
+        #mat4.inverse modelViewtransposedInverse, modelViewtransposedInverse
         #mat4.transpose modelViewtransposedInverse, modelViewtransposedInverse
 
-        #mat4.transpose @modelViewtransposedInverse, @normalMat
+        #mat4.multiply modelViewtransposedInverse, @normalMat, @normalMat
         @normalMat = vec3.normalize @normalMat
-        #vec3.multiply modelViewtransposedInverse, @normalMat, @normalMat
 
         #worldViewtransposedInverse = mat4.create()
         #mat4.inverse @gRSP.projectionMtxs[@gRSP.projectionMtxTop], worldViewtransposedInverse
@@ -555,11 +555,10 @@ C1964jsVideoHLE = (core, glx) ->
 
     for l in [0...@gRSPnumLights]
       fCosT = norm[0]*@gRSPlights[l].x + norm[1]*@gRSPlights[l].y + norm[2]*@gRSPlights[l].z
-      if fCosT > 0.0
-        r += @gRSPlights[l].r * fCosT
-        g += @gRSPlights[l].g * fCosT
-        b += @gRSPlights[l].b * fCosT
-        a += @gRSPlights[l].a * fCosT
+      r += @gRSPlights[l].r * fCosT
+      g += @gRSPlights[l].g * fCosT
+      b += @gRSPlights[l].b * fCosT
+      a += @gRSPlights[l].a * fCosT
 
     if r < 0.0
       r = 0.0
