@@ -306,6 +306,11 @@ C1964jsRenderer = (settings, glx, webGL) ->
         gl.drawElements gl.LINE_LOOP, texrectVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0
       else
         gl.drawElements gl.TRIANGLES, texrectVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0
+
+    texrectVertexIndexBuffer.numItems = 0
+    texrectVertexTextureCoordBuffer.numItems = 0
+    texrectVertexPositionBuffer.numItems = 0
+
     return
   return this
 #hack global space until we export classes properly
