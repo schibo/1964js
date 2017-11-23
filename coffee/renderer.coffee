@@ -244,6 +244,7 @@ C1964jsRenderer = (settings, glx, webGL) ->
     return
 
   @draw = (tile, tmem, videoHLE, nextPow2Width, nextPow2Height) ->
+    videoHLE.setBlendFunc()
     gl.useProgram webGL.shaderProgram
 
     gl.enableVertexAttribArray webGL.shaderProgram.vertexPositionAttribute

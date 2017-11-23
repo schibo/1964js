@@ -1125,8 +1125,10 @@ C1964jsVideoHLE = (core, glx) ->
       when CYCLE_TYPE_FILL
         @gl.disable @gl.BLEND
       when CYCLE_TYPE_COPY
+        #this is wrong, but better for now. Hud has no alpha.
+        # We should be calculating alpha transparency at the bottom of this function
+        @gl.blendFunc @gl.SRC_ALPHA, @gl.ONE_MINUS_SRC_ALPHA
         @gl.enable @gl.BLEND
-        @gl.blendFunc @gl.ONE, @gl.ZERO
       when CYCLE_TYPE_2
         forceBl = @otherModeL >> 14 & 0x1
         zCmp = @otherModeL >> 4 & 0x1
