@@ -212,6 +212,9 @@ C1964jsVideoHLE::gbi0LoadMatrix = (pc) ->
 C1964jsVideoHLE::gbi0PushMatrix = (pc) ->
   (if ((@core.memory.rdramUint8Array[pc + 1] & 0x00000004) isnt 0) then true else false)
 
+C1964jsVideoHLE::gbi0PopMtxIsProjection = (pc) ->
+  (if ((@core.memory.rdramUint8Array[pc + 1] & 0x00000001) isnt 0) then true else false)
+
 #TexRect struct
 #    uint32 dwXH    = (((gfx->words.w0)>>12)&0x0FFF)/4;
 # uint32 dwYH   = (((gfx->words.w0)    )&0x0FFF)/4;

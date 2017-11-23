@@ -210,7 +210,12 @@ C1964jsVideoHLE = (core, glx) ->
       when consts.RSP_GBI1_MV_MEM_L0, consts.RSP_GBI1_MV_MEM_L1, consts.RSP_GBI1_MV_MEM_L2, consts.RSP_GBI1_MV_MEM_L3, consts.RSP_GBI1_MV_MEM_L4, consts.RSP_GBI1_MV_MEM_L5, consts.RSP_GBI1_MV_MEM_L6, consts.RSP_GBI1_MV_MEM_L7
         dwLight = (type-consts.RSP_GBI1_MV_MEM_L0)/2
         @RSP_MoveMemLight dwLight, addr, pc
+      when consts.RSP_GBI1_MV_MEM_MATRIX1
+        @RSP_GFX_Force_Matrix pc
     return
+
+  C1964jsVideoHLE::RSP_GFX_Force_Matrix = (pc) ->
+    @RSP_GBI0_Mtx pc
 
   C1964jsVideoHLE::RSP_MoveMemViewport = (addr) ->
     #todo
@@ -285,7 +290,7 @@ C1964jsVideoHLE = (core, glx) ->
     addr = @getRspSegmentAddr(seg)
     #@videoLog "RSP_GBI0_Mtx addr: " + dec2hex(addr)
     @loadMatrix addr
-    if @gbi0isProjectionMatrix(pc)
+    if @gbi0isProjectionMatrix pc
       @setProjection @matToLoad, @gbi0PushMatrix(pc), @gbi0LoadMatrix(pc)
     else
       @setWorldView @matToLoad, @gbi0PushMatrix(pc), @gbi0LoadMatrix(pc)
@@ -785,8 +790,21 @@ C1964jsVideoHLE = (core, glx) ->
     #console.log "RSP_GBI1_Texture: Tile:" + tile + " On:" + @textureTile[tile].on + " Level:" + @textureTile[tile].level + " ScaleS:" + @textureTile[tile].scales + " ScaleT:" + @textureTile[tile].scalet
     return
 
+  C1964jsVideoHLE::popProjection = () ->
+    if @gRSP.projectionMtxTop > 0
+      @gRSP.projectionMtxTop--
+
+  C1964jsVideoHLE::popWorldView = () ->
+    if @gRSP.modelViewMtxTop > 0
+      @gRSP.modelViewMtxTop--
+      @gRSPmodelViewTop = @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop]
+      @gRSP.bMatrixIsUpdated = true
+
   C1964jsVideoHLE::RSP_GBI1_PopMtx = (pc) ->
-    #@videoLog "TODO: RSP_GBI1_PopMtx"
+    if @gbi0PopMtxIsProjection pc
+      @popProjection()
+    else
+      @popWorldView()
     return
 
   C1964jsVideoHLE::RSP_GBI1_CullDL = (pc) ->
@@ -819,35 +837,35 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::RDP_TriFill = (pc) ->
-    #@videoLog "TODO: RDP_TriFill"
+    @videoLog "TODO: RDP_TriFill"
     return
 
   C1964jsVideoHLE::RDP_TriFillZ = (pc) ->
-    #@videoLog "RDP_TriFillZ"
+    @videoLog "RDP_TriFillZ"
     return
 
   C1964jsVideoHLE::RDP_TriTxtr = (pc) ->
-    #@videoLog "TODO: RDP_TriTxtr"
+    @videoLog "TODO: RDP_TriTxtr"
     return
 
   C1964jsVideoHLE::RDP_TriTxtrZ = (pc) ->
-    #@videoLog "TODO: RDP_TriTxtrZ"
+    @videoLog "TODO: RDP_TriTxtrZ"
     return
 
   C1964jsVideoHLE::RDP_TriShade = (pc) ->
-    #@videoLog "TODO: RDP_TriShade"
+    @videoLog "TODO: RDP_TriShade"
     return
 
   C1964jsVideoHLE::RDP_TriShadeZ = (pc) ->
-    #@videoLog "TODO: RDP_TriShadeZ"
+    @videoLog "TODO: RDP_TriShadeZ"
     return
 
   C1964jsVideoHLE::RDP_TriShadeTxtr = (pc) ->
-    #@videoLog "TODO: RDP_TriShadeTxtr"
+    @videoLog "TODO: RDP_TriShadeTxtr"
     return
 
   C1964jsVideoHLE::RDP_TriShadeTxtrZ = (pc) ->
-    #@videoLog "TODO: RDP_TriShadeTxtrZ"
+    @videoLog "TODO: RDP_TriShadeTxtrZ"
     return
 
   C1964jsVideoHLE::DLParser_TexRect = (pc) ->
@@ -877,19 +895,19 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_TexRectFlip = (pc) ->
-    #@videoLog "TODO: DLParser_TexRectFlip"
+    @videoLog "TODO: DLParser_TexRectFlip"
     return
 
   C1964jsVideoHLE::DLParser_RDPLoadSynch = (pc) ->
-    #@videoLog "TODO: DLParser_RDPLoadSynch"
+    @videoLog "TODO: DLParser_RDPLoadSynch"
     return
 
   C1964jsVideoHLE::DLParser_RDPPipeSynch = (pc) ->
-    #@videoLog "TODO: DLParser_RDPPipeSynch"
+    @videoLog "TODO: DLParser_RDPPipeSynch"
     return
 
   C1964jsVideoHLE::DLParser_RDPTileSynch = (pc) ->
-    #@videoLog "TODO: DLParser_RDPTileSynch"
+    @videoLog "TODO: DLParser_RDPTileSynch"
     return
 
   C1964jsVideoHLE::DLParser_RDPFullSynch = (pc) ->
@@ -899,27 +917,27 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_SetKeyGB = (pc) ->
-    #@videoLog "TODO: DLParser_SetKeyGB"
+    @videoLog "TODO: DLParser_SetKeyGB"
     return
 
   C1964jsVideoHLE::DLParser_SetKeyR = (pc) ->
-    #@videoLog "TODO: DLParser_SetKeyR"
+    @videoLog "TODO: DLParser_SetKeyR"
     return
 
   C1964jsVideoHLE::DLParser_SetConvert = (pc) ->
-    #@videoLog "TODO: DLParser_SetConvert"
+    @videoLog "TODO: DLParser_SetConvert"
     return
 
   C1964jsVideoHLE::DLParser_SetPrimDepth = (pc) ->
-    #@videoLog "TODO: DLParser_SetPrimDepth"
+    @videoLog "TODO: DLParser_SetPrimDepth"
     return
 
   C1964jsVideoHLE::DLParser_RDPSetOtherMode = (pc) ->
-    #@videoLog "TODO: DLParser_RDPSetOtherMode"
+    @videoLog "TODO: DLParser_RDPSetOtherMode"
     return
 
   C1964jsVideoHLE::DLParser_LoadTLut = (pc) ->
-    #@videoLog "TODO: DLParser_LoadTLut"
+    @videoLog "TODO: DLParser_LoadTLut"
     return
 
   C1964jsVideoHLE::DLParser_SetTileSize = (pc) ->
@@ -931,7 +949,6 @@ C1964jsVideoHLE = (core, glx) ->
     @textureTile[tile].width = @textureTile[tile].lrs - @textureTile[tile].uls
     @textureTile[tile].height = @textureTile[tile].lrt - @textureTile[tile].ult
     #console.log "SetTileSize: UL("+@textureTile[tile].uls+"/"+@textureTile[tile].ult+") LR("+@textureTile[tile].lrs+"/"+@textureTile[tile].lrt+") Dim: "+@textureTile[tile].width+"x"+@textureTile[tile].height
-    #@videoLog "TODO: DLParser_SetTileSize"
     return
 
   C1964jsVideoHLE::DLParser_LoadBlock = (pc) ->
@@ -949,11 +966,10 @@ C1964jsVideoHLE = (core, glx) ->
     while i < bytesToXfer
       @tmem[i]= @core.memory.rdramUint8Array[@texImg.addr+i]
       i++
-    #@videoLog "TODO: DLParser_LoadBlock"
     return
 
   C1964jsVideoHLE::DLParser_LoadTile = (pc) ->
-    #@videoLog "TODO: DLParser_LoadTile"
+    @videoLog "TODO: DLParser_LoadTile"
     return
 
   C1964jsVideoHLE::DLParser_SetTile = (pc) ->
@@ -1007,7 +1023,7 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_SetFogColor = (pc) ->
-    #@videoLog "TODO: DLParser_SetFogColor"
+    @videoLog "TODO: DLParser_SetFogColor"
     return
 
   C1964jsVideoHLE::DLParser_SetBlendColor = (pc) ->
@@ -1028,7 +1044,6 @@ C1964jsVideoHLE = (core, glx) ->
     @primColor.push @getSetPrimColorB(pc)/255.0
     @primColor.push @getSetPrimColorA(pc)/255.0
     #alert @primColor
-    #@videoLog "TODO: DLParser_SetPrimColor"
     @gl.uniform4fv @core.webGL.shaderProgram.uPrimColor, @primColor
     @renderStateChanged = true
     return
