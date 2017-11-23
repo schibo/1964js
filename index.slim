@@ -463,7 +463,9 @@ html
         input#wireframe type="checkbox" wireframe
         |&nbsp;&nbsp;
         input#speedlimit type="checkbox" checked="true" speed limit 
-
+        - if outputMode == "debug.html"
+          |&nbsp;&nbsp;
+          input#repeatDList type="checkbox" repeat DList 
 
       .dropShadow
         .story

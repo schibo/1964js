@@ -507,10 +507,21 @@ C1964jsInterrupts = (core, cp0) ->
       when consts.GFX_TASK
         core.videoHLE = new C1964jsVideoHLE(core, core.webGL.gl)  if core.videoHLE is null or core.videoHLE is `undefined`
         core.settings.wireframe = document.getElementById("wireframe").checked
+        repeatDList = document.getElementById("repeatDList")
+        core.settings.repeatDList = false
+        core.settings.repeatDList = true if repeatDList isnt null and repeatDList.checked
         if core.terminate is false
           window.requestAnimationFrame(=>
             core.videoHLE.processDisplayList()
-            @triggerRspBreak()
+            if core.settings.repeatDList is true
+              @interval = setInterval(=>
+                core.videoHLE.processDisplayList()
+                if core.settings.repeatDList is false
+                  clearInterval @interval
+                  @triggerRspBreak()
+              , 16)
+            else
+              @triggerRspBreak()
           )
       when consts.SND_TASK
         @processAudioList()

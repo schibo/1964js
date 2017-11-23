@@ -446,8 +446,6 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_SetCombine = (pc) ->
-    @renderStateChanged = true
-
     @combineA0 = @getCombineA0(pc)
     @combineB0 = @getCombineB0(pc)
     @combineC0 = @getCombineC0(pc)
@@ -655,7 +653,6 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::RSP_GBI1_SetOtherModeH = (pc) ->
-    @renderStateChanged = true
     word0 = @getOtherModeH pc
     length = (word0 >>> 0) & 0xFF
     shift = (word0 >>> 8) & 0xFF
@@ -666,7 +663,6 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::RSP_GBI1_SetOtherModeL = (pc) ->
-    @renderStateChanged = true
     word0 = @getOtherModeL pc
     length = (word0 >>> 0) & 0xFF
     shift = (word0 >>> 8) & 0xFF
@@ -701,8 +697,6 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::RSP_GBI1_ClearGeometryMode = (pc) ->
-    @renderStateChanged = true
-
     data = @getClearGeometryMode(pc)>>>0
     @geometryMode &= ~data
     @initGeometryMode()
@@ -710,9 +704,6 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::RSP_GBI1_SetGeometryMode = (pc) ->
-    # state will change. draw.
-    @renderStateChanged = true
-
     data = @getSetGeometryMode(pc)>>>0
     @geometryMode |= data
     @initGeometryMode()
@@ -778,6 +769,7 @@ C1964jsVideoHLE = (core, glx) ->
     @textureTile[tile].scales = @getTextureScaleS(pc) / 0x8000
     @textureTile[tile].scalet = @getTextureScaleT(pc) / 0x8000
     #console.log "RSP_GBI1_Texture: Tile:" + tile + " On:" + @textureTile[tile].on + " Level:" + @textureTile[tile].level + " ScaleS:" + @textureTile[tile].scales + " ScaleT:" + @textureTile[tile].scalet
+    @drawScene false, 7
     return
 
   C1964jsVideoHLE::popProjection = () ->
@@ -896,6 +888,7 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_RDPLoadSynch = (pc) ->
+    @renderStateChanged = true
     @videoLog "TODO: DLParser_RDPLoadSynch"
     return
 
@@ -969,7 +962,6 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_SetTile = (pc) ->
-    #@renderStateChanged = true
     tile = @getSetTileTile(pc)
     @activeTile = tile
     @textureTile[tile].fmt = @getSetTileFmt(pc);
@@ -1014,7 +1006,6 @@ C1964jsVideoHLE = (core, glx) ->
     @fillColor.push @getSetFillColorB(pc)/255.0
     @fillColor.push @getSetFillColorA(pc)/255.0
     @gl.uniform4fv @core.webGL.shaderProgram.uFillColor, @fillColor
-    @renderStateChanged = true
     return
 
   C1964jsVideoHLE::DLParser_SetFogColor = (pc) ->
@@ -1029,7 +1020,6 @@ C1964jsVideoHLE = (core, glx) ->
     @blendColor.push @getSetFillColorA(pc)/255.0
     @gl.uniform4fv @core.webGL.shaderProgram.uBlendColor, @blendColor
     @alphaTestEnabled = 1
-    @renderStateChanged = true
     return
 
   C1964jsVideoHLE::DLParser_SetPrimColor = (pc) ->
@@ -1040,7 +1030,6 @@ C1964jsVideoHLE = (core, glx) ->
     @primColor.push @getSetPrimColorA(pc)/255.0
     #alert @primColor
     @gl.uniform4fv @core.webGL.shaderProgram.uPrimColor, @primColor
-    @renderStateChanged = true
     return
 
   C1964jsVideoHLE::DLParser_SetEnvColor = (pc) ->
@@ -1050,7 +1039,6 @@ C1964jsVideoHLE = (core, glx) ->
     @envColor.push @getSetEnvColorB(pc)/255.0
     @envColor.push @getSetEnvColorA(pc)/255.0
     @gl.uniform4fv @core.webGL.shaderProgram.uEnvColor, @envColor
-    @renderStateChanged = true
     return
 
   C1964jsVideoHLE::prepareTriangle = (dwV0, dwV1, dwV2) ->
@@ -1334,7 +1322,6 @@ C1964jsVideoHLE = (core, glx) ->
    # @geometryMode = 0
     @initGeometryMode()
     @alphaTestEnabled = 0
-    @renderStateChanged = true
     return
 
   C1964jsVideoHLE::initBuffers = ->
