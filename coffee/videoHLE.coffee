@@ -877,6 +877,14 @@ C1964jsVideoHLE = (core, glx) ->
     t = @getTexRectT(pc) >>> 5
     dsdx = @getTexRectDsDx(pc) >>> 10
     dtdy = @getTexRectDtDy(pc) >>> 10
+
+    if @cycleType is consts.CYCLE_TYPE_COPY
+      dsdx *= 0.25
+
+    if @cycleType is consts.CYCLE_TYPE_FILL or @cycleType is consts.CYCLE_TYPE_COPY
+      xh += 1.0
+      yh += 1.0
+
     #console.log "Texrect: UL("+xl+","+yl+") LR("+xh+","+yh+") Tile:"+tileno+" TexCoord:("+s+","+t+") TexSlope:("+dsdx+","+dtdy+")"
     @renderer.texRect xl, yl, xh, yh, s, t, dsdx, dtdy, @textureTile[tileno], @tmem, this
     @hasTexture = true
