@@ -1248,6 +1248,7 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::drawScene = (useTexture, tileno) ->
     @setBlendFunc()
+    @setDepthTest()
 
     @renderStateChanged = false
 
