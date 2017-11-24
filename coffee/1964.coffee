@@ -302,7 +302,8 @@ class C1964jsEmulator
     #setTimeout to be a good citizen..don't allow for the cpu to be pegged at 100%.
     #8ms idle time will be 50% cpu max if a 60FPS game is slow.
     @mySetInterval = setInterval (=>
-      @startTime = Date.now();
+      if @startTime is undefined
+        @startTime = Date.now();
       #@request = requestAnimFrame(@runLoop)  if @terminate is false
       if @terminate is true
         clearInterval @mySetInterval
@@ -341,9 +342,10 @@ class C1964jsEmulator
               @settings.speedLimitMs = rate
               clearInterval @mySetInterval
               @endTime = Date.now()
-              if delta < 0
-                delta = 1000.0/60
               delta = 1000.0/60.0 - (@endTime - @startTime)
+              @startTime = @endTime
+              if delta < 0
+                delta = 0 #1000.0/60
               @settings.rateWithDelta = delta
               @runLoop()
             else
@@ -351,6 +353,7 @@ class C1964jsEmulator
               return if @settings.speedLimitMs is 0
               @settings.speedLimitMs = 0
               clearInterval @mySetInterval
+              @startTime = Date.now();
               @runLoop()
             break
         else
@@ -425,8 +428,8 @@ class C1964jsEmulator
       string = "i1964js.code." + fnName + "=function(r, h, m, t){"
     until @stopCompiling
       instruction = @memory.lw(pc + offset)
-      string += this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction)
       @cnt += 1
+      string += this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction)
       offset += 4
       throw Error "too many instructions! bailing."  if offset > 10000
     @stopCompiling = false
@@ -600,11 +603,15 @@ class C1964jsEmulator
     instruction = @memory.lw((@p + offset + 4) | 0)
 
     #speed hack
-    if ((instr_index >> 0) is (@p + offset) >> 0) and (instruction is 0)
+    speedUp = false
+    speedUp = true if ((instr_index >> 0) is (@p + offset) >> 0) and (instruction is 0)
+
+    string += this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
+    if speedUp is true
       string += "t.m=0;"
     else
-      string += "t.m+=1;"
-    string += this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
+      string += "t.m+=" + (@cnt+1) + ";"      
+
     string += "t.p=" + instr_index + ";return t.code." + @getFnName(instr_index) + "}"
 
   r4300i_jal: (i) ->
@@ -618,7 +625,7 @@ class C1964jsEmulator
     instruction = @memory.lw((@p + offset + 4) | 0)
     string += this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     pc = (@p + offset + 8) | 0
-    string += "t.m+=1;"
+    string += "t.m+=" + (@cnt+1) + ";"
     string += "t.p=" + instr_index + ";r[31]=" + pc + ";h[31]=" + (pc >> 31) + ";return t.code." + @getFnName(instr_index) + "}"
 
   #should we set the programCounter after the delay slot or before it?
@@ -635,7 +642,7 @@ class C1964jsEmulator
     instruction = @memory.lw((@p + offset + 4) | 0)
     opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     string += opcode
-    string += "t.m+=1;"
+    string += "t.m+= " + (@cnt+1) + ";"
     string += "t.p=temp;return t.code[\"_\"+(temp>>>2)]}"
     string
 
@@ -649,7 +656,7 @@ class C1964jsEmulator
     instruction = @memory.lw((@p + offset + 4) | 0)
     opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     string += opcode
-    string += "t.m+=1;"
+    string += "t.m+= " + (@cnt+1) + ";"
     string += "t.p=temp;return t.code[\"_\"+(temp>>>2)]}"
 
   UNUSED: (i) ->
@@ -660,6 +667,7 @@ class C1964jsEmulator
     @stopCompiling = true
     string = "{if((t.cp0[" + consts.STATUS + "]&" + consts.ERL + ")!==0){alert(\"error epc\");t.p=t.cp0[" + consts.ERROREPC + "];"
     string += "t.cp0[" + consts.STATUS + "]&=~" + consts.ERL + "}else{t.p=t.cp0[" + consts.EPC + "];t.cp0[" + consts.STATUS + "]&=~" + consts.EXL + "}"
+    string += "t.m+= " + (@cnt+1) + ";"
     string += "t.LLbit=0;return t.code[\"_\"+(t.p>>>2)]}"
 
   r4300i_COP0_mtc0: (i, isDelaySlot) ->
@@ -742,7 +750,7 @@ class C1964jsEmulator
       when consts.RANDOM
         alert "RANDOM"
       when consts.COUNT
-        string += 't.cp0[' + this.helpers.fs(i) + ']-=t.m*2;'; # should this be t.m * 2?
+        #string += 't.cp0[' + this.helpers.fs(i) + ']-=t.m*2;'; # should this be t.m * 2?
       else
     string += @helpers.tRT(i) + "=t.cp0[" + @helpers.fs(i) + "]," + @helpers.tRTH(i) + "=t.cp0[" + @helpers.fs(i) + "]>>31;"
 
