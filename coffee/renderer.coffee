@@ -176,7 +176,7 @@ C1964jsRenderer = (settings, glx, webGL) ->
                 b = tmem[srcOffset]
                 I0 = threetoeight[(b & 0xe0)>>>5]
                 a0 = onetoeight[(b & 0x10)>>>4]
-                I1 = threetoeight[(b & 0xe0)>>>1]
+                I1 = threetoeight[(b & 0x0e)>>>1]
                 a1 = onetoeight[(b & 0x01)>>>0]
                 texture[dstOffset] = I0
                 texture[dstOffset + 1] = I0
@@ -196,6 +196,7 @@ C1964jsRenderer = (settings, glx, webGL) ->
                 texture[dstOffset + 1] = I0
                 texture[dstOffset + 2] = I0
                 texture[dstOffset + 3] = a0
+                i+=1
                 srcOffset += 1
                 dstOffset += 4
               j++
