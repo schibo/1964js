@@ -361,8 +361,10 @@ C1964jsVideoHLE = (core, glx) ->
     a = undefined
     @updateCombinedMatrix()
     i = v0
-    texWidth = @textureTile[@activeTile].width
-    texHeight = @textureTile[@activeTile].height
+
+    texWidth = ((@textureTile[@activeTile].lrs >> 2) + 1) - @textureTile[@activeTile].uls
+    texHeight = ((@textureTile[@activeTile].lrt >> 2) + 1) - @textureTile[@activeTile].ult
+
     while i < v0 + num
       a = addr + 16 * (i - v0)
 
@@ -758,18 +760,19 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::RSP_GBI1_EndDL = (pc) ->
     @RDP_GFX_PopDL()
-    @drawScene(false, 7)
+    @drawScene(false, @activeTile)
     @resetState()
     return
 
   C1964jsVideoHLE::RSP_GBI1_Texture = (pc) ->
     tile = @getTextureTile(pc)
+    @activeTile = tile
     @textureTile[tile].on    = @getTextureOn(pc)
     @textureTile[tile].level = @getTextureLevel(pc)
     @textureTile[tile].scales = @getTextureScaleS(pc) / 0x8000
     @textureTile[tile].scalet = @getTextureScaleT(pc) / 0x8000
     #console.log "RSP_GBI1_Texture: Tile:" + tile + " On:" + @textureTile[tile].on + " Level:" + @textureTile[tile].level + " ScaleS:" + @textureTile[tile].scales + " ScaleT:" + @textureTile[tile].scalet
-    @drawScene false, 7
+    #@drawScene false, tile
     return
 
   C1964jsVideoHLE::popProjection = () ->
@@ -811,7 +814,7 @@ C1964jsVideoHLE = (core, glx) ->
       return #loops until not tri1, then it will drawScene
 
     if @renderStateChanged is true
-      @drawScene false, 7
+      @drawScene false, @activeTile
     return
 
   C1964jsVideoHLE::RSP_GBI1_Noop = (pc) ->
@@ -933,10 +936,8 @@ C1964jsVideoHLE = (core, glx) ->
     tile = @getSetTileSizeTile(pc)
     @textureTile[tile].uls = @getSetTileSizeUls(pc)
     @textureTile[tile].ult = @getSetTileSizeUlt(pc)
-    @textureTile[tile].lrs = (@getSetTileSizeLrs(pc) >> 2) + 1
-    @textureTile[tile].lrt = (@getSetTileSizeLrt(pc) >> 2) + 1
-    @textureTile[tile].width = @textureTile[tile].lrs - @textureTile[tile].uls
-    @textureTile[tile].height = @textureTile[tile].lrt - @textureTile[tile].ult
+    @textureTile[tile].lrs = @getSetTileSizeLrs(pc)
+    @textureTile[tile].lrt = @getSetTileSizeLrt(pc)
     #console.log "SetTileSize: UL("+@textureTile[tile].uls+"/"+@textureTile[tile].ult+") LR("+@textureTile[tile].lrs+"/"+@textureTile[tile].lrt+") Dim: "+@textureTile[tile].width+"x"+@textureTile[tile].height
     return
 
@@ -963,7 +964,6 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::DLParser_SetTile = (pc) ->
     tile = @getSetTileTile(pc)
-    @activeTile = tile
     @textureTile[tile].fmt = @getSetTileFmt(pc);
     @textureTile[tile].siz = @getSetTileSiz(pc);
     @textureTile[tile].line = @getSetTileLine(pc);
@@ -1269,9 +1269,9 @@ C1964jsVideoHLE = (core, glx) ->
       @gl.bufferData @gl.ARRAY_BUFFER, @triTextureCoords.subarray(0, @triangleVertexTextureCoordBuffer.numItems*@triangleVertexTextureCoordBuffer.itemSize), @gl.STATIC_DRAW
       @gl.enableVertexAttribArray @core.webGL.shaderProgram.textureCoordAttribute
       @gl.vertexAttribPointer @core.webGL.shaderProgram.textureCoordAttribute, @triangleVertexTextureCoordBuffer.itemSize, @gl.FLOAT, false, 0, 0
-      tile = @textureTile[@activeTile]
-      canvaswidth = @pow2roundup tile.width
-      canvasheight = @pow2roundup tile.height
+      tile = @textureTile[tileno]
+      tileWidth = ((tile.lrs >> 2) + 1) - tile.uls
+      tileHeight = ((tile.lrt >> 2) + 1) - tile.ult
       textureData = @renderer.formatTexture(tile, @tmem, this)
       if textureData isnt undefined
         @gl.activeTexture(@gl.TEXTURE0)
@@ -1295,7 +1295,7 @@ C1964jsVideoHLE = (core, glx) ->
           # it's a canvas element
           @gl.texImage2D(@gl.TEXTURE_2D, 0, @gl.RGBA, @gl.RGBA, @gl.UNSIGNED_BYTE, textureData)
         else
-          @gl.texImage2D(@gl.TEXTURE_2D, 0, @gl.RGBA, tile.width, tile.height, 0, @gl.RGBA, @gl.UNSIGNED_BYTE, textureData)
+          @gl.texImage2D(@gl.TEXTURE_2D, 0, @gl.RGBA, tileWidth, tileHeight, 0, @gl.RGBA, @gl.UNSIGNED_BYTE, textureData)
 
     #@gl.uniform1i @core.webGL.shaderProgram.otherModeL, @otherModeL
     #@gl.uniform1i @core.webGL.shaderProgram.otherModeH, @otherModeH
@@ -1323,6 +1323,7 @@ C1964jsVideoHLE = (core, glx) ->
    # @geometryMode = 0
     @initGeometryMode()
     @alphaTestEnabled = 0
+    @activeTile = 0
     return
 
   C1964jsVideoHLE::initBuffers = ->
