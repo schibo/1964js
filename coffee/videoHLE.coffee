@@ -772,7 +772,7 @@ C1964jsVideoHLE = (core, glx) ->
     @textureTile[tile].scales = @getTextureScaleS(pc) / 0x8000
     @textureTile[tile].scalet = @getTextureScaleT(pc) / 0x8000
     #console.log "RSP_GBI1_Texture: Tile:" + tile + " On:" + @textureTile[tile].on + " Level:" + @textureTile[tile].level + " ScaleS:" + @textureTile[tile].scales + " ScaleT:" + @textureTile[tile].scalet
-    #@drawScene false, tile
+    @drawScene false, tile
     return
 
   C1964jsVideoHLE::popProjection = () ->
