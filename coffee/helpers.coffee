@@ -370,9 +370,9 @@ C1964jsHelpers = (core, isLittleEndian) ->
 
     #todo: handle div by zero
     r[32] = (r[@rs(i)] >>> 0) / (r[@rt(i)] >>> 0) #lo
-    h[32] = 0 #hi
+    h[32] = r[32] >> 31 #hi
     r[33] = (r[@rs(i)] >>> 0) % (r[@rt(i)] >>> 0) #lo
-    h[33] = 0 #hi
+    h[33] = r[33] >> 31 #hi
     return
 
   #alert('divu: '+r[this.rs(i)]+'/'+r[this.rt(i)]+'='+dec2hex(h[33]) +' '+dec2hex(r[33])+' '+dec2hex(h[32])+' '+dec2hex(r[32]));
