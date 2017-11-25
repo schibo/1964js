@@ -1317,6 +1317,7 @@ C1964jsVideoHLE = (core, glx) ->
     @triangleVertexPositionBuffer.numItems = 0
     @triangleVertexColorBuffer.numItems = 0
     @triangleVertexTextureCoordBuffer.numItems = 0
+    @gRSP.numVertices = 0
     return
 
   C1964jsVideoHLE::resetState = ->
