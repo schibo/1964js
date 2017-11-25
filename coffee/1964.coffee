@@ -604,7 +604,7 @@ class C1964jsEmulator
 
     #speed hack
     speedUp = false
-    speedUp = true if ((instr_index >> 0) is (@p + offset) >> 0) and (instruction is 0)
+    # speedUp = true if ((instr_index >> 0) is (@p + offset) >> 0) and (instruction is 0)
 
     string += this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     if speedUp is true

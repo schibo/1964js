@@ -147,6 +147,7 @@ C1964jsVideoHLE = (core, glx) ->
 
     #this.core.interrupts.triggerDPInterrupt(0, false);
     @core.interrupts.triggerSPInterrupt 0, false
+    return
 
   C1964jsVideoHLE::videoLog = (msg) ->
     #console.log msg
@@ -1342,6 +1343,7 @@ C1964jsVideoHLE = (core, glx) ->
     @triangleVertexTextureCoordBuffer.itemSize = 2
     @triangleVertexTextureCoordBuffer.numItems = 0
     return
+  return
 )()
 #hack global space until we export classes properly
 #node.js uses exports; browser uses this (window)
