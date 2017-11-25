@@ -154,9 +154,6 @@ C1964jsVideoHLE = (core, glx) ->
   C1964jsVideoHLE::dlParserProcess = ->
     @dlistStackPointer = 0
     @dlistStack[@dlistStackPointer].pc = (@core.memory.spMemUint8Array[consts.TASK_DATA_PTR] << 24 | @core.memory.spMemUint8Array[consts.TASK_DATA_PTR + 1] << 16 | @core.memory.spMemUint8Array[consts.TASK_DATA_PTR + 2] << 8 | @core.memory.spMemUint8Array[consts.TASK_DATA_PTR + 3])>>>0
-    end = (@core.memory.spMemUint8Array[consts.TASK_DATA_SIZE] << 24 | @core.memory.spMemUint8Array[consts.TASK_DATA_SIZE + 1] << 16 | @core.memory.spMemUint8Array[consts.TASK_DATA_SIZE + 2] << 8 | @core.memory.spMemUint8Array[consts.TASK_DATA_SIZE + 3])>>>0
-    end <<= 3
-    end += @dlistStack[@dlistStackPointer].pc
     @dlistStack[@dlistStackPointer].countdown = consts.MAX_DL_COUNT
 
     #see RSP_Parser.cpp
