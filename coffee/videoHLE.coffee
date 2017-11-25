@@ -84,7 +84,6 @@ C1964jsVideoHLE = (core, glx) ->
   @modelViewtransposedInverse = mat4.create()
   @worldViewtransposedInverse = mat4.create()
 
-
   #todo: different microcodes support
   @currentMicrocodeMap = @microcodeMap0
   i = 0
@@ -116,7 +115,6 @@ C1964jsVideoHLE = (core, glx) ->
   @gl.depthFunc @gl.LEQUAL
   @gl.clearDepth 1.0
   @gl.disable @gl.DEPTH_TEST
-
 
   #todo: allocate on-demand
   i = 0
@@ -156,6 +154,9 @@ C1964jsVideoHLE = (core, glx) ->
   C1964jsVideoHLE::dlParserProcess = ->
     @dlistStackPointer = 0
     @dlistStack[@dlistStackPointer].pc = (@core.memory.spMemUint8Array[consts.TASK_DATA_PTR] << 24 | @core.memory.spMemUint8Array[consts.TASK_DATA_PTR + 1] << 16 | @core.memory.spMemUint8Array[consts.TASK_DATA_PTR + 2] << 8 | @core.memory.spMemUint8Array[consts.TASK_DATA_PTR + 3])>>>0
+    end = (@core.memory.spMemUint8Array[consts.TASK_DATA_SIZE] << 24 | @core.memory.spMemUint8Array[consts.TASK_DATA_SIZE + 1] << 16 | @core.memory.spMemUint8Array[consts.TASK_DATA_SIZE + 2] << 8 | @core.memory.spMemUint8Array[consts.TASK_DATA_SIZE + 3])>>>0
+    end <<= 3
+    end += @dlistStack[@dlistStackPointer].pc
     @dlistStack[@dlistStackPointer].countdown = consts.MAX_DL_COUNT
 
     #see RSP_Parser.cpp
@@ -762,7 +763,7 @@ C1964jsVideoHLE = (core, glx) ->
   C1964jsVideoHLE::RSP_GBI1_EndDL = (pc) ->
     @RDP_GFX_PopDL()
     @drawScene(false, @activeTile)
-    @resetState()
+    #@resetState()
     return
 
   C1964jsVideoHLE::RSP_GBI1_Texture = (pc) ->
@@ -779,12 +780,14 @@ C1964jsVideoHLE = (core, glx) ->
   C1964jsVideoHLE::popProjection = () ->
     if @gRSP.projectionMtxTop > 0
       @gRSP.projectionMtxTop--
+    return
 
   C1964jsVideoHLE::popWorldView = () ->
     if @gRSP.modelViewMtxTop > 0
       @gRSP.modelViewMtxTop--
       @gRSPmodelViewTop = @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop]
       @gRSP.bMatrixIsUpdated = true
+    return
 
   C1964jsVideoHLE::RSP_GBI1_PopMtx = (pc) ->
     if @gbi0PopMtxIsProjection pc
@@ -995,8 +998,6 @@ C1964jsVideoHLE = (core, glx) ->
     #   @gl.clearDepth 1.0
     #   #@gl.clear @gl.DEPTH_BUFFER_BIT
     #   @gl.depthMask true
-
-
 
     return
 
@@ -1246,6 +1247,7 @@ C1964jsVideoHLE = (core, glx) ->
     else
       @gl.disable @gl.DEPTH_TEST
     @gl.depthMask zUpd
+    return
 
   C1964jsVideoHLE::drawScene = (useTexture, tileno) ->
     @setBlendFunc()
