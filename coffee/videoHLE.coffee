@@ -640,6 +640,13 @@ C1964jsVideoHLE = (core, glx) ->
     @gRSP.modelViewMtxTop = 0
     mat4.identity @gRSP.modelviewMtxs[0]
     mat4.identity @gRSP.projectionMtxs[0]
+
+    i = 0;
+    while (i < this.RICE_MATRIX_STACK)
+      mat4.identity @gRSP.projectionMtxs[i]
+      mat4.identity @gRSP.modelviewMtxs[i]
+      i += 1
+
     @gRSP.bMatrixIsUpdated = true
     @updateCombinedMatrix()
     return
@@ -1321,7 +1328,7 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::resetState = ->
-   # @geometryMode = 0
+    @geometryMode = 0
     @initGeometryMode()
     @alphaTestEnabled = 0
     @activeTile = 0
