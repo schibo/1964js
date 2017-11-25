@@ -84,7 +84,6 @@ C1964jsVideoHLE = (core, glx) ->
   @modelViewtransposedInverse = mat4.create()
   @worldViewtransposedInverse = mat4.create()
 
-
   #todo: different microcodes support
   @currentMicrocodeMap = @microcodeMap0
   i = 0
@@ -117,7 +116,6 @@ C1964jsVideoHLE = (core, glx) ->
   @gl.clearDepth 1.0
   @gl.disable @gl.DEPTH_TEST
 
-
   #todo: allocate on-demand
   i = 0
   while i < @RICE_MATRIX_STACK
@@ -147,6 +145,7 @@ C1964jsVideoHLE = (core, glx) ->
 
     #this.core.interrupts.triggerDPInterrupt(0, false);
     @core.interrupts.triggerSPInterrupt 0, false
+    return
 
   C1964jsVideoHLE::videoLog = (msg) ->
     #console.log msg
@@ -641,6 +640,13 @@ C1964jsVideoHLE = (core, glx) ->
     @gRSP.modelViewMtxTop = 0
     mat4.identity @gRSP.modelviewMtxs[0]
     mat4.identity @gRSP.projectionMtxs[0]
+
+    i = 0;
+    while (i < this.RICE_MATRIX_STACK)
+      mat4.identity @gRSP.projectionMtxs[i]
+      mat4.identity @gRSP.modelviewMtxs[i]
+      i += 1
+
     @gRSP.bMatrixIsUpdated = true
     @updateCombinedMatrix()
     return
@@ -761,7 +767,7 @@ C1964jsVideoHLE = (core, glx) ->
   C1964jsVideoHLE::RSP_GBI1_EndDL = (pc) ->
     @RDP_GFX_PopDL()
     @drawScene(false, @activeTile)
-    @resetState()
+    #@resetState()
     return
 
   C1964jsVideoHLE::RSP_GBI1_Texture = (pc) ->
@@ -778,12 +784,14 @@ C1964jsVideoHLE = (core, glx) ->
   C1964jsVideoHLE::popProjection = () ->
     if @gRSP.projectionMtxTop > 0
       @gRSP.projectionMtxTop--
+    return
 
   C1964jsVideoHLE::popWorldView = () ->
     if @gRSP.modelViewMtxTop > 0
       @gRSP.modelViewMtxTop--
       @gRSPmodelViewTop = @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop]
       @gRSP.bMatrixIsUpdated = true
+    return
 
   C1964jsVideoHLE::RSP_GBI1_PopMtx = (pc) ->
     if @gbi0PopMtxIsProjection pc
@@ -994,8 +1002,6 @@ C1964jsVideoHLE = (core, glx) ->
     #   @gl.clearDepth 1.0
     #   #@gl.clear @gl.DEPTH_BUFFER_BIT
     #   @gl.depthMask true
-
-
 
     return
 
@@ -1245,6 +1251,7 @@ C1964jsVideoHLE = (core, glx) ->
     else
       @gl.disable @gl.DEPTH_TEST
     @gl.depthMask zUpd
+    return
 
   C1964jsVideoHLE::drawScene = (useTexture, tileno) ->
     @setBlendFunc()
@@ -1317,10 +1324,11 @@ C1964jsVideoHLE = (core, glx) ->
     @triangleVertexPositionBuffer.numItems = 0
     @triangleVertexColorBuffer.numItems = 0
     @triangleVertexTextureCoordBuffer.numItems = 0
+    @gRSP.numVertices = 0
     return
 
   C1964jsVideoHLE::resetState = ->
-   # @geometryMode = 0
+    @geometryMode = 0
     @initGeometryMode()
     @alphaTestEnabled = 0
     @activeTile = 0
@@ -1342,6 +1350,7 @@ C1964jsVideoHLE = (core, glx) ->
     @triangleVertexTextureCoordBuffer.itemSize = 2
     @triangleVertexTextureCoordBuffer.numItems = 0
     return
+  return
 )()
 #hack global space until we export classes properly
 #node.js uses exports; browser uses this (window)

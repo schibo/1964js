@@ -295,7 +295,6 @@ class C1964jsEmulator
     lastDTLBIndex = 0
 
     @memory.initPhysRegions()
-
     return
 
   runLoop: () ->
@@ -315,7 +314,7 @@ class C1964jsEmulator
         if @m >= 0
           @interval += 1
           #@m = -125000 # which is -625000 / (interval+1)
-          @m = -62500 # which is -625000 / (interval+1) / 2
+          @m = -625000 / 4 # which is -625000 / (interval+1) / 2
           if @interval is 4
             @interval = 0
             @repaintWrapper()
@@ -604,7 +603,7 @@ class C1964jsEmulator
 
     #speed hack
     speedUp = false
-    speedUp = true if ((instr_index >> 0) is (@p + offset) >> 0) and (instruction is 0)
+    # speedUp = true if ((instr_index >> 0) is (@p + offset) >> 0) and (instruction is 0)
 
     string += this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     if speedUp is true

@@ -321,8 +321,8 @@ C1964jsRenderer = (settings, glx, webGL) ->
     texrectVertexIndexBuffer.numItems = 0
     texrectVertexTextureCoordBuffer.numItems = 0
     texrectVertexPositionBuffer.numItems = 0
-
     return
+
   return this
 #hack global space until we export classes properly
 #node.js uses exports; browser uses this (window)

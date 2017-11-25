@@ -129,6 +129,7 @@ C1964jsWebGL = (core, wireframe) ->
     @gl.uniformMatrix4fv shaderProgram.pMatrixUniform, false, pMatrix
     @gl.uniformMatrix4fv shaderProgram.mvMatrixUniform, false, mvMatrix
     #@gl.uniformMatrix4fv shaderProgram.nMatrixUniform, false, nMatrix
+    return
 
   C1964jsWebGL::beginDList = ->
     # matrices for quad tiles only
