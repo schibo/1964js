@@ -133,7 +133,24 @@ C1964jsWebGL = (core, wireframe) ->
 
   C1964jsWebGL::beginDList = ->
     # matrices for quad tiles only
-    @gl.viewport 0, 0, @gl.viewportWidth, @gl.viewportHeight
+    #@gl.viewport 0, 0, @gl.viewportWidth, @gl.viewportHeight
+    newAspect = (window.innerWidth) / (window.innerHeight)
+    aspectWidth = @gl.viewportWidth
+    aspectHeight = @gl.viewportHeight
+    x = 0
+    y = 0
+    
+    stretch = document.getElementById("stretch").checked
+
+    if !stretch
+      if newAspect >= (320.0/240.0)
+        aspectWidth = @gl.viewportWidth / newAspect * (320.0/240.0)
+        x = (@gl.viewportWidth - aspectWidth) / 2.0 # center x
+      else
+        aspectHeight = @gl.viewportHeight * newAspect / (320.0/240.0)
+        y = (@gl.viewportHeight - aspectHeight) / 2.0 # center y
+
+    @gl.viewport x, y, aspectWidth, aspectHeight
     #@gl.clear @gl.COLOR_BUFFER_BIT | @gl.DEPTH_BUFFER_BIT
     mat4.perspective 90, (@gl.viewportWidth/@gl.viewportHeight), 1.0, 100.0, pMatrix
     mat4.identity mvMatrix
