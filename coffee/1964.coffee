@@ -112,8 +112,47 @@ class C1964jsEmulator
     @currentHack = 0
     @kfi = 3200000
     @cnt = 0
-    @r = new Int32Array([0, 0, 0xd1731be9, 0xd1731be9, 0x001be9, 0xf45231e5, 0xa4001f0c, 0xa4001f08, 0x070, 0, 0x040, 0xA4000040, 0xd1330bc3, 0xd1330bc3, 0x025613a26, 0x02ea04317, 0, 0, 0, 0, 0, 0, 0, 0x06, 0, 0xd73f2993, 0, 0, 0, 0xa4001ff0, 0, 0xa4001554, 0, 0, 0])
-    @h = new Int32Array(35)
+    @gpr = new ArrayBuffer(35*4) # 32GPRs, 1 dummy location to catch attempts to write to r0, and 1 lo and 1 hi
+    @r = new Int32Array(@gpr)
+    @ru = new Uint32Array(@gpr)
+    @r[0] = 0
+    @r[1] = 0
+    @r[2] = 0xd1731be9
+    @r[3] = 0xd1731be9
+    @r[4] = 0x001be9
+    @r[5] = 0xf45231e5
+    @r[6] = 0xa4001f0c
+    @r[7] = 0xa4001f08
+    @r[8] = 0x070
+    @r[9] = 0
+    @r[10] = 0x040
+    @r[11] = 0xA4000040
+    @r[12] = 0xd1330bc3
+    @r[13] = 0xd1330bc3
+    @r[14] = 0x25613a26
+    @r[15] = 0x2ea04317
+    @r[16] = 0 
+    @r[17] = 0 
+    @r[18] = 0 
+    @r[19] = 0 
+    @r[20] = 0 
+    @r[21] = 0 
+    @r[22] = 0 
+    @r[23] = 0x06
+    @r[24] = 0
+    @r[25] = 0xd73f2993
+    @r[26] = 0
+    @r[27] = 0
+    @r[28] = 0
+    @r[29] = 0xa4001ff0
+    @r[30] = 0
+    @r[31] = 0xa4001554
+    @r[32] = 0
+    @r[33] = 0
+    @r[34] = 0
+    @gprh = new ArrayBuffer(35*4)
+    @h = new Int32Array(@gprh)
+    @hu = new Uint32Array(@gprh)
 
     #hook-up system objects
     @memory = new C1964jsMemory(this)
@@ -364,20 +403,20 @@ class C1964jsEmulator
           #we probably need to split this up more.
           try
             fn = @code[fnName]
-            @run fn, @r, @h
+            @run fn, @r, @ru, @h, @hu
           catch e
             #so, we really need to know what type of exception this is,
             #but right now, we're assuming that we need to compile a block due to
             #an attempt to call an undefined function. Are there standard exception types
             #in javascript?
             fn = @decompileBlock(@p)
-            fn = fn(@r, @h, @memory, this)
+            fn = fn(@r, @ru, @h, @hu, @memory, this)
     ), @settings.rateWithDelta
     this
 
-  run: (fn, r, h) ->
+  run: (fn, r, ru, h, hu) ->
     while @m < 0
-      fn = fn(r, h, @memory, this)
+      fn = fn(r, ru, h, hu, @memory, this)
     return
 
   repaintWrapper: ->
@@ -422,9 +461,9 @@ class C1964jsEmulator
 
     #Syntax: function(register, hiRegister, this.memory, this)
     if @writeToDom is true
-      string = "function " + fnName + "(r, h, m, t){"
+      string = "function " + fnName + "(r, ru, h, hu, m, t){"
     else
-      string = "i1964js.code." + fnName + "=function(r, h, m, t){"
+      string = "i1964js.code." + fnName + "=function(r, ru, h, hu, m, t){"
     until @stopCompiling
       instruction = @memory.lw(pc + offset)
       @cnt += 1
