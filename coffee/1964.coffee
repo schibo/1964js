@@ -353,7 +353,7 @@ class C1964jsEmulator
         if @m >= 0
           @interval += 1
           #@m = -125000 # which is -625000 / (interval+1)
-          @m = -625000 / 4 # which is -625000 / (interval+1) / 2
+          @m = -625000 / 6 # which is -625000 / (interval+1) / 2
           if @interval is 4
             @interval = 0
             @repaintWrapper()
