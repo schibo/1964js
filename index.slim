@@ -460,12 +460,12 @@ html
             option value="?rom=roms/unofficial/sp_crap.zip" Absolute Crap
             option value="?rom=roms/unofficial/DynamixReadme.zip" Dynamix
 
-        input#stretch type="checkbox" Stretch
+        input#stretch type="checkbox" stretch
+        |&nbsp;&nbsp;
+        input#speedlimit type="checkbox" checked="true" speed limit 
         - if outputMode == "debug.html"
           |&nbsp;&nbsp;
           input#wireframe type="checkbox" wireframe
-          |&nbsp;&nbsp;
-          input#speedlimit type="checkbox" checked="true" speed limit 
           |&nbsp;&nbsp;
           input#repeatDList type="checkbox" repeat DList 
 

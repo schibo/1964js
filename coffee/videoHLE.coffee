@@ -1061,24 +1061,21 @@ C1964jsVideoHLE = (core, glx) ->
     #console.log "Vertex Index: "+vtxIndex+" dwV:"+dwV
     return false  if dwV >= consts.MAX_VERTS
 
-    offset = 3 * (@triangleVertexPositionBuffer.numItems)
-    @triVertices[offset] = @N64VertexList[dwV].x
-    @triVertices[offset+1] = @N64VertexList[dwV].y
-    @triVertices[offset+2] = @N64VertexList[dwV].z
+    offset = 3 * @triangleVertexPositionBuffer.numItems++ # postfix addition is intentional for performance
+    vertex = this.N64VertexList[dwV]
+    @triVertices[offset] = vertex.x
+    @triVertices[offset+1] = vertex.y
+    @triVertices[offset+2] = vertex.z
 
-    @triangleVertexPositionBuffer.numItems += 1
+    colorOffset = @triangleVertexColorBuffer.numItems++ << 2 # postfix addition is intentional for performance
+    @triColorVertices[colorOffset]     = vertex.r
+    @triColorVertices[colorOffset + 1] = vertex.g
+    @triColorVertices[colorOffset + 2] = vertex.b
+    @triColorVertices[colorOffset + 3] = vertex.a
 
-    colorOffset = @triangleVertexColorBuffer.numItems << 2
-    @triColorVertices[colorOffset]     = @N64VertexList[dwV].r;
-    @triColorVertices[colorOffset + 1] = @N64VertexList[dwV].g;
-    @triColorVertices[colorOffset + 2] = @N64VertexList[dwV].b;
-    @triColorVertices[colorOffset + 3] = @N64VertexList[dwV].a;
-    @triangleVertexColorBuffer.numItems += 1
-
-    texOffset = @triangleVertexTextureCoordBuffer.numItems << 1
-    @triTextureCoords[texOffset]     = @N64VertexList[dwV].s
-    @triTextureCoords[texOffset + 1] = @N64VertexList[dwV].t
-    @triangleVertexTextureCoordBuffer.numItems += 1
+    texOffset = @triangleVertexTextureCoordBuffer.numItems++ << 1 # postfix addition is intentional for performance
+    @triTextureCoords[texOffset]     = vertex.s
+    @triTextureCoords[texOffset + 1] = vertex.t
     true
 
   C1964jsVideoHLE::setBlendFunc = () ->

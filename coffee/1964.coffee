@@ -377,11 +377,11 @@ class C1964jsEmulator
             #  #@frameTime += (thisFrameTime - @frameTime) / filterStrength;
             #  @lastLoop = thisLoop;            #@fps = thisLoop
             #  break if (frameTime > 30.0)
-            checked = true
+            limit = true
             speedlimit = document.getElementById("speedlimit")
-            checked is false if speedlimit isnt null and speedlimit.checked is true
+            limit = false if speedlimit isnt null and speedlimit.checked is false
 
-            if checked is true
+            if limit is true
               rate = 60
               @settings.speedLimitMs = rate
               clearInterval @mySetInterval
@@ -555,8 +555,14 @@ class C1964jsEmulator
     pc = (@p[0] + offset + 4 + (@helpers.soffset_imm(i) << 2)) | 0
     instruction = @memory.lw((@p[0] + offset + 4) | 0)
     opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
-    c=@cnt+1
-    string = opcode + "t.m[0]+="+c+";t.p[0]=" + pc + ";return t.code." + @getFnName(pc) + "}"
+    #speed hack
+    if instruction is 0 and @helpers.soffset_imm(i) is -1
+      c = 0
+      string = opcode + "t.m[0]="+c+";t.p[0]=" + pc + ";return t.code." + @getFnName(pc) + "}"
+    else
+      c=@cnt+1
+      string = opcode + "t.m[0]+="+c+";t.p[0]=" + pc + ";return t.code." + @getFnName(pc) + "}"
+    
 
     #if likely and if branch not taken, skip delay slot
     if likely is false
@@ -649,7 +655,7 @@ class C1964jsEmulator
 
     #speed hack
     speedUp = false
-    # speedUp = true if ((instr_index >> 0) is (@p[0] + offset) >> 0) and (instruction is 0)
+    speedUp = true if ((instr_index >> 0) is (@p[0] + offset) >> 0) and (instruction is 0)
 
     string += this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     if speedUp is true
@@ -727,7 +733,7 @@ class C1964jsEmulator
     "t.helpers.inter_mtc0(r," + @helpers.fs(i) + "," + @helpers.rt(i) + "," + delaySlot + "," + lpc + ",t.cp0,t.interrupts);"
 
   r4300i_sll: (i) ->
-    return ""  if (i & 0x001FFFFF) is 0
+    return ""  if (i & 0x001FFFFF) is 0 # NOP
     @helpers.tRDH(i) + "=(" + @helpers.tRD(i) + "=" + @helpers.RT(i) + "<<" + @helpers.sa(i) + ")>>31;"
 
   r4300i_srl: (i) ->
