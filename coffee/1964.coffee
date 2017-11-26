@@ -228,7 +228,8 @@ class C1964jsEmulator
     @cp0[consts.PREVID] = 0x00000b00
     @cp1Con[0] = 0x00000511
 
-    @p = 0xA4000040 #set programCounter to start of SP_MEM and after the 64 byte ROM header.
+    @p = new Int32Array(1)
+    @p[0] = 0xA4000040 #set programCounter to start of SP_MEM and after the 64 byte ROM header.
     @memory.setInt32 @memory.miUint8Array, consts.MI_VERSION_REG, 0x01010101
     @memory.setInt32 @memory.riUint8Array, consts.RI_CONFIG_REG, 0x00000001
     @memory.setInt32 @memory.viUint8Array, consts.VI_INTR_REG, 0x000003FF
@@ -362,7 +363,7 @@ class C1964jsEmulator
             @cp0[consts.COUNT] += 625000 #todo: set count to count + @m*2 when count is requested in code
             @interrupts.triggerCompareInterrupt 0, false
             @interrupts.triggerVIInterrupt 0, false
-            @interrupts.processException @p
+            @interrupts.processException @p[0]
             #@request = requestAnimFrame(@runLoop)  if @terminate is false
             #filterStrength = 1.0
             #frameTime = 0.0
@@ -396,8 +397,8 @@ class C1964jsEmulator
               @runLoop()
             break
         else
-          @interrupts.processException @p
-          pc = @p >>> 2
+          @interrupts.processException @p[0]
+          pc = @p[0] >>> 2
           fnName = "_" + pc
 
           #this is broken-up so that we can process more interrupts. If we freeze,
@@ -410,7 +411,7 @@ class C1964jsEmulator
             #but right now, we're assuming that we need to compile a block due to
             #an attempt to call an undefined function. Are there standard exception types
             #in javascript?
-            fn = @decompileBlock(@p)
+            fn = @decompileBlock(@p[0])
             fn = fn(@r, @ru, @h, @hu, @memory, this)
     ), @settings.rateWithDelta
     this
@@ -475,7 +476,7 @@ class C1964jsEmulator
 
     #close out the function
     string += "t.m[0]+=" + @cnt + ";"
-    string += "t.p=" + ((pc + offset) >> 0)
+    string += "t.p[0]=" + ((pc + offset) >> 0)
     string += ";return t.code." + @getFnName((pc + offset) >> 0) + "}"
     if @writeToDom is true
       g = document.createElement("script")
@@ -534,10 +535,10 @@ class C1964jsEmulator
 
     #So we can process exceptions
     if isDelaySlot is true
-      a = (@p + offset + 4) | 0
+      a = (@p[0] + offset + 4) | 0
       string += ", " + a + ", true);"
     else
-      a = (@p + offset) | 0
+      a = (@p[0] + offset) | 0
       string += ", " + a + ");"
     string
 
@@ -546,11 +547,11 @@ class C1964jsEmulator
     instruction = undefined
     opcode = undefined
     string = undefined
-    pc = (@p + offset + 4 + (@helpers.soffset_imm(i) << 2)) | 0
-    instruction = @memory.lw((@p + offset + 4) | 0)
+    pc = (@p[0] + offset + 4 + (@helpers.soffset_imm(i) << 2)) | 0
+    instruction = @memory.lw((@p[0] + offset + 4) | 0)
     opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     c=@cnt+1
-    string = opcode + "t.m[0]+="+c+";t.p=" + pc + ";return t.code." + @getFnName(pc) + "}"
+    string = opcode + "t.m[0]+="+c+";t.p[0]=" + pc + ";return t.code." + @getFnName(pc) + "}"
 
     #if likely and if branch not taken, skip delay slot
     if likely is false
@@ -596,12 +597,12 @@ class C1964jsEmulator
 
   r4300i_bgezal: (i) ->
     @stopCompiling = true
-    link = (@p + offset + 8) >> 0
+    link = (@p[0] + offset + 8) >> 0
     "if(" + @helpers.RSH(i) + ">=0){" + "r[31]=" + link + ";" + "h[31]=" + (link >> 31) + ";" + @delaySlot(i, false)
 
   r4300i_bgezall: (i) ->
     @stopCompiling = true
-    link = (@p + offset + 8) >> 0
+    link = (@p[0] + offset + 8) >> 0
     "if(" + @helpers.RSH(i) + ">=0){" + "r[31]=" + link + ";" + "h[31]=" + (link >> 31) + ";" + @delaySlot(i, true)
 
   r4300i_bltz: (i) ->
@@ -636,36 +637,36 @@ class C1964jsEmulator
     @stopCompiling = true
     instruction = undefined
     string = "{"
-    instr_index = ((((@p + offset + 4) & 0xF0000000) | ((i & 0x03FFFFFF) << 2)) | 0)
+    instr_index = ((((@p[0] + offset + 4) & 0xF0000000) | ((i & 0x03FFFFFF) << 2)) | 0)
 
     #delay slot
-    instruction = @memory.lw((@p + offset + 4) | 0)
+    instruction = @memory.lw((@p[0] + offset + 4) | 0)
 
     #speed hack
     speedUp = false
-    # speedUp = true if ((instr_index >> 0) is (@p + offset) >> 0) and (instruction is 0)
+    # speedUp = true if ((instr_index >> 0) is (@p[0] + offset) >> 0) and (instruction is 0)
 
     string += this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     if speedUp is true
-      string += "t.m=0;"
+      string += "t.m[0]=0;"
     else
       string += "t.m[0]+=" + (@cnt+1) + ";"      
 
-    string += "t.p=" + instr_index + ";return t.code." + @getFnName(instr_index) + "}"
+    string += "t.p[0]=" + instr_index + ";return t.code." + @getFnName(instr_index) + "}"
 
   r4300i_jal: (i) ->
     @stopCompiling = true
     pc = undefined
     instruction = undefined
     string = "{"
-    instr_index = ((((@p + offset + 4) & 0xF0000000) | ((i & 0x03FFFFFF) << 2)) | 0)
+    instr_index = ((((@p[0] + offset + 4) & 0xF0000000) | ((i & 0x03FFFFFF) << 2)) | 0)
 
     #delay slot
-    instruction = @memory.lw((@p + offset + 4) | 0)
+    instruction = @memory.lw((@p[0] + offset + 4) | 0)
     string += this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
-    pc = (@p + offset + 8) | 0
+    pc = (@p[0] + offset + 8) | 0
     string += "t.m[0]+=" + (@cnt+1) + ";"
-    string += "t.p=" + instr_index + ";r[31]=" + pc + ";h[31]=" + (pc >> 31) + ";return t.code." + @getFnName(instr_index) + "}"
+    string += "t.p[0]=" + instr_index + ";r[31]=" + pc + ";h[31]=" + (pc >> 31) + ";return t.code." + @getFnName(instr_index) + "}"
 
   #should we set the programCounter after the delay slot or before it?
   r4300i_jalr: (i) ->
@@ -674,15 +675,15 @@ class C1964jsEmulator
     opcode = undefined
     link = undefined
     string = "{var temp=" + @helpers.RS(i) + ";"
-    link = (@p + offset + 8) >> 0
+    link = (@p[0] + offset + 8) >> 0
     string += @helpers.tRD(i) + "=" + link + ";" + @helpers.tRDH(i) + "=" + (link >> 31) + ";"
 
     #delay slot
-    instruction = @memory.lw((@p + offset + 4) | 0)
+    instruction = @memory.lw((@p[0] + offset + 4) | 0)
     opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     string += opcode
     string += "t.m[0]+= " + (@cnt+1) + ";"
-    string += "t.p=temp;return t.code[\"_\"+(temp>>>2)]}"
+    string += "t.p[0]=temp;return t.code[\"_\"+(temp>>>2)]}"
     string
 
   r4300i_jr: (i) ->
@@ -692,11 +693,11 @@ class C1964jsEmulator
     string = "{var temp=" + @helpers.RS(i) + ";"
 
     #delay slot
-    instruction = @memory.lw((@p + offset + 4) | 0)
+    instruction = @memory.lw((@p[0] + offset + 4) | 0)
     opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     string += opcode
     string += "t.m[0]+= " + (@cnt+1) + ";"
-    string += "t.p=temp;return t.code[\"_\"+(temp>>>2)]}"
+    string += "t.p[0]=temp;return t.code[\"_\"+(temp>>>2)]}"
 
   UNUSED: (i) ->
     @log "warning: UNUSED"
@@ -704,19 +705,19 @@ class C1964jsEmulator
 
   r4300i_COP0_eret: (i) ->
     @stopCompiling = true
-    string = "{if((t.cp0[" + consts.STATUS + "]&" + consts.ERL + ")!==0){alert(\"error epc\");t.p=t.cp0[" + consts.ERROREPC + "];"
-    string += "t.cp0[" + consts.STATUS + "]&=~" + consts.ERL + "}else{t.p=t.cp0[" + consts.EPC + "];t.cp0[" + consts.STATUS + "]&=~" + consts.EXL + "}"
+    string = "{if((t.cp0[" + consts.STATUS + "]&" + consts.ERL + ")!==0){alert(\"error epc\");t.p[0]=t.cp0[" + consts.ERROREPC + "];"
+    string += "t.cp0[" + consts.STATUS + "]&=~" + consts.ERL + "}else{t.p[0]=t.cp0[" + consts.EPC + "];t.cp0[" + consts.STATUS + "]&=~" + consts.EXL + "}"
     string += "t.m[0]+= " + (@cnt+1) + ";"
-    string += "t.LLbit=0;return t.code[\"_\"+(t.p>>>2)]}"
+    string += "t.LLbit=0;return t.code[\"_\"+(t.p[0]>>>2)]}"
 
   r4300i_COP0_mtc0: (i, isDelaySlot) ->
     delaySlot = undefined
     lpc = undefined
     if isDelaySlot is true
-      lpc = (@p + offset + 4) | 0
+      lpc = (@p[0] + offset + 4) | 0
       delaySlot = "true"
     else
-      lpc = (@p + offset) | 0
+      lpc = (@p[0] + offset) | 0
       delaySlot = "false"
     "t.helpers.inter_mtc0(r," + @helpers.fs(i) + "," + @helpers.rt(i) + "," + delaySlot + "," + lpc + ",t.cp0,t.interrupts);"
 
@@ -820,10 +821,10 @@ class C1964jsEmulator
 
     #So we can process exceptions
     if isDelaySlot is true
-      a = (@p + offset + 4) | 0
+      a = (@p[0] + offset + 4) | 0
       string += ", " + a + ", true);"
     else
-      a = (@p + offset) | 0
+      a = (@p[0] + offset) | 0
       string += ", " + a + ");"
     string
 
@@ -833,10 +834,10 @@ class C1964jsEmulator
 
     #So we can process exceptions
     if isDelaySlot is true
-      a = (@p + offset + 4) | 0
+      a = (@p[0] + offset + 4) | 0
       string += ", " + a + ", true);"
     else
-      a = (@p + offset) | 0
+      a = (@p[0] + offset) | 0
       string += ", " + a + ");"
     string
 
@@ -876,10 +877,10 @@ class C1964jsEmulator
 
     #So we can process exceptions
     if isDelaySlot is true
-      a = (@p + offset + 4) | 0
+      a = (@p[0] + offset + 4) | 0
       string += ", " + a + ", true);"
     else
-      a = (@p + offset) | 0
+      a = (@p[0] + offset) | 0
       string += ", " + a + ");"
 
     #hi
@@ -887,10 +888,10 @@ class C1964jsEmulator
 
     #So we can process exceptions
     if isDelaySlot is true
-      a = (@p + offset + 4) | 0
+      a = (@p[0] + offset + 4) | 0
       string += ", " + a + ", true)}"
     else
-      a = (@p + offset) | 0
+      a = (@p[0] + offset) | 0
       string += ", " + a + ")}"
     string
 
@@ -987,10 +988,10 @@ class C1964jsEmulator
 
     #So we can process exceptions
     if isDelaySlot is true
-      a = (@p + offset + 4) | 0
+      a = (@p[0] + offset + 4) | 0
       string += ", " + a + ", true);"
     else
-      a = (@p + offset) | 0
+      a = (@p[0] + offset) | 0
       string += ", " + a + ");"
     string
 
@@ -1000,19 +1001,19 @@ class C1964jsEmulator
 
     #So we can process exceptions
     if isDelaySlot is true
-      a = (@p + offset + 4) | 0
+      a = (@p[0] + offset + 4) | 0
       string += ", " + a + ", true);"
     else
-      a = (@p + offset) | 0
+      a = (@p[0] + offset) | 0
       string += ", " + a + ");"
     string += "m.sw(t.cp1_i[" + @helpers.FT32HIArrayView(i) + "],(t.vAddr[0])|0"
 
     #So we can process exceptions
     if isDelaySlot is true
-      a = (@p + offset + 4) | 0
+      a = (@p[0] + offset + 4) | 0
       string += ", " + a + ", true)}"
     else
-      a = (@p + offset) | 0
+      a = (@p[0] + offset) | 0
       string += ", " + a + ")}"
     string
 

@@ -91,7 +91,7 @@ C1964jsInterrupts = (core, cp0) ->
     #throw 'interrupt';
     core.flushDynaCache()  if core.doOnce is 0
     core.doOnce = 1
-    core.p = 0x80000180
+    core.p[0] = 0x80000180
     true
 
   @triggerCompareInterrupt = (pc, isFromDelaySlot) ->
