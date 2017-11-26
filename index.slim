@@ -460,10 +460,12 @@ html
             option value="?rom=roms/unofficial/sp_crap.zip" Absolute Crap
             option value="?rom=roms/unofficial/DynamixReadme.zip" Dynamix
 
-        input#wireframe type="checkbox" wireframe
-        |&nbsp;&nbsp;
-        input#speedlimit type="checkbox" checked="true" speed limit 
+        input#stretch type="checkbox" Stretch
         - if outputMode == "debug.html"
+          |&nbsp;&nbsp;
+          input#wireframe type="checkbox" wireframe
+          |&nbsp;&nbsp;
+          input#speedlimit type="checkbox" checked="true" speed limit 
           |&nbsp;&nbsp;
           input#repeatDList type="checkbox" repeat DList 
 
@@ -482,8 +484,6 @@ html
           br/
           br/
         |Supports Super Mario 64
-        br/
-        |Press Enter/Return in game to start
         br/
         a href="https://www.google.com/chrome/" [Best with Chrome]
 

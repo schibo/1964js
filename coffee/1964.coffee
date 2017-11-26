@@ -377,7 +377,11 @@ class C1964jsEmulator
             #  #@frameTime += (thisFrameTime - @frameTime) / filterStrength;
             #  @lastLoop = thisLoop;            #@fps = thisLoop
             #  break if (frameTime > 30.0)
-            if document.getElementById("speedlimit").checked is true
+            checked = true
+            speedlimit = document.getElementById("speedlimit")
+            checked is false if speedlimit isnt null and speedlimit.checked is true
+
+            if checked is true
               rate = 60
               @settings.speedLimitMs = rate
               clearInterval @mySetInterval
@@ -436,7 +440,8 @@ class C1964jsEmulator
     @terminate = false
     @log "startEmulator"
     @settings.rateWithDelta = 0.0
-    @settings.rateWithDelta = 100.0/60.0 if document.getElementById("speedlimit").checked is true
+    speedlimit =  document.getElementById("speedlimit")
+    @settings.rateWithDelta = 100.0/60.0 if speedlimit isnt null and speedlimit.checked is true
     @runLoop()
     return
 
