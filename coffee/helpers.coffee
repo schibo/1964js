@@ -80,12 +80,12 @@ C1964jsHelpers = (core, isLittleEndian) ->
   @uRS = (i) ->
     reg = (i >> 21 & 0x1f)
     return "0"  if reg is 0
-    "(r[" + reg + "]>>>0)"
+    "ru[" + reg + "]"
 
   @uRSH = (i) ->
     reg = (i >> 21 & 0x1f)
     return "0"  if reg is 0
-    "(h[" + reg + "]>>>0)"
+    "hu[" + reg + "]"
 
   @tRS = (i) ->
     reg = (i >> 21 & 0x1f)
@@ -130,12 +130,12 @@ C1964jsHelpers = (core, isLittleEndian) ->
   @uRD = (i) ->
     reg = (i >> 11 & 0x1f)
     return "0"  if reg is 0
-    "(r[" + reg + "]>>>0)"
+    "ru[" + reg + "]"
 
   @uRDH = (i) ->
     reg = (i >> 11 & 0x1f)
     return "0"  if reg is 0
-    "(h[" + reg + "]>>>0)"
+    "hu[" + reg + "]"
 
   @RT = (i) ->
     reg = (i >> 16 & 0x1f)
@@ -150,12 +150,12 @@ C1964jsHelpers = (core, isLittleEndian) ->
   @uRT = (i) ->
     reg = (i >> 16 & 0x1f)
     return "0"  if reg is 0
-    "(r[" + reg + "]>>>0)"
+    "ru[" + reg + "]"
 
   @uRTH = (i) ->
     reg = (i >> 16 & 0x1f)
     return "0"  if reg is 0
-    "(h[" + reg + "]>>>0)"
+    "hu[" + reg + "]"
 
   @rt = (i) ->
     i >> 16 & 0x1f
@@ -370,9 +370,9 @@ C1964jsHelpers = (core, isLittleEndian) ->
 
     #todo: handle div by zero
     r[32] = (r[@rs(i)] >>> 0) / (r[@rt(i)] >>> 0) #lo
-    h[32] = 0 #hi
+    h[32] = r[32] >> 31 #hi
     r[33] = (r[@rs(i)] >>> 0) % (r[@rt(i)] >>> 0) #lo
-    h[33] = 0 #hi
+    h[33] = r[33] >> 31 #hi
     return
 
   #alert('divu: '+r[this.rs(i)]+'/'+r[this.rt(i)]+'='+dec2hex(h[33]) +' '+dec2hex(r[33])+' '+dec2hex(h[32])+' '+dec2hex(r[32]));
@@ -384,6 +384,10 @@ C1964jsHelpers = (core, isLittleEndian) ->
     z = undefined
     num = undefined
     rt64 = undefined
+
+    alert "dmult RSh negative:" + h[@rs(i)]  if h[@rs(i)] < 0
+    alert "dmult RTh negative:" + h[@rt(i)]  if h[@rt(i)] < 0
+
     rs64 = "0x" + String(dec2hex(h[@rs(i)])) + String(dec2hex(r[@rs(i)]))
     rt64 = "0x" + String(dec2hex(h[@rt(i)])) + String(dec2hex(r[@rt(i)]))
     x = new BigInt(rs64)
