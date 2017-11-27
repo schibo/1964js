@@ -78,7 +78,7 @@ C1964jsVideoHLE = (core, glx) ->
   @colorsTexture = @gl.createTexture()
   @renderStateChanged = false
 
-  @normalMat = mat4.create()
+  @normalMat = new Float32Array(4)
   @transformed = mat4.create()
   @nonTransformed = mat4.create()
   @modelViewtransposedInverse = mat4.create()
@@ -195,7 +195,7 @@ C1964jsVideoHLE = (core, glx) ->
     type = @getGbi1Type(pc)
     length = @getGbi1Length(pc)
     seg = @getGbi0DlistAddr(pc)
-    addr = @getGbi1RspSegmentAddr(seg)
+    addr = @getRspSegmentAddr(seg)
     switch type
       when consts.RSP_GBI1_MV_MEM_VIEWPORT
         @RSP_MoveMemViewport addr
@@ -370,37 +370,74 @@ C1964jsVideoHLE = (core, glx) ->
       @N64VertexList[i].x = @getVertexX(a)
       @N64VertexList[i].y = @getVertexY(a)
       @N64VertexList[i].z = @getVertexZ(a)
+      #@N64VertexList[i].w = @getVertexW(a)
+      #if @N64VertexList[i].w is 0
+      #  @N64VertexList[i].w = 1.0
+      #else
+      #  alert "whoa"
+      @N64VertexList[i].w = 1.0
       @N64VertexList[i].s = @getVertexS(a)/32 / texWidth
       @N64VertexList[i].t = @getVertexT(a)/32 / texHeight
 
       if @bLightingEnable is true
-        @normalMat[0] = -@getVertexNormalX(a)
-        @normalMat[1] = -@getVertexNormalY(a)
-        @normalMat[2] = -@getVertexNormalZ(a)
-        @normalMat[3] = 0
-        #modelViewtransposedInverse = mat4.create()
-        #mat4.set @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], modelViewtransposedInverse
+        @normalMat[0] = (this.getVertexNormalX(a) << 24 >> 24)
+        @normalMat[1] = (this.getVertexNormalY(a) << 24 >> 24)
+        @normalMat[2] = (this.getVertexNormalZ(a) << 24 >> 24)
+        @normalMat[3] = 1.0
+
+        ve = new Float32Array(3)
+        ve[0] = this.normalMat[0]
+        ve[1] = this.normalMat[1]
+        ve[2] = this.normalMat[2]
+        ve = vec3.normalize(ve)
+
+        vek = new Float32Array(4);
+        vek[0] = ve[0];
+        vek[1] = ve[1];
+        vek[2] = ve[2];
+        vek[3] = 1.0;
+        
+        #@normalMat = vec3.normalize(@normalMat);
+
+        modelViewInverse = mat4.create()
+        modelViewtransposedInverse = mat4.create()
+       # mat4.set @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], modelViewInverse
         #mat4.inverse modelViewtransposedInverse, modelViewtransposedInverse
         #mat4.transpose modelViewtransposedInverse, modelViewtransposedInverse
 
         #mat4.multiply modelViewtransposedInverse, @normalMat, @normalMat
-        @normalMat = vec3.normalize @normalMat
+        
+       # @normalMat[3] = 1.0
 
-        #worldViewtransposedInverse = mat4.create()
-        #mat4.inverse @gRSP.projectionMtxs[@gRSP.projectionMtxTop], worldViewtransposedInverse
-        #mat4.transpose worldViewtransposedInverse, worldViewtransposedInverse
-        #vec3.multiply worldViewtransposedInverse, @normalMat, @normalMat
+        mat4.inverse @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], modelViewInverse
+        mat4.transpose modelViewInverse, modelViewtransposedInverse
+        #mat4.inverse @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], modelViewInverse
 
-        vertColor = @lightVertex @normalMat
+        mat4.multiplyVec4(modelViewtransposedInverse, vek, vek);
+
+        vect = new Float32Array(3)
+        vect[0] = vek[0]
+        vect[1] = vek[1]
+        vect[2] = vek[2]
+        vect = vec3.normalize(vect)
+
+        
+        # projectiontransposedInverse = mat4.create()
+        # mat4.set @gRSP.projectionMtxs[@gRSP.projectionMtxTop], projectiontransposedInverse
+        # mat4.transpose projectiontransposedInverse, projectiontransposedInverse
+        # mat4.inverse projectiontransposedInverse, projectiontransposedInverse
+        # mat4.multiply projectiontransposedInverse, @normalMat, @normalMat
+
+        vertColor = @lightVertex vect
         @N64VertexList[i].r = vertColor[0]
         @N64VertexList[i].g = vertColor[1]
         @N64VertexList[i].b = vertColor[2]
         @N64VertexList[i].a = vertColor[3]
       else if @bShade is false
-        @N64VertexList[i].r = @primColor[0] * 255.0
-        @N64VertexList[i].g = @primColor[1] * 255.0
-        @N64VertexList[i].b = @primColor[2] * 255.0
-        @N64VertexList[i].a = @primColor[3] * 255.0
+        @N64VertexList[i].r = @primColor[0]
+        @N64VertexList[i].g = @primColor[1]
+        @N64VertexList[i].b = @primColor[2]
+        @N64VertexList[i].a = @primColor[3]
       else
         @N64VertexList[i].r = @getVertexColorR(a)
         @N64VertexList[i].g = @getVertexColorG(a)
@@ -421,7 +458,7 @@ C1964jsVideoHLE = (core, glx) ->
     @zColorImage.siz = @getSetTileSiz pc
     @zColorImage.width = @getTImgWidth(pc) + 1
     seg = @getGbi0DlistAddr(pc)
-    @zColorImage.addr = @getGbi1RspSegmentAddr(seg)
+   # @zColorImage.addr = @getGbi1RspSegmentAddr(seg)
     return
 
   C1964jsVideoHLE::DLParser_SetZImg = (pc) ->
@@ -429,7 +466,7 @@ C1964jsVideoHLE = (core, glx) ->
     @zDepthImage.siz = @getSetTileSiz pc
     @zDepthImage.width = @getTImgWidth(pc) + 1
     seg = @getGbi0DlistAddr(pc)
-    @zDepthImage.addr = @getGbi1RspSegmentAddr(seg)
+   # @zDepthImage.addr = @getGbi1RspSegmentAddr(seg)
     return
 
   #Gets new display list address
@@ -538,7 +575,10 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::setLightDirection = (dwLight, x, y, z) ->
-    lightVec = [x, y, z]
+    lightVec = new Float32Array(3)
+    lightVec[0] = x
+    lightVec[1] = y
+    lightVec[2] = z
     lightVec = vec3.normalize(lightVec)
 
     @gRSPlights[dwLight].x = lightVec[0]
@@ -547,17 +587,18 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::lightVertex = (norm) ->
-    r = @gRSP.fAmbientLightR
+    r = @gRSP.fAmbientLightR 
     g = @gRSP.fAmbientLightG
     b = @gRSP.fAmbientLightB
     a = @gRSP.fAmbientLightA
 
     for l in [0...@gRSPnumLights]
       fCosT = norm[0]*@gRSPlights[l].x + norm[1]*@gRSPlights[l].y + norm[2]*@gRSPlights[l].z
-      r += @gRSPlights[l].r * fCosT
-      g += @gRSPlights[l].g * fCosT
-      b += @gRSPlights[l].b * fCosT
-      a += @gRSPlights[l].a * fCosT
+      if fCosT > 0
+        r += @gRSPlights[l].r * fCosT
+        g += @gRSPlights[l].g * fCosT
+        b += @gRSPlights[l].b * fCosT
+        a += @gRSPlights[l].a * fCosT
 
     if r < 0.0
       r = 0.0
@@ -584,9 +625,9 @@ C1964jsVideoHLE = (core, glx) ->
 
     @gRSPn64lights[dwLight].dwRGBA = @getGbi0MoveWordValue(dwAddr)
     @gRSPn64lights[dwLight].dwRGBACopy = @getGbi0MoveWordValue(dwAddr+4)
-    @gRSPn64lights[dwLight].x = @getCommand(pc+8)
-    @gRSPn64lights[dwLight].y = @getCommand(pc+9)
-    @gRSPn64lights[dwLight].z = @getCommand(pc+10)
+    @gRSPn64lights[dwLight].x = @getVertexLightX dwAddr
+    @gRSPn64lights[dwLight].y = @getVertexLightY dwAddr
+    @gRSPn64lights[dwLight].z = @getVertexLightZ dwAddr
 
     # disabled in Rice's code.
     # /*
@@ -618,7 +659,7 @@ C1964jsVideoHLE = (core, glx) ->
       @setAmbientLight dwCol
     else
       @setLightCol dwLight, @gRSPn64lights[dwLight].dwRGBA
-      if @getGbi0MoveWordValue(dwAddr+8) is 0  # Direction is 0!
+      if @getGbi0MoveWordValue(dwAddr+4) is 0  # Direction is 0! // This sucks. Give it a better name
       else
         @setLightDirection dwLight, @gRSPn64lights[dwLight].x, @gRSPn64lights[dwLight].y, @gRSPn64lights[dwLight].z
     return
@@ -652,6 +693,7 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::RSP_RDP_InsertMatrix = ->
+    @videoLog "TODO: Insert Matrix"
     @updateCombinedMatrix()
     @gRSP.bMatrixIsUpdated = false
     return
@@ -763,6 +805,7 @@ C1964jsVideoHLE = (core, glx) ->
     else
       @bZBufferEnable = false
     return
+
 
   C1964jsVideoHLE::RSP_GBI1_EndDL = (pc) ->
     @RDP_GFX_PopDL()
@@ -1061,11 +1104,12 @@ C1964jsVideoHLE = (core, glx) ->
     #console.log "Vertex Index: "+vtxIndex+" dwV:"+dwV
     return false  if dwV >= consts.MAX_VERTS
 
-    offset = 3 * @triangleVertexPositionBuffer.numItems++ # postfix addition is intentional for performance
+    offset = 4 * @triangleVertexPositionBuffer.numItems++ # postfix addition is intentional for performance
     vertex = this.N64VertexList[dwV]
     @triVertices[offset] = vertex.x
     @triVertices[offset+1] = vertex.y
     @triVertices[offset+2] = vertex.z
+    @triVertices[offset+3] = vertex.w
 
     colorOffset = @triangleVertexColorBuffer.numItems++ << 2 # postfix addition is intentional for performance
     @triColorVertices[colorOffset]     = vertex.r
@@ -1334,7 +1378,7 @@ C1964jsVideoHLE = (core, glx) ->
   C1964jsVideoHLE::initBuffers = ->
     @triangleVertexPositionBuffer = @gl.createBuffer()
     @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexPositionBuffer
-    @triangleVertexPositionBuffer.itemSize = 3
+    @triangleVertexPositionBuffer.itemSize = 4
     @triangleVertexPositionBuffer.numItems = 0
 
     @triangleVertexColorBuffer = @gl.createBuffer()

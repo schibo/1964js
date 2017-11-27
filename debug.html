@@ -12,7 +12,7 @@
   <body alink="#ff0000" bgcolor="#000000" link="#ffa953" onLoad="start1964({wireframe:true})" onunload="i1964js.stopEmulatorAndCleanup()" text="#ffffff" vlink="#ffa953">
     <p></p>
     <script id="vertex-shader" type="x-shader/x-vertex">
-      attribute vec3 aVertexPosition;
+      attribute vec4 aVertexPosition;
       attribute vec4 aVertexColor;
       attribute vec2 aTextureCoord;
       uniform mat4 uMVMatrix;
@@ -22,7 +22,7 @@
       varying vec2 vTextureCoord;
       
       void main(void) {
-        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+        gl_Position = uPMatrix * uMVMatrix * aVertexPosition;
         vColor = aVertexColor;
         vTextureCoord = aTextureCoord;
       }

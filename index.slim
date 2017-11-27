@@ -68,7 +68,7 @@ html
     p
 
     script#vertex-shader type="x-shader/x-vertex"
-      | attribute vec3 aVertexPosition;
+      | attribute vec4 aVertexPosition;
         attribute vec4 aVertexColor;
         attribute vec2 aTextureCoord;
         uniform mat4 uMVMatrix;
@@ -78,7 +78,7 @@ html
         varying vec2 vTextureCoord;
         
         void main(void) {
-          gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+          gl_Position = uPMatrix * uMVMatrix * aVertexPosition;
           vColor = aVertexColor;
           vTextureCoord = aTextureCoord;
         }
