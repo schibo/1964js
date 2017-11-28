@@ -73,10 +73,12 @@ C1964jsRenderer = (settings, glx, webGL) ->
     sh = (s + (rectWidth*dsdx)) / tileWidth * widthscale
     th = (t + (rectHeight*dtdy)) / tileHeight * heightscale
 
-    xl = (xl-160)/160
-    xh = (xh-160)/160
-    yl = -(yl-120)/120
-    yh = -(yh-120)/120
+    xTrans = videoHLE.n64ViewportWidth
+    yTrans = videoHLE.n64ViewportHeight
+    xl = (xl-xTrans)/xTrans
+    xh = (xh-xTrans)/xTrans
+    yl = -(yl-yTrans)/yTrans
+    yh = -(yh-yTrans)/yTrans
 
     initQuad xl, yl, xh, yh, sl, tl, sh, th, videoHLE
     @draw tile, tmem, videoHLE, nextPow2Width, nextPow2Height, tileWidth, tileHeight

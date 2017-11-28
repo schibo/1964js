@@ -84,6 +84,15 @@ C1964jsVideoHLE = (core, glx) ->
   @modelViewInverse = mat4.create()
   @modelViewTransposedInverse = mat4.create()
 
+  # Native Viewport
+  @n64ViewportWidth = 640
+  @n64ViewportHeight = 480
+  @n64ViewportLeft = 0
+  @n64ViewportTop = 0
+  @n64ViewportRight = 320
+  @n64ViewportBottom = 240
+
+
   #todo: different microcodes support
   @currentMicrocodeMap = @microcodeMap0
   i = 0
@@ -192,7 +201,6 @@ C1964jsVideoHLE = (core, glx) ->
     addr = undefined
     length = undefined
     type = @getGbi1Type(pc)
-    length = @getGbi1Length(pc)
     seg = @getGbi0DlistAddr(pc)
     addr = @getRspSegmentAddr(seg)
     switch type
@@ -214,6 +222,41 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::RSP_MoveMemViewport = (addr) ->
     @videoLog "RSP_MoveMemViewport"
+
+    g_dwRamSize = 0x400000 # todo, use 8MB or custom setting
+    if addr + 16 >= g_dwRamSize
+      console.error "viewport addresses beyond mem size"
+      return
+
+    scale = new Float32Array(4)
+    trans = new Float32Array(4)
+
+    scale[0] = @getShort addr+0*2
+    scale[1] = @getShort addr+1*2
+    scale[2] = @getShort addr+2*2
+    scale[3] = @getShort addr+3*2
+
+    trans[0] = @getShort addr+4*2
+    trans[1] = @getShort addr+5*2
+    trans[2] = @getShort addr+6*2
+    trans[3] = @getShort addr+7*2
+
+    centerX = trans[0] / 4.0
+    centerY = trans[1] / 4.0
+    @n64ViewportWidth = scale[0] / 4.0
+    @n64ViewportHeight = scale[1] / 4.0
+
+    @n64ViewportWidth = -@n64ViewportWidth if @n64ViewportWidth < 0
+    @n64ViewportHeight = -@n64ViewportHeight if @n64ViewportHeight < 0
+    @n64ViewportLeft = centerX - @n64ViewportWidth
+    @n64ViewportTop = centerY - @n64ViewportHeight
+    @n64ViewportRight = centerX + @n64ViewportWidth
+    @n64ViewportBottom = centerY + @n64ViewportHeight
+
+    maxZ = 0x3FF
+
+    #@setViewPort left, top, right, bottom, maxZ
+
     return
 
   C1964jsVideoHLE::RSP_GBI1_SpNoop = (pc) ->

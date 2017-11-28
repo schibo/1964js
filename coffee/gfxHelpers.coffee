@@ -259,10 +259,6 @@ C1964jsVideoHLE::getTexRectDtDy = (pc) ->
 C1964jsVideoHLE::getGbi1Type = (pc) ->
   (@core.memory.rdramUint8Array[pc] << 24 | @core.memory.rdramUint8Array[pc+1] << 16 | @core.memory.rdramUint8Array[pc+2] << 8 | @core.memory.rdramUint8Array[pc+3]) >>> 16 & 0x0FF
 
-#is this right?
-C1964jsVideoHLE::getGbi1Length = (pc) ->
-  (@core.memory.rdramUint8Array[pc] << 24 | @core.memory.rdramUint8Array[pc] << 16 | @core.memory.rdramUint8Array[pc] << 8 | @core.memory.rdramUint8Array[pc]) & 0xFFFF
-
 C1964jsVideoHLE::getRspSegmentAddr = (seg) ->
   #TODO: May need to mask with rdram size - 1
   (@segments[seg >> 24 & 0x0F]&0x00ffffff) + (seg & 0x00FFFFFF)
@@ -280,6 +276,10 @@ C1964jsVideoHLE::getWord0 = (pc) ->
 
 C1964jsVideoHLE::getWord1 = (pc) ->
   (@core.memory.rdramUint8Array[pc + 4] << 24 | @core.memory.rdramUint8Array[pc + 5] << 16 | @core.memory.rdramUint8Array[pc + 6] << 8 | @core.memory.rdramUint8Array[pc + 7])
+
+C1964jsVideoHLE::getShort = (pc) ->
+  (@core.memory.rdramUint8Array[pc] << 24 | @core.memory.rdramUint8Array[pc + 1] << 16) >> 16
+
 
 #
 #typedef struct {
