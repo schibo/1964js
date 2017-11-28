@@ -12,7 +12,7 @@
   <body alink="#ff0000" bgcolor="#000000" link="#ffa953" onLoad="start1964({wireframe:true})" onunload="i1964js.stopEmulatorAndCleanup()" text="#ffffff" vlink="#ffa953">
     <p></p>
     <script id="vertex-shader" type="x-shader/x-vertex">
-      attribute vec3 aVertexPosition;
+      attribute vec4 aVertexPosition;
       attribute vec4 aVertexColor;
       attribute vec2 aTextureCoord;
       uniform mat4 uMVMatrix;
@@ -22,7 +22,7 @@
       varying vec2 vTextureCoord;
       
       void main(void) {
-        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+        gl_Position = uPMatrix * uMVMatrix * aVertexPosition;
         vColor = aVertexColor;
         vTextureCoord = aTextureCoord;
       }
@@ -381,7 +381,7 @@
         <h1>
           1964js
           <div style="font-size: 10px;">
-            v0.2.24
+            v0.2.25
           </div>
           <select onChange="if (this.value !== &#39;Demos&#39;) window.open(this.value, &#39;_self&#39;);" style="vertical-align: middle;">
             <option value="Demos">

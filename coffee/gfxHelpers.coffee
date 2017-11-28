@@ -99,6 +99,10 @@ C1964jsVideoHLE::getVertexY = (pc) ->
 C1964jsVideoHLE::getVertexZ = (pc) ->
   (@core.memory.rdramUint8Array[pc + 4] << 24 | @core.memory.rdramUint8Array[pc + 5] << 16) >> 16
 
+#is this right?
+C1964jsVideoHLE::getVertexW = (pc) ->
+  (@core.memory.rdramUint8Array[pc + 6] << 24 | @core.memory.rdramUint8Array[pc + 7] << 16) >> 16
+
 
 C1964jsVideoHLE::getVertexS = (pc) ->
   #@core.memory.getInt32(@core.memory.rdramUint8Array, pc + 8) >> 16
@@ -121,16 +125,27 @@ C1964jsVideoHLE::getVertexAlpha = (pc) ->
   @core.memory.rdramUint8Array[pc+15] >>> 0
 
 C1964jsVideoHLE::getVertexNormalX = (pc) ->
-  (@core.memory.rdramUint8Array[pc+12] << 24 | @core.memory.rdramUint8Array[pc+13] << 16 | @core.memory.rdramUint8Array[pc+14] << 8 | @core.memory.rdramUint8Array[pc+15]) >>> 24
+  (@core.memory.rdramUint8Array[pc+12] << 24 | @core.memory.rdramUint8Array[pc+13] << 16 | @core.memory.rdramUint8Array[pc+14] << 8 | @core.memory.rdramUint8Array[pc+15]) >> 24
 
 C1964jsVideoHLE::getVertexNormalY = (pc) ->
-  (@core.memory.rdramUint8Array[pc+12] << 24 | @core.memory.rdramUint8Array[pc+13] << 16 | @core.memory.rdramUint8Array[pc+14] << 8 | @core.memory.rdramUint8Array[pc+15]) << 8 >>> 24
+  (@core.memory.rdramUint8Array[pc+12] << 24 | @core.memory.rdramUint8Array[pc+13] << 16 | @core.memory.rdramUint8Array[pc+14] << 8 | @core.memory.rdramUint8Array[pc+15]) << 8 >> 24
 
 C1964jsVideoHLE::getVertexNormalZ = (pc) ->
-  (@core.memory.rdramUint8Array[pc+12] << 24 | @core.memory.rdramUint8Array[pc+13] << 16 | @core.memory.rdramUint8Array[pc+14] << 8 | @core.memory.rdramUint8Array[pc+15]) << 16 >>> 24
+  (@core.memory.rdramUint8Array[pc+12] << 24 | @core.memory.rdramUint8Array[pc+13] << 16 | @core.memory.rdramUint8Array[pc+14] << 8 | @core.memory.rdramUint8Array[pc+15]) << 16 >> 24
 
 C1964jsVideoHLE::getVertexNormalA = (pc) ->
-  (@core.memory.rdramUint8Array[pc+12] << 24 | @core.memory.rdramUint8Array[pc+13] << 16 | @core.memory.rdramUint8Array[pc+14] << 8 | @core.memory.rdramUint8Array[pc+15]) << 24 >>> 24
+  (@core.memory.rdramUint8Array[pc+12] << 24 | @core.memory.rdramUint8Array[pc+13] << 16 | @core.memory.rdramUint8Array[pc+14] << 8 | @core.memory.rdramUint8Array[pc+15]) << 24 >> 24
+
+
+C1964jsVideoHLE::getVertexLightX = (pc) ->
+  @core.memory.rdramUint8Array[pc+8] << 24>> 24
+
+C1964jsVideoHLE::getVertexLightY = (pc) ->
+  @core.memory.rdramUint8Array[pc+9] << 24>> 24
+
+C1964jsVideoHLE::getVertexLightZ = (pc) ->
+  @core.memory.rdramUint8Array[pc+10] << 24>> 24
+
 
 
 C1964jsVideoHLE::toSByte = (ub) ->
@@ -213,7 +228,7 @@ C1964jsVideoHLE::gbi0PushMatrix = (pc) ->
   (if ((@core.memory.rdramUint8Array[pc + 1] & 0x00000004) isnt 0) then true else false)
 
 C1964jsVideoHLE::gbi0PopMtxIsProjection = (pc) ->
-  (if ((@core.memory.rdramUint8Array[pc + 1] & 0x00000001) isnt 0) then true else false)
+  (if ((@core.memory.rdramUint8Array[pc + 7] & 0x00000001) isnt 0) then true else false)
 
 #TexRect struct
 #    uint32 dwXH    = (((gfx->words.w0)>>12)&0x0FFF)/4;
@@ -264,13 +279,9 @@ C1964jsVideoHLE::getGbi1Type = (pc) ->
 C1964jsVideoHLE::getGbi1Length = (pc) ->
   (@core.memory.rdramUint8Array[pc] << 24 | @core.memory.rdramUint8Array[pc] << 16 | @core.memory.rdramUint8Array[pc] << 8 | @core.memory.rdramUint8Array[pc]) & 0xFFFF
 
-C1964jsVideoHLE::getGbi1RspSegmentAddr = (pc) ->
-  @getRspSegmentAddr(pc+4)
-
 C1964jsVideoHLE::getRspSegmentAddr = (seg) ->
-
   #TODO: May need to mask with rdram size - 1
-  @segments[seg >> 24 & 0x0F] + (seg & 0x00FFFFFF)
+  (@segments[seg >> 24 & 0x0F]&0x00ffffff) + (seg & 0x00FFFFFF)
 
 
 C1964jsVideoHLE::getOtherModeL = (pc) ->
