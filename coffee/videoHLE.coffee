@@ -83,7 +83,6 @@ C1964jsVideoHLE = (core, glx) ->
   @nonTransformed = mat4.create()
   @modelViewInverse = mat4.create()
   @modelViewTransposedInverse = mat4.create()
-  @worldViewTransposedInverse = mat4.create()
 
   #todo: different microcodes support
   @currentMicrocodeMap = @microcodeMap0
@@ -145,7 +144,7 @@ C1964jsVideoHLE = (core, glx) ->
     @dlParserProcess()
 
     #this.core.interrupts.triggerDPInterrupt(0, false);
-    @core.interrupts.triggerSPInterrupt 0, false
+    @core.interrupts.triggerDPInterrupt 0, false
     return
 
   C1964jsVideoHLE::videoLog = (msg) ->
@@ -177,7 +176,6 @@ C1964jsVideoHLE = (core, glx) ->
       if @dlistStackPointer >= 0
         @dlistStack[@dlistStackPointer].countdown -= 1
         @dlistStackPointer -= 1  if @dlistStack[@dlistStackPointer].countdown < 0
-    @core.interrupts.triggerSPInterrupt 0, false
     return
 
   #TODO: end rendering
@@ -375,12 +373,12 @@ C1964jsVideoHLE = (core, glx) ->
       @N64VertexList[i].x = @getVertexX(a)
       @N64VertexList[i].y = @getVertexY(a)
       @N64VertexList[i].z = @getVertexZ(a)
-      #@N64VertexList[i].w = @getVertexW(a)
-      #if @N64VertexList[i].w is 0
-      #  @N64VertexList[i].w = 1.0
-      #else
-      #  alert "whoa"
-      @N64VertexList[i].w = 1.0
+      @N64VertexList[i].w = @getVertexW(a)
+      if @N64VertexList[i].w is 0
+        @N64VertexList[i].w = 1.0
+      # else
+      #   alert "whoa"
+      #@N64VertexList[i].w = 1.0
       @N64VertexList[i].s = @getVertexS(a)/32 / texWidth
       @N64VertexList[i].t = @getVertexT(a)/32 / texHeight
 
@@ -1086,6 +1084,7 @@ C1964jsVideoHLE = (core, glx) ->
 
     offset = 4 * @triangleVertexPositionBuffer.numItems++ # postfix addition is intentional for performance
     vertex = this.N64VertexList[dwV]
+
     @triVertices[offset] = vertex.x
     @triVertices[offset+1] = vertex.y
     @triVertices[offset+2] = vertex.z
