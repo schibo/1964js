@@ -384,13 +384,23 @@ class C1964jsEmulator
             if limit is true
               rate = 60
               @settings.speedLimitMs = rate
-              clearInterval @mySetInterval
               @endTime = Date.now()
               delta = 1000.0/60.0 - (@endTime - @startTime)
               @startTime = @endTime
+
+              # it took too much time
               if delta < 0
-                delta = 0 #1000.0/60
+                delta = 0.0
+                @settings.rateWithDelta = 10
+                return
+
+              if delta > @settings.rateWithDelta
+                @settings.rateWithDelta = delta
+                return
+
+              delta = 1000.0/60
               @settings.rateWithDelta = delta
+              clearInterval @mySetInterval
               @runLoop()
             else
               @settings.rateWithDelta = 0
