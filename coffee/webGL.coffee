@@ -42,6 +42,7 @@ C1964jsWebGL = (core, wireframe) ->
       log "this.gl.viewportWidth = " + @gl.viewportWidth
       @gl.viewportHeight = canvas.height
       log "this.gl.viewportHeight = " + @gl.viewportHeight
+      @gl.clear @gl.COLOR_BUFFER_BIT | @gl.DEPTH_BUFFER_BIT
     log "Could not initialize WebGL. Your browser may not support it."  unless @gl
     return
 
@@ -153,7 +154,7 @@ C1964jsWebGL = (core, wireframe) ->
         y = (@gl.viewportHeight - aspectHeight) / 2.0 # center y
 
     @gl.viewport x, y, aspectWidth, aspectHeight
-    #@gl.clear @gl.COLOR_BUFFER_BIT | @gl.DEPTH_BUFFER_BIT
+    #needed for game selection screen in mario
     mat4.perspective 90, (@gl.viewportWidth/@gl.viewportHeight), 1.0, 100.0, pMatrix
     mat4.identity mvMatrix
     mat4.translate mvMatrix, [0.0, 0.0, -(@gl.viewportWidth/@gl.viewportHeight)]

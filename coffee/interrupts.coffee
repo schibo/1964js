@@ -245,7 +245,7 @@ C1964jsInterrupts = (core, cp0) ->
         #todo: implement AI_LEN_REG -- how many bytes unconsumed..
         core.kfi -= 1
         if core.kfi is 0
-          core.kfi = 512
+          core.kfi = 512 #todo: this comes from viewport?
           @clrFlag core.memory.aiUint8Array, consts.AI_STATUS_REG, consts.AI_STATUS_FIFO_FULL
           #@triggerAIInterrupt 0, false
           #checkInterrupts();
