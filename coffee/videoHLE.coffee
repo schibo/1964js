@@ -81,8 +81,9 @@ C1964jsVideoHLE = (core, glx) ->
   @normalMat = new Float32Array(4)
   @transformed = mat4.create()
   @nonTransformed = mat4.create()
-  @modelViewtransposedInverse = mat4.create()
-  @worldViewtransposedInverse = mat4.create()
+  @modelViewInverse = mat4.create()
+  @modelViewTransposedInverse = mat4.create()
+  @worldViewTransposedInverse = mat4.create()
 
   #todo: different microcodes support
   @currentMicrocodeMap = @microcodeMap0
@@ -380,47 +381,26 @@ C1964jsVideoHLE = (core, glx) ->
       @N64VertexList[i].t = @getVertexT(a)/32 / texHeight
 
       if @bLightingEnable is true
-        @normalMat[0] = (this.getVertexNormalX(a) << 24 >> 24)
-        @normalMat[1] = (this.getVertexNormalY(a) << 24 >> 24)
-        @normalMat[2] = (this.getVertexNormalZ(a) << 24 >> 24)
+        @normalMat[0] = this.getVertexNormalX a
+        @normalMat[1] = this.getVertexNormalY a
+        @normalMat[2] = this.getVertexNormalZ a
         @normalMat[3] = 1.0
 
-        ve = new Float32Array(3)
-        ve[0] = this.normalMat[0]
-        ve[1] = this.normalMat[1]
-        ve[2] = this.normalMat[2]
-        ve = vec3.normalize(ve)
-
-        vek = new Float32Array(4);
-        vek[0] = ve[0];
-        vek[1] = ve[1];
-        vek[2] = ve[2];
-        vek[3] = 1.0;
+        vek = new Float32Array 4
         
         #@normalMat = vec3.normalize(@normalMat);
+        #mat4.multiply @modelViewTransposedInverse, @normalMat, @normalMat
+        #@normalMat[3] = 1.0
 
-        modelViewInverse = mat4.create()
-        modelViewtransposedInverse = mat4.create()
-       # mat4.set @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], modelViewInverse
-        #mat4.inverse modelViewtransposedInverse, modelViewtransposedInverse
-        #mat4.transpose modelViewtransposedInverse, modelViewtransposedInverse
+        mat4.inverse @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], @modelViewInverse
+        mat4.transpose @modelViewInverse, @modelViewTransposedInverse
+        mat4.multiplyVec4 @modelViewTransposedInverse, @normalMat, vek
 
-        #mat4.multiply modelViewtransposedInverse, @normalMat, @normalMat
-        
-       # @normalMat[3] = 1.0
-
-        mat4.inverse @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], modelViewInverse
-        mat4.transpose modelViewInverse, modelViewtransposedInverse
-        #mat4.inverse @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], modelViewInverse
-
-        mat4.multiplyVec4(modelViewtransposedInverse, vek, vek);
-
-        vect = new Float32Array(3)
+        vect = new Float32Array 3
         vect[0] = vek[0]
         vect[1] = vek[1]
         vect[2] = vek[2]
-        vect = vec3.normalize(vect)
-
+        vect = vec3.normalize vect
         
         # projectiontransposedInverse = mat4.create()
         # mat4.set @gRSP.projectionMtxs[@gRSP.projectionMtxTop], projectiontransposedInverse
