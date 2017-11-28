@@ -255,7 +255,7 @@ C1964jsRenderer = (settings, glx, webGL) ->
 
   @draw = (tile, tmem, videoHLE, nextPow2Width, nextPow2Height, tileWidth, tileHeight) ->
     videoHLE.setBlendFunc()
-    gl.useProgram webGL.shaderProgram
+#    gl.useProgram webGL.shaderProgram
 
     gl.enableVertexAttribArray webGL.shaderProgram.vertexPositionAttribute
     gl.bindBuffer gl.ARRAY_BUFFER, texrectVertexPositionBuffer
@@ -308,15 +308,15 @@ C1964jsRenderer = (settings, glx, webGL) ->
       if videoHLE.envColor.length > 0
         gl.uniform4fv webGL.shaderProgram.uEnvColor, videoHLE.envColor
 
-      gl.bindBuffer gl.ELEMENT_ARRAY_BUFFER, texrectVertexIndexBuffer
-      webGL.setMatrixUniforms webGL.shaderProgram
-      webGL.setCombineUniforms webGL.shaderProgram
-      gl.uniform1i webGL.shaderProgram.wireframeUniform, if settings.wireframe then 1 else 0
+    gl.bindBuffer gl.ELEMENT_ARRAY_BUFFER, texrectVertexIndexBuffer
+    webGL.setMatrixUniforms webGL.shaderProgram
+    webGL.setCombineUniforms webGL.shaderProgram
+    gl.uniform1i webGL.shaderProgram.wireframeUniform, if settings.wireframe then 1 else 0
 
-      if settings.wireframe is true
-        gl.drawElements gl.LINE_LOOP, texrectVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0
-      else
-        gl.drawElements gl.TRIANGLES, texrectVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0
+    if settings.wireframe is true
+      gl.drawElements gl.LINE_LOOP, texrectVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0
+    else
+      gl.drawElements gl.TRIANGLES, texrectVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0
 
     texrectVertexIndexBuffer.numItems = 0
     texrectVertexTextureCoordBuffer.numItems = 0
