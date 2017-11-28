@@ -339,10 +339,14 @@ C1964jsVideoHLE = (core, glx) ->
     v0 = @getGbi0Vertex0(pc)
     seg = @getGbi0DlistAddr(pc)
     addr = @getRspSegmentAddr(seg)
-    num = 32 - v0  if (v0 + num) > 80
+    num = 32 - v0  if (v0 + num) > @MAX_VERTICES
 
-    #TODO: check that address is valid
-    @processVertexData addr, v0, num
+    #Check that the address is valid
+    g_dwRamSize = 0x400000 # todo, use 8MB or custom setting
+    if (addr + num*16) > g_dwRamSize
+      console.error "vertex beyond mem size"
+    else
+      @processVertexData addr, v0, num
     return
 
   C1964jsVideoHLE::updateCombinedMatrix = ->
@@ -388,10 +392,6 @@ C1964jsVideoHLE = (core, glx) ->
 
         vek = new Float32Array 4
         
-        #@normalMat = vec3.normalize(@normalMat);
-        #mat4.multiply @modelViewTransposedInverse, @normalMat, @normalMat
-        #@normalMat[3] = 1.0
-
         mat4.inverse @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], @modelViewInverse
         mat4.transpose @modelViewInverse, @modelViewTransposedInverse
         mat4.multiplyVec4 @modelViewTransposedInverse, @normalMat, vek
