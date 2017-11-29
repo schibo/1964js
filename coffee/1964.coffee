@@ -341,93 +341,84 @@ class C1964jsEmulator
   runLoop: () ->
     #setTimeout to be a good citizen..don't allow for the cpu to be pegged at 100%.
     #8ms idle time will be 50% cpu max if a 60FPS game is slow.
-    @mySetInterval = setInterval (=>
-      if @startTime is undefined
-        @startTime = Date.now();
-      #@request = requestAnimFrame(@runLoop)  if @terminate is false
-      if @terminate is true
-        clearInterval @mySetInterval
-        return
-      @interrupts.checkInterrupts()
+    if @startTime is undefined
+      @startTime = Date.now();
+    #@request = requestAnimFrame(@runLoop)  if @terminate is false
+    if @terminate is true
+      clearInterval @mySetInterval
+      return
+    @interrupts.checkInterrupts()
 
-      while 1
-        #trigger
-        if @m[0] >= 0
-          @interval += 1
-          #@m[0] = -125000 # which is -625000 / (interval+1)
-          @m[0] = -156250 # which is -625000 / (interval+1) / 2
-          if @interval is 4
-            @interval = 0
-            @repaintWrapper()
-            #@cp0[consts.COUNT] += 625000*2 #todo: set count to count + @m*2 when count is requested in code
-            @cp0[consts.COUNT] += 625000 #todo: set count to count + @m*2 when count is requested in code
-            @interrupts.triggerCompareInterrupt 0, false
-            @interrupts.triggerVIInterrupt 0, false
-            @interrupts.processException @p[0]
-            #@request = requestAnimFrame(@runLoop)  if @terminate is false
-            #filterStrength = 1.0
-            #frameTime = 0.0
-            #if(@lastLoop is undefined)
-            #  @lastLoop = new Date()
-            #  @lastLoop = @lastLoop.getTime()
-            #else loop
-            #  thisLoop = new Date()
-            #  thisLoop = thisLoop.getTime()
-            #  frameTime += thisLoop - @lastLoop
-            #  #@frameTime += (thisFrameTime - @frameTime) / filterStrength;
-            #  @lastLoop = thisLoop;            #@fps = thisLoop
-            #  break if (frameTime > 30.0)
-            limit = true
-            speedlimit = document.getElementById("speedlimit")
-            limit = false if speedlimit isnt null and speedlimit.checked is false
-
-            if limit is true
-              rate = 60
-              @settings.speedLimitMs = rate
-              @endTime = Date.now()
-              delta = 1000.0/60.0 - (@endTime - @startTime)
-              @startTime = @endTime
-
-              # it took too much time
-              if delta < 0
-                delta = 0.0
-                @settings.rateWithDelta = 10
-                return
-
-              if delta > @settings.rateWithDelta
-                @settings.rateWithDelta = delta
-                return
-
-              delta = 1000.0/60
-              @settings.rateWithDelta = delta
-              clearInterval @mySetInterval
-              @runLoop()
-            else
-              @settings.rateWithDelta = 0
-              return if @settings.speedLimitMs is 0
-              @settings.speedLimitMs = 0
-              clearInterval @mySetInterval
-              @startTime = Date.now();
-              @runLoop()
-            break
-        else
+    while 1
+      #trigger
+      if @m[0] >= 0
+        @interval += 1
+        #@m[0] = -125000 # which is -625000 / (interval+1)
+        @m[0] = -156250 # which is -625000 / (interval+1) / 2
+        if @interval is 4
+          @interval = 0
+          @repaintWrapper()
+          #@cp0[consts.COUNT] += 625000*2 #todo: set count to count + @m*2 when count is requested in code
+          @cp0[consts.COUNT] += 625000 #todo: set count to count + @m*2 when count is requested in code
+          @interrupts.triggerCompareInterrupt 0, false
+          @interrupts.triggerVIInterrupt 0, false
           @interrupts.processException @p[0]
-          pc = @p[0] >>> 2
-          fnName = "_" + pc
+          limit = true
+          speedlimit = document.getElementById("speedlimit")
+          limit = false if speedlimit isnt null and speedlimit.checked is false
 
-          #this is broken-up so that we can process more interrupts. If we freeze,
-          #we probably need to split this up more.
-          try
-            fn = @code[fnName]
-            @run fn, @r, @ru, @h, @hu
-          catch e
-            #so, we really need to know what type of exception this is,
-            #but right now, we're assuming that we need to compile a block due to
-            #an attempt to call an undefined function. Are there standard exception types
-            #in javascript?
-            fn = @decompileBlock(@p[0])
-            fn = fn(@r, @ru, @h, @hu, @memory, this)
-    ), @settings.rateWithDelta
+          @endTime = Date.now()
+          time = @endTime - @startTime
+
+          if time > 2000
+            time = 1000.0/60.0
+
+          delta = 1000.0/60.0 - (time)
+
+          if limit is true
+            if delta < 0
+              # it took too much time
+              @settings.rateWithDelta = 0
+              @startTime = Date.now() + delta
+            else if delta > @settings.rateWithDelta
+              # it needs to slow down
+              @startTime = Date.now() - delta
+              @settings.rateWithDelta = 1000.0/60.0
+            else
+              @startTime = Date.now();
+              @settings.rateWithDelta = 1000.0/60
+            clearTimeout @mySetTimeout
+            clearInterval @mySetInterval
+            @mySetInterval = null
+            @mySetTimeout = setTimeout(=>
+              @runLoop()
+            , @settings.rateWithDelta)
+          else
+            @settings.rateWithDelta = 0
+            @startTime = Date.now();
+            clearTimeout @mySetTimeout
+            if @mySetInterval is null
+              @mySetInterval = setInterval(=>
+                @runLoop()
+              , @settings.rateWithDelta)
+          break
+      else
+        @interrupts.processException @p[0]
+        pc = @p[0] >>> 2
+        fnName = "_" + pc
+
+        #this is broken-up so that we can process more interrupts. If we freeze,
+        #we probably need to split this up more.
+        try
+          fn = @code[fnName]
+          @run fn, @r, @ru, @h, @hu
+        catch e
+          #so, we really need to know what type of exception this is,
+          #but right now, we're assuming that we need to compile a block due to
+          #an attempt to call an undefined function. Are there standard exception types
+          #in javascript?
+          fn = @decompileBlock(@p[0])
+          fn = fn(@r, @ru, @h, @hu, @memory, this)
     this
 
   run: (fn, r, ru, h, hu) ->

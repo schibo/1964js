@@ -288,7 +288,7 @@ C1964jsVideoHLE = (core, glx) ->
     @gRSP.bMatrixIsUpdated = true
     
     #hack to show Mario's head but break everything else
-    mat4.ortho -1024, 1024, -1024, 1024, -1000.0, 1000.0, @gRSP.projectionMtxs[@gRSP.projectionMtxTop]
+    #mat4.ortho -1, 1, -1, 1, -1000.0, 1000.0, @gRSP.projectionMtxs[@gRSP.projectionMtxTop]
     return
 
   C1964jsVideoHLE::setWorldView = (mat, bPush, bReplace) ->

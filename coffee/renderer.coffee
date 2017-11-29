@@ -73,8 +73,8 @@ C1964jsRenderer = (settings, glx, webGL) ->
     sh = (s + (rectWidth*dsdx)) / tileWidth * widthscale
     th = (t + (rectHeight*dtdy)) / tileHeight * heightscale
 
-    xTrans = videoHLE.n64ViewportWidth
-    yTrans = videoHLE.n64ViewportHeight
+    xTrans = 160
+    yTrans = 120
     xl = (xl-xTrans)/xTrans
     xh = (xh-xTrans)/xTrans
     yl = -(yl-yTrans)/yTrans
