@@ -272,22 +272,23 @@ C1964jsVideoHLE = (core, glx) ->
       if @gRSP.projectionMtxTop >= (@RICE_MATRIX_STACK - 1)
         @gRSP.bMatrixIsUpdated = true
         return
-
       @gRSP.projectionMtxTop += 1
+      # We should store the current projection matrix...
       if bReplace
-
         # Load projection matrix
         mat4.set mat, @gRSP.projectionMtxs[@gRSP.projectionMtxTop]
       else
         mat4.multiply @gRSP.projectionMtxs[@gRSP.projectionMtxTop - 1], mat, @gRSP.projectionMtxs[@gRSP.projectionMtxTop]
     else
       if bReplace
-
         # Load projection matrix
         mat4.set mat, @gRSP.projectionMtxs[@gRSP.projectionMtxTop]
       else
         mat4.multiply @gRSP.projectionMtxs[@gRSP.projectionMtxTop], mat, @gRSP.projectionMtxs[@gRSP.projectionMtxTop]
     @gRSP.bMatrixIsUpdated = true
+    
+    #hack to show Mario's head but break everything else
+    mat4.ortho -1024, 1024, -1024, 1024, -1000.0, 1000.0, @gRSP.projectionMtxs[@gRSP.projectionMtxTop]
     return
 
   C1964jsVideoHLE::setWorldView = (mat, bPush, bReplace) ->
@@ -295,30 +296,19 @@ C1964jsVideoHLE = (core, glx) ->
       if @gRSP.modelViewMtxTop >= (@RICE_MATRIX_STACK - 1)
         @gRSP.bMatrixIsUpdated = true
         return
-
       @gRSP.modelViewMtxTop += 1
-      # We should store the current projection matrix...
       if bReplace
-
-        # Load projection matrix
+        # Load modelView matrix
         mat4.set mat, @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop]
-      else # Multiply projection matrix
+      else # Multiply modelView matrix
         mat4.multiply @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop - 1], mat, @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop]
-
-    #  this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop] = mat * this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop-1];
     else # NoPush
       if bReplace
-
-        # Load projection matrix
+        # Load modelView matrix
         mat4.set mat, @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop]
       else
-
-        # Multiply projection matrix
+        # Multiply modelView matrix
         mat4.multiply @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], mat, @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop]
-
-    #this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop] = mat * this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop];
-
-    #gRSPmodelViewTop = this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop];
     @gRSP.bMatrixIsUpdated = true
     return
 

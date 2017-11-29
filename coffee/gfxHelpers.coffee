@@ -261,7 +261,7 @@ C1964jsVideoHLE::getGbi1Type = (pc) ->
 
 C1964jsVideoHLE::getRspSegmentAddr = (seg) ->
   #TODO: May need to mask with rdram size - 1
-  (@segments[seg >> 24 & 0x0F]&0x00ffffff) + (seg & 0x00FFFFFF)
+  (@segments[(seg >> 24) & 0x0F]&0x00ffffff) + (seg & 0x00FFFFFF)
 
 
 C1964jsVideoHLE::getOtherModeL = (pc) ->
