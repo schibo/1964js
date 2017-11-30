@@ -221,7 +221,8 @@ class C1964jsEmulator
       @memory.spMemUint8Array[k] = @memory.rom[k]
       k += 1
     @r[20] = @getTVSystem(@memory.romUint8Array[0x3D])
-    @r[22] = @getCIC()
+    bootCode = @getBootCode()
+    @r[22] = bootCode.cic
     @cp0[consts.STATUS] = 0x70400004
     @cp0[consts.RANDOM] = 0x0000001f
     @cp0[consts.CONFIG] = 0x0006e463
@@ -235,6 +236,12 @@ class C1964jsEmulator
     @memory.setInt32 @memory.viUint8Array, consts.VI_INTR_REG, 0x000003FF
     @memory.setInt32 @memory.viUint8Array, consts.VI_V_SYNC_REG, 0x000000D1
     @memory.setInt32 @memory.viUint8Array, consts.VI_H_SYNC_REG, 0x000D2047
+
+    #set ram size
+    MEMORY_SIZE_NO_EXPANSION = 0x400000
+    MEMORY_SIZE_WITH_EXPANSION = 0x800000
+    currentRdramSize = MEMORY_SIZE_WITH_EXPANSION
+    @memory.setInt32 @memory.rdramUint8Array, bootCode.rdramSizeAddress, currentRdramSize 
 
     #this.memory.setInt32(this.memory.spReg1Uint8Array, SP_STATUS_REG, SP_STATUS_HALT);
     #1964cpp sets this then clears it in RCP_Reset() !

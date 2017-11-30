@@ -83,7 +83,6 @@ C1964jsVideoHLE::getVertexY = (pc) ->
 C1964jsVideoHLE::getVertexZ = (pc) ->
   (@core.memory.rdramUint8Array[pc + 4] << 24 | @core.memory.rdramUint8Array[pc + 5] << 16) >> 16
 
-#is this right?
 C1964jsVideoHLE::getVertexW = (pc) ->
   (@core.memory.rdramUint8Array[pc + 6] << 24 | @core.memory.rdramUint8Array[pc + 7] << 16) >> 16
 

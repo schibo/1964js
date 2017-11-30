@@ -225,7 +225,7 @@ C1964jsVideoHLE = (core, glx) ->
 
     g_dwRamSize = 0x400000 # todo, use 8MB or custom setting
     if addr + 16 >= g_dwRamSize
-      console.error "viewport addresses beyond mem size"
+      console.warn "viewport addresses beyond mem size"
       return
 
     scale = new Float32Array(4)
@@ -287,8 +287,18 @@ C1964jsVideoHLE = (core, glx) ->
         mat4.multiply @gRSP.projectionMtxs[@gRSP.projectionMtxTop], mat, @gRSP.projectionMtxs[@gRSP.projectionMtxTop]
     @gRSP.bMatrixIsUpdated = true
     
-    #hack to show Mario's head but break everything else
-    #mat4.ortho -1, 1, -1, 1, -1000.0, 1000.0, @gRSP.projectionMtxs[@gRSP.projectionMtxTop]
+    #hack to show Mario's head (ortho projection)
+    #if @gRSP.projectionMtxs[@gRSP.projectionMtxTop][4] != -1 or @gRSP.projectionMtxs[@gRSP.projectionMtxTop][4] != 0
+    #  mat4.ortho -1023, 1023, -1023, 1023, -1023.0, 1023.0, @gRSP.projectionMtxs[@gRSP.projectionMtxTop]
+   # mat4.perspective 90, (@gl.viewportWidth/@gl.viewportHeight), 1.0, 1023.0, @gRSP.projectionMtxs[@gRSP.projectionMtxTop]
+
+
+    # var persp = mat4.create();
+    # mat4.ortho(-1023, 1023, -1023, 1023, -1023, 1023, persp);
+    # mat4.multiply(this.gRSP.projectionMtxs[this.gRSP.projectionMtxTop], persp, this.gRSP.projectionMtxs[this.gRSP.projectionMtxTop]);
+    # //mat4.perspective(90, 1, 1.0, 10230.0, this.gRSP.projectionMtxs[this.gRSP.projectionMtxTop]);
+
+
     return
 
   C1964jsVideoHLE::setWorldView = (mat, bPush, bReplace) ->
@@ -322,14 +332,16 @@ C1964jsVideoHLE = (core, glx) ->
       @setProjection @matToLoad, @gbi0PushMatrix(pc), @gbi0LoadMatrix(pc)
     else
       @setWorldView @matToLoad, @gbi0PushMatrix(pc), @gbi0LoadMatrix(pc)
+
+    @renderStateChanged = true
     return
 
   C1964jsVideoHLE::loadMatrix = (addr) ->
     #  todo: port and probably log warning message if true
-    #    if (addr + 64 > g_dwRamSize)
-    #    {
-    #        return;
-    #    }
+    g_dwRamSize = 0x400000
+    if (addr + 64 > g_dwRamSize)
+      console.warn "loading matrix beyond ram size"
+      return
     i = undefined
     j = undefined
     lo = undefined
@@ -375,7 +387,7 @@ C1964jsVideoHLE = (core, glx) ->
     #Check that the address is valid
     g_dwRamSize = 0x400000 # todo, use 8MB or custom setting
     if (addr + num*16) > g_dwRamSize
-      console.error "vertex beyond mem size"
+      console.warn "vertex is beyond ram size"
     else
       @processVertexData addr, v0, num
     return
@@ -403,17 +415,20 @@ C1964jsVideoHLE = (core, glx) ->
     while i < v0 + num
       a = addr + 16 * (i - v0)
 
+
       @N64VertexList[i].x = @getVertexX(a)
       @N64VertexList[i].y = @getVertexY(a)
       @N64VertexList[i].z = @getVertexZ(a)
       @N64VertexList[i].w = @getVertexW(a)
-      if @N64VertexList[i].w is 0
-        @N64VertexList[i].w = 1.0
-      # else
-      #   alert "whoa"
-      #@N64VertexList[i].w = 1.0
-      @N64VertexList[i].s = @getVertexS(a)/32 / texWidth
-      @N64VertexList[i].t = @getVertexT(a)/32 / texHeight
+      # if @N64VertexList[i].w is 0
+      #   @N64VertexList[i].w = 1.0
+      # @N64VertexList[i].x = @getVertexX(a) / @N64VertexList[i].w
+      # @N64VertexList[i].y = @getVertexY(a) / @N64VertexList[i].w
+      # @N64VertexList[i].z = @getVertexZ(a) / @N64VertexList[i].w
+
+
+      @N64VertexList[i].u = @getVertexS(a)/32 / texWidth
+      @N64VertexList[i].v = @getVertexT(a)/32 / texHeight
 
       if @bLightingEnable is true
         @normalMat[0] = this.getVertexNormalX a
@@ -699,7 +714,7 @@ C1964jsVideoHLE = (core, glx) ->
       mat4.identity @gRSP.modelviewMtxs[i]
       i += 1
 
-    @gRSP.bMatrixIsUpdated = true
+    @gRSP.bMatrixIsUpdated = false
     @updateCombinedMatrix()
     return
 
@@ -1121,7 +1136,13 @@ C1964jsVideoHLE = (core, glx) ->
     @triVertices[offset] = vertex.x
     @triVertices[offset+1] = vertex.y
     @triVertices[offset+2] = vertex.z
-    @triVertices[offset+3] = vertex.w
+    @triVertices[offset+3] = vertex.w #here
+
+    @triVertices[offset+3] = 1.0 if vertex.w == 0
+
+
+
+
 
     colorOffset = @triangleVertexColorBuffer.numItems++ << 2 # postfix addition is intentional for performance
     @triColorVertices[colorOffset]     = vertex.r
@@ -1130,8 +1151,8 @@ C1964jsVideoHLE = (core, glx) ->
     @triColorVertices[colorOffset + 3] = vertex.a
 
     texOffset = @triangleVertexTextureCoordBuffer.numItems++ << 1 # postfix addition is intentional for performance
-    @triTextureCoords[texOffset]     = vertex.s
-    @triTextureCoords[texOffset + 1] = vertex.t
+    @triTextureCoords[texOffset]     = vertex.u
+    @triTextureCoords[texOffset + 1] = vertex.v
     true
 
   C1964jsVideoHLE::setBlendFunc = () ->
