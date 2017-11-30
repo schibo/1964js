@@ -221,7 +221,8 @@ class C1964jsEmulator
       @memory.spMemUint8Array[k] = @memory.rom[k]
       k += 1
     @r[20] = @getTVSystem(@memory.romUint8Array[0x3D])
-    @r[22] = @getCIC()
+    bootCode = @getBootCode()
+    @r[22] = bootCode.cic
     @cp0[consts.STATUS] = 0x70400004
     @cp0[consts.RANDOM] = 0x0000001f
     @cp0[consts.CONFIG] = 0x0006e463
@@ -235,6 +236,25 @@ class C1964jsEmulator
     @memory.setInt32 @memory.viUint8Array, consts.VI_INTR_REG, 0x000003FF
     @memory.setInt32 @memory.viUint8Array, consts.VI_V_SYNC_REG, 0x000000D1
     @memory.setInt32 @memory.viUint8Array, consts.VI_H_SYNC_REG, 0x000D2047
+
+    #set ram size
+    MEMORY_SIZE_NO_EXPANSION = 0x400000
+    MEMORY_SIZE_WITH_EXPANSION = 0x800000
+    @currentRdramSize = MEMORY_SIZE_WITH_EXPANSION
+    
+    # rom header
+    #copy rom name
+    @romName = new Uint8Array 20
+    for i in [0...32]
+      @romName[i] = @memory.rom[32+i]
+    #copy crc1
+    @crc1 = (@memory.rom[16] << 24 | @memory.rom[17] << 16 | @memory.rom[18] << 8 | @memory.rom[19]) >>> 0
+    #copy crc2
+    @crc2 = (@memory.rom[20] << 24 | @memory.rom[21] << 16 | @memory.rom[22] << 8 | @memory.rom[23]) >>> 0
+
+    @pif.eepromName = @pif.binArrayToJson(@romName) + "-" + dec2hex(@crc1) + dec2hex(@crc2) + ".eep"
+    
+    @memory.setInt32 @memory.rdramUint8Array, bootCode.rdramSizeAddress, @currentRdramSize 
 
     #this.memory.setInt32(this.memory.spReg1Uint8Array, SP_STATUS_REG, SP_STATUS_HALT);
     #1964cpp sets this then clears it in RCP_Reset() !
@@ -341,83 +361,84 @@ class C1964jsEmulator
   runLoop: () ->
     #setTimeout to be a good citizen..don't allow for the cpu to be pegged at 100%.
     #8ms idle time will be 50% cpu max if a 60FPS game is slow.
-    @mySetInterval = setInterval (=>
-      if @startTime is undefined
-        @startTime = Date.now();
-      #@request = requestAnimFrame(@runLoop)  if @terminate is false
-      if @terminate is true
-        clearInterval @mySetInterval
-        return
-      @interrupts.checkInterrupts()
+    if @startTime is undefined
+      @startTime = Date.now();
+    #@request = requestAnimFrame(@runLoop)  if @terminate is false
+    if @terminate is true
+      clearInterval @mySetInterval
+      return
+    @interrupts.checkInterrupts()
 
-      while 1
-        #trigger
-        if @m[0] >= 0
-          @interval += 1
-          #@m[0] = -125000 # which is -625000 / (interval+1)
-          @m[0] = -156250 # which is -625000 / (interval+1) / 2
-          if @interval is 4
-            @interval = 0
-            @repaintWrapper()
-            #@cp0[consts.COUNT] += 625000*2 #todo: set count to count + @m*2 when count is requested in code
-            @cp0[consts.COUNT] += 625000 #todo: set count to count + @m*2 when count is requested in code
-            @interrupts.triggerCompareInterrupt 0, false
-            @interrupts.triggerVIInterrupt 0, false
-            @interrupts.processException @p[0]
-            #@request = requestAnimFrame(@runLoop)  if @terminate is false
-            #filterStrength = 1.0
-            #frameTime = 0.0
-            #if(@lastLoop is undefined)
-            #  @lastLoop = new Date()
-            #  @lastLoop = @lastLoop.getTime()
-            #else loop
-            #  thisLoop = new Date()
-            #  thisLoop = thisLoop.getTime()
-            #  frameTime += thisLoop - @lastLoop
-            #  #@frameTime += (thisFrameTime - @frameTime) / filterStrength;
-            #  @lastLoop = thisLoop;            #@fps = thisLoop
-            #  break if (frameTime > 30.0)
-            limit = true
-            speedlimit = document.getElementById("speedlimit")
-            limit = false if speedlimit isnt null and speedlimit.checked is false
-
-            if limit is true
-              rate = 60
-              @settings.speedLimitMs = rate
-              clearInterval @mySetInterval
-              @endTime = Date.now()
-              delta = 1000.0/60.0 - (@endTime - @startTime)
-              @startTime = @endTime
-              if delta < 0
-                delta = 0 #1000.0/60
-              @settings.rateWithDelta = delta
-              @runLoop()
-            else
-              @settings.rateWithDelta = 0
-              return if @settings.speedLimitMs is 0
-              @settings.speedLimitMs = 0
-              clearInterval @mySetInterval
-              @startTime = Date.now();
-              @runLoop()
-            break
-        else
+    while 1
+      #trigger
+      if @m[0] >= 0
+        @interval += 1
+        #@m[0] = -125000 # which is -625000 / (interval+1)
+        @m[0] = -156250 # which is -625000 / (interval+1) / 2
+        if @interval is 4
+          @interval = 0
+          @repaintWrapper()
+          #@cp0[consts.COUNT] += 625000*2 #todo: set count to count + @m*2 when count is requested in code
+          @cp0[consts.COUNT] += 625000 #todo: set count to count + @m*2 when count is requested in code
+          @interrupts.triggerCompareInterrupt 0, false
+          @interrupts.triggerVIInterrupt 0, false
           @interrupts.processException @p[0]
-          pc = @p[0] >>> 2
-          fnName = "_" + pc
+          limit = true
+          speedlimit = document.getElementById("speedlimit")
+          limit = false if speedlimit isnt null and speedlimit.checked is false
 
-          #this is broken-up so that we can process more interrupts. If we freeze,
-          #we probably need to split this up more.
-          try
-            fn = @code[fnName]
-            @run fn, @r, @ru, @h, @hu
-          catch e
-            #so, we really need to know what type of exception this is,
-            #but right now, we're assuming that we need to compile a block due to
-            #an attempt to call an undefined function. Are there standard exception types
-            #in javascript?
-            fn = @decompileBlock(@p[0])
-            fn = fn(@r, @ru, @h, @hu, @memory, this)
-    ), @settings.rateWithDelta
+          @endTime = Date.now()
+          time = @endTime - @startTime
+
+          if time > 2000
+            time = 1000.0/60.0
+
+          delta = 1000.0/60.0 - (time)
+
+          if limit is true
+            if delta < 0
+              # it took too much time
+              @settings.rateWithDelta = 0
+              @startTime = Date.now() + delta
+            else if delta > @settings.rateWithDelta
+              # it needs to slow down
+              @startTime = Date.now() - delta
+              @settings.rateWithDelta = 1000.0/60.0
+            else
+              @startTime = Date.now();
+              @settings.rateWithDelta = 1000.0/60
+            clearTimeout @mySetTimeout
+            clearInterval @mySetInterval
+            @mySetInterval = null
+            @mySetTimeout = setTimeout(=>
+              @runLoop()
+            , @settings.rateWithDelta)
+          else
+            @settings.rateWithDelta = 0
+            @startTime = Date.now();
+            clearTimeout @mySetTimeout
+            if @mySetInterval is null
+              @mySetInterval = setInterval(=>
+                @runLoop()
+              , @settings.rateWithDelta)
+          break
+      else
+        @interrupts.processException @p[0]
+        pc = @p[0] >>> 2
+        fnName = "_" + pc
+
+        #this is broken-up so that we can process more interrupts. If we freeze,
+        #we probably need to split this up more.
+        try
+          fn = @code[fnName]
+          @run fn, @r, @ru, @h, @hu
+        catch e
+          #so, we really need to know what type of exception this is,
+          #but right now, we're assuming that we need to compile a block due to
+          #an attempt to call an undefined function. Are there standard exception types
+          #in javascript?
+          fn = @decompileBlock(@p[0])
+          fn = fn(@r, @ru, @h, @hu, @memory, this)
     this
 
   run: (fn, r, ru, h, hu) ->

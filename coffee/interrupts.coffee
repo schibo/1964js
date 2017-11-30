@@ -245,7 +245,7 @@ C1964jsInterrupts = (core, cp0) ->
         #todo: implement AI_LEN_REG -- how many bytes unconsumed..
         core.kfi -= 1
         if core.kfi is 0
-          core.kfi = 512
+          core.kfi = 512 #todo: this comes from viewport?
           @clrFlag core.memory.aiUint8Array, consts.AI_STATUS_REG, consts.AI_STATUS_FIFO_FULL
           #@triggerAIInterrupt 0, false
           #checkInterrupts();
@@ -513,7 +513,7 @@ C1964jsInterrupts = (core, cp0) ->
         core.settings.repeatDList = false
         core.settings.repeatDList = true if repeatDList isnt null and repeatDList.checked
         if core.terminate is false
-          window.requestAnimationFrame(=>
+          core.request = window.requestAnimationFrame(=>
             core.videoHLE.processDisplayList()
             if core.settings.repeatDList is true
               @interval = setInterval(=>

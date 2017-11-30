@@ -24,6 +24,12 @@ C1964jsRenderer = (settings, glx, webGL) ->
   texrectVertexPositionBuffer = gl.createBuffer()
   texrectVertexTextureCoordBuffer = gl.createBuffer()
   texrectVertexIndexBuffer = gl.createBuffer()
+  texrectVertexIndices = [0, 1, 2, 0, 2, 3]
+  gl.bindBuffer gl.ELEMENT_ARRAY_BUFFER, texrectVertexIndexBuffer
+  gl.bufferData gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(texrectVertexIndices), gl.STATIC_DRAW
+  texrectVertexIndexBuffer.itemSize = 1
+  texrectVertexIndexBuffer.numItems = 6
+
   @videoHLE = undefined
   fivetoeight = [0x00,0x08,0x10,0x18,0x21,0x29,0x31,0x39,0x42,0x4A,0x52,0x5A,0x63,0x6B,0x73,0x7B,0x84,0x8C,0x94,0x9C,0xA5,0xAD,0xB5,0xBD,0xC6,0xCE,0xD6,0xDE,0xE7,0xEF,0xF7,0xFF]
   fourtoeight = [0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xaa,0xbb,0xcc,0xdd,0xee,0xff]
@@ -67,10 +73,12 @@ C1964jsRenderer = (settings, glx, webGL) ->
     sh = (s + (rectWidth*dsdx)) / tileWidth * widthscale
     th = (t + (rectHeight*dtdy)) / tileHeight * heightscale
 
-    xl = (xl-160)/160
-    xh = (xh-160)/160
-    yl = -(yl-120)/120
-    yh = -(yh-120)/120
+    xTrans = 160
+    yTrans = 120
+    xl = (xl-xTrans)/xTrans
+    xh = (xh-xTrans)/xTrans
+    yl = -(yl-yTrans)/yTrans
+    yh = -(yh-yTrans)/yTrans
 
     initQuad xl, yl, xh, yh, sl, tl, sh, th, videoHLE
     @draw tile, tmem, videoHLE, nextPow2Width, nextPow2Height, tileWidth, tileHeight
@@ -245,12 +253,6 @@ C1964jsRenderer = (settings, glx, webGL) ->
     gl.bufferData gl.ARRAY_BUFFER, new Float32Array(textureCoords), gl.STATIC_DRAW
     texrectVertexTextureCoordBuffer.itemSize = 2
     texrectVertexTextureCoordBuffer.numItems = 4
-
-    texrectVertexIndices = [0, 1, 2, 0, 2, 3]
-    gl.bindBuffer gl.ELEMENT_ARRAY_BUFFER, texrectVertexIndexBuffer
-    gl.bufferData gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(texrectVertexIndices), gl.STATIC_DRAW
-    texrectVertexIndexBuffer.itemSize = 1
-    texrectVertexIndexBuffer.numItems = 6
     return
 
   @draw = (tile, tmem, videoHLE, nextPow2Width, nextPow2Height, tileWidth, tileHeight) ->
@@ -318,7 +320,6 @@ C1964jsRenderer = (settings, glx, webGL) ->
     else
       gl.drawElements gl.TRIANGLES, texrectVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0
 
-    texrectVertexIndexBuffer.numItems = 0
     texrectVertexTextureCoordBuffer.numItems = 0
     texrectVertexPositionBuffer.numItems = 0
     return

@@ -42,7 +42,8 @@ C1964jsWebGL = (core, wireframe) ->
       log "this.gl.viewportWidth = " + @gl.viewportWidth
       @gl.viewportHeight = canvas.height
       log "this.gl.viewportHeight = " + @gl.viewportHeight
-    log "Could not initialise WebGL. Your browser may not support it."  unless @gl
+      @gl.clear @gl.COLOR_BUFFER_BIT | @gl.DEPTH_BUFFER_BIT
+    log "Could not initialize WebGL. Your browser may not support it."  unless @gl
     return
 
   C1964jsWebGL::createShader = (type, source) ->
@@ -142,17 +143,19 @@ C1964jsWebGL = (core, wireframe) ->
     
     stretch = document.getElementById("stretch").checked
 
+    nativeAspect = @core.videoHLE.n64ViewportWidth / @core.videoHLE.n64ViewportHeight
+
     if !stretch
-      if newAspect >= (320.0/240.0)
-        aspectWidth = @gl.viewportWidth / newAspect * (320.0/240.0)
+      if newAspect >= nativeAspect
+        aspectWidth = @gl.viewportWidth / newAspect * nativeAspect
         x = (@gl.viewportWidth - aspectWidth) / 2.0 # center x
       else
-        aspectHeight = @gl.viewportHeight * newAspect / (320.0/240.0)
+        aspectHeight = @gl.viewportHeight * newAspect / nativeAspect
         y = (@gl.viewportHeight - aspectHeight) / 2.0 # center y
 
     @gl.viewport x, y, aspectWidth, aspectHeight
-    #@gl.clear @gl.COLOR_BUFFER_BIT | @gl.DEPTH_BUFFER_BIT
-    mat4.perspective 90, (@gl.viewportWidth/@gl.viewportHeight), 1.0, 100.0, pMatrix
+    #needed for game selection screen in mario
+    mat4.perspective 90, (@gl.viewportWidth/@gl.viewportHeight), 1.0, 1023.0, pMatrix
     mat4.identity mvMatrix
     mat4.translate mvMatrix, [0.0, 0.0, -(@gl.viewportWidth/@gl.viewportHeight)]
     return

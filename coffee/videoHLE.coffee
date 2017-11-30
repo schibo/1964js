@@ -83,7 +83,15 @@ C1964jsVideoHLE = (core, glx) ->
   @nonTransformed = mat4.create()
   @modelViewInverse = mat4.create()
   @modelViewTransposedInverse = mat4.create()
-  @worldViewTransposedInverse = mat4.create()
+
+  # Native Viewport
+  @n64ViewportWidth = 640
+  @n64ViewportHeight = 480
+  @n64ViewportLeft = 0
+  @n64ViewportTop = 0
+  @n64ViewportRight = 320
+  @n64ViewportBottom = 240
+
 
   #todo: different microcodes support
   @currentMicrocodeMap = @microcodeMap0
@@ -125,6 +133,7 @@ C1964jsVideoHLE = (core, glx) ->
     i += 1
   @gRSP.vertexMult = 10
   @triangleVertexTextureCoordBuffer = `undefined`
+  @resetMatrices()
   return this
 
 (->
@@ -145,7 +154,7 @@ C1964jsVideoHLE = (core, glx) ->
     @dlParserProcess()
 
     #this.core.interrupts.triggerDPInterrupt(0, false);
-    @core.interrupts.triggerSPInterrupt 0, false
+    @core.interrupts.triggerDPInterrupt 0, false
     return
 
   C1964jsVideoHLE::videoLog = (msg) ->
@@ -177,7 +186,6 @@ C1964jsVideoHLE = (core, glx) ->
       if @dlistStackPointer >= 0
         @dlistStack[@dlistStackPointer].countdown -= 1
         @dlistStackPointer -= 1  if @dlistStack[@dlistStackPointer].countdown < 0
-    @core.interrupts.triggerSPInterrupt 0, false
     return
 
   #TODO: end rendering
@@ -194,7 +202,6 @@ C1964jsVideoHLE = (core, glx) ->
     addr = undefined
     length = undefined
     type = @getGbi1Type(pc)
-    length = @getGbi1Length(pc)
     seg = @getGbi0DlistAddr(pc)
     addr = @getRspSegmentAddr(seg)
     switch type
@@ -216,6 +223,40 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::RSP_MoveMemViewport = (addr) ->
     @videoLog "RSP_MoveMemViewport"
+
+    if addr + 16 >= @core.currentRdramSize
+      console.warn "viewport addresses beyond mem size"
+      return
+
+    scale = new Float32Array(4)
+    trans = new Float32Array(4)
+
+    scale[0] = @getShort addr+0*2
+    scale[1] = @getShort addr+1*2
+    scale[2] = @getShort addr+2*2
+    scale[3] = @getShort addr+3*2
+
+    trans[0] = @getShort addr+4*2
+    trans[1] = @getShort addr+5*2
+    trans[2] = @getShort addr+6*2
+    trans[3] = @getShort addr+7*2
+
+    centerX = trans[0] / 4.0
+    centerY = trans[1] / 4.0
+    @n64ViewportWidth = scale[0] / 4.0
+    @n64ViewportHeight = scale[1] / 4.0
+
+    @n64ViewportWidth = -@n64ViewportWidth if @n64ViewportWidth < 0
+    @n64ViewportHeight = -@n64ViewportHeight if @n64ViewportHeight < 0
+    @n64ViewportLeft = centerX - @n64ViewportWidth
+    @n64ViewportTop = centerY - @n64ViewportHeight
+    @n64ViewportRight = centerX + @n64ViewportWidth
+    @n64ViewportBottom = centerY + @n64ViewportHeight
+
+    maxZ = 0x3FF
+
+    #@setViewPort left, top, right, bottom, maxZ
+
     return
 
   C1964jsVideoHLE::RSP_GBI1_SpNoop = (pc) ->
@@ -231,22 +272,26 @@ C1964jsVideoHLE = (core, glx) ->
       if @gRSP.projectionMtxTop >= (@RICE_MATRIX_STACK - 1)
         @gRSP.bMatrixIsUpdated = true
         return
-
       @gRSP.projectionMtxTop += 1
+      # We should store the current projection matrix...
       if bReplace
-
         # Load projection matrix
         mat4.set mat, @gRSP.projectionMtxs[@gRSP.projectionMtxTop]
       else
         mat4.multiply @gRSP.projectionMtxs[@gRSP.projectionMtxTop - 1], mat, @gRSP.projectionMtxs[@gRSP.projectionMtxTop]
     else
       if bReplace
-
         # Load projection matrix
         mat4.set mat, @gRSP.projectionMtxs[@gRSP.projectionMtxTop]
       else
         mat4.multiply @gRSP.projectionMtxs[@gRSP.projectionMtxTop], mat, @gRSP.projectionMtxs[@gRSP.projectionMtxTop]
     @gRSP.bMatrixIsUpdated = true
+    
+    #hack to show Mario's head (as an ortho projection. This if/else is wrong.
+    if @gRSP.projectionMtxs[@gRSP.projectionMtxTop][14] > 0
+      mat4.ortho -1024, 1024, -1024, 1024, -1023.0, 1024.0, @gRSP.projectionMtxs[@gRSP.projectionMtxTop]
+    else
+      mat4.ortho -1, 1, -1, 1, -1, 1, 1.0, 1024.0, this.gRSP.projectionMtxs[this.gRSP.projectionMtxTop]
     return
 
   C1964jsVideoHLE::setWorldView = (mat, bPush, bReplace) ->
@@ -254,30 +299,19 @@ C1964jsVideoHLE = (core, glx) ->
       if @gRSP.modelViewMtxTop >= (@RICE_MATRIX_STACK - 1)
         @gRSP.bMatrixIsUpdated = true
         return
-
       @gRSP.modelViewMtxTop += 1
-      # We should store the current projection matrix...
       if bReplace
-
-        # Load projection matrix
+        # Load modelView matrix
         mat4.set mat, @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop]
-      else # Multiply projection matrix
+      else # Multiply modelView matrix
         mat4.multiply @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop - 1], mat, @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop]
-
-    #  this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop] = mat * this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop-1];
     else # NoPush
       if bReplace
-
-        # Load projection matrix
+        # Load modelView matrix
         mat4.set mat, @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop]
       else
-
-        # Multiply projection matrix
+        # Multiply modelView matrix
         mat4.multiply @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], mat, @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop]
-
-    #this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop] = mat * this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop];
-
-    #gRSPmodelViewTop = this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop];
     @gRSP.bMatrixIsUpdated = true
     return
 
@@ -291,14 +325,15 @@ C1964jsVideoHLE = (core, glx) ->
       @setProjection @matToLoad, @gbi0PushMatrix(pc), @gbi0LoadMatrix(pc)
     else
       @setWorldView @matToLoad, @gbi0PushMatrix(pc), @gbi0LoadMatrix(pc)
+
+    @renderStateChanged = true
     return
 
   C1964jsVideoHLE::loadMatrix = (addr) ->
     #  todo: port and probably log warning message if true
-    #    if (addr + 64 > g_dwRamSize)
-    #    {
-    #        return;
-    #    }
+    if (addr + 64 > @core.currentRdramSize)
+      console.warn "loading matrix beyond ram size"
+      return
     i = undefined
     j = undefined
     lo = undefined
@@ -312,7 +347,7 @@ C1964jsVideoHLE = (core, glx) ->
         a = addr + (i << 3) + (j << 1)
         hi = (@core.memory.rdramUint8Array[a] << 8 | @core.memory.rdramUint8Array[a + 1]) & 0x0000FFFF
         lo = (@core.memory.rdramUint8Array[a + 32] << 8 | @core.memory.rdramUint8Array[a + 32 + 1]) & 0x0000FFFF
-        @matToLoad[k] = ((hi << 16) | lo) / 65536.0
+        @matToLoad[k] = (((hi << 16) | lo)>>0) / 65536.0
         k += 1
         j += 1
       i += 1
@@ -339,10 +374,13 @@ C1964jsVideoHLE = (core, glx) ->
     v0 = @getGbi0Vertex0(pc)
     seg = @getGbi0DlistAddr(pc)
     addr = @getRspSegmentAddr(seg)
-    num = 32 - v0  if (v0 + num) > 80
+    num = 32 - v0  if (v0 + num) > @MAX_VERTICES
 
-    #TODO: check that address is valid
-    @processVertexData addr, v0, num
+    #Check that the address is valid
+    if (addr + num*16) > @core.currentRdramSize
+      console.warn "vertex is beyond ram size"
+    else
+      @processVertexData addr, v0, num
     return
 
   C1964jsVideoHLE::updateCombinedMatrix = ->
@@ -368,30 +406,24 @@ C1964jsVideoHLE = (core, glx) ->
     while i < v0 + num
       a = addr + 16 * (i - v0)
 
+      @N64VertexList[i].w = @getVertexW(a)
+      if @N64VertexList[i].w is 0
+        @N64VertexList[i].w = 1.0
       @N64VertexList[i].x = @getVertexX(a)
       @N64VertexList[i].y = @getVertexY(a)
       @N64VertexList[i].z = @getVertexZ(a)
-      #@N64VertexList[i].w = @getVertexW(a)
-      #if @N64VertexList[i].w is 0
-      #  @N64VertexList[i].w = 1.0
-      #else
-      #  alert "whoa"
-      @N64VertexList[i].w = 1.0
-      @N64VertexList[i].s = @getVertexS(a)/32 / texWidth
-      @N64VertexList[i].t = @getVertexT(a)/32 / texHeight
+
+      @N64VertexList[i].u = @getVertexS(a)/32 / texWidth
+      @N64VertexList[i].v = @getVertexT(a)/32 / texHeight
 
       if @bLightingEnable is true
-        @normalMat[0] = this.getVertexNormalX a
-        @normalMat[1] = this.getVertexNormalY a
-        @normalMat[2] = this.getVertexNormalZ a
+        @normalMat[0] = @getVertexNormalX a
+        @normalMat[1] = @getVertexNormalY a
+        @normalMat[2] = @getVertexNormalZ a
         @normalMat[3] = 1.0
 
         vek = new Float32Array 4
         
-        #@normalMat = vec3.normalize(@normalMat);
-        #mat4.multiply @modelViewTransposedInverse, @normalMat, @normalMat
-        #@normalMat[3] = 1.0
-
         mat4.inverse @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], @modelViewInverse
         mat4.transpose @modelViewInverse, @modelViewTransposedInverse
         mat4.multiplyVec4 @modelViewTransposedInverse, @normalMat, vek
@@ -647,7 +679,10 @@ C1964jsVideoHLE = (core, glx) ->
   C1964jsVideoHLE::renderReset = ->
 
     #UpdateClipRectangle();
-    @resetMatrices()
+    #@resetMatrices()
+    @gRSP.projectionMtxTop = 0
+    @gRSP.modelViewMtxTop = 0
+
 
     #SetZBias(0);
     @gRSP.numVertices = 0
@@ -663,12 +698,12 @@ C1964jsVideoHLE = (core, glx) ->
     mat4.identity @gRSP.projectionMtxs[0]
 
     i = 0;
-    while (i < this.RICE_MATRIX_STACK)
+    while (i < @RICE_MATRIX_STACK)
       mat4.identity @gRSP.projectionMtxs[i]
       mat4.identity @gRSP.modelviewMtxs[i]
       i += 1
 
-    @gRSP.bMatrixIsUpdated = true
+    @gRSP.bMatrixIsUpdated = false
     @updateCombinedMatrix()
     return
 
@@ -821,6 +856,7 @@ C1964jsVideoHLE = (core, glx) ->
       @popProjection()
     else
       @popWorldView()
+    @renderStateChanged = true
     return
 
   C1964jsVideoHLE::RSP_GBI1_CullDL = (pc) ->
@@ -1085,11 +1121,13 @@ C1964jsVideoHLE = (core, glx) ->
     return false  if dwV >= consts.MAX_VERTS
 
     offset = 4 * @triangleVertexPositionBuffer.numItems++ # postfix addition is intentional for performance
-    vertex = this.N64VertexList[dwV]
+    vertex = @N64VertexList[dwV]
+
     @triVertices[offset] = vertex.x
     @triVertices[offset+1] = vertex.y
     @triVertices[offset+2] = vertex.z
     @triVertices[offset+3] = vertex.w
+    @triVertices[offset+3] = 1.0 if vertex.w == 0
 
     colorOffset = @triangleVertexColorBuffer.numItems++ << 2 # postfix addition is intentional for performance
     @triColorVertices[colorOffset]     = vertex.r
@@ -1098,8 +1136,8 @@ C1964jsVideoHLE = (core, glx) ->
     @triColorVertices[colorOffset + 3] = vertex.a
 
     texOffset = @triangleVertexTextureCoordBuffer.numItems++ << 1 # postfix addition is intentional for performance
-    @triTextureCoords[texOffset]     = vertex.s
-    @triTextureCoords[texOffset + 1] = vertex.t
+    @triTextureCoords[texOffset]     = vertex.u
+    @triTextureCoords[texOffset + 1] = vertex.v
     true
 
   C1964jsVideoHLE::setBlendFunc = () ->
