@@ -245,7 +245,7 @@ class C1964jsEmulator
     # rom header
     #copy rom name
     @romName = new Uint8Array 20
-    for i in [0...32]
+    for i in [0...20]
       @romName[i] = @memory.rom[32+i]
     #copy crc1
     @crc1 = (@memory.rom[16] << 24 | @memory.rom[17] << 16 | @memory.rom[18] << 8 | @memory.rom[19]) >>> 0
