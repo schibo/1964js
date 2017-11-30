@@ -31,6 +31,8 @@ class C1964jsPif
     @g1964buttons = 0x00000000
     window.onkeydown = this.onKeyDown.bind(this)
     window.onkeyup = this.onKeyUp.bind(this)
+    @eepromLoaded = false
+    @eepromName = ""
 
   processPif: ->
     cmd = undefined
@@ -78,7 +80,36 @@ class C1964jsPif
       else
     false
 
+  binArrayToJson: (buf) ->
+    return String.fromCharCode.apply null, new Uint8Array(buf)
+
+  jsonToArray: (str) ->
+    buf = new ArrayBuffer(str.length) # 1 byte for each char
+    bufView = new Uint8Array(buf);
+    for i in [0...str.length]
+      bufView[i] = str.charCodeAt i
+    return buf
+
+  loadEepromFile: () ->
+    eeprom = localStorage.getItem @eepromName
+    if eeprom isnt null and @eepromLoaded is false
+      try
+        @eeprom = new Uint8Array(@jsonToArray eeprom)
+        if @eeprom.length != 0x1000
+          throw Error "Failed to load game save"
+      catch e
+        alert "Failed to load game save"
+        localStorage.removeItem @eepromName
+        @eeprom = new Uint8Array 0x1000
+    @eepromLoaded = true
+    return
+
+  writeEepromFile: () ->
+    localStorage.setItem @eepromName, @binArrayToJson @eeprom
+    return
+
   readEeprom: (pifRamStart, count, offset) ->
+    @loadEepromFile()
     @pifUint8Array[pifRamStart + count] = @eeprom[offset]
     @pifUint8Array[pifRamStart + count + 1] = @eeprom[offset + 1]
     @pifUint8Array[pifRamStart + count + 2] = @eeprom[offset + 2]
@@ -90,6 +121,7 @@ class C1964jsPif
     return
 
   writeEeprom: (pifRamStart, count, offset) ->
+    @loadEepromFile()
     @eeprom[offset] = @pifUint8Array[pifRamStart + count]
     @eeprom[offset + 1] = @pifUint8Array[pifRamStart + count + 1]
     @eeprom[offset + 2] = @pifUint8Array[pifRamStart + count + 2]
@@ -98,6 +130,7 @@ class C1964jsPif
     @eeprom[offset + 5] = @pifUint8Array[pifRamStart + count + 5]
     @eeprom[offset + 6] = @pifUint8Array[pifRamStart + count + 6]
     @eeprom[offset + 7] = @pifUint8Array[pifRamStart + count + 7]
+    @writeEepromFile()
     return
 
   processController: (count, device, pifRamStart) ->

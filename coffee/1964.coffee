@@ -240,8 +240,21 @@ class C1964jsEmulator
     #set ram size
     MEMORY_SIZE_NO_EXPANSION = 0x400000
     MEMORY_SIZE_WITH_EXPANSION = 0x800000
-    currentRdramSize = MEMORY_SIZE_WITH_EXPANSION
-    @memory.setInt32 @memory.rdramUint8Array, bootCode.rdramSizeAddress, currentRdramSize 
+    @currentRdramSize = MEMORY_SIZE_WITH_EXPANSION
+    
+    # rom header
+    #copy rom name
+    @romName = new Uint8Array 20
+    for i in [0...32]
+      @romName[i] = @memory.rom[32+i]
+    #copy crc1
+    @crc1 = (@memory.rom[16] << 24 | @memory.rom[17] << 16 | @memory.rom[18] << 8 | @memory.rom[19]) >>> 0
+    #copy crc2
+    @crc2 = (@memory.rom[20] << 24 | @memory.rom[21] << 16 | @memory.rom[22] << 8 | @memory.rom[23]) >>> 0
+
+    @pif.eepromName = @pif.binArrayToJson(@romName) + "-" + dec2hex(@crc1) + dec2hex(@crc2) + ".eep"
+    
+    @memory.setInt32 @memory.rdramUint8Array, bootCode.rdramSizeAddress, @currentRdramSize 
 
     #this.memory.setInt32(this.memory.spReg1Uint8Array, SP_STATUS_REG, SP_STATUS_HALT);
     #1964cpp sets this then clears it in RCP_Reset() !
