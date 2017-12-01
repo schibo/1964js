@@ -358,7 +358,7 @@ class C1964jsEmulator
     @memory.initPhysRegions()
     return
 
-  runLoop: () ->
+  runLoop: () =>
     #setTimeout to be a good citizen..don't allow for the cpu to be pegged at 100%.
     #8ms idle time will be 50% cpu max if a 60FPS game is slow.
     if @startTime is undefined
@@ -383,6 +383,7 @@ class C1964jsEmulator
           @interrupts.triggerCompareInterrupt 0, false
           @interrupts.triggerVIInterrupt 0, false
           @interrupts.processException @p[0]
+
           break
       else
         @interrupts.processException @p[0]
@@ -412,33 +413,14 @@ class C1964jsEmulator
     @repaint @ctx, @ImDat
     return
 
-  asyncMainLoop: (rate) ->    
-    @myMainInterval = setInterval(=>
-      if @terminateSyncedLoop is true
-        clearInterval @myInterval
-      else
-        requestAnimationFrame(=>
-          @runLoop()
-          return
-        )
-        return
-    , rate)
-
   asyncFastLoop: () ->    
     @myFastInterval = setInterval(=>
-      if @terminateFastLoop is true
-        clearInterval @myFastInterval
-      else
-        requestAnimationFrame(=>
-          @runLoop()
-          return
-        )
-        return
+      @runLoop()
+      return
     , 0.0)
-
+    return
 
   startEmulator: () ->
-
     window.requestAnimationFrame = window.requestAnimationFrame or
     window.mozRequestAnimationFrame or
     window.webkitRequestAnimationFrame or
@@ -447,26 +429,26 @@ class C1964jsEmulator
 
     @terminate = false
     @log "startEmulator"
-    @settings.rateWithDelta = 0.0
-    @asyncMainLoop(1000.0/60.0)
+    @settings.rateWithDelta = 1000.0/60.0
+    
+    MainLoop.setUpdate().setDraw(i1964js.runLoop).setEnd().start();
+    return
 
   #make way for another 1964 instance. cleanup old scripts written to the page.
-  stopEmulatorAndCleanup: ->
+  stopEmulatorAndCleanup: =>
     @stopCompiling = true
     @terminate = true
+    clearInterval @myFastInterval 
     @log "stopEmulatorAndCleanup"
     @flushDynaCache()
     return
 
   onSpeedLimitChanged: ->
     speedlimit =  document.getElementById("speedlimit")
+    clearInterval @myFastInterval 
     if speedlimit isnt null and speedlimit.checked is true
-      @terminateFastLoop = true
-      @terminateSyncedLoop = false
-      asyncMainLoop(1000.0/60.0)
+      @asyncMainLoop(1000.0/60.0)
     else
-      @terminateFastLoop = false
-      @terminateSyncedLoop = true
       @asyncFastLoop()
     return
 
