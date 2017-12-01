@@ -367,9 +367,9 @@ class C1964jsEmulator
     if @terminate is true
       clearInterval @mySetInterval
       return
-    @interrupts.checkInterrupts()
 
     while 1
+      @interrupts.checkInterrupts()
       #trigger
       if @m[0] >= 0
         @interval += 1
@@ -383,44 +383,6 @@ class C1964jsEmulator
           @interrupts.triggerCompareInterrupt 0, false
           @interrupts.triggerVIInterrupt 0, false
           @interrupts.processException @p[0]
-          limit = true
-          speedlimit = document.getElementById("speedlimit")
-          limit = false if speedlimit isnt null and speedlimit.checked is false
-
-          @endTime = Date.now()
-          time = @endTime - @startTime
-
-          if time > 2000
-            time = 1000.0/60.0
-
-          delta = 1000.0/60.0 - (time)
-
-          if limit is true
-            if delta < 0
-              # it took too much time
-              @settings.rateWithDelta = 0
-              @startTime = Date.now() + delta
-            else if delta > @settings.rateWithDelta
-              # it needs to slow down
-              @startTime = Date.now() - delta
-              @settings.rateWithDelta = 1000.0/60.0
-            else
-              @startTime = Date.now();
-              @settings.rateWithDelta = 1000.0/60
-            clearTimeout @mySetTimeout
-            clearInterval @mySetInterval
-            @mySetInterval = null
-            @mySetTimeout = setTimeout(=>
-              @runLoop()
-            , @settings.rateWithDelta)
-          else
-            @settings.rateWithDelta = 0
-            @startTime = Date.now();
-            clearTimeout @mySetTimeout
-            if @mySetInterval is null
-              @mySetInterval = setInterval(=>
-                @runLoop()
-              , @settings.rateWithDelta)
           break
       else
         @interrupts.processException @p[0]
@@ -450,6 +412,31 @@ class C1964jsEmulator
     @repaint @ctx, @ImDat
     return
 
+  asyncMainLoop: (rate) ->    
+    @myMainInterval = setInterval(=>
+      if @terminateSyncedLoop is true
+        clearInterval @myInterval
+      else
+        requestAnimationFrame(=>
+          @runLoop()
+          return
+        )
+        return
+    , rate)
+
+  asyncFastLoop: () ->    
+    @myFastInterval = setInterval(=>
+      if @terminateFastLoop is true
+        clearInterval @myFastInterval
+      else
+        requestAnimationFrame(=>
+          @runLoop()
+          return
+        )
+        return
+    , 0.0)
+
+
   startEmulator: () ->
 
     window.requestAnimationFrame = window.requestAnimationFrame or
@@ -461,10 +448,7 @@ class C1964jsEmulator
     @terminate = false
     @log "startEmulator"
     @settings.rateWithDelta = 0.0
-    speedlimit =  document.getElementById("speedlimit")
-    @settings.rateWithDelta = 100.0/60.0 if speedlimit isnt null and speedlimit.checked is true
-    @runLoop()
-    return
+    @asyncMainLoop(1000.0/60.0)
 
   #make way for another 1964 instance. cleanup old scripts written to the page.
   stopEmulatorAndCleanup: ->
@@ -472,6 +456,18 @@ class C1964jsEmulator
     @terminate = true
     @log "stopEmulatorAndCleanup"
     @flushDynaCache()
+    return
+
+  onSpeedLimitChanged: ->
+    speedlimit =  document.getElementById("speedlimit")
+    if speedlimit isnt null and speedlimit.checked is true
+      @terminateFastLoop = true
+      @terminateSyncedLoop = false
+      asyncMainLoop(1000.0/60.0)
+    else
+      @terminateFastLoop = false
+      @terminateSyncedLoop = true
+      @asyncFastLoop()
     return
 
   #clearInterval(interval);
