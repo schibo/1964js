@@ -191,7 +191,7 @@ C1964jsHelpers = (core, isLittleEndian) ->
       @tRD(i) + "=" + @RS(i) + n + @RT(i) + "," + @tRDH(i) + "=" + @RSH(i) + n + @RTH(i) + ";"
 
   @virtualToPhysical = (addr) ->
-    "b=" + addr + ";a=((m.physRegion[b>>>12]<<16)|(b&0x0000ffff));"
+    "t.a[0]=" + addr + ";t.a[1]=((m.physRegion[t.a[0]>>>12]<<16)|(t.a[0]&0x0000ffff));"
 
   #//////////////////////////
   #Interpreted opcode helpers
