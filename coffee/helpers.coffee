@@ -207,7 +207,7 @@ C1964jsHelpers = (core, isLittleEndian) ->
         cp0[f] |= r[rt] & 0x300
 
         #      if (((r[rt] & 1)===1) && (cp0[f] & 1)===0) //possible fix over 1964cpp?
-        interrupts.setException consts.EXC_INT, 0, pc, isDelaySlot  if (cp0[consts.CAUSE] & cp0[consts.STATUS] & 0x0000FF00) isnt 0  if r[rt] & 0x300
+        interrupts.setException consts.EXC_INT, 0, pc, isDelaySlot  if (cp0[consts.CAUSE] & cp0[consts.STATUS] & 0x0000FF00) isnt 0  and (r[rt] & 0x300) isnt 0
 
       #interrupts.processException(pc, isDelaySlot);
       when consts.COUNT

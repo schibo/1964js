@@ -103,7 +103,7 @@ class C1964jsEmulator
     @isBigEndian = 0
     @interval = 0
     @m = new Int32Array(1)
-    @m[0] = -125000 #which is magic_number / (interval+1)
+    @m[0] = -625000 #which is magic_number / (interval+1)
     @forceRepaint = false #presumably origin reg doesn't change because not double or triple-buffered (single-buffered)
     #main run loop
     @doOnce = 0
@@ -369,24 +369,24 @@ class C1964jsEmulator
       return
 
     while 1
-      @interrupts.checkInterrupts()
-      #trigger
+      #@interrupts.checkInterrupts()
       if @m[0] >= 0
         @interval += 1
         #@m[0] = -125000 # which is -625000 / (interval+1)
         @m[0] = -156250 # which is -625000 / (interval+1) / 2
+        @interrupts.processException @p[0]
         if @interval is 4
           @interval = 0
           @repaintWrapper()
           #@cp0[consts.COUNT] += 625000*2 #todo: set count to count + @m*2 when count is requested in code
-          @cp0[consts.COUNT] += 625000 #todo: set count to count + @m*2 when count is requested in code
+          @cp0[consts.COUNT] += 625000*2 #todo: set count to count + @m*2 when count is requested in code
           @interrupts.triggerCompareInterrupt 0, false
-          @interrupts.triggerVIInterrupt 0, false
-          @interrupts.processException @p[0]
-
+          @interrupts.triggerVIInterrupt 0, false #if ((@memory.getUint32(@memory.miUint8Array, consts.MI_INTR_REG) & consts.MI_INTR_VI) isnt 0)
+        else if @interval is 2
+          @interrupts.checkInterrupts()
           break
       else
-        @interrupts.processException @p[0]
+      #  @interrupts.processException @p[0]
         pc = @p[0] >>> 2
         fnName = "_" + pc
 
@@ -400,8 +400,11 @@ class C1964jsEmulator
           #but right now, we're assuming that we need to compile a block due to
           #an attempt to call an undefined function. Are there standard exception types
           #in javascript?
-          fn = @decompileBlock(@p[0])
-          fn = fn(@r, @ru, @h, @hu, @memory, this)
+          if e instanceof TypeError
+            fn = @decompileBlock(@p[0])
+            fn = fn(@r, @ru, @h, @hu, @memory, this)
+          else
+            throw e
     this
 
   run: (fn, r, ru, h, hu) ->
@@ -446,9 +449,7 @@ class C1964jsEmulator
   onSpeedLimitChanged: ->
     speedlimit =  document.getElementById("speedlimit")
     clearInterval @myFastInterval 
-    if speedlimit isnt null and speedlimit.checked is true
-      @asyncMainLoop(1000.0/60.0)
-    else
+    if speedlimit is null or speedlimit.checked is false
       @asyncFastLoop()
     return
 

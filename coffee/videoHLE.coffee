@@ -154,7 +154,9 @@ C1964jsVideoHLE = (core, glx) ->
     @dlParserProcess()
 
     #this.core.interrupts.triggerDPInterrupt(0, false);
+    @core.interrupts.delayNextInterrupt = true #don't process immediately
     @core.interrupts.triggerDPInterrupt 0, false
+
     return
 
   C1964jsVideoHLE::videoLog = (msg) ->
@@ -971,7 +973,6 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_RDPFullSynch = (pc) ->
-    @core.interrupts.triggerDPInterrupt 0, false
     #@drawScene(7, false)
     return
 

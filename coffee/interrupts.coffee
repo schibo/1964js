@@ -65,6 +65,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 currentHack = 0
 C1964jsInterrupts = (core, cp0) ->
   "use strict"
+
+  @delayNextInterrupt = false
+
   @setException = (exception, causeFlag, pc, isFromDelaySlot) ->
     #log('set exception');
     cp0[consts.CAUSE] |= exception
@@ -72,6 +75,13 @@ C1964jsInterrupts = (core, cp0) ->
     return
 
   @processException = (pc, isFromDelaySlot) ->
+
+    # we don't want to process interrupts immediately
+    if @delayNextInterrupt is true
+      core.m[0] = -156250
+      @delayNextInterrupt = false
+      return
+
     return false  if (cp0[consts.STATUS] & consts.IE) is 0
     if (cp0[consts.STATUS] & consts.EXL) isnt 0
       #log "nested exception"
@@ -96,6 +106,8 @@ C1964jsInterrupts = (core, cp0) ->
 
   @triggerCompareInterrupt = (pc, isFromDelaySlot) ->
     @setException consts.EXC_INT, consts.CAUSE_IP8, pc, isFromDelaySlot
+    #if core.interval is 3 #don't process immediately
+    #core.m[0] = -156250
     return
 
   @triggerPIInterrupt = (pc, isFromDelaySlot) ->
@@ -142,8 +154,8 @@ C1964jsInterrupts = (core, cp0) ->
 
   @clearMIInterrupt = (flag) ->
     @clrFlag core.memory.miUint8Array, consts.MI_INTR_REG, flag
-    value = core.memory.miUint8Array[consts.MI_INTR_MASK_REG] << 24 | core.memory.miUint8Array[consts.MI_INTR_MASK_REG + 1] << 16 | core.memory.miUint8Array[consts.MI_INTR_MASK_REG + 2] << 8 | core.memory.miUint8Array[consts.MI_INTR_MASK_REG + 3]
-    cp0[consts.CAUSE] &= ~consts.CAUSE_IP3  if (value & (core.memory.getUint32(core.memory.miUint8Array, consts.MI_INTR_REG))) isnt 0
+    miIntrMaskReg = core.memory.miUint8Array[consts.MI_INTR_MASK_REG] << 24 | core.memory.miUint8Array[consts.MI_INTR_MASK_REG + 1] << 16 | core.memory.miUint8Array[consts.MI_INTR_MASK_REG + 2] << 8 | core.memory.miUint8Array[consts.MI_INTR_MASK_REG + 3]
+    cp0[consts.CAUSE] &= ~consts.CAUSE_IP3  if (miIntrMaskReg & (core.memory.getUint32(core.memory.miUint8Array, consts.MI_INTR_REG))) is 0
     return
 
   #if((cp0[CAUSE] & cp0[STATUS] & SR_IMASK) == 0)
@@ -391,7 +403,7 @@ C1964jsInterrupts = (core, cp0) ->
 
   @writeSIStatusReg = (value, pc, isFromDelaySlot) ->
     #Clear SI interrupt unconditionally
-    #clearMIInterrupt(consts.MI_INTR_SI); //wrong!
+    @clearMIInterrupt(consts.MI_INTR_SI); #wrong!
     @clrFlag core.memory.siUint8Array, consts.SI_STATUS_REG, consts.SI_STATUS_INTERRUPT
     return
 
@@ -400,8 +412,9 @@ C1964jsInterrupts = (core, cp0) ->
     tempSr &= ~consts.SP_STATUS_BROKE if value & SP_CLR_BROKE
     if value & SP_SET_INTR
       @triggerSPInterrupt pc, isFromDelaySlot
-    #to use else if here is a possible bux fix (what is this?..this looks weird)
-    else @clearMIInterrupt consts.MI_INTR_SP if value & SP_CLR_INTR
+    #to use else if here is a possible bux fix (what is this?..this looks weird).
+    # No. this else causes freezing.
+   # else @clearMIInterrupt consts.MI_INTR_SP if value & SP_CLR_INTR
     if value & SP_SET_SSTEP
       tempSr |= SP_STATUS_SSTEP
     else tempSr &= ~SP_STATUS_SSTEP if value & SP_CLR_SSTEP
@@ -513,24 +526,23 @@ C1964jsInterrupts = (core, cp0) ->
         core.settings.repeatDList = false
         core.settings.repeatDList = true if repeatDList isnt null and repeatDList.checked
         if core.terminate is false
-          core.request = window.requestAnimationFrame(=>
-            core.videoHLE.processDisplayList()
-            if core.settings.repeatDList is true
-              @interval = setInterval(=>
-                core.videoHLE.processDisplayList()
-                if core.settings.repeatDList is false
-                  clearInterval @interval
-                  @triggerRspBreak()
-              , 16)
-            else
-              @triggerRspBreak()
-          )
+          core.videoHLE.processDisplayList()
+          if core.settings.repeatDList is true
+            @interval = setInterval(=>
+              core.videoHLE.processDisplayList()
+              if core.settings.repeatDList is false
+                clearInterval @interval
+                @triggerRspBreak 0, false
+                triggerDPInterrupt 0, false
+            , 16)
+          else
+            @triggerRspBreak 0, false
       when consts.SND_TASK
         @processAudioList()
-        @triggerRspBreak()
+        @triggerRspBreak 0, false
       when consts.JPG_TASK
         @processJpegTask()
-        @triggerRspBreak()
+        @triggerRspBreak 0, false
       else
         #log "unhandled sp task: " + spDmemTask
         break
@@ -559,7 +571,7 @@ C1964jsInterrupts = (core, cp0) ->
     @triggerDPInterrupt 0, false  if (core.memory.getUint32(core.memory.miUint8Array, consts.MI_INTR_REG) & consts.MI_INTR_DP) isnt 0
     @triggerAIInterrupt 0, false  if (core.memory.getUint32(core.memory.miUint8Array, consts.MI_INTR_REG) & consts.MI_INTR_AI) isnt 0
     @triggerSIInterrupt 0, false  if (core.memory.getUint32(core.memory.miUint8Array, consts.MI_INTR_REG) & consts.MI_INTR_SI) isnt 0
-
+    @triggerRspBreak 0, false  if (core.memory.getUint32(core.memory.miUint8Array, consts.MI_INTR_REG) & consts.MI_INTR_SP) isnt 0
     #if ((core.memory.getUint32(miUint8Array, consts.MI_INTR_REG) & consts.MI_INTR_VI) !== 0)
     #    this.triggerVIInterrupt(0, false);
     @setException consts.EXC_INT, 0, core.p, false  if (cp0[consts.CAUSE] & cp0[consts.STATUS] & 0x0000FF00) isnt 0
