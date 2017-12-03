@@ -186,34 +186,34 @@ handleFileSelect = (evt) ->
   reader.readAsArrayBuffer evt.target.files[0]
   return
 
-document.getElementById("user_panel").onmousemove = ->
-  document.getElementById("user_panel").className = "show"
-  document.getElementById("files").disabled = false
-
 document.getElementById("user_panel").ontouchend = (event) ->
   document.getElementById("user_panel").className = "show"
-  document.getElementById("files").disabled = false
-  event.cancelBubble = true
-  event.stopPropagation() if event.stopPropagation
-
-document.getElementById("user_panel").onmouseup = (event) ->
-  event.cancelBubble = true
-  event.stopPropagation() if event.stopPropagation
 
 document.onmouseup = (event) ->
+
+  if event.target.className is "dropbtn"
+    # disallow hiding if presssing the dropdown
+    event.cancelBubble = true
+    event.stopPropagation() if event.stopPropagation
+    return
+
   if document.getElementById("user_panel").className is "" 
     document.getElementById("user_panel").className = "show"
     document.getElementById("files").disabled = false
   else if document.getElementById("user_panel").className is "show"
     document.getElementById("user_panel").className = ""
-    document.getElementById("files").disabled = true
 
 document.ontouchend = (event) ->
+  if event.target.className is "dropbtn"
+    # disallow hiding if presssing the dropdown
+    event.cancelBubble = true
+    event.stopPropagation() if event.stopPropagation
+    return
+
   if document.getElementById("user_panel").className is "" 
     document.getElementById("user_panel").className = "show"
     document.getElementById("files").disabled = false
   else if document.getElementById("user_panel").className is "show"
     document.getElementById("user_panel").className = ""
-    document.getElementById("files").disabled = true
 
 document.getElementById("files").addEventListener "change", handleFileSelect, false
