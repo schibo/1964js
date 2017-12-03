@@ -93,7 +93,6 @@ uncompressAndRun = (romPath, response) ->
 
 @start1964 = (settings) ->
   g_settings = settings
-  document.getElementById("user_panel").className = "show"
 
   vars = getUrlVars()
   romPath = undefined
@@ -108,7 +107,10 @@ uncompressAndRun = (romPath, response) ->
     xhr.send()
     xhr.onload = (e) =>
       # hide the user panel
+      hideUserPanel()
       uncompressAndRun romPath, e.target.response
+  else
+    showUserPanel()
   return
 
 #Check for the various File API support.
@@ -186,34 +188,41 @@ handleFileSelect = (evt) ->
   reader.readAsArrayBuffer evt.target.files[0]
   return
 
-document.getElementById("user_panel").onmousemove = ->
-  document.getElementById("user_panel").className = "show"
-  document.getElementById("files").disabled = false
-
 document.getElementById("user_panel").ontouchend = (event) ->
-  document.getElementById("user_panel").className = "show"
-  document.getElementById("files").disabled = false
-  event.cancelBubble = true
-  event.stopPropagation() if event.stopPropagation
+  showUserPanel()
 
-document.getElementById("user_panel").onmouseup = (event) ->
-  event.cancelBubble = true
-  event.stopPropagation() if event.stopPropagation
+showUserPanel = () ->
+  document.getElementById("user_panel").className = "show"
+  window.startGradientBackground()
+
+hideUserPanel = () ->
+  document.getElementById("user_panel").className = ""
+  #disable the animating background
+  window.stopGradientBackground()
 
 document.onmouseup = (event) ->
+
+  if event.target.className is "dropbtn" or event.target.className is "file"
+    # disallow hiding if presssing the dropdown
+    event.cancelBubble = true
+    event.stopPropagation() if event.stopPropagation
+    return
+
   if document.getElementById("user_panel").className is "" 
-    document.getElementById("user_panel").className = "show"
-    document.getElementById("files").disabled = false
+    showUserPanel()
   else if document.getElementById("user_panel").className is "show"
-    document.getElementById("user_panel").className = ""
-    document.getElementById("files").disabled = true
+    hideUserPanel()
 
 document.ontouchend = (event) ->
+  if event.target.className is "dropbtn" or event.target.className is "file"
+    # disallow hiding if presssing the dropdown
+    event.cancelBubble = true
+    event.stopPropagation() if event.stopPropagation
+    return
+
   if document.getElementById("user_panel").className is "" 
-    document.getElementById("user_panel").className = "show"
-    document.getElementById("files").disabled = false
+    showUserPanel()
   else if document.getElementById("user_panel").className is "show"
-    document.getElementById("user_panel").className = ""
-    document.getElementById("files").disabled = true
+    hideUserPanel()
 
 document.getElementById("files").addEventListener "change", handleFileSelect, false

@@ -17,6 +17,96 @@
         var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
       })();
     </script>
+    <script>
+      function showDropdownList() {
+        document.getElementById("myDropdown").classList.toggle("show");
+      }
+      // Close the dropdown if the user clicks outside of it
+      window.onclick = function(event) {
+        if (!event.target.matches('.dropbtn')) {
+      
+          var dropdowns = document.getElementsByClassName("dropdown-content");
+          var i;
+          for (i = 0; i < dropdowns.length; i++) {
+            var openDropdown = dropdowns[i];
+            if (openDropdown.classList.contains('show')) {
+              openDropdown.classList.remove('show');
+            }
+          }
+        }
+      }
+    </script>
+    <script>
+      var colors;
+      
+      var step = 0;
+      //color table indices for: 
+      // current color left
+      // next color left
+      // current color right
+      // next color right
+      var colorIndices = [0,1,2,3];
+      
+      //transition speed
+      var gradientSpeed = 0.01;
+      
+      function updateGradient()
+      {
+      
+        if ( $===undefined ) return;
+      
+      var c0_0 = colors[colorIndices[0]];
+      var c0_1 = colors[colorIndices[1]];
+      var c1_0 = colors[colorIndices[2]];
+      var c1_1 = colors[colorIndices[3]];
+      
+      var istep = 1 - step;
+      var r1 = Math.round(istep * c0_0[0] + step * c0_1[0]);
+      var g1 = Math.round(istep * c0_0[1] + step * c0_1[1]);
+      var b1 = Math.round(istep * c0_0[2] + step * c0_1[2]);
+      var color1 = "rgb("+r1+","+g1+","+b1+")";
+      
+      var r2 = Math.round(istep * c1_0[0] + step * c1_1[0]);
+      var g2 = Math.round(istep * c1_0[1] + step * c1_1[1]);
+      var b2 = Math.round(istep * c1_0[2] + step * c1_1[2]);
+      var color2 = "rgb("+r2+","+g2+","+b2+")";
+      
+       $('#gradient').css({
+         background: "-webkit-gradient(linear, left top, right top, from("+color1+"), to("+color2+"))"}).css({
+          background: "-moz-linear-gradient(left, "+color1+" 0%, "+color2+" 100%)"});
+      
+        step += gradientSpeed;
+        if ( step >= 1 )
+        {
+          step %= 1;
+          colorIndices[0] = colorIndices[1];
+          colorIndices[2] = colorIndices[3];
+      
+          //pick two new target color indices
+          //do not pick the same as the current one
+          colorIndices[1] = ( colorIndices[1] + Math.floor( 1 + Math.random() * (colors.length - 1))) % colors.length;
+          colorIndices[3] = ( colorIndices[3] + Math.floor( 1 + Math.random() * (colors.length - 1))) % colors.length;
+        }
+      }
+      var gradientBackgroundInterval = null;
+      function stopGradientBackground() {
+          clearInterval(gradientBackgroundInterval);
+          gradientBackgroundInterval = null;
+      }
+      function startGradientBackground() {
+        if (gradientBackgroundInterval == null) {
+          colors = new Array(
+            [Math.random()*192,Math.random()*192,Math.random()*192],
+            [Math.random()*192,Math.random()*192,Math.random()*192],
+            [Math.random()*192,Math.random()*192,Math.random()*192],
+            [Math.random()*192,Math.random()*192,Math.random()*192],
+            [Math.random()*192,Math.random()*192,Math.random()*192],
+            [Math.random()*192,Math.random()*192,Math.random()*192]);
+            gradientBackgroundInterval = setInterval(updateGradient,30);
+            startGradientBackground();
+        }
+      }
+    </script>
     <link href="css/style.css" rel="stylesheet" type="text/css" />
     <title>1964 and 1964js Home page</title>
     <meta content="1964js - N64 emulator in JavaScript" property="og:title" />
@@ -26,7 +116,7 @@
     <meta content="1964js" property="og:site_name" />
     <meta content="1397141558" property="fb:admins" />
   </head>
-  <body alink="#ff0000" bgcolor="#000000" link="#ffa953" onLoad="start1964({wireframe:true})" onunload="i1964js.stopEmulatorAndCleanup()" text="#ffffff" vlink="#ffa953">
+  <body alink="#ff0000" bgcolor="#000000" link="#D8D8D8" onLoad="start1964({wireframe:true})" onunload="i1964js.stopEmulatorAndCleanup()" text="#ffffff" vlink="#D8D8D8">
     <div id="fb-root"></div>
     <script>
       window.fbAsyncInit = function() {
@@ -418,56 +508,43 @@
          }
        }
     </script>
-    <div style="position: absolute; left: -600 px; top: -600 px"></div>
     <canvas height="240" id="Canvas" width="320"></canvas><canvas height="1024" id="Canvas3D" width="1024"></canvas>
     <div id="user_panel">
-      <div class="header">
-        <a href="http://1964emu.emulation64.com">[Get 1964 for Windows]</a>&nbsp;<a href="http://1964js.com/blog/index.html">[Blog]</a>&nbsp;<a href="http://github.com/schibo/1964js">[Code]</a>&nbsp;<a href="http://hulkholden.github.com/n64js/">[Try n64js too!]</a>
-        <h1>
-          1964js
-          <div style="font-size: 10px;">
-            v0.3.5
+      <div id="gradient">
+        <span class="header"><a href="http://1964emu.emulation64.com">Get&nbsp;1964&nbsp;for&nbsp;Windows</a>&nbsp; &nbsp;<a href="http://1964js.com/blog/index.html">Blog</a>&nbsp; &nbsp;<a href="http://hulkholden.github.com/n64js/">Try&nbsp;n64js&nbsp;too!</a></span>
+        <p style="font-size: 130%;">
+          1964js <span style="font-size: 10px; font-size: 40%;"> v0.3.6</span>
+        </p>
+        <p></p>
+        <div>
+          <div class="dropdown">
+            <button class="dropbtn" onclick="showDropdownList()"> Demos</button>
+            <div class="dropdown-content" id="myDropdown">
+              <a href="?rom=roms/unofficial/rotate.zip">Rotate</a><a href="?rom=roms/unofficial/chrome.zip">Chrome</a><a href="?rom=roms/unofficial/dextrose.zip">Dextrose</a><a href="?rom=roms/unofficial/n64stars.zip">N64 Stars</a><a href="?rom=roms/unofficial/liner.zip">Liner</a><a href="?rom=roms/unofficial/hardcode.zip">Hard Coded</a><a href="?rom=roms/unofficial/sp_crap.zip">Absolute Crap</a><a href="?rom=roms/unofficial/DynamixReadme.zip">Dynamix</a>
+            </div>
           </div>
-          <select onChange="if (this.value !== &#39;Demos&#39;) window.open(this.value, &#39;_self&#39;);" style="vertical-align: middle;">
-            <option value="Demos">
-              Demos
-            </option>
-            <option value="?rom=roms/unofficial/rotate.zip">
-              Rotate
-            </option>
-            <option value="?rom=roms/unofficial/chrome.zip">
-              Chrome
-            </option>
-            <option value="?rom=roms/unofficial/dextrose.zip">
-              Dextrose
-            </option>
-            <option value="?rom=roms/unofficial/n64stars.zip">
-              N64 Stars
-            </option>
-            <option value="?rom=roms/unofficial/liner.zip">
-              Liner (z to start)
-            </option>
-            <option value="?rom=roms/unofficial/hardcode.zip">
-              Hard Coded
-            </option>
-            <option value="?rom=roms/unofficial/sp_crap.zip">
-              Absolute Crap
-            </option>
-            <option value="?rom=roms/unofficial/DynamixReadme.zip">
-              Dynamix
-            </option>
-          </select>
-        </h1>
-        <input id="stretch" type="checkbox">stretch</input>&nbsp;&nbsp;<input checked="true" id="speedlimit" onclick="i1964js.onSpeedLimitChanged()" type="checkbox">speed limit </input>
-      </div>
-      <div class="dropShadow">
-        <div class="story">
-          <br /><input id="files" name="file" type="file">*.v64; *.n64; *.z64</input><br /><br />
+        </div>
+        <div>
+          <br /><center>
+            <div class="dropbtn" style="position: relative; overflow: hidden; direction: ltr;background-color: #4CAF50; width:10vw; font-size: 1.5vw">
+              <div style="display: block; text-align: center">
+                Load ROM
+              </div>
+              <input class="file" id="files" name="file" type="file" />
+            </div>
+            <span style="font-size: 10px; font-size: 50%"><br />Supports Super Mario 64 <br /></span></center>
+        </div>
+        <p style="margin-top: 2%;">
+          <input id="stretch" type="checkbox">stretch</input>&nbsp;&nbsp;<input checked="true" id="speedlimit" onclick="i1964js.onSpeedLimitChanged()" type="checkbox">speed&nbsp;limit </input>
+        </p>
+        <p></p>
+        <a href="https://www.google.com/chrome/" style="font-align:left;">Best with Chrome</a><br />
+        <div style="height:auto; margin-bottom:0px;">
+          <a href="http://www.github.com/schibo/1964js"><img alt="Code" src="img/Octocat.png" style="display:inline;padding-top:10%;width:22%;height:auto;margin: auto;" /></a><a href="http://www.uproarapp.com"><img alt="Uproar" src="img/uproar_logo.svg" style="display:inline;padding-top:10%;width:22%;height:auto;margin: auto;" /></a><a href="http://w3schools.com"><img alt="w3 schools" src="img/w3schools.png" style="display:inline;padding-top:10%;width:22%;height:auto;margin: auto;" /></a>
         </div>
       </div>
-      <div class="footer">Supports Super Mario 64<br /><a href="https://www.google.com/chrome/">[Best with Chrome]</a>
-      </div>
     </div>
-    <script src="lib/1964js-0.3.5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+    <script src="lib/1964js-0.3.6.min.js"></script>
   </body>
 </html>

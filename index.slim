@@ -20,6 +20,95 @@ html
             ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
           })();
+    javascript:
+      function showDropdownList() {
+        document.getElementById("myDropdown").classList.toggle("show");
+      }
+      // Close the dropdown if the user clicks outside of it
+      window.onclick = function(event) {
+        if (!event.target.matches('.dropbtn')) {
+
+          var dropdowns = document.getElementsByClassName("dropdown-content");
+          var i;
+          for (i = 0; i < dropdowns.length; i++) {
+            var openDropdown = dropdowns[i];
+            if (openDropdown.classList.contains('show')) {
+              openDropdown.classList.remove('show');
+            }
+          }
+        }
+      }
+    // gradient backround from https://codepen.io/quasimondo/pen/lDdrF
+    javascript:
+      var colors;
+
+      var step = 0;
+      //color table indices for: 
+      // current color left
+      // next color left
+      // current color right
+      // next color right
+      var colorIndices = [0,1,2,3];
+
+      //transition speed
+      var gradientSpeed = 0.01;
+
+      function updateGradient()
+      {
+        
+        if ( $===undefined ) return;
+        
+      var c0_0 = colors[colorIndices[0]];
+      var c0_1 = colors[colorIndices[1]];
+      var c1_0 = colors[colorIndices[2]];
+      var c1_1 = colors[colorIndices[3]];
+
+      var istep = 1 - step;
+      var r1 = Math.round(istep * c0_0[0] + step * c0_1[0]);
+      var g1 = Math.round(istep * c0_0[1] + step * c0_1[1]);
+      var b1 = Math.round(istep * c0_0[2] + step * c0_1[2]);
+      var color1 = "rgb("+r1+","+g1+","+b1+")";
+
+      var r2 = Math.round(istep * c1_0[0] + step * c1_1[0]);
+      var g2 = Math.round(istep * c1_0[1] + step * c1_1[1]);
+      var b2 = Math.round(istep * c1_0[2] + step * c1_1[2]);
+      var color2 = "rgb("+r2+","+g2+","+b2+")";
+
+       $('#gradient').css({
+         background: "-webkit-gradient(linear, left top, right top, from("+color1+"), to("+color2+"))"}).css({
+          background: "-moz-linear-gradient(left, "+color1+" 0%, "+color2+" 100%)"});
+        
+        step += gradientSpeed;
+        if ( step >= 1 )
+        {
+          step %= 1;
+          colorIndices[0] = colorIndices[1];
+          colorIndices[2] = colorIndices[3];
+          
+          //pick two new target color indices
+          //do not pick the same as the current one
+          colorIndices[1] = ( colorIndices[1] + Math.floor( 1 + Math.random() * (colors.length - 1))) % colors.length;
+          colorIndices[3] = ( colorIndices[3] + Math.floor( 1 + Math.random() * (colors.length - 1))) % colors.length;
+        }
+      }
+      var gradientBackgroundInterval = null;
+      function stopGradientBackground() {
+          clearInterval(gradientBackgroundInterval);
+          gradientBackgroundInterval = null;
+      }
+      function startGradientBackground() {
+        if (gradientBackgroundInterval == null) {
+          colors = new Array(
+            [Math.random()*192,Math.random()*192,Math.random()*192],
+            [Math.random()*192,Math.random()*192,Math.random()*192],
+            [Math.random()*192,Math.random()*192,Math.random()*192],
+            [Math.random()*192,Math.random()*192,Math.random()*192],
+            [Math.random()*192,Math.random()*192,Math.random()*192],
+            [Math.random()*192,Math.random()*192,Math.random()*192]);
+            gradientBackgroundInterval = setInterval(updateGradient,30);
+            startGradientBackground();
+        }
+      }
 
     link href="css/style.css" rel="stylesheet" type="text/css"
     title 1964 and 1964js Home page
@@ -30,7 +119,7 @@ html
     meta content="1964js" property="og:site_name"
     meta content="1397141558" property="fb:admins"
   
-  body alink="#ff0000" bgcolor="#000000" link="#ffa953" onLoad="start1964({wireframe:true})" onunload="i1964js.stopEmulatorAndCleanup()" text="#ffffff" vlink="#ffa953"
+  body alink="#ff0000" bgcolor="#000000" link="#D8D8D8" onLoad="start1964({wireframe:true})" onunload="i1964js.stopEmulatorAndCleanup()" text="#ffffff" vlink="#D8D8D8"
 
     - outputMode = "release"
     - ARGV.each do|a|
@@ -428,64 +517,77 @@ html
           }
         }
 
-    div style="position: absolute; left: -600 px; top: -600 px"
+    //div style="position: absolute; left: -600 px; top: -600 px"
 
     canvas#Canvas height="240" width="320"
     canvas#Canvas3D height="1024" width="1024"
-  
+
     #user_panel
-      .header
-        a href="http://1964emu.emulation64.com" [Get 1964 for Windows]
-        |&nbsp;
-        a href="http://1964js.com/blog/index.html" [Blog]
-        |&nbsp;
-        a href="http://github.com/schibo/1964js" [Code]
-        |&nbsp;
-        a href="http://hulkholden.github.com/n64js/" [Try n64js too!]
+      #gradient
+        span.header
+          a href="http://1964emu.emulation64.com" Get&nbsp;1964&nbsp;for&nbsp;Windows
+          | &nbsp; &nbsp;
+          a href="http://1964js.com/blog/index.html" Blog
+          | &nbsp; &nbsp;
+          a href="http://hulkholden.github.com/n64js/" Try&nbsp;n64js&nbsp;too!
 
-        h1
-          | 1964js
-          div style="font-size: 10px;"
+        p style="font-size: 130%;"
+          | 1964js 
+          span style="font-size: 10px; font-size: 40%;"
             - version1964 = ENV['version1964']
-            | v#{version1964}
-          select onChange="if (this.value !== 'Demos') window.open(this.value, '_self');" style="vertical-align: middle;"
-            option value="Demos" Demos
-            option value="?rom=roms/unofficial/rotate.zip" Rotate
-            option value="?rom=roms/unofficial/chrome.zip" Chrome
-            option value="?rom=roms/unofficial/dextrose.zip" Dextrose
-            option value="?rom=roms/unofficial/n64stars.zip" N64 Stars
-            option value="?rom=roms/unofficial/liner.zip" Liner (z to start)
-            option value="?rom=roms/unofficial/hardcode.zip" Hard Coded
-            option value="?rom=roms/unofficial/sp_crap.zip" Absolute Crap
-            option value="?rom=roms/unofficial/DynamixReadme.zip" Dynamix
-
-        input#stretch type="checkbox" stretch
-        |&nbsp;&nbsp;
-        input#speedlimit type="checkbox" checked="true" onclick="i1964js.onSpeedLimitChanged()" speed limit 
-        - if outputMode == "debug.html"
+            |  v#{version1964}
+        p
+        div
+          .dropdown
+            button.dropbtn onclick="showDropdownList()"  Demos
+            #myDropdown.dropdown-content
+              a href="?rom=roms/unofficial/rotate.zip" Rotate
+              a href="?rom=roms/unofficial/chrome.zip" Chrome
+              a href="?rom=roms/unofficial/dextrose.zip" Dextrose
+              a href="?rom=roms/unofficial/n64stars.zip" N64 Stars
+              a href="?rom=roms/unofficial/liner.zip" Liner
+              a href="?rom=roms/unofficial/hardcode.zip" Hard Coded
+              a href="?rom=roms/unofficial/sp_crap.zip" Absolute Crap
+              a href="?rom=roms/unofficial/DynamixReadme.zip" Dynamix
+        div
+          br /
+          center
+            .dropbtn style="position: relative; overflow: hidden; direction: ltr;background-color: #4CAF50; width:10vw; font-size: 1.5vw"
+              div style="display: block; text-align: center"
+                | Load ROM
+              input.file#files name="file" type="file"
+                    //| *.v64; *.n64; *.z64
+            span style="font-size: 10px; font-size: 50%"
+              br /
+              | Supports Super Mario 64 
+              br /
+        p style="margin-top: 2%;"
+          input#stretch type="checkbox" stretch
           |&nbsp;&nbsp;
-          input#wireframe type="checkbox" wireframe
-          |&nbsp;&nbsp;
-          input#repeatDList type="checkbox" repeat DList 
+          input#speedlimit type="checkbox" checked="true" onclick="i1964js.onSpeedLimitChanged()" speed&nbsp;limit 
+          - if outputMode == "debug.html"
+            |&nbsp;&nbsp;
+            input#wireframe type="checkbox" wireframe
+            |&nbsp;&nbsp;
+            input#repeatDList type="checkbox" repeat&nbsp;DList 
+        p
+        a style="font-align:left;" href="https://www.google.com/chrome/" Best with Chrome
+        br /
+        div style="height:auto; margin-bottom:0px;"
+          a href="http://www.github.com/schibo/1964js"
+            img src="img/Octocat.png" alt="Code" style="display:inline;padding-top:10%;width:22%;height:auto;margin: auto;"    
+          a href="http://www.uproarapp.com"
+            img src="img/uproar_logo.svg" alt="Uproar" style="display:inline;padding-top:10%;width:22%;height:auto;margin: auto;"
+          a  href="http://w3schools.com"
+            img src="img/w3schools.png" alt="w3 schools" style="display:inline;padding-top:10%;width:22%;height:auto;margin: auto;"
 
-      .dropShadow
-        .story
-          br/
-          input#files name="file" type="file" 
-            | *.v64; *.n64; *.z64
-          br/
-          br/
+      / .footer
+      /   - useFacebookLike = false
+      /   - if useFacebookLike == true
+      /     .fb-like data-colorscheme="dark" data-send="false" data-show-faces="false" data-width="300"
 
-      .footer
-        - useFacebookLike = false
-        - if useFacebookLike == true
-          .fb-like data-colorscheme="dark" data-send="false" data-show-faces="false" data-width="300"
-          br/
-          br/
-        |Supports Super Mario 64
-        br/
-        a href="https://www.google.com/chrome/" [Best with Chrome]
 
+    script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.2/jquery.min.js'
     - outputMode = "release"
     - ARGV.each do|a|
       - if a == "debug.html"

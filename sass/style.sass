@@ -2,7 +2,7 @@
   margin: 10px 0
   padding: 3px
   border: 1px solid #000
-  font-size: 14px
+  font-size: 100%
   clear: both
   opacity: 0
   -moz-transition: opacity 1s linear
@@ -11,59 +11,97 @@
   &.loading
     opacity: 1.0
   .percent
-    background-color: #99ccff
+    background-color: #3d0f66
     height: auto
     width: 0
 
+span
+  color: inherit
+  font-size: inherit
+
+a:visited
+  text-decoration: none
+a:link
+  text-decoration: none
+
+p
+  color: inherit
+  font-size: inherit
+
 #user_panel
-  background-color: #222222
-  border: 2px solid #303030
+  font-size: 100%
+  font-size: 3.5vh
+  font-weight: bold
+  background-color: #3d0f66
+  overflow: hidden
+  //border: 2px solid #3d0f66
+  position: fixed
   text-align: center
-  font-family: "Arial"
+  font-family: "Verdana"
   color: #FFFFFF
-  width: 380px
+  top: 5%
+  left: 5%
+  width: 90%
+  height: 90%
   opacity: 0
+  pointer-events: none
   /* Firefox
   -moz-transition-property: opacity
   -moz-transition-duration: 0s
   -moz-transition-delay: 0s
   /* WebKit
   -webkit-transition-property: opacity
-  -webkit-transition-duration: 1s
+  -webkit-transition-duration: 0.4s
   -webkit-transition-delay: 0s
   /* Opera
   -o-transition-property: opacity
-  -o-transition-duration: 1s
+  -o-transition-duration: 0.4s
   -o-transition-delay: 0s
   /* Standard
   transition-property: opacity
-  transition-duration: 1s
+  transition-duration: 0.4s
   transition-delay: 0s
   .header
-    background-color: #303030
-    border: 1px solid #303030
-    font-size: 12px
+    //background-color: #3d0f66
+    //border: 1px solid #3d0f66
+    font-size: 3vh
     font-weight: bold
+    font-family: "Verdana"
+    height: 25%
 
 h1
-  font-size: 35px
-  font-weight: bold
-  font-family: "Arial"
+  font-size: 100%
+  font-weight: normal
+  font-family: "Verdana"
+  font-size: 3.5vw
 
 #user_panel
   .story
-    border: 3px solid #303030
-    font-size: 12px
+    border: 3px solid #3d0f66
+    font-size: 100%
+    font-size: 3.5vh
     font-weight: bold
-    font-family: "Arial"
+    font-family: "Verdana"
   .footer
-    background-color: #303030
-    border: 13px solid #303030
-    font-size: 12px
+    //background-color: #3d0f66
+    //border: 13px solid #3d0f66
+    font-size: 100%
+    font-size: 3.5vh
     font-weight: bold
-    font-family: "Arial"
+    font-family: "Verdana"
+    position: absolute
+    height: 10%
+    right: 0
+    bottom: 0
+    left: 0
+    padding: 1rem
+    background-color: #efefef
+    text-align: center
   &.show_fast
-    opacity: 0.8
+    font-size: 3.5vh
+    font-weight: bold
+    opacity: 0.95
+    pointer-events: auto
     /* Firefox
     -moz-transition-property: opacity
     -moz-transition-duration: 0s
@@ -80,8 +118,14 @@ h1
     transition-property: opacity
     transition-duration: 0s
     transition-delay: 0s
+    overflow: hidden
   &.show
-    opacity: 0.8
+    font-size: 3.5vh
+    font-weight: bold
+    opacity: 0.95
+    pointer-events: auto
+    overflow: hidden
+
 
 #Canvas
   width: 100%
@@ -105,4 +149,68 @@ h1
 
 .dropShadow
   text-shadow: 3px 3px 3px #555
+  font-size: 100%
+  font-size: 2vw
+
+.dropbtn
+  background-color: #4CAF50
+  color: white
+  padding: 16px
+  font-size: 16px
+  border: none
+  cursor: pointer
+
+.dropbtn:hover, .dropbtn:focus
+  background-color: #3e8e41
+
+.dropdown
+  position: relative
+  display: inline-block
+
+.dropdown-content
+  display: none
+  position: absolute
+  background-color: #f9f9f9
+  min-width: 160px
+  overflow: auto
   font-size: 12px
+  font-size: 1.5vh
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2)
+  z-index: 1
+
+.dropdown-content a
+  color: black
+  padding: 12px 16px
+  text-decoration: none
+  display: block
+
+.dropdown a:hover
+  background-color: #f1f1f1
+
+.show
+  display: block
+
+.file
+  position: absolute
+  left: 0px
+  top: 0px
+  font-family: "Verdana"
+  font-size: 118px
+  margin: 0px
+  padding: 0px
+  cursor: pointer
+  opacity: 0
+  height: 100%
+
+//https://codepen.io/quasimondo/pen/lDdrF
+body
+  background-color: #000000
+  padding: 0px
+  margin: 0px
+
+#gradient 
+  width: 100%
+  height: 800px
+  padding: 0px
+  margin: 0px
+
