@@ -16,7 +16,7 @@ handlers:
   static_dir: js
 
 - url: /img
-  static_dir:img
+  static_dir: img
 
 - url: /lib
   static_dir: lib
