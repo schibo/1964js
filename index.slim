@@ -21,7 +21,7 @@ html
             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
           })();
     javascript:
-      function myFunction() {
+      function showDropdownList() {
         document.getElementById("myDropdown").classList.toggle("show");
       }
       // Close the dropdown if the user clicks outside of it
@@ -40,13 +40,7 @@ html
       }
     // gradient backround from https://codepen.io/quasimondo/pen/lDdrF
     javascript:
-      var colors = new Array(
-        [Math.random()*192,Math.random()*192,Math.random()*192],
-        [Math.random()*192,Math.random()*192,Math.random()*192],
-        [Math.random()*192,Math.random()*192,Math.random()*192],
-        [Math.random()*192,Math.random()*192,Math.random()*192],
-        [Math.random()*192,Math.random()*192,Math.random()*192],
-        [Math.random()*192,Math.random()*192,Math.random()*192]);
+      var colors;
 
       var step = 0;
       //color table indices for: 
@@ -95,11 +89,26 @@ html
           //do not pick the same as the current one
           colorIndices[1] = ( colorIndices[1] + Math.floor( 1 + Math.random() * (colors.length - 1))) % colors.length;
           colorIndices[3] = ( colorIndices[3] + Math.floor( 1 + Math.random() * (colors.length - 1))) % colors.length;
-          
         }
       }
-      setInterval(updateGradient,30);
-
+      var gradientBackgroundInterval = null;
+      function stopGradientBackground() {
+          clearInterval(gradientBackgroundInterval);
+          gradientBackgroundInterval = null;
+      }
+      function startGradientBackground() {
+        if (gradientBackgroundInterval == null) {
+          colors = new Array(
+            [Math.random()*192,Math.random()*192,Math.random()*192],
+            [Math.random()*192,Math.random()*192,Math.random()*192],
+            [Math.random()*192,Math.random()*192,Math.random()*192],
+            [Math.random()*192,Math.random()*192,Math.random()*192],
+            [Math.random()*192,Math.random()*192,Math.random()*192],
+            [Math.random()*192,Math.random()*192,Math.random()*192]);
+            gradientBackgroundInterval = setInterval(updateGradient,30);
+            startGradientBackground();
+        }
+      }
 
     link href="css/style.css" rel="stylesheet" type="text/css"
     title 1964 and 1964js Home page
@@ -512,7 +521,7 @@ html
 
     canvas#Canvas height="240" width="320"
     canvas#Canvas3D height="1024" width="1024"
-  
+
     #user_panel
       #gradient
         span.header
@@ -530,7 +539,7 @@ html
         p
         div
           .dropdown
-            button.dropbtn onclick="myFunction()"  Demos
+            button.dropbtn onclick="showDropdownList()"  Demos
             #myDropdown.dropdown-content
               a href="?rom=roms/unofficial/rotate.zip" Rotate
               a href="?rom=roms/unofficial/chrome.zip" Chrome

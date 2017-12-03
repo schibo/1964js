@@ -1,7 +1,7 @@
 <html>
   <head>
     <script>
-      function myFunction() {
+      function showDropdownList() {
         document.getElementById("myDropdown").classList.toggle("show");
       }
       // Close the dropdown if the user clicks outside of it
@@ -20,13 +20,7 @@
       }
     </script>
     <script>
-      var colors = new Array(
-        [Math.random()*192,Math.random()*192,Math.random()*192],
-        [Math.random()*192,Math.random()*192,Math.random()*192],
-        [Math.random()*192,Math.random()*192,Math.random()*192],
-        [Math.random()*192,Math.random()*192,Math.random()*192],
-        [Math.random()*192,Math.random()*192,Math.random()*192],
-        [Math.random()*192,Math.random()*192,Math.random()*192]);
+      var colors;
       
       var step = 0;
       //color table indices for: 
@@ -75,10 +69,26 @@
           //do not pick the same as the current one
           colorIndices[1] = ( colorIndices[1] + Math.floor( 1 + Math.random() * (colors.length - 1))) % colors.length;
           colorIndices[3] = ( colorIndices[3] + Math.floor( 1 + Math.random() * (colors.length - 1))) % colors.length;
-      
         }
       }
-      setInterval(updateGradient,30);
+      var gradientBackgroundInterval = null;
+      function stopGradientBackground() {
+          clearInterval(gradientBackgroundInterval);
+          gradientBackgroundInterval = null;
+      }
+      function startGradientBackground() {
+        if (gradientBackgroundInterval == null) {
+          colors = new Array(
+            [Math.random()*192,Math.random()*192,Math.random()*192],
+            [Math.random()*192,Math.random()*192,Math.random()*192],
+            [Math.random()*192,Math.random()*192,Math.random()*192],
+            [Math.random()*192,Math.random()*192,Math.random()*192],
+            [Math.random()*192,Math.random()*192,Math.random()*192],
+            [Math.random()*192,Math.random()*192,Math.random()*192]);
+            gradientBackgroundInterval = setInterval(updateGradient,30);
+            startGradientBackground();
+        }
+      }
     </script>
     <link href="css/style.css" rel="stylesheet" type="text/css" />
     <title>1964 and 1964js Home page</title>
@@ -458,12 +468,12 @@
       <div id="gradient">
         <span class="header"><a href="http://1964emu.emulation64.com">Get&nbsp;1964&nbsp;for&nbsp;Windows</a>&nbsp; &nbsp;<a href="http://1964js.com/blog/index.html">Blog</a>&nbsp; &nbsp;<a href="http://hulkholden.github.com/n64js/">Try&nbsp;n64js&nbsp;too!</a></span>
         <p style="font-size: 130%;">
-          1964js <span style="font-size: 10px; font-size: 40%;"> v0.3.5</span>
+          1964js <span style="font-size: 10px; font-size: 40%;"> v0.3.6</span>
         </p>
         <p></p>
         <div>
           <div class="dropdown">
-            <button class="dropbtn" onclick="myFunction()"> Demos</button>
+            <button class="dropbtn" onclick="showDropdownList()"> Demos</button>
             <div class="dropdown-content" id="myDropdown">
               <a href="?rom=roms/unofficial/rotate.zip">Rotate</a><a href="?rom=roms/unofficial/chrome.zip">Chrome</a><a href="?rom=roms/unofficial/dextrose.zip">Dextrose</a><a href="?rom=roms/unofficial/n64stars.zip">N64 Stars</a><a href="?rom=roms/unofficial/liner.zip">Liner</a><a href="?rom=roms/unofficial/hardcode.zip">Hard Coded</a><a href="?rom=roms/unofficial/sp_crap.zip">Absolute Crap</a><a href="?rom=roms/unofficial/DynamixReadme.zip">Dynamix</a>
             </div>
