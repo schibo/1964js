@@ -66,6 +66,10 @@ C1964jsVideoHLE = (core, glx) ->
   @triVertices = new Float32Array(16384)
   @triColorVertices = new Uint8Array(16384)
   @triTextureCoords = new Float32Array(16384)
+
+  @tempVec4 = new Float32Array 4
+  @tempVec3 = new Float32Array 3
+
   @otherModeL = 0
   @otherModeH = 0
   @cycleType = 0
@@ -425,17 +429,14 @@ C1964jsVideoHLE = (core, glx) ->
         @normalMat[2] = @getVertexNormalZ a
         @normalMat[3] = 1.0
 
-        vek = new Float32Array 4
-        
         mat4.inverse @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], @modelViewInverse
         mat4.transpose @modelViewInverse, @modelViewTransposedInverse
-        mat4.multiplyVec4 @modelViewTransposedInverse, @normalMat, vek
+        mat4.multiplyVec4 @modelViewTransposedInverse, @normalMat, @tempVec4
 
-        vect = new Float32Array 3
-        vect[0] = vek[0]
-        vect[1] = vek[1]
-        vect[2] = vek[2]
-        vect = vec3.normalize vect
+        @tempVec3[0] = @tempVec4[0]
+        @tempVec3[1] = @tempVec4[1]
+        @tempVec3[2] = @tempVec4[2]
+        vect = vec3.normalize @tempVec3
         
         # projectiontransposedInverse = mat4.create()
         # mat4.set @gRSP.projectionMtxs[@gRSP.projectionMtxTop], projectiontransposedInverse
@@ -998,11 +999,11 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::DLParser_RDPSetOtherModeL = (otherModeL) ->
     if (otherModeL & consts.RDP_ALPHA_COMPARE_THRESHOLD) isnt 0
-      @alphaTestEnabled = true
+      @alphaTestEnabled = 1
     else if (otherModeL & consts.RDP_ALPHA_COMPARE_DITHER) isnt 0
-      @alphaTestEnabled = true
+      @alphaTestEnabled = 1
     else
-      @alphaTestEnabled = false
+      @alphaTestEnabled = 0
     return
 
   C1964jsVideoHLE::DLParser_LoadTLut = (pc) ->
