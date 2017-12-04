@@ -340,8 +340,8 @@
            //vec4 combined = (a0-b0) * c0 + d0; 
       
            gl_FragColor = (a0-b0) * c0 + d0;
-         //  if (uAlphaTestEnabled == 1 && gl_FragColor.a < uBlendColor.a)
-         //    discard;
+           if (uAlphaTestEnabled == 1 && gl_FragColor.a < uBlendColor.a)
+             discard;
       
            if (cycleType == 1) //2-cycle
            {
@@ -501,9 +501,10 @@
              if (uCombineC1a >= 16 && uCombineC1a <= 31)
                c1.a = 0.0;
       
+           gl_FragColor = (a1-b1) * c1 + d1;
            //  gl_FragColor.a = 0.5;
-           //  if (uAlphaTestEnabled == 1 && gl_FragColor.a < uBlendColor.a)
-           //    discard;
+            if (uAlphaTestEnabled == 1 && gl_FragColor.a < uBlendColor.a)
+              discard;
            }            
          }
        }
@@ -513,7 +514,7 @@
       <div id="gradient">
         <span class="header"><a href="http://1964emu.emulation64.com">Get&nbsp;1964&nbsp;for&nbsp;Windows</a>&nbsp; &nbsp;<a href="http://1964js.com/blog/index.html">Blog</a>&nbsp; &nbsp;<a href="http://hulkholden.github.com/n64js/">Try&nbsp;n64js&nbsp;too!</a></span>
         <p style="font-size: 130%;">
-          1964js <span style="font-size: 10px; font-size: 40%;"> v0.3.6</span>
+          1964js <span style="font-size: 10px; font-size: 40%;"> v0.3.7</span>
         </p>
         <p></p>
         <div>
@@ -545,6 +546,6 @@
       </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
-    <script src="lib/1964js-0.3.6.min.js"></script>
+    <script src="lib/1964js-0.3.7.min.js"></script>
   </body>
 </html>

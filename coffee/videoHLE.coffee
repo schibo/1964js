@@ -75,7 +75,8 @@ C1964jsVideoHLE = (core, glx) ->
   @bLightingEnable = false
   @bFogEnable = false
   @bZBufferEnable = false
-  @colorsTexture = @gl.createTexture()
+  @colorsTexture0 = @gl.createTexture()
+  @colorsTexture1 = @gl.createTexture()
   @renderStateChanged = false
 
   @normalMat = new Float32Array(4)
@@ -727,6 +728,7 @@ C1964jsVideoHLE = (core, glx) ->
     @otherModeH &= ~mask
     @otherModeH |= @getOtherModeH pc+4
     #alert @otherModeH
+    @renderStateChanged = true
     return
 
   C1964jsVideoHLE::RSP_GBI1_SetOtherModeL = (pc) ->
@@ -737,6 +739,8 @@ C1964jsVideoHLE = (core, glx) ->
     @otherModeL &= ~mask
     @otherModeL |= @getOtherModeL pc+4
     #alert dec2hex @otherModeL
+    @DLParser_RDPSetOtherModeL(@otherModel)
+    @renderStateChanged = true
     return
 
   C1964jsVideoHLE::RSP_GBI0_Sprite2DBase = (pc) ->
@@ -992,8 +996,13 @@ C1964jsVideoHLE = (core, glx) ->
     @videoLog "TODO: DLParser_SetPrimDepth"
     return
 
-  C1964jsVideoHLE::DLParser_RDPSetOtherMode = (pc) ->
-    @videoLog "TODO: DLParser_RDPSetOtherMode"
+  C1964jsVideoHLE::DLParser_RDPSetOtherModeL = (otherModeL) ->
+    if (otherModeL & consts.RDP_ALPHA_COMPARE_THRESHOLD) isnt 0
+      @alphaTestEnabled = true
+    else if (otherModeL & consts.RDP_ALPHA_COMPARE_DITHER) isnt 0
+      @alphaTestEnabled = true
+    else
+      @alphaTestEnabled = false
     return
 
   C1964jsVideoHLE::DLParser_LoadTLut = (pc) ->
@@ -1085,7 +1094,6 @@ C1964jsVideoHLE = (core, glx) ->
     @blendColor.push @getSetFillColorB(pc)/255.0
     @blendColor.push @getSetFillColorA(pc)/255.0
     @gl.uniform4fv @core.webGL.shaderProgram.uBlendColor, @blendColor
-    @alphaTestEnabled = 1
     return
 
   C1964jsVideoHLE::DLParser_SetPrimColor = (pc) ->
@@ -1342,7 +1350,7 @@ C1964jsVideoHLE = (core, glx) ->
       textureData = @renderer.formatTexture(tile, @tmem, this)
       if textureData isnt undefined
         @gl.activeTexture(@gl.TEXTURE0)
-        @gl.bindTexture(@gl.TEXTURE_2D, @colorsTexture)
+        @gl.bindTexture(@gl.TEXTURE_2D, @colorsTexture0)
         wrapS = @gl.REPEAT
         wrapT = @gl.REPEAT
         if ((tile.cms is consts.RDP_TXT_CLAMP) or (tile.masks is 0))
@@ -1357,12 +1365,12 @@ C1964jsVideoHLE = (core, glx) ->
         @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_WRAP_T, wrapT)
         @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MAG_FILTER, @gl.LINEAR)
         @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MIN_FILTER, @gl.NEAREST)
-        @gl.uniform1i @core.webGL.shaderProgram.samplerUniform, @colorsTexture
         if textureData instanceof HTMLElement
           # it's a canvas element
           @gl.texImage2D(@gl.TEXTURE_2D, 0, @gl.RGBA, @gl.RGBA, @gl.UNSIGNED_BYTE, textureData)
         else
           @gl.texImage2D(@gl.TEXTURE_2D, 0, @gl.RGBA, tileWidth, tileHeight, 0, @gl.RGBA, @gl.UNSIGNED_BYTE, textureData)
+        @gl.uniform1i @core.webGL.shaderProgram.samplerUniform, @colorsTexture0
 
     #@gl.uniform1i @core.webGL.shaderProgram.otherModeL, @otherModeL
     #@gl.uniform1i @core.webGL.shaderProgram.otherModeH, @otherModeH

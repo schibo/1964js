@@ -349,8 +349,8 @@ html
             //vec4 combined = (a0-b0) * c0 + d0; 
 
             gl_FragColor = (a0-b0) * c0 + d0;
-          //  if (uAlphaTestEnabled == 1 && gl_FragColor.a < uBlendColor.a)
-          //    discard;
+            if (uAlphaTestEnabled == 1 && gl_FragColor.a < uBlendColor.a)
+              discard;
 
             if (cycleType == 1) //2-cycle
             {
@@ -510,9 +510,10 @@ html
               if (uCombineC1a >= 16 && uCombineC1a <= 31)
                 c1.a = 0.0;
 
+            gl_FragColor = (a1-b1) * c1 + d1;
             //  gl_FragColor.a = 0.5;
-            //  if (uAlphaTestEnabled == 1 && gl_FragColor.a < uBlendColor.a)
-            //    discard;
+             if (uAlphaTestEnabled == 1 && gl_FragColor.a < uBlendColor.a)
+               discard;
             }            
           }
         }

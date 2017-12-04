@@ -29,6 +29,7 @@ C1964jsRenderer = (settings, glx, webGL) ->
   gl.bufferData gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(texrectVertexIndices), gl.STATIC_DRAW
   texrectVertexIndexBuffer.itemSize = 1
   texrectVertexIndexBuffer.numItems = 6
+  @colorsTexture0 = gl.createTexture()
 
   @videoHLE = undefined
   fivetoeight = [0x00,0x08,0x10,0x18,0x21,0x29,0x31,0x39,0x42,0x4A,0x52,0x5A,0x63,0x6B,0x73,0x7B,0x84,0x8C,0x94,0x9C,0xA5,0xAD,0xB5,0xBD,0xC6,0xCE,0xD6,0xDE,0xE7,0xEF,0xF7,0xFF]
@@ -271,9 +272,8 @@ C1964jsRenderer = (settings, glx, webGL) ->
 
     textureData = @formatTexture(tile, tmem, videoHLE)
     if textureData isnt undefined
-      colorsTexture = gl.createTexture()
       gl.activeTexture(gl.TEXTURE0)
-      gl.bindTexture(gl.TEXTURE_2D, colorsTexture)
+      gl.bindTexture(gl.TEXTURE_2D, @colorsTexture0)
       if textureData instanceof HTMLElement
         #it's a canvas
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textureData)
@@ -296,7 +296,7 @@ C1964jsRenderer = (settings, glx, webGL) ->
 
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-      gl.uniform1i webGL.shaderProgram.samplerUniform, colorsTexture
+      gl.uniform1i webGL.shaderProgram.samplerUniform, @colorsTexture0
 
       if videoHLE.primColor.length > 0
         gl.uniform4fv webGL.shaderProgram.uPrimColor, videoHLE.primColor
