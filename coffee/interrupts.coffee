@@ -533,7 +533,7 @@ C1964jsInterrupts = (core, cp0) ->
               if core.settings.repeatDList is false
                 clearInterval @interval
                 @triggerRspBreak 0, false
-                triggerDPInterrupt 0, false
+                @triggerDPInterrupt 0, false
             , 16)
           else
             @triggerRspBreak 0, false
