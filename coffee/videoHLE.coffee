@@ -293,7 +293,7 @@ C1964jsVideoHLE = (core, glx) ->
       else
         mat4.multiply @gRSP.projectionMtxs[@gRSP.projectionMtxTop], mat, @gRSP.projectionMtxs[@gRSP.projectionMtxTop]
     @gRSP.bMatrixIsUpdated = true
-    
+
     #hack to show Mario's head (as an ortho projection. This if/else is wrong.
     if @gRSP.projectionMtxs[@gRSP.projectionMtxTop][14] > 0
       mat4.ortho -1024, 1024, -1024, 1024, -1023.0, 1024.0, @gRSP.projectionMtxs[@gRSP.projectionMtxTop]
@@ -420,8 +420,10 @@ C1964jsVideoHLE = (core, glx) ->
       @N64VertexList[i].y = @getVertexY(a)
       @N64VertexList[i].z = @getVertexZ(a)
 
-      @N64VertexList[i].u = @getVertexS(a)/32 / texWidth
-      @N64VertexList[i].v = @getVertexT(a)/32 / texHeight
+      @N64VertexList[i].u = @getVertexS(a) / 32 / texWidth
+      @N64VertexList[i].v = @getVertexT(a) / 32 / texHeight
+
+
 
       if @bLightingEnable is true
         @normalMat[0] = @getVertexNormalX a
@@ -437,7 +439,7 @@ C1964jsVideoHLE = (core, glx) ->
         @tempVec3[1] = @tempVec4[1]
         @tempVec3[2] = @tempVec4[2]
         vect = vec3.normalize @tempVec3
-        
+
         # projectiontransposedInverse = mat4.create()
         # mat4.set @gRSP.projectionMtxs[@gRSP.projectionMtxTop], projectiontransposedInverse
         # mat4.transpose projectiontransposedInverse, projectiontransposedInverse
@@ -474,7 +476,7 @@ C1964jsVideoHLE = (core, glx) ->
     @zColorImage.siz = @getSetTileSiz pc
     @zColorImage.width = @getTImgWidth(pc) + 1
     seg = @getGbi0DlistAddr(pc)
-   # @zColorImage.addr = @getGbi1RspSegmentAddr(seg)
+    @zColorImage.addr = @getRspSegmentAddr seg
     return
 
   C1964jsVideoHLE::DLParser_SetZImg = (pc) ->
@@ -482,7 +484,7 @@ C1964jsVideoHLE = (core, glx) ->
     @zDepthImage.siz = @getSetTileSiz pc
     @zDepthImage.width = @getTImgWidth(pc) + 1
     seg = @getGbi0DlistAddr(pc)
-   # @zDepthImage.addr = @getGbi1RspSegmentAddr(seg)
+    @zDepthImage.addr = @getRspSegmentAddr seg
     return
 
   #Gets new display list address
@@ -603,7 +605,7 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::lightVertex = (norm) ->
-    r = @gRSP.fAmbientLightR 
+    r = @gRSP.fAmbientLightR
     g = @gRSP.fAmbientLightG
     b = @gRSP.fAmbientLightB
     a = @gRSP.fAmbientLightA
@@ -693,6 +695,11 @@ C1964jsVideoHLE = (core, glx) ->
     @gRSP.curTile = 0
     @gRSP.fTexScaleX = 1 / 32.0
     @gRSP.fTexScaleY = 1 / 32.0
+
+    @gl.clearDepth 1.0
+    @gl.depthMask true
+    @gl.clear @gl.DEPTH_BUFFER_BIT
+
     return
 
   C1964jsVideoHLE::resetMatrices = ->
@@ -927,7 +934,7 @@ C1964jsVideoHLE = (core, glx) ->
     @videoLog "TODO: RDP_TriShadeTxtrZ"
     return
 
-  C1964jsVideoHLE::DLParser_TexRect = (pc) ->
+  C1964jsVideoHLE::DLParser_TexRect = (pc, isFillRect) ->
     depthTestEnabled = true
     if depthTestEnabled
       #@setDepthTest()
@@ -954,7 +961,7 @@ C1964jsVideoHLE = (core, glx) ->
       yh += 1.0
 
     #console.log "Texrect: UL("+xl+","+yl+") LR("+xh+","+yh+") Tile:"+tileno+" TexCoord:("+s+","+t+") TexSlope:("+dsdx+","+dtdy+")"
-    @renderer.texRect xl, yl, xh, yh, s, t, dsdx, dtdy, @textureTile[tileno], @tmem, this
+    @renderer.texRect xl, yl, xh, yh, s, t, dsdx, dtdy, @textureTile[tileno], @tmem, this, isFillRect
     @hasTexture = true
     #@setDepthTest()
     #@drawScene false, 7
@@ -1060,18 +1067,21 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_FillRect = (pc) ->
-    xl   = @getTexRectXl(pc) >>> 2
-    yl   = @getTexRectYl(pc) >>> 2
-    xh   = @getTexRectXh(pc) >>> 2
-    yh   = @getTexRectYh(pc) >>> 2
-
-    #todo
-
-
-    # if @zDepthImage.addr == @zColorImage.addr
+    # if @zDepthImage.addr isnt undefined and (@zDepthImage.addr is @zColorImage.addr)
     #   @gl.clearDepth 1.0
-    #   #@gl.clear @gl.DEPTH_BUFFER_BIT
     #   @gl.depthMask true
+    #   @gl.clear @gl.DEPTH_BUFFER_BIT
+      #@gl.clearColor @fillColor[0], @fillColor[1], @fillColor[2], 1.0
+      #@gl.clear @gl.COLOR_BUFFER_BIT
+      #@gl.clearColor 0.0, 0.0, 0.0, 0.0
+      #return
+
+    @DLParser_TexRect pc, true
+
+    # if @fillColor isnt undefined
+    #   if @zDepthImage.addr isnt @zColorImage.addr
+    #     @gl.clearColor 1.0, @fillColor[1], @fillColor[2], 1.0
+    #     @gl.clear @gl.COLOR_BUFFER_BIT
 
     return
 
@@ -1360,7 +1370,7 @@ C1964jsVideoHLE = (core, glx) ->
           wrapS = @gl.MIRRORED_REPEAT
         if ((tile.cmt is consts.RDP_TXT_CLAMP) or (tile.maskt is 0))
           wrapT = @gl.CLAMP_TO_EDGE
-        else if tile.cms is consts.RDP_TXT_MIRROR
+        else if tile.cmt is consts.RDP_TXT_MIRROR
           wrapT = @gl.MIRRORED_REPEAT
         @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_WRAP_S, wrapS)
         @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_WRAP_T, wrapT)
