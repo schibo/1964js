@@ -323,8 +323,7 @@ C1964jsRenderer = (settings, glx, webGL) ->
 
     gl.bindBuffer gl.ELEMENT_ARRAY_BUFFER, texrectVertexIndexBuffer
     webGL.setMatrixUniforms webGL.shaderProgram
-    webGL.setCombineUniforms webGL.shaderProgram
-    gl.uniform1i webGL.shaderProgram.wireframeUniform, if settings.wireframe then 1 else 0
+   # webGL.setCombineUniforms videoHLE, webGL.shaderProgram
 
     if settings.wireframe is true
       gl.drawElements gl.LINE_LOOP, texrectVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0

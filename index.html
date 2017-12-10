@@ -168,7 +168,6 @@
       varying mediump vec2 vTextureCoord;
       uniform sampler2D uSampler;
       
-      uniform int uWireframe;
       uniform int cycleType;
       //uniform int otherModeL, otherModeH;
       uniform int uCombineA0, uCombineB0, uCombineC0, uCombineD0;
@@ -190,7 +189,6 @@
       
       void main(void)
       {
-         if (uWireframe == 1) {gl_FragColor = green; return; } 
          if (cycleType == 3)
          {
            gl_FragColor = uFillColor;

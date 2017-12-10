@@ -106,24 +106,23 @@ C1964jsWebGL = (core, wireframe) ->
     shaderProgram.uAlphaTestEnabled = @gl.getUniformLocation(shaderProgram, "uAlphaTestEnabled")
     shaderProgram
 
-  C1964jsWebGL::setCombineUniforms = (shaderProgram) ->
-    vhle = @core.videoHLE
-    @gl.uniform1i shaderProgram.uCombineA0, vhle.combineA0
-    @gl.uniform1i shaderProgram.uCombineB0, vhle.combineB0
-    @gl.uniform1i shaderProgram.uCombineC0, vhle.combineC0
-    @gl.uniform1i shaderProgram.uCombineD0, vhle.combineD0
-    @gl.uniform1i shaderProgram.uCombineA0a, vhle.combineA0a
-    @gl.uniform1i shaderProgram.uCombineB0a, vhle.combineB0a
-    @gl.uniform1i shaderProgram.uCombineC0a, vhle.combineC0a
-    @gl.uniform1i shaderProgram.uCombineD0a, vhle.combineD0a
-    @gl.uniform1i shaderProgram.uCombineA1, vhle.combineA1
-    @gl.uniform1i shaderProgram.uCombineB1, vhle.combineB1
-    @gl.uniform1i shaderProgram.uCombineC1, vhle.combineC1
-    @gl.uniform1i shaderProgram.uCombineD1, vhle.combineD1
-    @gl.uniform1i shaderProgram.uCombineA1a, vhle.combineA1a
-    @gl.uniform1i shaderProgram.uCombineB1a, vhle.combineB1a
-    @gl.uniform1i shaderProgram.uCombineC1a, vhle.combineC1a
-    @gl.uniform1i shaderProgram.uCombineD1a, vhle.combineD1a
+  C1964jsWebGL::setCombineUniforms = (vhle, shaderProgram) ->
+    @gl.uniform1i shaderProgram.uCombineA0, vhle.combine[0]
+    @gl.uniform1i shaderProgram.uCombineB0, vhle.combine[2]
+    @gl.uniform1i shaderProgram.uCombineC0, vhle.combine[4]
+    @gl.uniform1i shaderProgram.uCombineD0, vhle.combine[6]
+    @gl.uniform1i shaderProgram.uCombineA0a, vhle.combine[1]
+    @gl.uniform1i shaderProgram.uCombineB0a, vhle.combine[3]
+    @gl.uniform1i shaderProgram.uCombineC0a, vhle.combine[5]
+    @gl.uniform1i shaderProgram.uCombineD0a, vhle.combine[7]
+    @gl.uniform1i shaderProgram.uCombineA1, vhle.combine[8]
+    @gl.uniform1i shaderProgram.uCombineB1, vhle.combine[10]
+    @gl.uniform1i shaderProgram.uCombineC1, vhle.combine[12]
+    @gl.uniform1i shaderProgram.uCombineD1, vhle.combine[14]
+    @gl.uniform1i shaderProgram.uCombineA1a, vhle.combine[9]
+    @gl.uniform1i shaderProgram.uCombineB1a, vhle.combine[11]
+    @gl.uniform1i shaderProgram.uCombineC1a, vhle.combine[13]
+    @gl.uniform1i shaderProgram.uCombineD1a, vhle.combine[15]
     return
 
   C1964jsWebGL::setMatrixUniforms = (shaderProgram) ->

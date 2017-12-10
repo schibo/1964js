@@ -139,6 +139,8 @@ C1964jsVideoHLE = (core, glx) ->
   @gRSP.vertexMult = 10
   @triangleVertexTextureCoordBuffer = `undefined`
   @resetMatrices()
+  @combine = new Uint32Array(16)
+
   return this
 
 (->
@@ -161,7 +163,6 @@ C1964jsVideoHLE = (core, glx) ->
     #this.core.interrupts.triggerDPInterrupt(0, false);
     @core.interrupts.delayNextInterrupt = true #don't process immediately
     @core.interrupts.triggerDPInterrupt 0, false
-
     return
 
   C1964jsVideoHLE::videoLog = (msg) ->
@@ -410,6 +411,11 @@ C1964jsVideoHLE = (core, glx) ->
     texWidth = ((@textureTile[@activeTile].lrs >> 2) + 1) - @textureTile[@activeTile].uls
     texHeight = ((@textureTile[@activeTile].lrt >> 2) + 1) - @textureTile[@activeTile].ult
 
+
+    if @bLightingEnable is true
+      mat4.inverse @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], @modelViewInverse
+      mat4.transpose @modelViewInverse, @modelViewTransposedInverse
+
     while i < v0 + num
       a = addr + 16 * (i - v0)
 
@@ -431,8 +437,6 @@ C1964jsVideoHLE = (core, glx) ->
         @normalMat[2] = @getVertexNormalZ a
         @normalMat[3] = 1.0
 
-        mat4.inverse @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], @modelViewInverse
-        mat4.transpose @modelViewInverse, @modelViewTransposedInverse
         mat4.multiplyVec4 @modelViewTransposedInverse, @normalMat, @tempVec4
 
         @tempVec3[0] = @tempVec4[0]
@@ -502,34 +506,34 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::DLParser_SetCombine = (pc) ->
-    @combineA0 = @getCombineA0(pc)
-    @combineB0 = @getCombineB0(pc)
-    @combineC0 = @getCombineC0(pc)
-    @combineD0 = @getCombineD0(pc)
+    @combine[0] = @getCombineA0(pc)
+    @combine[2] = @getCombineB0(pc)
+    @combine[4] = @getCombineC0(pc)
+    @combine[6] = @getCombineD0(pc)
     # @combineA0 = 0xFF if @combineA0 is 15
     # @combineB0 = 0xFF if @combineB0 is 15
     # @combineC0 = 0xFF if @combineC0 is 31
     # @combineD0 = 0xFF if @combineD0 is 7
-    @combineA0a = @getCombineA0a(pc)
-    @combineB0a = @getCombineB0a(pc)
-    @combineC0a = @getCombineC0a(pc)
-    @combineD0a = @getCombineD0a(pc)
+    @combine[1] = @getCombineA0a(pc)
+    @combine[3] = @getCombineB0a(pc)
+    @combine[5] = @getCombineC0a(pc)
+    @combine[7] = @getCombineD0a(pc)
     # @combineA0a = 0xFF if @combineA0a is 7
     # @combineB0a = 0xFF if @combineB0a is 7
     # @combineC0a = 0xFF if @combineC0a is 7
     # @combineD0a = 0xFF if @combineD0a is 7
-    @combineA1 = @getCombineA1(pc)
-    @combineB1 = @getCombineB1(pc)
-    @combineC1 = @getCombineC1(pc)
-    @combineD1 = @getCombineD1(pc)
+    @combine[8] = @getCombineA1(pc)
+    @combine[10] = @getCombineB1(pc)
+    @combine[12] = @getCombineC1(pc)
+    @combine[14] = @getCombineD1(pc)
     # @combineA1 = 0xFF if @combineA1 is 15
     # @combineB1 = 0xFF if @combineB1 is 15
     # @combineC1 = 0xFF if @combineC1 is 31
     # @combineD1 = 0xFF if @combineD1 is 7
-    @combineA1a = @getCombineA1a(pc)
-    @combineB1a = @getCombineB1a(pc)
-    @combineC1a = @getCombineC1a(pc)
-    @combineD1a = @getCombineD1a(pc)
+    @combine[9] = @getCombineA1a(pc)
+    @combine[11] = @getCombineB1a(pc)
+    @combine[13] = @getCombineC1a(pc)
+    @combine[15] = @getCombineD1a(pc)
     # @combineA1a = 0xFF if @combineA1a is 7
     # @combineB1a = 0xFF if @combineB1a is 7
     # @combineC1a = 0xFF if @combineC1a is 7
@@ -542,7 +546,7 @@ C1964jsVideoHLE = (core, glx) ->
     #  console.log " a0:" + @combineA0 + " b0:" + @combineB0 + " c0:" + @combineC0 + " d0:" + @combineD0 + " a0a:" + @combineA0a + " b0a:" + @combineB0a + " c0a:" + @combineC0a + " d0a:" + @combineD0a + " a1:" + @combineA1 + " b1:" + @combineB1 + " c1:" + @combineC1 + " d1:" + @combineD1 + " a1a:" + @combineA1a + " b1a:" + @combineB1a + " c1a:" + @combineC1a + " d1a:" + @combineD1a
 
     #@videoLog "TODO: DLParser_SetCombine"
-    @core.webGL.setCombineUniforms @core.webGL.shaderProgram
+    @core.webGL.setCombineUniforms this, @core.webGL.shaderProgram
     return
 
   C1964jsVideoHLE::RSP_GBI1_MoveWord = (pc) ->
@@ -1381,14 +1385,11 @@ C1964jsVideoHLE = (core, glx) ->
           @gl.texImage2D(@gl.TEXTURE_2D, 0, @gl.RGBA, @gl.RGBA, @gl.UNSIGNED_BYTE, textureData)
         else
           @gl.texImage2D(@gl.TEXTURE_2D, 0, @gl.RGBA, tileWidth, tileHeight, 0, @gl.RGBA, @gl.UNSIGNED_BYTE, textureData)
-        @gl.uniform1i @core.webGL.shaderProgram.samplerUniform, @colorsTexture0
 
     #@gl.uniform1i @core.webGL.shaderProgram.otherModeL, @otherModeL
     #@gl.uniform1i @core.webGL.shaderProgram.otherModeH, @otherModeH
     @gl.uniform1i @core.webGL.shaderProgram.cycleType, @cycleType
     @gl.uniform1i @core.webGL.shaderProgram.uAlphaTestEnabled, @alphaTestEnabled
-
-    @gl.uniform1i @core.webGL.shaderProgram.wireframeUniform, if @core.settings.wireframe then 1 else 0
 
     # Matrix Uniforms
     @gl.uniformMatrix4fv(@core.webGL.shaderProgram.pMatrixUniform, false, @gRSP.projectionMtxs[@gRSP.projectionMtxTop]);
