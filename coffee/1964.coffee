@@ -370,7 +370,7 @@ class C1964jsEmulator
       clearInterval @mySetInterval
       return
 
-    while 1
+    while @terminate is false
       #@interrupts.checkInterrupts()
       if @m[0] >= 0
         @interval += 1
@@ -441,6 +441,7 @@ class C1964jsEmulator
 
   #make way for another 1964 instance. cleanup old scripts written to the page.
   stopEmulatorAndCleanup: =>
+    MainLoop.stop()
     @stopCompiling = true
     @terminate = true
     clearInterval @myFastInterval 
@@ -452,7 +453,10 @@ class C1964jsEmulator
     speedlimit =  document.getElementById("speedlimit")
     clearInterval @myFastInterval 
     if speedlimit is null or speedlimit.checked is false
+      MainLoop.stop()
       @asyncFastLoop()
+    else
+      @startEmulator()
     return
 
   #clearInterval(interval);

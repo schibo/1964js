@@ -528,13 +528,12 @@ C1964jsInterrupts = (core, cp0) ->
         if core.terminate is false
           core.videoHLE.processDisplayList()
           if core.settings.repeatDList is true
+            core.stopEmulatorAndCleanup()
             @interval = setInterval(=>
               core.videoHLE.processDisplayList()
-              if core.settings.repeatDList is false
-                clearInterval @interval
-                @triggerRspBreak 0, false
-                @triggerDPInterrupt 0, false
-            , 16)
+              @triggerRspBreak 0, false
+              return
+            , 1000)
           else
             @triggerRspBreak 0, false
       when consts.SND_TASK
