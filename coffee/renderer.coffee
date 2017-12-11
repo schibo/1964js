@@ -313,12 +313,11 @@ C1964jsRenderer = (settings, glx, webGL) ->
       if videoHLE.envColor.length > 0
         gl.uniform4fv webGL.shaderProgram.uEnvColor, videoHLE.envColor
 
-      cycleType = consts.CYCLE_TYPE_COPY
-      if videoHLE.cycleType.length > 0
-        cycleType = videoHLE.cycleType
-      else if isFillRect is true
-        cycleType = 3
 
+      if isFillRect is true
+        cycleType = 3
+      else 
+        cycleType = videoHLE.cycleType
       gl.uniform1i webGL.shaderProgram.cycleType, cycleType
 
     gl.bindBuffer gl.ELEMENT_ARRAY_BUFFER, texrectVertexIndexBuffer
