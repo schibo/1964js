@@ -73,6 +73,7 @@ class C1964jsEmulator
   callBind: (fn, me) ->
     ->
       fn.call me
+      return
 
   constructor: (userSettings) ->
     #@runLoop = @callBind @runLoop, this

@@ -7,10 +7,9 @@ class C1964jsAudio
   constructor: ->
 
   processAudio: (memory, from, length) ->
-    return
     try
       return  if audioContext is "unsupported"
-      audioContext = new webkitAudioContext()  if audioContext is `undefined`
+      audioContext = new (window.AudioContext || window.webkitAudioContext)() if audioContext is `undefined`
     catch error
       #log "Your browser doesn't support Web Audio."
       audioContext = "unsupported"
@@ -35,7 +34,7 @@ class C1964jsAudio
     @startTime += audioBuffer.duration
     source.connect audioContext.destination
     source.loop = false
-    source.noteOn @startTime
+    source.start()
     return true
 
 #hack global space until we export classes properly

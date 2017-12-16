@@ -17,140 +17,132 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 #jslint todo: true, bitwise: true
 
 #globals window, mat4, C1964jsRenderer, consts, dec2hex, Float32Array
-C1964jsVideoHLE = (core, glx) ->
+class C1964jsVideoHLE
   "use strict"
 
-  @processDisplayList = @callBind @processDisplayList, this
+  constructor: (core, glx) ->
+    @processDisplayList = @callBind @processDisplayList, this
+    i = undefined
+    @core = core #only needed for gfxHelpers prototypes to access.
+    @gl = glx
+    @fogIsImplemented = false #enable this when we supoort fog
 
-  i = undefined
-  @core = core #only needed for gfxHelpers prototypes to access.
-  @gl = glx
+    #todo: make gRSP a class object.
+    @RICE_MATRIX_STACK = 60
+    @MAX_TEXTURES = 8
+    @MAX_VERTICES = 80
+    @MAX_TILES = 8
+    @tmem = new Uint8Array(1024 * 4)
+    @activeTile = 0
+    @textureTile = []
+    @zDepthImage = {fmt: 0, siz: 0, width: 0, addr: 0}
+    @zColorImage = {fmt: 0, siz: 0, width: 0, addr: 0}
+    @N64VertexList = []
+    @vtxTransformed = []
+    @vtxNonTransformed = []
+    @vecProjected = []
+    @vtxProjected5 = []
+    @geometryMode = 0
+    @gRSP = {}
+    @gRSPlights = [{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]
+    @gRSPn64lights = [{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]
+    @gRSPnumLights = 0
+    @matToLoad = mat4.create()
+    @lightingMat = mat4.create()
+    @gRSPworldProject = mat4.create()
+    @triangleVertexPositionBuffer = `undefined`
+    @triangleVertexColorBuffer = `undefined`
+    @dlistStackPointer = 0
+    @dlistStack = []
+    @renderer = new C1964jsRenderer(@core.settings, @core.webGL.gl, @core.webGL)
+    @texImg = {}
+    @segments = []
+    @gl.useProgram @core.webGL.shaderProgram
+    @primColor = [0.0, 0.0, 0.0, 0.0]
+    @fillColor = [0.0, 0.0, 0.0, 0.0]
+    @blendColor = [0.0, 0.0, 0.0, 0.0]
+    @envColor = [0.0, 0.0, 0.0, 0.0]
+    @triVertices = new Float32Array(16384)
+    @triColorVertices = new Uint8Array(16384)
+    @triTextureCoords = new Float32Array(16384)
+    @tempVec4 = new Float32Array 4
+    @tempVec3 = new Float32Array 3
+    @otherModeL = 0
+    @otherModeH = 0
+    @cycleType = 0
+    @alphaTestEnabled = 0
+    @bShade = false
+    @bTextureGen = false
+    @bLightingEnable = false
+    @bFogEnable = false
+    @bZBufferEnable = false
+    @colorsTexture0 = @gl.createTexture()
+    @colorsTexture1 = @gl.createTexture()
+    @renderStateChanged = false
+    @normalMat = new Float32Array(4)
+    @transformed = mat4.create()
+    @nonTransformed = mat4.create()
+    @modelViewInverse = mat4.create()
+    @modelViewTransposedInverse = mat4.create()
 
-  @fogIsImplemented = false #enable this when we supoort fog
+    # Native Viewport
+    @n64ViewportWidth = 640
+    @n64ViewportHeight = 480
+    @n64ViewportLeft = 0
+    @n64ViewportTop = 0
+    @n64ViewportRight = 320
+    @n64ViewportBottom = 240
 
-  #todo: make gRSP a class object.
-  @RICE_MATRIX_STACK = 60
-  @MAX_TEXTURES = 8
-  @MAX_VERTICES = 80
-  @MAX_TILES = 8
-  @tmem = new Uint8Array(1024 * 4)
-  @activeTile = 0
-  @textureTile = []
-  @zDepthImage = {fmt: 0, siz: 0, width: 0, addr: 0}
-  @zColorImage = {fmt: 0, siz: 0, width: 0, addr: 0}
-  @N64VertexList = []
-  @vtxTransformed = []
-  @vtxNonTransformed = []
-  @vecProjected = []
-  @vtxProjected5 = []
-  @geometryMode = 0
-  @gRSP = {}
-  @gRSPlights = [{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]
-  @gRSPn64lights = [{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]
-  @gRSPnumLights = 0
-  @matToLoad = mat4.create()
-  @lightingMat = mat4.create()
-  @gRSPworldProject = mat4.create()
-  @triangleVertexPositionBuffer = `undefined`
-  @triangleVertexColorBuffer = `undefined`
-  @dlistStackPointer = 0
-  @dlistStack = []
-  @renderer = new C1964jsRenderer(@core.settings, @core.webGL.gl, @core.webGL)
-  @texImg = {}
-  @segments = []
-  @gl.useProgram @core.webGL.shaderProgram
-  @primColor = [0.0, 0.0, 0.0, 0.0]
-  @fillColor = [0.0, 0.0, 0.0, 0.0]
-  @blendColor = [0.0, 0.0, 0.0, 0.0]
-  @envColor = [0.0, 0.0, 0.0, 0.0]
-  @triVertices = new Float32Array(16384)
-  @triColorVertices = new Uint8Array(16384)
-  @triTextureCoords = new Float32Array(16384)
+    #todo: different microcodes support
+    @currentMicrocodeMap = @microcodeMap0
+    i = 0
+    while i < @MAX_TILES
+      @textureTile[i] = []
+      i += 1
+    i = 0
+    while i < @MAX_VERTICES
+      @N64VertexList[i] = {}
+      i += 1
+    i = 0
+    while i < consts.MAX_DL_STACK_SIZE
+      @dlistStack[i] = {}
+      i += 1
+    i = 0
+    while i < @segments.length
+      @segments[i] = 0
+      i += 1
+    @gRSP.projectionMtxs = []
+    @gRSP.modelviewMtxs = []
+    @gRSP.ambientLightIndex = 0
+    @gRSP.ambientLightColor = 0
+    @gRSP.fAmbientLightA = 0
+    @gRSP.fAmbientLightR = 0
+    @gRSP.fAmbientLightG = 0
+    @gRSP.fAmbientLightB = 0
 
-  @tempVec4 = new Float32Array 4
-  @tempVec3 = new Float32Array 3
+    @gl.clearColor 0.0, 0.0, 0.0, 0.0
+    @gl.depthFunc @gl.LEQUAL
+    @gl.clearDepth 1.0
+    @gl.disable @gl.DEPTH_TEST
 
-  @otherModeL = 0
-  @otherModeH = 0
-  @cycleType = 0
-  @alphaTestEnabled = 0
-  @bShade = false
-  @bTextureGen = false
-  @bLightingEnable = false
-  @bFogEnable = false
-  @bZBufferEnable = false
-  @colorsTexture0 = @gl.createTexture()
-  @colorsTexture1 = @gl.createTexture()
-  @renderStateChanged = false
+    #todo: allocate on-demand
+    i = 0
+    while i < @RICE_MATRIX_STACK
+      @gRSP.projectionMtxs[i] = mat4.create()
+      @gRSP.modelviewMtxs[i] = mat4.create()
+      i += 1
+    @gRSP.vertexMult = 10
+    @triangleVertexTextureCoordBuffer = `undefined`
+    @resetMatrices()
+    @combine = new Uint32Array(16)
+    return this
 
-  @normalMat = new Float32Array(4)
-  @transformed = mat4.create()
-  @nonTransformed = mat4.create()
-  @modelViewInverse = mat4.create()
-  @modelViewTransposedInverse = mat4.create()
-
-  # Native Viewport
-  @n64ViewportWidth = 640
-  @n64ViewportHeight = 480
-  @n64ViewportLeft = 0
-  @n64ViewportTop = 0
-  @n64ViewportRight = 320
-  @n64ViewportBottom = 240
-
-
-  #todo: different microcodes support
-  @currentMicrocodeMap = @microcodeMap0
-  i = 0
-  while i < @MAX_TILES
-    @textureTile[i] = []
-    i += 1
-  i = 0
-  while i < @MAX_VERTICES
-    @N64VertexList[i] = {}
-    i += 1
-  i = 0
-  while i < consts.MAX_DL_STACK_SIZE
-    @dlistStack[i] = {}
-    i += 1
-  i = 0
-  while i < @segments.length
-    @segments[i] = 0
-    i += 1
-  @gRSP.projectionMtxs = []
-  @gRSP.modelviewMtxs = []
-  @gRSP.ambientLightIndex = 0
-  @gRSP.ambientLightColor = 0
-  @gRSP.fAmbientLightA = 0
-  @gRSP.fAmbientLightR = 0
-  @gRSP.fAmbientLightG = 0
-  @gRSP.fAmbientLightB = 0
-
-  @gl.clearColor 0.0, 0.0, 0.0, 0.0
-  @gl.depthFunc @gl.LEQUAL
-  @gl.clearDepth 1.0
-  @gl.disable @gl.DEPTH_TEST
-
-  #todo: allocate on-demand
-  i = 0
-  while i < @RICE_MATRIX_STACK
-    @gRSP.projectionMtxs[i] = mat4.create()
-    @gRSP.modelviewMtxs[i] = mat4.create()
-    i += 1
-  @gRSP.vertexMult = 10
-  @triangleVertexTextureCoordBuffer = `undefined`
-  @resetMatrices()
-  @combine = new Uint32Array(16)
-
-  return this
-
-(->
-  "use strict"
-
-  C1964jsVideoHLE::callBind = (fn, me) ->
+  callBind: (fn, me) ->
     ->
       fn.call me
+      return
 
-  C1964jsVideoHLE::processDisplayList = ->
+  processDisplayList: ->
     if @core.showFB is true
       @initBuffers()
       @core.webGL.show3D()
@@ -165,11 +157,11 @@ C1964jsVideoHLE = (core, glx) ->
     @core.interrupts.triggerDPInterrupt 0, false
     return
 
-  C1964jsVideoHLE::videoLog = (msg) ->
+  videoLog: (msg) ->
     #console.log msg
     return
 
-  C1964jsVideoHLE::dlParserProcess = ->
+  dlParserProcess: ->
     @dlistStackPointer = 0
     @dlistStack[@dlistStackPointer].pc = (@core.memory.spMemUint8Array[consts.TASK_DATA_PTR] << 24 | @core.memory.spMemUint8Array[consts.TASK_DATA_PTR + 1] << 16 | @core.memory.spMemUint8Array[consts.TASK_DATA_PTR + 2] << 8 | @core.memory.spMemUint8Array[consts.TASK_DATA_PTR + 3])>>>0
     @dlistStack[@dlistStackPointer].countdown = consts.MAX_DL_COUNT
@@ -197,16 +189,16 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   #TODO: end rendering
-  C1964jsVideoHLE::RDP_GFX_PopDL = ->
+  RDP_GFX_PopDL: ->
     @dlistStackPointer -= 1
     return
 
-  C1964jsVideoHLE::RSP_RDP_Nothing = (pc) ->
+  RSP_RDP_Nothing: (pc) ->
     #@videoLog "RSP RDP NOTHING"
     #@dlistStackPointer -= 1
     return
 
-  C1964jsVideoHLE::RSP_GBI1_MoveMem = (pc) ->
+  RSP_GBI1_MoveMem: (pc) ->
     addr = undefined
     length = undefined
     type = @getGbi1Type(pc)
@@ -226,10 +218,10 @@ C1964jsVideoHLE = (core, glx) ->
         @RSP_GFX_Force_Matrix pc
     return
 
-  C1964jsVideoHLE::RSP_GFX_Force_Matrix = (pc) ->
+  RSP_GFX_Force_Matrix: (pc) ->
     @RSP_GBI0_Mtx pc
 
-  C1964jsVideoHLE::RSP_MoveMemViewport = (addr) ->
+  RSP_MoveMemViewport: (addr) ->
     @videoLog "RSP_MoveMemViewport"
 
     if addr + 16 >= @core.currentRdramSize
@@ -267,15 +259,15 @@ C1964jsVideoHLE = (core, glx) ->
 
     return
 
-  C1964jsVideoHLE::RSP_GBI1_SpNoop = (pc) ->
+  RSP_GBI1_SpNoop: (pc) ->
     #@videoLog "RSP_GBI1_SpNoop"
     return
 
-  C1964jsVideoHLE::RSP_GBI1_Reserved = (pc) ->
+  RSP_GBI1_Reserved: (pc) ->
     #@videoLog "RSP_GBI1_Reserved"
     return
 
-  C1964jsVideoHLE::setProjection = (mat, bPush, bReplace) ->
+  setProjection: (mat, bPush, bReplace) ->
     if bPush is true
       if @gRSP.projectionMtxTop >= (@RICE_MATRIX_STACK - 1)
         @gRSP.bMatrixIsUpdated = true
@@ -302,7 +294,7 @@ C1964jsVideoHLE = (core, glx) ->
       mat4.ortho -1, 1, -1, 1, -1, 1, 1.0, 1024.0, this.gRSP.projectionMtxs[this.gRSP.projectionMtxTop]
     return
 
-  C1964jsVideoHLE::setWorldView = (mat, bPush, bReplace) ->
+  setWorldView: (mat, bPush, bReplace) ->
     if bPush is true
       if @gRSP.modelViewMtxTop >= (@RICE_MATRIX_STACK - 1)
         @gRSP.bMatrixIsUpdated = true
@@ -323,7 +315,7 @@ C1964jsVideoHLE = (core, glx) ->
     @gRSP.bMatrixIsUpdated = true
     return
 
-  C1964jsVideoHLE::RSP_GBI0_Mtx = (pc) ->
+  RSP_GBI0_Mtx: (pc) ->
     addr = undefined
     seg = @getGbi0DlistAddr(pc)
     addr = @getRspSegmentAddr(seg)
@@ -337,7 +329,7 @@ C1964jsVideoHLE = (core, glx) ->
     @renderStateChanged = true
     return
 
-  C1964jsVideoHLE::loadMatrix = (addr) ->
+  loadMatrix: (addr) ->
     #  todo: port and probably log warning message if true
     if (addr + 64 > @core.currentRdramSize)
       console.warn "loading matrix beyond ram size"
@@ -362,7 +354,7 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   #tile info.
-  C1964jsVideoHLE::DLParser_SetTImg = (pc) ->
+  DLParser_SetTImg: (pc) ->
     @texImg.format = @getTImgFormat(pc)
     @texImg.size = @getTImgSize(pc)
     @texImg.width = @getTImgWidth(pc) + 1
@@ -374,7 +366,7 @@ C1964jsVideoHLE = (core, glx) ->
 
   #this.videoLog('Texture: format=' + this.texImg.format + ' size=' + this.texImg.size + ' ' + 'width=' + this.texImg.width + ' addr=' + this.texImg.addr + ' bpl=' + this.texImg.bpl);
 
-  C1964jsVideoHLE::RSP_GBI0_Vtx = (pc) ->
+  RSP_GBI0_Vtx: (pc) ->
     v0 = undefined
     seg = undefined
     addr = undefined
@@ -391,7 +383,7 @@ C1964jsVideoHLE = (core, glx) ->
       @processVertexData addr, v0, num
     return
 
-  C1964jsVideoHLE::updateCombinedMatrix = ->
+  updateCombinedMatrix: ->
     return #this is set in the shader
     if @gRSP.bMatrixIsUpdated
       pmtx = undefined
@@ -403,7 +395,7 @@ C1964jsVideoHLE = (core, glx) ->
       @gRSP.bMatrixIsUpdated = false
     return
 
-  C1964jsVideoHLE::processVertexData = (addr, v0, num) ->
+  processVertexData: (addr, v0, num) ->
     a = undefined
     @updateCombinedMatrix()
     i = v0
@@ -475,7 +467,7 @@ C1964jsVideoHLE = (core, glx) ->
       i += 1
     return
 
-  C1964jsVideoHLE::DLParser_SetCImg = (pc) ->
+  DLParser_SetCImg: (pc) ->
     @zColorImage.fmt = @getSetTileFmt pc
     @zColorImage.siz = @getSetTileSiz pc
     @zColorImage.width = @getTImgWidth(pc) + 1
@@ -483,7 +475,7 @@ C1964jsVideoHLE = (core, glx) ->
     @zColorImage.addr = @getRspSegmentAddr seg
     return
 
-  C1964jsVideoHLE::DLParser_SetZImg = (pc) ->
+  DLParser_SetZImg: (pc) ->
     @zDepthImage.fmt = @getSetTileFmt pc
     @zDepthImage.siz = @getSetTileSiz pc
     @zDepthImage.width = @getTImgWidth(pc) + 1
@@ -492,7 +484,7 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   #Gets new display list address
-  C1964jsVideoHLE::RSP_GBI0_DL = (pc) ->
+  RSP_GBI0_DL: (pc) ->
     param = undefined
     seg = @getGbi0DlistAddr(pc)
     addr = @getRspSegmentAddr(seg)
@@ -505,7 +497,7 @@ C1964jsVideoHLE = (core, glx) ->
     @dlistStack[@dlistStackPointer].countdown = consts.MAX_DL_COUNT
     return
 
-  C1964jsVideoHLE::DLParser_SetCombine = (pc) ->
+  DLParser_SetCombine: (pc) ->
     @combine[0] = @getCombineA0(pc)
     @combine[2] = @getCombineB0(pc)
     @combine[4] = @getCombineC0(pc)
@@ -549,7 +541,7 @@ C1964jsVideoHLE = (core, glx) ->
     @core.webGL.setCombineUniforms this, @core.webGL.shaderProgram
     return
 
-  C1964jsVideoHLE::RSP_GBI1_MoveWord = (pc) ->
+  RSP_GBI1_MoveWord: (pc) ->
     #@videoLog "RSP_GBI1_MoveWord"
     switch @getGbi0MoveWordType(pc)
       when consts.RSP_MOVE_WORD_MATRIX
@@ -573,7 +565,7 @@ C1964jsVideoHLE = (core, glx) ->
             @setLightCol light, @getGbi0MoveWordValue(pc)
     return
 
-  C1964jsVideoHLE::setAmbientLight = (col) ->
+  setAmbientLight: (col) ->
     @gRSP.ambientLightColor = col
     r = (col >>> 24) & 0xff
     g = (col >>> 16) & 0xff
@@ -585,7 +577,7 @@ C1964jsVideoHLE = (core, glx) ->
     @gRSP.fAmbientLightA = a
     return
 
-  C1964jsVideoHLE::setLightCol = (dwLight, dwCol) ->
+  setLightCol: (dwLight, dwCol) ->
     r = ((dwCol >>> 24) & 0xFF)
     g = ((dwCol >>> 16) & 0xFF)
     b = ((dwCol >>> 8) & 0xFF)
@@ -596,7 +588,7 @@ C1964jsVideoHLE = (core, glx) ->
     @gRSPlights[dwLight].a = a
     return
 
-  C1964jsVideoHLE::setLightDirection = (dwLight, x, y, z) ->
+  setLightDirection: (dwLight, x, y, z) ->
     lightVec = new Float32Array(3)
     lightVec[0] = x
     lightVec[1] = y
@@ -608,7 +600,7 @@ C1964jsVideoHLE = (core, glx) ->
     @gRSPlights[dwLight].z = lightVec[2]
     return
 
-  C1964jsVideoHLE::lightVertex = (norm) ->
+  lightVertex: (norm) ->
     r = @gRSP.fAmbientLightR
     g = @gRSP.fAmbientLightG
     b = @gRSP.fAmbientLightB
@@ -641,7 +633,7 @@ C1964jsVideoHLE = (core, glx) ->
 
     return [r, g, b, 255.0]
 
-  C1964jsVideoHLE::RSP_MoveMemLight = (dwLight, dwAddr, pc) ->
+  RSP_MoveMemLight: (dwLight, dwAddr, pc) ->
     if dwLight >= 16
       return
 
@@ -686,7 +678,7 @@ C1964jsVideoHLE = (core, glx) ->
         @setLightDirection dwLight, @gRSPn64lights[dwLight].x, @gRSPn64lights[dwLight].y, @gRSPn64lights[dwLight].z
     return
 
-  C1964jsVideoHLE::renderReset = ->
+  renderReset: ->
 
     #UpdateClipRectangle();
     #@resetMatrices()
@@ -706,7 +698,7 @@ C1964jsVideoHLE = (core, glx) ->
 
     return
 
-  C1964jsVideoHLE::resetMatrices = ->
+  resetMatrices: ->
     @gRSP.projectionMtxTop = 0
     @gRSP.modelViewMtxTop = 0
     mat4.identity @gRSP.modelviewMtxs[0]
@@ -722,17 +714,17 @@ C1964jsVideoHLE = (core, glx) ->
     @updateCombinedMatrix()
     return
 
-  C1964jsVideoHLE::RSP_RDP_InsertMatrix = ->
+  RSP_RDP_InsertMatrix: ->
     @videoLog "TODO: Insert Matrix"
     @updateCombinedMatrix()
     @gRSP.bMatrixIsUpdated = false
     return
 
-  C1964jsVideoHLE::DLParser_SetScissor = (pc) ->
+  DLParser_SetScissor: (pc) ->
     @videoLog "TODO: DLParser_SetScissor"
     return
 
-  C1964jsVideoHLE::RSP_GBI1_SetOtherModeH = (pc) ->
+  RSP_GBI1_SetOtherModeH: (pc) ->
     word0 = @getOtherModeH pc
     length = (word0 >>> 0) & 0xFF
     shift = (word0 >>> 8) & 0xFF
@@ -743,7 +735,7 @@ C1964jsVideoHLE = (core, glx) ->
     @renderStateChanged = true
     return
 
-  C1964jsVideoHLE::RSP_GBI1_SetOtherModeL = (pc) ->
+  RSP_GBI1_SetOtherModeL: (pc) ->
     word0 = @getOtherModeL pc
     length = (word0 >>> 0) & 0xFF
     shift = (word0 >>> 8) & 0xFF
@@ -755,45 +747,45 @@ C1964jsVideoHLE = (core, glx) ->
     @renderStateChanged = true
     return
 
-  C1964jsVideoHLE::RSP_GBI0_Sprite2DBase = (pc) ->
+  RSP_GBI0_Sprite2DBase: (pc) ->
     @videoLog "TODO: RSP_GBI0_Sprite2DBase"
     return
 
-  C1964jsVideoHLE::RSP_GBI0_Tri4 = (pc) ->
+  RSP_GBI0_Tri4: (pc) ->
     @videoLog "TODO: RSP_GBI0_Tri4"
     return
 
-  C1964jsVideoHLE::RSP_GBI1_RDPHalf_Cont = (pc) ->
+  RSP_GBI1_RDPHalf_Cont: (pc) ->
     @videoLog "TODO: RSP_GBI1_RDPHalf_Cont"
     return
 
-  C1964jsVideoHLE::RSP_GBI1_RDPHalf_2 = (pc) ->
+  RSP_GBI1_RDPHalf_2: (pc) ->
     @videoLog "TODO: RSP_GBI1_RDPHalf_2"
     return
 
-  C1964jsVideoHLE::RSP_GBI1_RDPHalf_1 = (pc) ->
+  RSP_GBI1_RDPHalf_1: (pc) ->
     @videoLog "TODO: RSP_GBI1_RDPHalf_1"
     return
 
-  C1964jsVideoHLE::RSP_GBI1_Line3D = (pc) ->
+  RSP_GBI1_Line3D: (pc) ->
     @videoLog "TODO: RSP_GBI1_Line3D"
     return
 
-  C1964jsVideoHLE::RSP_GBI1_ClearGeometryMode = (pc) ->
+  RSP_GBI1_ClearGeometryMode: (pc) ->
     data = @getClearGeometryMode(pc)>>>0
     @geometryMode &= ~data
     @initGeometryMode()
     @setDepthTest()
     return
 
-  C1964jsVideoHLE::RSP_GBI1_SetGeometryMode = (pc) ->
+  RSP_GBI1_SetGeometryMode: (pc) ->
     data = @getSetGeometryMode(pc)>>>0
     @geometryMode |= data
     @initGeometryMode()
     @setDepthTest()
     return
 
-  C1964jsVideoHLE::initGeometryMode = () ->
+  initGeometryMode: () ->
     # cull face
     bCullFront = @geometryMode & consts.G_CULL_FRONT
     bCullBack = @geometryMode & consts.G_CULL_BACK
@@ -840,13 +832,13 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
 
-  C1964jsVideoHLE::RSP_GBI1_EndDL = (pc) ->
+  RSP_GBI1_EndDL: (pc) ->
     @RDP_GFX_PopDL()
     @drawScene(false, @activeTile)
     #@resetState()
     return
 
-  C1964jsVideoHLE::RSP_GBI1_Texture = (pc) ->
+  RSP_GBI1_Texture: (pc) ->
     tile = @getTextureTile(pc)
     @activeTile = tile
     @textureTile[tile].on    = @getTextureOn(pc)
@@ -857,19 +849,19 @@ C1964jsVideoHLE = (core, glx) ->
     @drawScene false, tile
     return
 
-  C1964jsVideoHLE::popProjection = () ->
+  popProjection: () ->
     if @gRSP.projectionMtxTop > 0
       @gRSP.projectionMtxTop--
     return
 
-  C1964jsVideoHLE::popWorldView = () ->
+  popWorldView: () ->
     if @gRSP.modelViewMtxTop > 0
       @gRSP.modelViewMtxTop--
       @gRSPmodelViewTop = @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop]
       @gRSP.bMatrixIsUpdated = true
     return
 
-  C1964jsVideoHLE::RSP_GBI1_PopMtx = (pc) ->
+  RSP_GBI1_PopMtx: (pc) ->
     if @gbi0PopMtxIsProjection pc
       @popProjection()
     else
@@ -877,11 +869,11 @@ C1964jsVideoHLE = (core, glx) ->
     @renderStateChanged = true
     return
 
-  C1964jsVideoHLE::RSP_GBI1_CullDL = (pc) ->
+  RSP_GBI1_CullDL: (pc) ->
     @videoLog "TODO: RSP_GBI1_CullDL"
     return
 
-  C1964jsVideoHLE::RSP_GBI1_Tri1 = (pc) ->
+  RSP_GBI1_Tri1: (pc) ->
     v0 = @getGbi0Tri1V0(pc) / @gRSP.vertexMult
     v1 = @getGbi0Tri1V1(pc) / @gRSP.vertexMult
     v2 = @getGbi0Tri1V2(pc) / @gRSP.vertexMult
@@ -902,43 +894,43 @@ C1964jsVideoHLE = (core, glx) ->
       @drawScene false, @activeTile
     return
 
-  C1964jsVideoHLE::RSP_GBI1_Noop = (pc) ->
+  RSP_GBI1_Noop: (pc) ->
     #@videoLog "TODO: RSP_GBI1_Noop"
     return
 
-  C1964jsVideoHLE::RDP_TriFill = (pc) ->
+  RDP_TriFill: (pc) ->
     @videoLog "TODO: RDP_TriFill"
     return
 
-  C1964jsVideoHLE::RDP_TriFillZ = (pc) ->
+  RDP_TriFillZ: (pc) ->
     @videoLog "RDP_TriFillZ"
     return
 
-  C1964jsVideoHLE::RDP_TriTxtr = (pc) ->
+  RDP_TriTxtr: (pc) ->
     @videoLog "TODO: RDP_TriTxtr"
     return
 
-  C1964jsVideoHLE::RDP_TriTxtrZ = (pc) ->
+  RDP_TriTxtrZ: (pc) ->
     @videoLog "TODO: RDP_TriTxtrZ"
     return
 
-  C1964jsVideoHLE::RDP_TriShade = (pc) ->
+  RDP_TriShade: (pc) ->
     @videoLog "TODO: RDP_TriShade"
     return
 
-  C1964jsVideoHLE::RDP_TriShadeZ = (pc) ->
+  RDP_TriShadeZ: (pc) ->
     @videoLog "TODO: RDP_TriShadeZ"
     return
 
-  C1964jsVideoHLE::RDP_TriShadeTxtr = (pc) ->
+  RDP_TriShadeTxtr: (pc) ->
     @videoLog "TODO: RDP_TriShadeTxtr"
     return
 
-  C1964jsVideoHLE::RDP_TriShadeTxtrZ = (pc) ->
+  RDP_TriShadeTxtrZ: (pc) ->
     @videoLog "TODO: RDP_TriShadeTxtrZ"
     return
 
-  C1964jsVideoHLE::DLParser_TexRect = (pc, isFillRect) ->
+  DLParser_TexRect: (pc, isFillRect) ->
     depthTestEnabled = true
     if depthTestEnabled
       #@setDepthTest()
@@ -971,44 +963,44 @@ C1964jsVideoHLE = (core, glx) ->
     #@drawScene false, 7
     return
 
-  C1964jsVideoHLE::DLParser_TexRectFlip = (pc) ->
+  DLParser_TexRectFlip: (pc) ->
     @videoLog "TODO: DLParser_TexRectFlip"
     return
 
-  C1964jsVideoHLE::DLParser_RDPLoadSynch = (pc) ->
+  DLParser_RDPLoadSynch: (pc) ->
     @renderStateChanged = true
     @videoLog "TODO: DLParser_RDPLoadSynch"
     return
 
-  C1964jsVideoHLE::DLParser_RDPPipeSynch = (pc) ->
+  DLParser_RDPPipeSynch: (pc) ->
     @videoLog "TODO: DLParser_RDPPipeSynch"
     return
 
-  C1964jsVideoHLE::DLParser_RDPTileSynch = (pc) ->
+  DLParser_RDPTileSynch: (pc) ->
     @videoLog "TODO: DLParser_RDPTileSynch"
     return
 
-  C1964jsVideoHLE::DLParser_RDPFullSynch = (pc) ->
+  DLParser_RDPFullSynch: (pc) ->
     #@drawScene(7, false)
     return
 
-  C1964jsVideoHLE::DLParser_SetKeyGB = (pc) ->
+  DLParser_SetKeyGB: (pc) ->
     @videoLog "TODO: DLParser_SetKeyGB"
     return
 
-  C1964jsVideoHLE::DLParser_SetKeyR = (pc) ->
+  DLParser_SetKeyR: (pc) ->
     @videoLog "TODO: DLParser_SetKeyR"
     return
 
-  C1964jsVideoHLE::DLParser_SetConvert = (pc) ->
+  DLParser_SetConvert: (pc) ->
     @videoLog "TODO: DLParser_SetConvert"
     return
 
-  C1964jsVideoHLE::DLParser_SetPrimDepth = (pc) ->
+  DLParser_SetPrimDepth: (pc) ->
     @videoLog "TODO: DLParser_SetPrimDepth"
     return
 
-  C1964jsVideoHLE::DLParser_RDPSetOtherModeL = (otherModeL) ->
+  DLParser_RDPSetOtherModeL: (otherModeL) ->
     if (otherModeL & consts.RDP_ALPHA_COMPARE_THRESHOLD) isnt 0
       @alphaTestEnabled = 1
     else if (otherModeL & consts.RDP_ALPHA_COMPARE_DITHER) isnt 0
@@ -1017,11 +1009,11 @@ C1964jsVideoHLE = (core, glx) ->
       @alphaTestEnabled = 0
     return
 
-  C1964jsVideoHLE::DLParser_LoadTLut = (pc) ->
+  DLParser_LoadTLut: (pc) ->
     @videoLog "TODO: DLParser_LoadTLut"
     return
 
-  C1964jsVideoHLE::DLParser_SetTileSize = (pc) ->
+  DLParser_SetTileSize: (pc) ->
     tile = @getSetTileSizeTile(pc)
     @textureTile[tile].uls = @getSetTileSizeUls(pc)
     @textureTile[tile].ult = @getSetTileSizeUlt(pc)
@@ -1030,7 +1022,7 @@ C1964jsVideoHLE = (core, glx) ->
     #console.log "SetTileSize: UL("+@textureTile[tile].uls+"/"+@textureTile[tile].ult+") LR("+@textureTile[tile].lrs+"/"+@textureTile[tile].lrt+") Dim: "+@textureTile[tile].width+"x"+@textureTile[tile].height
     return
 
-  C1964jsVideoHLE::DLParser_LoadBlock = (pc) ->
+  DLParser_LoadBlock: (pc) ->
     tile = @getLoadBlockTile(pc)
     uls = @getLoadBlockUls(pc)
     ult = @getLoadBlockUlt(pc)
@@ -1047,11 +1039,11 @@ C1964jsVideoHLE = (core, glx) ->
       i++
     return
 
-  C1964jsVideoHLE::DLParser_LoadTile = (pc) ->
+  DLParser_LoadTile: (pc) ->
     @videoLog "TODO: DLParser_LoadTile"
     return
 
-  C1964jsVideoHLE::DLParser_SetTile = (pc) ->
+  DLParser_SetTile: (pc) ->
     tile = @getSetTileTile(pc)
     @textureTile[tile].fmt = @getSetTileFmt(pc);
     @textureTile[tile].siz = @getSetTileSiz(pc);
@@ -1070,7 +1062,7 @@ C1964jsVideoHLE = (core, glx) ->
     #console.log "SetTile:"+tile+" FMT:"+@textureTile[tile].fmt+" SIZ:"+@textureTile[tile].siz+" LINE: "+@textureTile[tile].line+" TMEM:"+@textureTile[tile].tmem+" PAL:"+@textureTile[tile].pal+" CMS/T:"+@textureTile[tile].cms+"/"+@textureTile[tile].cmt+" MASKS/T:"+@textureTile[tile].masks+"/"+@textureTile[tile].maskt+" SHIFTS/T:"+@textureTile[tile].shifts+"/"+@textureTile[tile].shiftt
     return
 
-  C1964jsVideoHLE::DLParser_FillRect = (pc) ->
+  DLParser_FillRect: (pc) ->
     # if @zDepthImage.addr isnt undefined and (@zDepthImage.addr is @zColorImage.addr)
     #   @gl.clearDepth 1.0
     #   @gl.depthMask true
@@ -1089,7 +1081,7 @@ C1964jsVideoHLE = (core, glx) ->
 
     return
 
-  C1964jsVideoHLE::DLParser_SetFillColor = (pc) ->
+  DLParser_SetFillColor: (pc) ->
     @fillColor = []
     @fillColor.push @getSetFillColorR(pc)/255.0
     @fillColor.push @getSetFillColorG(pc)/255.0
@@ -1098,11 +1090,11 @@ C1964jsVideoHLE = (core, glx) ->
     @gl.uniform4fv @core.webGL.shaderProgram.uFillColor, @fillColor
     return
 
-  C1964jsVideoHLE::DLParser_SetFogColor = (pc) ->
+  DLParser_SetFogColor: (pc) ->
     @videoLog "TODO: DLParser_SetFogColor"
     return
 
-  C1964jsVideoHLE::DLParser_SetBlendColor = (pc) ->
+  DLParser_SetBlendColor: (pc) ->
     @blendColor = []
     @blendColor.push @getSetFillColorR(pc)/255.0
     @blendColor.push @getSetFillColorG(pc)/255.0
@@ -1111,7 +1103,7 @@ C1964jsVideoHLE = (core, glx) ->
     @gl.uniform4fv @core.webGL.shaderProgram.uBlendColor, @blendColor
     return
 
-  C1964jsVideoHLE::DLParser_SetPrimColor = (pc) ->
+  DLParser_SetPrimColor: (pc) ->
     @primColor = []
     @primColor.push @getSetPrimColorR(pc)/255.0
     @primColor.push @getSetPrimColorG(pc)/255.0
@@ -1121,7 +1113,7 @@ C1964jsVideoHLE = (core, glx) ->
     @gl.uniform4fv @core.webGL.shaderProgram.uPrimColor, @primColor
     return
 
-  C1964jsVideoHLE::DLParser_SetEnvColor = (pc) ->
+  DLParser_SetEnvColor: (pc) ->
     @envColor = []
     @envColor.push @getSetEnvColorR(pc)/255.0
     @envColor.push @getSetEnvColorG(pc)/255.0
@@ -1130,7 +1122,7 @@ C1964jsVideoHLE = (core, glx) ->
     @gl.uniform4fv @core.webGL.shaderProgram.uEnvColor, @envColor
     return
 
-  C1964jsVideoHLE::prepareTriangle = (dwV0, dwV1, dwV2) ->
+  prepareTriangle: (dwV0, dwV1, dwV2) ->
     #SP_Timing(SP_Each_Triangle);
     didSucceed = undefined #(CRender::g_pRender->IsTextureEnabled() || this.gRSP.ucode == 6 );
     textureFlag = false
@@ -1140,7 +1132,7 @@ C1964jsVideoHLE = (core, glx) ->
     @gRSP.numVertices += 3  if didSucceed
     didSucceed
 
-  C1964jsVideoHLE::initVertex = (dwV, vtxIndex, bTexture) ->
+  initVertex: (dwV, vtxIndex, bTexture) ->
     #console.log "Vertex Index: "+vtxIndex+" dwV:"+dwV
     return false  if dwV >= consts.MAX_VERTS
 
@@ -1164,7 +1156,7 @@ C1964jsVideoHLE = (core, glx) ->
     @triTextureCoords[texOffset + 1] = vertex.v
     true
 
-  C1964jsVideoHLE::setBlendFunc = () ->
+  setBlendFunc: () ->
     CYCLE_TYPE_1 = 0
     CYCLE_TYPE_2 = 1
     CYCLE_TYPE_COPY = 2
@@ -1325,7 +1317,7 @@ C1964jsVideoHLE = (core, glx) ->
             #render->SetAlphaTestEnable(TRUE);
     return
 
-  C1964jsVideoHLE::setDepthTest = () ->
+  setDepthTest: () ->
     zBufferMode = (@geometryMode & consts.G_ZBUFFER) isnt 0
     zCmp = (@otherModeL & consts.Z_COMPARE) isnt 0
     zUpd = (@otherModeL & consts.Z_UPDATE) isnt 0
@@ -1336,7 +1328,7 @@ C1964jsVideoHLE = (core, glx) ->
     @gl.depthMask zUpd
     return
 
-  C1964jsVideoHLE::drawScene = (useTexture, tileno) ->
+  drawScene: (useTexture, tileno) ->
     @setBlendFunc()
     @setDepthTest()
 
@@ -1407,14 +1399,14 @@ C1964jsVideoHLE = (core, glx) ->
     @gRSP.numVertices = 0
     return
 
-  C1964jsVideoHLE::resetState = ->
+  resetState: ->
     @geometryMode = 0
     @initGeometryMode()
     @alphaTestEnabled = 0
     @activeTile = 0
     return
 
-  C1964jsVideoHLE::initBuffers = ->
+  initBuffers: ->
     @triangleVertexPositionBuffer = @gl.createBuffer()
     @gl.bindBuffer @gl.ARRAY_BUFFER, @triangleVertexPositionBuffer
     @triangleVertexPositionBuffer.itemSize = 4
@@ -1430,8 +1422,7 @@ C1964jsVideoHLE = (core, glx) ->
     @triangleVertexTextureCoordBuffer.itemSize = 2
     @triangleVertexTextureCoordBuffer.numItems = 0
     return
-  return
-)()
+
 #hack global space until we export classes properly
 #node.js uses exports; browser uses this (window)
 root = exports ? this
