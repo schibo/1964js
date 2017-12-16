@@ -166,6 +166,36 @@ class C1964jsEmulator
     @webGL = new C1964jsWebGL(this, userSettings.wireframe)
     @log = (message) ->
       console.log message
+    @videoHLE = null
+    @endianTest()
+    @helpers = new C1964jsHelpers(this, @isLittleEndian)
+    @initTLB()
+    @currentHack = 0
+    @dma.startTime = 0
+    @kfi = 512
+    @doOnce = 0
+    @interval = 0
+    @m[0] = -125000 #which is magic_number / (interval+1)
+    @flushDynaCache()
+    @showFB = true
+    @webGL.hide3D()
+    
+    #canvas
+    @c = document.getElementById("Canvas")
+    @ctx = @c.getContext("2d")
+    @ImDat = @ctx.createImageData(320, 240)
+    @stopCompiling = false
+    @p = new Int32Array(1)
+    
+    #set ram size
+    MEMORY_SIZE_NO_EXPANSION = 0x400000
+    MEMORY_SIZE_WITH_EXPANSION = 0x800000
+    @currentRdramSize = MEMORY_SIZE_WITH_EXPANSION
+    @romName = new Uint8Array 20
+
+    @startTime = null
+    @myFastInterval = null
+
 
     # opcodes map
     @CPU_instruction = [@instr, @REGIMM_instr, @r4300i_j, @r4300i_jal, @r4300i_beq, @r4300i_bne, @r4300i_blez, @r4300i_bgtz, @r4300i_addi, @r4300i_addiu, @r4300i_slti, @r4300i_sltiu, @r4300i_andi, @r4300i_ori, @r4300i_xori, @r4300i_lui, @COP0_instr, @COP1_instr, @UNUSED, @UNUSED, @r4300i_beql, @r4300i_bnel, @r4300i_blezl, @r4300i_bgtzl, @r4300i_daddi, @r4300i_daddiu, @r4300i_ldl, @r4300i_ldr, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @r4300i_lb, @r4300i_lh, @r4300i_lwl, @r4300i_lw, @r4300i_lbu, @r4300i_lhu, @r4300i_lwr, @r4300i_lwu, @r4300i_sb, @r4300i_sh, @r4300i_swl, @r4300i_sw, @r4300i_sdl, @r4300i_sdr, @r4300i_swr, @r4300i_cache, @r4300i_ll, @r4300i_lwc1, @UNUSED, @UNUSED, @r4300i_lld, @r4300i_ldc1, @UNUSED, @r4300i_ld, @r4300i_sc, @r4300i_swc1, @UNUSED, @UNUSED, @r4300i_scd, @r4300i_sdc1, @UNUSED, @r4300i_sd]
@@ -179,7 +209,6 @@ class C1964jsEmulator
     @COP1_D_Instruction = [@r4300i_COP1_add_d, @r4300i_COP1_sub_d, @r4300i_COP1_mul_d, @r4300i_COP1_div_d, @r4300i_COP1_sqrt_d, @r4300i_COP1_abs_d, @r4300i_COP1_mov_d, @r4300i_COP1_neg_d, @r4300i_COP1_roundl_d, @r4300i_COP1_truncl_d, @r4300i_COP1_ceill_d, @r4300i_COP1_floorl_d, @r4300i_COP1_roundw_d, @r4300i_COP1_truncw_d, @r4300i_COP1_ceilw_d, @r4300i_COP1_floorw_d, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @r4300i_COP1_cvts_d, @UNUSED, @UNUSED, @UNUSED, @r4300i_COP1_cvtw_d, @r4300i_COP1_cvtl_d, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @r4300i_C_F_D, @r4300i_C_UN_D, @r4300i_C_EQ_D, @r4300i_C_UEQ_D, @r4300i_C_OLT_D, @r4300i_C_ULT_D, @r4300i_C_OLE_D, @r4300i_C_ULE_D, @r4300i_C_SF_D, @r4300i_C_NGLE_D, @r4300i_C_SEQ_D, @r4300i_C_NGL_D, @r4300i_C_LT_D, @r4300i_C_NGE_D, @r4300i_C_LE_D, @r4300i_C_NGT_D]
     @COP1_W_Instruction = [@UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @r4300i_COP1_cvts_w, @r4300i_COP1_cvtd_w, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED]
     @COP1_L_Instruction = [@UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @r4300i_COP1_cvts_l, @r4300i_COP1_cvtd_l, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED, @UNUSED]
-
     return
 
   # function init()
@@ -191,34 +220,15 @@ class C1964jsEmulator
     x = undefined
     i = undefined
     y = undefined
-    @endianTest()
-    @helpers = new C1964jsHelpers(this, @isLittleEndian)
-    @initTLB()
 
     #todo: verity that r[8] is 0x070
     cancelAnimFrame @request
-    @currentHack = 0
-    @dma.startTime = 0
-    @kfi = 512
-    @doOnce = 0
-    @interval = 0
-    @m[0] = -125000 #which is magic_number / (interval+1)
-    @flushDynaCache()
-    @showFB = true
-    @webGL.hide3D()
 
     #runTest();
     @memory.rom = buffer
 
     #rom = new Uint8Array(buffer);
     @memory.romUint8Array = buffer
-    @docElement = document.getElementById("screen")
-    @errorElement = document.getElementById("error")
-
-    #canvas
-    @c = document.getElementById("Canvas")
-    @ctx = @c.getContext("2d")
-    @ImDat = @ctx.createImageData(320, 240)
 
     #fill alpha
     i = 3
@@ -230,7 +240,6 @@ class C1964jsEmulator
         i += 4
         x += 1
       y += 1
-    @stopCompiling = false
     @byteSwap @memory.rom
 
     #copy first 4096 bytes to sp_dmem and run from there.
@@ -247,22 +256,15 @@ class C1964jsEmulator
     @cp0[consts.PREVID] = 0x00000b00
     @cp1Con[0] = 0x00000511
 
-    @p = new Int32Array(1)
     @p[0] = 0xA4000040 #set programCounter to start of SP_MEM and after the 64 byte ROM header.
     @memory.setInt32 @memory.miUint8Array, consts.MI_VERSION_REG, 0x01010101
     @memory.setInt32 @memory.riUint8Array, consts.RI_CONFIG_REG, 0x00000001
     @memory.setInt32 @memory.viUint8Array, consts.VI_INTR_REG, 0x000003FF
     @memory.setInt32 @memory.viUint8Array, consts.VI_V_SYNC_REG, 0x000000D1
     @memory.setInt32 @memory.viUint8Array, consts.VI_H_SYNC_REG, 0x000D2047
-
-    #set ram size
-    MEMORY_SIZE_NO_EXPANSION = 0x400000
-    MEMORY_SIZE_WITH_EXPANSION = 0x800000
-    @currentRdramSize = MEMORY_SIZE_WITH_EXPANSION
     
     # rom header
     #copy rom name
-    @romName = new Uint8Array 20
     for i in [0...20]
       @romName[i] = @memory.rom[32+i]
     #copy crc1
@@ -379,11 +381,10 @@ class C1964jsEmulator
   runLoop: () =>
     #setTimeout to be a good citizen..don't allow for the cpu to be pegged at 100%.
     #8ms idle time will be 50% cpu max if a 60FPS game is slow.
-    if @startTime is undefined
+    if @startTime is null
       @startTime = Date.now();
     #@request = requestAnimFrame(@runLoop)  if @terminate is false
     if @terminate is true
-      clearInterval @mySetInterval
       return
 
     while @terminate is false
