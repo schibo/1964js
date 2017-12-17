@@ -26,6 +26,7 @@ class C1964jsDMA
     @interrupts = interrupts
     @pif = pif
     @audio = undefined
+    #@flushMap = new Map()
 
   copyCartToDram: (pc, isDelaySlot) ->
     end = @memory.getInt32(@memory.piUint8Array, consts.PI_WR_LEN_REG)
@@ -95,10 +96,10 @@ class C1964jsDMA
     if @audio is `undefined`
       @audio = new C1964jsAudio()
 
-    if @audio.processAudio(@memory, from, length) is false
+    if @audio.playAudio(@memory, from, length) is false
       @interrupts.clrFlag @memory.aiUint8Array, consts.AI_STATUS_REG, consts.AI_STATUS_FIFO_FULL
- 
-    @interrupts.setFlag @memory.aiUint8Array, consts.AI_STATUS_REG, consts.AI_STATUS_FIFO_FULL
+    else
+      @interrupts.setFlag @memory.aiUint8Array, consts.AI_STATUS_REG, consts.AI_STATUS_FIFO_FULL
     #@interrupts.triggerAIInterrupt 0, false
     return
 
@@ -125,19 +126,27 @@ class C1964jsDMA
     alert "todo: copySpToDram"
     return
 
-  copyDramToSp: (pc, isDelaySlot) ->
+  copyDramToSp: (core, pc, isDelaySlot) ->
     end = @memory.getInt32(@memory.spReg1Uint8Array, consts.SP_RD_LEN_REG)
     to = @memory.getInt32(@memory.spReg1Uint8Array, consts.SP_MEM_ADDR_REG)
     from = @memory.getInt32(@memory.spReg1Uint8Array, consts.SP_DRAM_ADDR_REG)
+
+    # if shouldFlush[from].to is to and 
+    # if @flushMap.get('' + to + '' + from + '' + end) is undefined
+    #   @flushMap.set '' + to + '' + from + '' + end, from
+    #   core.flushDynaCache()
+
     log "sp dma read " + (end + 1) + " bytes from " + dec2hex(from) + " to " + dec2hex(to)
     end &= 0x00000FFF
     to &= 0x00001fff
     from &= 0x00ffffff
+
     while end >= 0
       @memory.spMemUint8Array[to] = @memory.rdramUint8Array[from]
       to++
       from++
       --end
+
     @memory.setInt32 @memory.spReg1Uint8Array, consts.SP_DMA_BUSY_REG, 0
     alert "hmm..todo: an sp fp status flag is blocking from continuing"  if @memory.getInt32(@memory.spReg1Uint8Array, consts.SP_STATUS_REG) & (consts.SP_STATUS_DMA_BUSY | consts.SP_STATUS_IO_FULL | consts.SP_STATUS_DMA_FULL)
     @interrupts.clrFlag @memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_DMA_BUSY

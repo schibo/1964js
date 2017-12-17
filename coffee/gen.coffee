@@ -44,7 +44,60 @@ C1964jsEmulator::deleteFunction = (k) ->
   s.parentNode.removeChild s
 
   #allow deletion of this function
-  eval fnName + "= function (r, s, t, v){}; delete " + fnName + ";"
+  #eval fnName + "= function (r, s, t, v){}; delete " + fnName + ";"
   window[fnName] = null
   alert "window[fnName] should have been null."  if window[fnName]
+  return
+
+C1964jsEmulator::flushRspDynaCache = (rsp) ->
+  "use strict"
+  pc = undefined
+  if @writeToDom is false
+    for pc of @code
+      delete @code[pc]
+      alert "@code[pc] failed to delete."  if @code[pc]
+    delete @code
+
+    @code = {}
+  else
+    @deleteRspFunctions "rsp", rsp
+  return
+
+#must not use strict here.
+C1964jsEmulator::deleteRspFunctions = (className, rsp) ->
+  fnName = undefined
+  splitResult = undefined
+  s = document.getElementsByClassName("rsp")
+  k = s.length - 1
+  while s.length > 0
+    splitResult = s[k].text.split("_")
+    splitResult = splitResult[1].split("(")
+    fnName = "_" + splitResult[0]
+    s[k].parentNode.removeChild s[k]
+    rsp.kk -= 1
+    k -= 1
+
+    #allow deletion of this function
+    #eval fnName + "= function (r, s, t, v){}; delete " + fnName + ";"
+    window[fnName] = null
+    alert "window[fnName] should have been null."  if window[fnName]
+  return
+
+C1964jsEmulator::deleteRspFunction = (className, rsp) ->
+  fnName = undefined
+  splitResult = undefined
+  s = document.getElementsByClassName("rsp")
+  k = s.length - 1
+  while s.length > 0
+    splitResult = s[k].text.split("_")
+    splitResult = splitResult[1].split("(")
+    fnName = "_" + splitResult[0]
+    s[k].parentNode.removeChild s[k]
+    rsp.kk -= 1
+    k -= 1
+
+    #allow deletion of this function
+    #eval fnName + "= function (r, s, t, v){}; delete " + fnName + ";"
+    window[fnName] = null
+    alert "window[fnName] should have been null."  if window[fnName]
   return

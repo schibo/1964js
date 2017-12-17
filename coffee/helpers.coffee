@@ -190,6 +190,13 @@ C1964jsHelpers = (core, isLittleEndian) ->
     else
       @tRD(i) + "=" + @RS(i) + n + @RT(i) + "," + @tRDH(i) + "=" + @RSH(i) + n + @RTH(i) + ";"
 
+  #32bit (RSP)
+  @sLogic32 = (i, n) ->
+    if (@rd(i) is @rs(i))
+      @tRD(i) + n + "=" + @RT(i) + ";"
+    else
+      @tRD(i) + "=" + @RS(i) + n + @RT(i) + ";"
+
   @virtualToPhysical = (addr) ->
     "t.a[0]=" + addr + ";t.a[1]=((m.physRegion[t.a[0]>>>12]<<16)|(t.a[0]&0x0000ffff));"
 

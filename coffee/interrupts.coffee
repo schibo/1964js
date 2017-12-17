@@ -339,7 +339,7 @@ C1964jsInterrupts = (core, cp0) ->
     switch offset
       when consts.SP_PC_REG
         #log "writing sp pc: " + value
-        core.memory.setInt32 core.memory.spReg2Uint8Array, offset, value & 0x00000FFC
+        core.memory.setInt32 core.memory.spReg2Uint8Array, offset, value # 1964 windows ands with & 0xFFC; don't think we want that.
       else
         core.memory.setInt32 core.memory.spReg2Uint8Array, offset, value
         #log "unhandled sp reg2 write: " + offset
@@ -550,11 +550,11 @@ C1964jsInterrupts = (core, cp0) ->
 
   @processAudioList = ->
     #log "todo: process Audio List"
-
+    core.rsp.runLoop()
     #just clear flags now to get the gfx tasks :)
     #see UpdateFifoFlag in 1964cpp's AudioLLE main.cpp.
     @clrFlag core.memory.aiUint8Array, consts.AI_STATUS_REG, consts.AI_STATUS_FIFO_FULL
-    #@interrupts.triggerAIInterrupt 0, false
+    #@triggerAIInterrupt 0, false
     #core.kfi = 512
     return
 

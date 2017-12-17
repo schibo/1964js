@@ -36,6 +36,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 # 1964cpp's init sets SP_STATUS_REG to SP_STATUS_HALT but then clears it in RCP_Reset() !
 # call to tlbwi masked index with &31 .. (seems wrong)
 #
+# rsp_cop0_mf case 12 incorrectly loads from dpc status reg instead of dpc clock reg.
+#
 # Use a typed-array but access it a byte at a time for endian-safety.
 # Do not use the DataView .getInt16, getInt32, etc functions. These will ensure endian
 # safety but they are a lot slower than accessing an Int8Array() by its index with the [] notation,
@@ -159,7 +161,7 @@ class C1964jsEmulator
     @hu = new Uint32Array(@gprh)
 
     #hook-up system objects
-    @memory = new C1964jsMemory(this)
+    @memory = new C1964jsMemory @
     @interrupts = new C1964jsInterrupts(this, @cp0)
     @pif = new C1964jsPif(@memory.pifUint8Array)
     @dma = new C1964jsDMA(@memory, @interrupts, @pif)
@@ -169,6 +171,7 @@ class C1964jsEmulator
     @videoHLE = null
     @endianTest()
     @helpers = new C1964jsHelpers(this, @isLittleEndian)
+    @rsp = new C1964jsRsp @helpers, @memory.rdramUint8Array, @memory.spMemUint8Array, @writeToDom, @
     @initTLB()
     @currentHack = 0
     @dma.startTime = 0
@@ -639,6 +642,13 @@ class C1964jsEmulator
     link = (@p[0] + offset + 8) >> 0
     "if(" + @helpers.RSH(i) + ">=0){" + "r[31]=" + link + ";" + "h[31]=" + (link >> 31) + ";" + @delaySlot(i, true)
 
+
+  r4300i_bltzal: (i) ->
+    @log "TODO: bltzal"
+
+  r4300i_bltzall: (i) ->
+    @log "TODO: bltzall"    
+
   r4300i_bltz: (i) ->
     @stopCompiling = true
     "if(" + @helpers.RSH(i) + "<0){" + @delaySlot(i, false)
@@ -716,8 +726,8 @@ class C1964jsEmulator
     instruction = @memory.lw((@p[0] + offset + 4) | 0)
     opcode = @CPU_instruction[instruction >> 26 & 0x3f].call(@, instruction, true)
     string += opcode
-    string += "t.m[0]+= " + (@cnt+1) + ";"
-    string += "t.p[0]=temp;return t.code[\"_\"+(temp>>>2)]}"
+    string += "t.m[0]+=" + (@cnt+1) + ";"
+    string += "t.p[0]=temp;return t.code['_'+(temp>>>2)]}"
     string
 
   r4300i_jr: (i) ->
@@ -730,8 +740,8 @@ class C1964jsEmulator
     instruction = @memory.lw((@p[0] + offset + 4) | 0)
     opcode = @CPU_instruction[instruction >> 26 & 0x3f].call(@, instruction, true)
     string += opcode
-    string += "t.m[0]+= " + (@cnt+1) + ";"
-    string += "t.p[0]=temp;return t.code[\"_\"+(temp>>>2)]}"
+    string += "t.m[0]+=" + (@cnt+1) + ";"
+    string += "t.p[0]=temp;return t.code['_'+(temp>>>2)]}"
 
   UNUSED: (i) ->
     @log "warning: UNUSED"
@@ -739,10 +749,10 @@ class C1964jsEmulator
 
   r4300i_COP0_eret: (i) ->
     @stopCompiling = true
-    string = "{if((t.cp0[" + consts.STATUS + "]&" + consts.ERL + ")!==0){alert(\"error epc\");t.p[0]=t.cp0[" + consts.ERROREPC + "];"
+    string = "{if((t.cp0[" + consts.STATUS + "]&" + consts.ERL + ")!==0){alert('error epc');t.p[0]=t.cp0[" + consts.ERROREPC + "];"
     string += "t.cp0[" + consts.STATUS + "]&=~" + consts.ERL + "}else{t.p[0]=t.cp0[" + consts.EPC + "];t.cp0[" + consts.STATUS + "]&=~" + consts.EXL + "}"
     string += "t.m[0]+= " + (@cnt+1) + ";"
-    string += "t.LLbit=0;return t.code[\"_\"+(t.p[0]>>>2)]}"
+    string += "t.LLbit=0;return t.code['_'+(t.p[0]>>>2)]}"
 
   r4300i_COP0_mtc0: (i, isDelaySlot) ->
     delaySlot = undefined
