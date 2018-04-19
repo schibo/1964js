@@ -152,15 +152,16 @@ class C1964jsMemory
     off_ = a & 0x0000FFFC
     that.dummyReadWriteUint8Array[off_] << 24 | that.dummyReadWriteUint8Array[off_ + 1] << 16 | that.dummyReadWriteUint8Array[off_ + 2] << 8 | that.dummyReadWriteUint8Array[off_ + 3]
 
-  #little-endian only
   readRdram8: (that, a) ->
     that.rdramUint8Array[a]
 
   readRdram16: (that, a) ->
-    that.rdramUint8Array[a] << 8 | that.rdramUint8Array[a + 1]
+    ram = that.rdramUint8Array
+    ram[a] << 8 | ram[a + 1]
 
   readRdram32: (that, a) ->
-    that.rdramUint8Array[a] << 24 | that.rdramUint8Array[a + 1] << 16 | that.rdramUint8Array[a + 2] << 8 | that.rdramUint8Array[a + 3]
+    ram = that.rdramUint8Array
+    ram[a] << 24 | ram[a + 1] << 16 | ram[a + 2] << 8 | ram[a + 3]
 
   readRamRegs0_8: (that, a) ->
     off_ = a - MEMORY_START_RAMREGS0
@@ -419,15 +420,17 @@ class C1964jsMemory
     return
 
   writeRdram16: (that, val, a) ->
-    that.rdramUint8Array[a] = val >> 8
-    that.rdramUint8Array[a + 1] = val
+    ram = that.rdramUint8Array
+    ram[a] = val >> 8
+    ram[a + 1] = val
     return
 
   writeRdram32: (that, val, a) ->
-    that.rdramUint8Array[a] = val >> 24
-    that.rdramUint8Array[a + 1] = val >> 16
-    that.rdramUint8Array[a + 2] = val >> 8
-    that.rdramUint8Array[a + 3] = val
+    ram = that.rdramUint8Array
+    ram[a] = val >> 24
+    ram[a + 1] = val >> 16
+    ram[a + 2] = val >> 8
+    ram[a + 3] = val
     return
 
   writeSpMem8: (that, val, a) ->

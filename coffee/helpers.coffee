@@ -179,10 +179,7 @@ C1964jsHelpers = (core, isLittleEndian) ->
     i >> 6 & 0x1F
 
   @sLogic = (i, n) ->
-    if (@rd(i) is @rs(i))
-      @tRDH(i) + "=("  + @tRD(i) + n + "=" + @RT(i) + ")>>31;";
-    else
-      @tRDH(i) + "=("  + @tRD(i) + "=" + @RS(i) + n + @RT(i) + ")>>31;";
+    "{var a=" + @RS(i) + n + @RT(i) + ";" + @tRD(i) + "=a;" + @tRDH(i) + "=a>>31;}";
 
   @dLogic = (i, n) ->
     if (@rd(i) is @rs(i))
