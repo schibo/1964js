@@ -19,10 +19,10 @@ C1964jsEmulator::flushDynaCache = ->
   "use strict"
   pc = undefined
   if @writeToDom is false
-    for pc of @code
-      delete @code[pc]
-      alert "@code[pc] failed to delete."  if @code[pc]
-    delete @code
+    for pc of @c
+      delete @c[pc]
+      alert "@c[pc] failed to delete."  if @c[pc]
+    delete @c
 
     @code = {}
   else
