@@ -104,7 +104,6 @@ class C1964jsEmulator
     @interval = 0
     @m = new Int32Array(1)
     @m[0] = -625000 #which is magic_number / (interval+1)
-    @a = new Uint32Array(2) # temp variables for compiler
 
     @forceRepaint = false #presumably origin reg doesn't change because not double or triple-buffered (single-buffered)
     #main run loop
@@ -115,7 +114,8 @@ class C1964jsEmulator
     @currentHack = 0
     @kfi = 3200000
     @cnt = 0
-    @gpr = new ArrayBuffer(35*4) # 32GPRs, 1 dummy location to catch attempts to write to r0, and 1 lo and 1 hi
+    # temps start at r[35]
+    @gpr = new ArrayBuffer(35*4 + 4*4) # 32GPRs, 1 dummy location to catch attempts to write to r0, and 1 lo and 1 hi, 4 temporary vars.
     @r = new Int32Array(@gpr)
     @ru = new Uint32Array(@gpr)
     @r[0] = 0
@@ -474,9 +474,9 @@ class C1964jsEmulator
 
     #Syntax: function(register, hiRegister, this.memory, this)
     if @writeToDom is true
-      string = "function " + fnName + "(r, ru, h, hu, m, t){"
+      string = "function " + fnName + "(r,ru,h,hu,m,t){"
     else
-      string = "i1964js.code." + fnName + "=function(r, ru, h, hu, m, t){"
+      string = "i1964js.code." + fnName + "=function(r,ru,h,hu,m,t){"
     until @stopCompiling
       instruction = @memory.lw(pc + offset)
       @cnt += 1
@@ -533,24 +533,24 @@ class C1964jsEmulator
 
   r4300i_lw: (i) ->
  #   @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=m.lw(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + "))>>31;"
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=m.region32[t.a[1]>>>14](m,t.a[1]))>>31;"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=m.region32[r[36]>>>14](m,r[36]))>>31;"
 
   r4300i_lwu: (i) ->
     #@helpers.tRTH(i) + "=0," + @helpers.tRT(i) + "=m.lw(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");"
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRTH(i) + "=0;" + @helpers.tRT(i) + "=m.region32[t.a[1]>>>14](m,t.a[1]);"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRTH(i) + "=0;" + @helpers.tRT(i) + "=m.region32[r[36]>>>14](m,r[36]);"
 
   r4300i_sw: (i, isDelaySlot) ->
     a = undefined
 #    string = "m.sw(" + @helpers.RT(i) + "," + @helpers.RS(i) + "+" + @helpers.soffset_imm(i)
-    string = @helpers.virtualToPhysical("" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + "") + "m.writeRegion32[t.a[1]>>>14](m, " + @helpers.RT(i) + ",t.a[1]"
+    string = @helpers.virtualToPhysical("" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + "") + "m.writeRegion32[r[36]>>>14](m," + @helpers.RT(i) + ",r[36]"
 
     #So we can process exceptions
     if isDelaySlot is true
       a = (@p[0] + offset + 4) | 0
-      string += ", " + a + ", true);"
+      string += "," + a + ",true);"
     else
       a = (@p[0] + offset) | 0
-      string += ", " + a + ");"
+      string += "," + a + ");"
     string
 
   delaySlot: (i, likely) ->
@@ -691,7 +691,8 @@ class C1964jsEmulator
     instruction = undefined
     opcode = undefined
     link = undefined
-    string = "{var temp=" + @helpers.RS(i) + ";"
+    # r[37] is a temp variable
+    string = "{ru[37]=" + @helpers.RS(i) + ";"
     link = (@p[0] + offset + 8) >> 0
     string += @helpers.tRD(i) + "=" + link + ";" + @helpers.tRDH(i) + "=" + (link >> 31) + ";"
 
@@ -699,22 +700,23 @@ class C1964jsEmulator
     instruction = @memory.lw((@p[0] + offset + 4) | 0)
     opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     string += opcode
-    string += "t.m[0]+= " + (@cnt+1) + ";"
-    string += "t.p[0]=temp;return t.code[\"_\"+(temp>>>2)]}"
+    string += "t.m[0]+=" + (@cnt+1) + ";"
+    string += "t.p[0]=ru[37];return t.code[\"_\"+(ru[37]>>>2)]}"
     string
 
   r4300i_jr: (i) ->
     @stopCompiling = true
     instruction = undefined
     opcode = undefined
-    string = "{var temp=" + @helpers.RS(i) + ";"
+    # r[37] is a temp variable
+    string = "{ru[37]=" + @helpers.RS(i) + ";"
 
     #delay slot
     instruction = @memory.lw((@p[0] + offset + 4) | 0)
     opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     string += opcode
-    string += "t.m[0]+= " + (@cnt+1) + ";"
-    string += "t.p[0]=temp;return t.code[\"_\"+(temp>>>2)]}"
+    string += "t.m[0]+=" + (@cnt+1) + ";"
+    string += "t.p[0]=ru[37];return t.code[\"_\"+(ru[37]>>>2)]}"
 
   UNUSED: (i) ->
     @log "warning: UNUSED"
@@ -724,7 +726,7 @@ class C1964jsEmulator
     @stopCompiling = true
     string = "{if((t.cp0[" + consts.STATUS + "]&" + consts.ERL + ")!==0){alert(\"error epc\");t.p[0]=t.cp0[" + consts.ERROREPC + "];"
     string += "t.cp0[" + consts.STATUS + "]&=~" + consts.ERL + "}else{t.p[0]=t.cp0[" + consts.EPC + "];t.cp0[" + consts.STATUS + "]&=~" + consts.EXL + "}"
-    string += "t.m[0]+= " + (@cnt+1) + ";"
+    string += "t.m[0]+=" + (@cnt+1) + ";"
     string += "t.LLbit=0;return t.code[\"_\"+(t.p[0]>>>2)]}"
 
   r4300i_COP0_mtc0: (i, isDelaySlot) ->
@@ -814,48 +816,48 @@ class C1964jsEmulator
   r4300i_lb: (i) ->
     #"{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=(m.lb(vAddr)<<24)>>24;" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31}"
     #@helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=m.lb(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ")<<24>>24)>>8;"
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=m.region[t.a[1]>>>14](m,t.a[1])<<24>>24)>>8;"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=m.region[r[36]>>>14](m,r[36])<<24>>24)>>8;"
 
   r4300i_lbu: (i) ->
     #"{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=(m.lb(vAddr))&0x000000ff;" + @helpers.tRTH(i) + "=0}"
     #@helpers.tRTH(i) + "=0," + @helpers.tRT(i) + "=m.lb(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ")&0x000000ff;"
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRTH(i) + "=0;" + @helpers.tRT(i) + "=m.region[t.a[1]>>>14](m,t.a[1])&0x000000ff;"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRTH(i) + "=0;" + @helpers.tRT(i) + "=m.region[r[36]>>>14](m,r[36])&0x000000ff;"
 
   r4300i_lh: (i) ->
     #"{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=(m.lh(vAddr)<<16)>>16;" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31}"
     #@helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=m.lh(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ")<<16>>16)>>16;"
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=m.region16[t.a[1]>>>14](m,t.a[1])<<16>>16)>>16;"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=m.region16[r[36]>>>14](m,r[36])<<16>>16)>>16;"
 
   r4300i_lhu: (i) ->
     #"{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=(m.lh(vAddr))&0x0000ffff;" + @helpers.tRTH(i) + "=0}"
     #@helpers.tRTH(i) + "=0," + @helpers.tRT(i) + "=m.lh(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ")&0x0000ffff;"
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRTH(i) + "=0;" + @helpers.tRT(i) + "=m.region16[t.a[1]>>>14](m,t.a[1])&0x0000ffff;"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRTH(i) + "=0;" + @helpers.tRT(i) + "=m.region16[r[36]>>>14](m,r[36])&0x0000ffff;"
 
   r4300i_sb: (i, isDelaySlot) ->
     #"m.sb(" + @helpers.RT(i) + "," + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");"
-    #string = "a = m.virtualToPhysical(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");m.writeRegion8[a>>>14](m, " + @helpers.RT(i) + ",a"
-    string = @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + "m.writeRegion8[t.a[1]>>>14](m, " + @helpers.RT(i) + ",t.a[1]"
+    #string = "a = m.virtualToPhysical(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");m.writeRegion8[a>>>14](m," + @helpers.RT(i) + ",a"
+    string = @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + "m.writeRegion8[r[36]>>>14](m," + @helpers.RT(i) + ",r[36]"
 
     #So we can process exceptions
     if isDelaySlot is true
       a = (@p[0] + offset + 4) | 0
-      string += ", " + a + ", true);"
+      string += "," + a + ",true);"
     else
       a = (@p[0] + offset) | 0
-      string += ", " + a + ");"
+      string += "," + a + ");"
     string
 
   r4300i_sh: (i, isDelaySlot) ->
     #"m.sh(" + @helpers.RT(i) + "," + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");"
-    string = @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + "m.writeRegion16[t.a[1]>>>14](m, " + @helpers.RT(i) + ",t.a[1]"
+    string = @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + "m.writeRegion16[r[36]>>>14](m," + @helpers.RT(i) + ",r[36]"
 
     #So we can process exceptions
     if isDelaySlot is true
       a = (@p[0] + offset + 4) | 0
-      string += ", " + a + ", true);"
+      string += "," + a + ",true);"
     else
       a = (@p[0] + offset) | 0
-      string += ", " + a + ");"
+      string += "," + a + ");"
     string
 
 
@@ -895,10 +897,10 @@ class C1964jsEmulator
     #So we can process exceptions
     if isDelaySlot is true
       a = (@p[0] + offset + 4) | 0
-      string += ", " + a + ", true);"
+      string += "," + a + ",true);"
     else
       a = (@p[0] + offset) | 0
-      string += ", " + a + ");"
+      string += "," + a + ");"
 
     #hi
     string += "m.sw(" + @helpers.RTH(i) + ",t.vAddr[0]"
@@ -906,10 +908,10 @@ class C1964jsEmulator
     #So we can process exceptions
     if isDelaySlot is true
       a = (@p[0] + offset + 4) | 0
-      string += ", " + a + ", true)}"
+      string += "," + a + ",true)}"
     else
       a = (@p[0] + offset) | 0
-      string += ", " + a + ")}"
+      string += "," + a + ")}"
     string
 
   r4300i_dmultu: (i) ->
@@ -976,7 +978,7 @@ class C1964jsEmulator
 
   r4300i_swl: (i) ->
     string = "{" + @helpers.setVAddr(i)
-    string += "var vAddrAligned=(t.vAddr&0xfffffffc)|0;var value=m.lw(vAddrAligned);"
+    string += "var vAddrAligned=(t.vAddr[0]&0xfffffffc)|0;var value=m.lw(vAddrAligned);"
     string += "switch(t.vAddr[0]&3){case 0:value=" + @helpers.RT(i) + ";break;"
     string += "case 1:value=((value&0xff000000)|(" + @helpers.RT(i) + ">>>8));break;"
     string += "case 2:value=((value&0xffff0000)|(" + @helpers.RT(i) + ">>>16));break;"
@@ -1006,10 +1008,10 @@ class C1964jsEmulator
     #So we can process exceptions
     if isDelaySlot is true
       a = (@p[0] + offset + 4) | 0
-      string += ", " + a + ", true);"
+      string += "," + a + ",true);"
     else
       a = (@p[0] + offset) | 0
-      string += ", " + a + ");"
+      string += "," + a + ");"
     string
 
   r4300i_sdc1: (i, isDelaySlot) ->
@@ -1019,19 +1021,19 @@ class C1964jsEmulator
     #So we can process exceptions
     if isDelaySlot is true
       a = (@p[0] + offset + 4) | 0
-      string += ", " + a + ", true);"
+      string += "," + a + ",true);"
     else
       a = (@p[0] + offset) | 0
-      string += ", " + a + ");"
+      string += "," + a + ");"
     string += "m.sw(t.cp1_i[" + @helpers.FT32HIArrayView(i) + "],(t.vAddr[0])|0"
 
     #So we can process exceptions
     if isDelaySlot is true
       a = (@p[0] + offset + 4) | 0
-      string += ", " + a + ", true)}"
+      string += "," + a + ",true)}"
     else
       a = (@p[0] + offset) | 0
-      string += ", " + a + ")}"
+      string += "," + a + ")}"
     string
 
   r4300i_COP1_mtc1: (i) ->

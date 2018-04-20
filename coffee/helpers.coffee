@@ -179,7 +179,7 @@ C1964jsHelpers = (core, isLittleEndian) ->
     i >> 6 & 0x1F
 
   @sLogic = (i, n) ->
-    "{var a=" + @RS(i) + n + @RT(i) + ";" + @tRD(i) + "=a;" + @tRDH(i) + "=a>>31;}";
+    "{r[35]=" + @RS(i) + n + @RT(i) + ";" + @tRD(i) + "=r[35];" + @tRDH(i) + "=r[35]>>31;}";
 
   @dLogic = (i, n) ->
     if (@rd(i) is @rs(i))
@@ -188,7 +188,7 @@ C1964jsHelpers = (core, isLittleEndian) ->
       @tRD(i) + "=" + @RS(i) + n + @RT(i) + "," + @tRDH(i) + "=" + @RSH(i) + n + @RTH(i) + ";"
 
   @virtualToPhysical = (addr) ->
-    "t.a[0]=" + addr + ";t.a[1]=((m.physRegion[t.a[0]>>>12]<<16)|(t.a[0]&0x0000ffff));"
+    "r[35]=" + addr + ";r[36]=((m.physRegion[r[35]>>>12]<<16)|(r[35]&0x0000ffff));"
 
   #//////////////////////////
   #Interpreted opcode helpers
