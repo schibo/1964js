@@ -731,7 +731,10 @@ class C1964jsEmulator
 
   r4300i_sll: (i) ->
     return ""  if (i & 0x001FFFFF) is 0 # NOP
-    @helpers.tRD(i) + "=" + @helpers.RT(i) + "<<" + @helpers.sa(i) + "," + @helpers.tRDH(i) + "=" + @helpers.RD(i) + ">>31;"
+    if @helpers.rd(i) is @helpers.rt(i)
+      @helpers.tRD(i) + "<<=" + @helpers.sa(i) + "," + @helpers.tRDH(i) + "=" + @helpers.RD(i) + ">>31;"
+    else  
+      @helpers.tRD(i) + "=" + @helpers.RT(i) + "<<" + @helpers.sa(i) + "," + @helpers.tRDH(i) + "=" + @helpers.RD(i) + ">>31;"
 
   r4300i_srl: (i) ->
     sa = @helpers.sa(i)
@@ -945,9 +948,13 @@ class C1964jsEmulator
 
   r4300i_sra: (i) ->
     #optimization: sra's r[hi] can safely right-shift RT.
-    #"{" + @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>" + @helpers.sa(i) + ";" + @helpers.tRDH(i) + "=" + @helpers.RT(i) + ">>31}"
-    @helpers.tRDH(i) + "=(" + @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>" + @helpers.sa(i) + ")>>31;"
+    string = @helpers.tRDH(i) + "=" + @helpers.RT(i) + ">>31,"
 
+    if @helpers.rd(i) is @helpers.rt(i)
+      string += @helpers.tRD(i) + ">>=" + @helpers.sa(i) + ";"
+    else
+      string += @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>" + @helpers.sa(i) + ";"
+    string
 
   r4300i_COP0_tlbwi: (i) ->
     "t.helpers.inter_tlbwi(t.cp0[" + consts.INDEX + "], t.tlb, t.cp0);"
