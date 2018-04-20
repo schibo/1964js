@@ -114,7 +114,7 @@ class C1964jsEmulator
     @kfi = 3200000
     @cnt = 0
     # temps start at r[35]
-    @gpr = new ArrayBuffer(35*4 + 4*4) # 32GPRs, 1 dummy location to catch attempts to write to r0, and 1 lo and 1 hi, 4 temporary vars.
+    @gpr = new ArrayBuffer(35*4 + 4*5) # 32GPRs, 1 dummy location to catch attempts to write to r0, and 1 lo and 1 hi, 4 temporary vars.
     @r = new Int32Array(@gpr)
     @ru = new Uint32Array(@gpr)
     @r[0] = 0
@@ -690,8 +690,8 @@ class C1964jsEmulator
     instruction = undefined
     opcode = undefined
     link = undefined
-    # r[37] is a temp variable
-    string = "{ru[37]=" + @helpers.RS(i) + ";"
+    # r[39] is a temp variable specific to vAddr for jalr
+    string = "{ru[39]=" + @helpers.RS(i) + ";"
     link = (@p[0] + offset + 8) >> 0
     string += @helpers.tRD(i) + "=" + link + ";" + @helpers.tRDH(i) + "=" + (link >> 31) + ";"
 
@@ -700,14 +700,14 @@ class C1964jsEmulator
     opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     string += opcode
     string += "t.m[0]+=" + (@cnt+1) + ";"
-    string += "t.p[0]=ru[37];return t.code[\"_\"+(ru[37]>>>2)]}"
+    string += "t.p[0]=ru[39];return t.code[\"_\"+(ru[39]>>>2)]}"
     string
 
   r4300i_jr: (i) ->
     @stopCompiling = true
     instruction = undefined
     opcode = undefined
-    # r[37] is a temp variable
+    # r[37] is a temp variable specific to vAddr for jr
     string = "{ru[37]=" + @helpers.RS(i) + ";"
 
     #delay slot
@@ -744,7 +744,11 @@ class C1964jsEmulator
     @helpers.tRDH(i) + "=(" + @helpers.tRD(i) + "=" + @helpers.RT(i) + "<<" + @helpers.sa(i) + ")>>31;"
 
   r4300i_srl: (i) ->
-    @helpers.tRDH(i) + "=(" + @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>>" + @helpers.sa(i) + ")>>31;"
+    sa = @helpers.sa(i)
+    if sa > 0
+      @helpers.tRDH(i) + "=0," + @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>>" + sa + ";"
+    else
+      @helpers.tRDH(i) + "=(" + @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>>" + sa + ")>>31;"
 
   r4300i_ori: (i) ->
     @helpers.tRT(i) + "=" + @helpers.RS(i) + "|" + @helpers.offset_imm(i) + "," + @helpers.tRTH(i) + "=" + @helpers.RSH(i) + ";"
