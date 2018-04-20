@@ -528,7 +528,8 @@ class C1964jsEmulator
 
   r4300i_lui: (i) ->
     temp = ((i & 0x0000ffff) << 16)
-    @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=" + temp + ")>>31;"
+    tempHi = temp >> 31
+    @helpers.tRTH(i) + "=" + tempHi + "," + @helpers.tRT(i) + "=" + temp + ";"
 
   r4300i_lw: (i) ->
  #   @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=m.lw(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + "))>>31;"
