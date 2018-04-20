@@ -21,7 +21,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 # NOTES:
 # fixed bgtz bgtzl
 # improved ldc1,sdc1 ..could still be bugged.
-# Make sure if an opcode has multiple javascript lines that they are enclosed in {} because the opcode could be a delay slot.
+# Make sure if an opcode has multiple javascript statements that they are enclosed in {} or separated by comma,
+# because the opcode could be a delay slot.
 #
 # possible BUGS in original 1964cpp?:
 # - JAL & JALR instr_index: upper 4 bits are from the pc's delay slot, not the current pc!
@@ -741,20 +742,27 @@ class C1964jsEmulator
 
   r4300i_sll: (i) ->
     return ""  if (i & 0x001FFFFF) is 0 # NOP
-    @helpers.tRDH(i) + "=(" + @helpers.tRD(i) + "=" + @helpers.RT(i) + "<<" + @helpers.sa(i) + ")>>31;"
+    @helpers.tRD(i) + "=" + @helpers.RT(i) + "<<" + @helpers.sa(i) + "," + @helpers.tRDH(i) + "=" + @helpers.RD(i) + ">>31;"
 
   r4300i_srl: (i) ->
     sa = @helpers.sa(i)
     if sa > 0
       @helpers.tRDH(i) + "=0," + @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>>" + sa + ";"
     else
-      @helpers.tRDH(i) + "=(" + @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>>" + sa + ")>>31;"
+      #alert "ok"
+      @helpers.tRDH(i) + "=" + @helpers.RT(i) + ">>31," + @helpers.tRD(i) + "=" + @helpers.RT(i) + ";"
 
   r4300i_ori: (i) ->
-    @helpers.tRT(i) + "=" + @helpers.RS(i) + "|" + @helpers.offset_imm(i) + "," + @helpers.tRTH(i) + "=" + @helpers.RSH(i) + ";"
+    if @helpers.rt(i) is @helpers.rs(i)
+      @helpers.tRT(i) + "|=" + @helpers.offset_imm(i) + ";"
+    else
+      @helpers.tRT(i) + "=" + @helpers.RS(i) + "|" + @helpers.offset_imm(i) + "," + @helpers.tRTH(i) + "=" + @helpers.RSH(i) + ";"
 
   r4300i_xori: (i) ->
-    @helpers.tRT(i) + "=" + @helpers.RS(i) + "^" + @helpers.offset_imm(i) + "," + @helpers.tRTH(i) + "=" + @helpers.RSH(i) + "^0;"
+    if @helpers.rt(i) is @helpers.rs(i)
+      @helpers.tRT(i) + "^=" + @helpers.offset_imm(i) + ";"
+    else
+      @helpers.tRT(i) + "=" + @helpers.RS(i) + "^" + @helpers.offset_imm(i) + "," + @helpers.tRTH(i) + "=" + @helpers.RSH(i) + ";"
 
   r4300i_andi: (i) ->
     @helpers.tRTH(i) + "=0," + @helpers.tRT(i) + "=" + @helpers.RS(i) + "&" + @helpers.offset_imm(i) + ";"
