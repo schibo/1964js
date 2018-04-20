@@ -85,7 +85,6 @@ class C1964jsEmulator
       @code = window
     else
       @code = {}
-    @vAddr = new Int32Array(1)
     @cp0 = new Int32Array(32)
     @cp1Buffer = new ArrayBuffer(32 * 4) # *4 because ArrayBuffers are in bytes
     @cp1_i = new Int32Array(@cp1Buffer)
@@ -881,10 +880,10 @@ class C1964jsEmulator
     "t.cp1Con[31]=" + @helpers.RT(i) + ";"  if @helpers.fs(i) is 31
 
   r4300i_ld: (i) ->
-    "{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=m.lw((t.vAddr[0]+4)|0);" + @helpers.tRTH(i) + "=m.lw(t.vAddr[0])}"
+    "{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=m.lw((r[38]+4)|0);" + @helpers.tRTH(i) + "=m.lw(r[38])}"
 
   r4300i_lld: (i) ->
-    "{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=m.lw((t.vAddr[0]+4)|0);" + @helpers.tRTH(i) + "=m.lw(t.vAddr[0]);t.LLbit=1}"
+    "{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=m.lw((r[38]+4)|0);" + @helpers.tRTH(i) + "=m.lw(r[38]);t.LLbit=1}"
 
   #address error exceptions in ld and sd are weird since this is split up
   #into 2 reads or writes. i guess they're fatal exceptions, so
@@ -892,7 +891,7 @@ class C1964jsEmulator
   r4300i_sd: (i, isDelaySlot) ->
     #lo
     a = undefined
-    string = "{" + @helpers.setVAddr(i) + "m.sw(" + @helpers.RT(i) + ",(t.vAddr[0]+4)|0"
+    string = "{" + @helpers.setVAddr(i) + "m.sw(" + @helpers.RT(i) + ",(r[38]+4)|0"
 
     #So we can process exceptions
     if isDelaySlot is true
@@ -903,7 +902,7 @@ class C1964jsEmulator
       string += "," + a + ");"
 
     #hi
-    string += "m.sw(" + @helpers.RTH(i) + ",t.vAddr[0]"
+    string += "m.sw(" + @helpers.RTH(i) + ",r[38]"
 
     #So we can process exceptions
     if isDelaySlot is true
@@ -960,8 +959,9 @@ class C1964jsEmulator
 
   r4300i_lwl: (i) ->
     string = "{" + @helpers.setVAddr(i)
-    string += "var vAddrAligned=(t.vAddr[0]&0xfffffffc)|0;var value=m.lw(vAddrAligned);"
-    string += "switch(t.vAddr[0]&3){case 0:" + @helpers.tRT(i) + "=value;break;"
+    string += "var vAddrAligned=(r[38]&0xfffffffc)|0;var value=m.lw(vAddrAligned);"
+    # r[38] = vAddress
+    string += "switch(r[38]&3){case 0:" + @helpers.tRT(i) + "=value;break;"
     string += "case 1:" + @helpers.tRT(i) + "=(" + @helpers.RT(i) + "&0x000000ff)|((value<<8)>>>0);break;"
     string += "case 2:" + @helpers.tRT(i) + "=(" + @helpers.RT(i) + "&0x0000ffff)|((value<<16)>>>0);break;"
     string += "case 3:" + @helpers.tRT(i) + "=(" + @helpers.RT(i) + "&0x00ffffff)|((value<<24)>>>0);break;}"
@@ -969,8 +969,8 @@ class C1964jsEmulator
 
   r4300i_lwr: (i) ->
     string = "{" + @helpers.setVAddr(i)
-    string += "var vAddrAligned=(t.vAddr[0]&0xfffffffc)|0;var value=m.lw(vAddrAligned);"
-    string += "switch(t.vAddr[0]&3){case 3:" + @helpers.tRT(i) + "=value;break;"
+    string += "var vAddrAligned=(r[38]&0xfffffffc)|0;var value=m.lw(vAddrAligned);"
+    string += "switch(r[38]&3){case 3:" + @helpers.tRT(i) + "=value;break;"
     string += "case 2:" + @helpers.tRT(i) + "=(" + @helpers.RT(i) + "&0xff000000)|(value>>>8);break;"
     string += "case 1:" + @helpers.tRT(i) + "=(" + @helpers.RT(i) + "&0xffff0000)|(value>>>16);break;"
     string += "case 0:" + @helpers.tRT(i) + "=(" + @helpers.RT(i) + "&0xffffff00)|(value>>>24);break;}"
@@ -978,8 +978,8 @@ class C1964jsEmulator
 
   r4300i_swl: (i) ->
     string = "{" + @helpers.setVAddr(i)
-    string += "var vAddrAligned=(t.vAddr[0]&0xfffffffc)|0;var value=m.lw(vAddrAligned);"
-    string += "switch(t.vAddr[0]&3){case 0:value=" + @helpers.RT(i) + ";break;"
+    string += "var vAddrAligned=(r[38]&0xfffffffc)|0;var value=m.lw(vAddrAligned);"
+    string += "switch(r[38]&3){case 0:value=" + @helpers.RT(i) + ";break;"
     string += "case 1:value=((value&0xff000000)|(" + @helpers.RT(i) + ">>>8));break;"
     string += "case 2:value=((value&0xffff0000)|(" + @helpers.RT(i) + ">>>16));break;"
     string += "case 3:value=((value&0xffffff00)|(" + @helpers.RT(i) + ">>>24));break;}"
@@ -987,8 +987,8 @@ class C1964jsEmulator
 
   r4300i_swr: (i) ->
     string = "{" + @helpers.setVAddr(i)
-    string += "var vAddrAligned=(t.vAddr[0]&0xfffffffc)|0;var value=m.lw(vAddrAligned);"
-    string += "switch(t.vAddr[0]&3){case 3:value=" + @helpers.RT(i) + ";break;"
+    string += "var vAddrAligned=(r[38]&0xfffffffc)|0;var value=m.lw(vAddrAligned);"
+    string += "switch(r[38]&3){case 3:value=" + @helpers.RT(i) + ";break;"
     string += "case 2:value=((value & 0x000000FF)|((" + @helpers.RT(i) + "<<8)>>>0));break;"
     string += "case 1:value=((value & 0x0000FFFF)|((" + @helpers.RT(i) + "<<16)>>>0));break;"
     string += "case 0:value=((value & 0x00FFFFFF)|((" + @helpers.RT(i) + "<<24)>>>0));break;}"
@@ -998,8 +998,8 @@ class C1964jsEmulator
     "t.cp1_i[" + @helpers.FT32ArrayView(i) + "]=m.lw(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");"
 
   r4300i_ldc1: (i) ->
-    string = "{" + @helpers.setVAddr(i) + "t.cp1_i[" + @helpers.FT32ArrayView(i) + "]=m.lw((t.vAddr[0]+4)|0);"
-    string += "t.cp1_i[" + @helpers.FT32HIArrayView(i) + "]=m.lw((t.vAddr[0])|0)}"
+    string = "{" + @helpers.setVAddr(i) + "t.cp1_i[" + @helpers.FT32ArrayView(i) + "]=m.lw((r[38]+4)|0);"
+    string += "t.cp1_i[" + @helpers.FT32HIArrayView(i) + "]=m.lw((r[38])|0)}"
 
   r4300i_swc1: (i, isDelaySlot) ->
     a = undefined
@@ -1016,7 +1016,7 @@ class C1964jsEmulator
 
   r4300i_sdc1: (i, isDelaySlot) ->
     a = undefined
-    string = "{" + @helpers.setVAddr(i) + "m.sw(t.cp1_i[" + @helpers.FT32ArrayView(i) + "],(t.vAddr[0]+4)|0"
+    string = "{" + @helpers.setVAddr(i) + "m.sw(t.cp1_i[" + @helpers.FT32ArrayView(i) + "],(r[38]+4)|0"
 
     #So we can process exceptions
     if isDelaySlot is true
@@ -1025,7 +1025,7 @@ class C1964jsEmulator
     else
       a = (@p[0] + offset) | 0
       string += "," + a + ");"
-    string += "m.sw(t.cp1_i[" + @helpers.FT32HIArrayView(i) + "],(t.vAddr[0])|0"
+    string += "m.sw(t.cp1_i[" + @helpers.FT32HIArrayView(i) + "],(r[38])|0"
 
     #So we can process exceptions
     if isDelaySlot is true

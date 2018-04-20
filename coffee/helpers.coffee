@@ -167,7 +167,7 @@ C1964jsHelpers = (core, isLittleEndian) ->
     ((i & 0x0000ffff) << 16) >> 16
 
   @setVAddr = (i) ->
-    "t.vAddr[0]=" + @RS(i) + "+" + @soffset_imm(i) + ";"
+    "r[38]=" + @RS(i) + "+" + @soffset_imm(i) + ";"
 
   @fn = (i) ->
     i & 0x3f
