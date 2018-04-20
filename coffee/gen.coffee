@@ -18,17 +18,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 C1964jsEmulator::flushDynaCache = ->
   "use strict"
   pc = undefined
-  if @writeToDom is false
-    for pc of @c
-      delete @c[pc]
-      alert "@c[pc] failed to delete."  if @c[pc]
-    delete @c
-
-    @code = {}
-  else
-    while @kk
-      @kk -= 1
-      @deleteFunction @kk
+  while @kk
+    @kk -= 1
+    @deleteFunction @kk
   return
 
 #must not use strict here.

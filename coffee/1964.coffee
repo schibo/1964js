@@ -81,11 +81,6 @@ class C1964jsEmulator
     @settings = userSettings
     @request = `undefined`
     @debug = false
-    @writeToDom = true
-    if @writeToDom is true
-      @c = window
-    else
-      @c = {}
     @cp0 = new Int32Array(32)
     @cp1Buffer = new ArrayBuffer(32 * 4) # *4 because ArrayBuffers are in bytes
     @cp1_i = new Int32Array(@cp1Buffer)
@@ -394,7 +389,7 @@ class C1964jsEmulator
         #this is broken-up so that we can process more interrupts. If we freeze,
         #we probably need to split this up more.
         try
-          fn = @c[fnName]
+          fn = window[fnName]
           @run fn, @r, @ru, @h, @hu
         catch e
           #so, we really need to know what type of exception this is,
@@ -472,10 +467,7 @@ class C1964jsEmulator
     fnName = "_" + (pc >>> 2)
 
     #Syntax: function(register, hiRegister, this.memory, this)
-    if @writeToDom is true
-      string = "function " + fnName + "(r,ru,h,hu,m,t){"
-    else
-      string = "i1964js.c." + fnName + "=function(r,ru,h,hu,m,t){"
+    string = "function " + fnName + "(r,ru,h,hu,m,t){"
     until @stopCompiling
       instruction = @memory.lw(pc + offset)
       @cnt += 1
@@ -487,16 +479,13 @@ class C1964jsEmulator
     #close out the function
     string += "t.m[0]+=" + @cnt + ";"
     string += "t.p[0]=" + ((pc + offset) >> 0)
-    string += ";return t.c." + @getFnName((pc + offset) >> 0) + "}"
-    if @writeToDom is true
-      g = document.createElement("script")
-      s = document.getElementsByTagName("script")[@kk]
-      @kk += 1
-      s.parentNode.insertBefore g, s
-      g.text = string
-    else
-      @wrapEval string
-    @c[fnName]
+    string += ";return window." + @getFnName((pc + offset) >> 0) + "}"
+    g = document.createElement("script")
+    s = document.getElementsByTagName("script")[@kk]
+    @kk += 1
+    s.parentNode.insertBefore g, s
+    g.text = string
+    window[fnName]
 
   #purely so v8 can optimize decompileBlock
   wrapEval: (string) ->
@@ -564,10 +553,10 @@ class C1964jsEmulator
     #speed hack
     if instruction is 0 and @helpers.soffset_imm(i) is -1
       c = 0
-      string = opcode + "t.m[0]="+c+";t.p[0]=" + pc + ";return t.c." + @getFnName(pc) + "}"
+      string = opcode + "t.m[0]="+c+";t.p[0]=" + pc + ";return window." + @getFnName(pc) + "}"
     else
       c=@cnt+1
-      string = opcode + "t.m[0]+="+c+";t.p[0]=" + pc + ";return t.c." + @getFnName(pc) + "}"
+      string = opcode + "t.m[0]+="+c+";t.p[0]=" + pc + ";return window." + @getFnName(pc) + "}"
     
 
     #if likely and if branch not taken, skip delay slot
@@ -578,23 +567,23 @@ class C1964jsEmulator
 
   r4300i_bne: (i) ->
     @stopCompiling = true
-    "if((" + @helpers.RS(i) + "!==" + @helpers.RT(i) + ")|(" + @helpers.RSH(i) + "!==" + @helpers.RTH(i) + ")){" + @delaySlot(i, false)
+    "if(" + @helpers.RS(i) + "!==" + @helpers.RT(i) + "|" + @helpers.RSH(i) + "!==" + @helpers.RTH(i) + "){" + @delaySlot(i, false)
 
   r4300i_beq: (i) ->
     @stopCompiling = true
-    "if((" + @helpers.RS(i) + "===" + @helpers.RT(i) + ")&(" + @helpers.RSH(i) + "===" + @helpers.RTH(i) + ")){" + @delaySlot(i, false)
+    "if(" + @helpers.RS(i) + "===" + @helpers.RT(i) + "&" + @helpers.RSH(i) + "===" + @helpers.RTH(i) + "){" + @delaySlot(i, false)
 
   r4300i_bnel: (i) ->
     @stopCompiling = true
-    "if((" + @helpers.RS(i) + "!==" + @helpers.RT(i) + ")|(" + @helpers.RSH(i) + "!==" + @helpers.RTH(i) + ")){" + @delaySlot(i, true)
+    "if(" + @helpers.RS(i) + "!==" + @helpers.RT(i) + "|" + @helpers.RSH(i) + "!==" + @helpers.RTH(i) + "){" + @delaySlot(i, true)
 
   r4300i_blez: (i) ->
     @stopCompiling = true
-    "if((" + @helpers.RSH(i) + "<0)|((" + @helpers.RSH(i) + "===0)&(" + @helpers.RS(i) + "===0))){" + @delaySlot(i, false)
+    "if(" + @helpers.RSH(i) + "<0|(" + @helpers.RSH(i) + "===0&" + @helpers.RS(i) + "===0)){" + @delaySlot(i, false)
 
   r4300i_blezl: (i) ->
     @stopCompiling = true
-    "if((" + @helpers.RSH(i) + "<0)|((" + @helpers.RSH(i) + "===0)&(" + @helpers.RS(i) + "===0))){" + @delaySlot(i, true)
+    "if(" + @helpers.RSH(i) + "<0|(" + @helpers.RSH(i) + "===0&" + @helpers.RS(i) + "===0)){" + @delaySlot(i, true)
 
   r4300i_bgez: (i) ->
     @stopCompiling = true
@@ -606,7 +595,7 @@ class C1964jsEmulator
 
   r4300i_bgtzl: (i) ->
     @stopCompiling = true
-    "if((" + @helpers.RSH(i) + ">=0)&((" + @helpers.RSH(i) + ">0)|(" + @helpers.RS(i) + "!==0))){" + @delaySlot(i, true)
+    "if(" + @helpers.RSH(i) + ">=0&(" + @helpers.RSH(i) + ">0|" + @helpers.RS(i) + "!==0)){" + @delaySlot(i, true)
 
   r4300i_bltzl: (i) ->
     @stopCompiling = true
@@ -628,11 +617,11 @@ class C1964jsEmulator
 
   r4300i_bgtz: (i) ->
     @stopCompiling = true
-    "if((" + @helpers.RSH(i) + ">=0)&((" + @helpers.RSH(i) + ">0)|(" + @helpers.RS(i) + "!==0))){" + @delaySlot(i, false)
+    "if(" + @helpers.RSH(i) + ">=0&(" + @helpers.RSH(i) + ">0|" + @helpers.RS(i) + "!==0)){" + @delaySlot(i, false)
 
   r4300i_beql: (i) ->
     @stopCompiling = true
-    "if((" + @helpers.RS(i) + "===" + @helpers.RT(i) + ")&(" + @helpers.RSH(i) + "===" + @helpers.RTH(i) + ")){" + @delaySlot(i, true)
+    "if(" + @helpers.RS(i) + "===" + @helpers.RT(i) + "&(" + @helpers.RSH(i) + "===" + @helpers.RTH(i) + ")){" + @delaySlot(i, true)
 
   r4300i_COP1_bc1f: (i) ->
     @stopCompiling = true
@@ -669,7 +658,7 @@ class C1964jsEmulator
     else
       string += "t.m[0]+=" + (@cnt+1) + ";"      
 
-    string += "t.p[0]=" + instr_index + ";return t.c." + @getFnName(instr_index) + "}"
+    string += "t.p[0]=" + instr_index + ";return window." + @getFnName(instr_index) + "}"
 
   r4300i_jal: (i) ->
     @stopCompiling = true
@@ -683,7 +672,7 @@ class C1964jsEmulator
     string += this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     pc = (@p[0] + offset + 8) | 0
     string += "t.m[0]+=" + (@cnt+1) + ";"
-    string += "t.p[0]=" + instr_index + ";r[31]=" + pc + ";h[31]=" + (pc >> 31) + ";return t.c." + @getFnName(instr_index) + "}"
+    string += "t.p[0]=" + instr_index + ";r[31]=" + pc + ";h[31]=" + (pc >> 31) + ";return window." + @getFnName(instr_index) + "}"
 
   #should we set the programCounter after the delay slot or before it?
   r4300i_jalr: (i) ->
@@ -701,7 +690,7 @@ class C1964jsEmulator
     opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     string += opcode
     string += "t.m[0]+=" + (@cnt+1) + ";"
-    string += "t.p[0]=ru[39];return t.c[\"_\"+(ru[39]>>>2)]}"
+    string += "t.p[0]=ru[39];return window[\"_\"+(ru[39]>>>2)]}"
     string
 
   r4300i_jr: (i) ->
@@ -716,7 +705,7 @@ class C1964jsEmulator
     opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     string += opcode
     string += "t.m[0]+=" + (@cnt+1) + ";"
-    string += "t.p[0]=ru[37];return t.c[\"_\"+(ru[37]>>>2)]}"
+    string += "t.p[0]=ru[37];return window[\"_\"+(ru[37]>>>2)]}"
 
   UNUSED: (i) ->
     @log "warning: UNUSED"
@@ -727,7 +716,7 @@ class C1964jsEmulator
     string = "{if((t.cp0[" + consts.STATUS + "]&" + consts.ERL + ")!==0){alert(\"error epc\");t.p[0]=t.cp0[" + consts.ERROREPC + "];"
     string += "t.cp0[" + consts.STATUS + "]&=~" + consts.ERL + "}else{t.p[0]=t.cp0[" + consts.EPC + "];t.cp0[" + consts.STATUS + "]&=~" + consts.EXL + "}"
     string += "t.m[0]+=" + (@cnt+1) + ";"
-    string += "t.LLbit=0;return t.c[\"_\"+(t.p[0]>>>2)]}"
+    string += "t.LLbit=0;return window[\"_\"+(t.p[0]>>>2)]}"
 
   r4300i_COP0_mtc0: (i, isDelaySlot) ->
     delaySlot = undefined
