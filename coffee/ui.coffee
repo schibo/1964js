@@ -131,7 +131,7 @@ toggleUi = ->
   return
 
 errorHandler = (evt) ->
-  switch evt.target.error.c
+  switch evt.target.error.code
     when evt.target.error.NOT_FOUND_ERR
       alert "File Not Found!"
     when evt.target.error.NOT_READABLE_ERR
