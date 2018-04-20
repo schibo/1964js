@@ -774,7 +774,7 @@ class C1964jsEmulator
     @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ")>>31;"
 
   r4300i_slt: (i) ->
-    "{if(" + @helpers.RSH(i) + ">" + @helpers.RTH(i) + ")" + @helpers.tRD(i) + "=0;" + "else if(" + @helpers.RSH(i) + "<" + @helpers.RTH(i) + ")" + @helpers.tRD(i) + "=1;" + "else if(" + @helpers.uRS(i) + "<" + @helpers.uRT(i) + ")" + @helpers.tRD(i) + "=1;" + "else " + @helpers.tRD(i) + "=0;" + @helpers.tRDH(i) + "=0}"
+    @helpers.tRD(i) + "=((" + @helpers.RSH(i) + "<" + @helpers.RTH(i) + ")|((" + @helpers.RSH(i) + "===" + @helpers.RTH(i) + ")&(" + @helpers.uRS(i) + "<" + @helpers.uRT(i) + ")))," + @helpers.tRDH(i) + "=0;"
 
   r4300i_sltu: (i) ->
     "{if(" + @helpers.uRSH(i) + ">" + @helpers.uRTH(i) + ")" + @helpers.tRD(i) + "=0;" + "else if(" + @helpers.uRSH(i) + "<" + @helpers.uRTH(i) + ")" + @helpers.tRD(i) + "=1;" + "else if(" + @helpers.uRS(i) + "<" + @helpers.uRT(i) + ")" + @helpers.tRD(i) + "=1;" + "else " + @helpers.tRD(i) + "=0;" + @helpers.tRDH(i) + "=0}"
@@ -783,13 +783,13 @@ class C1964jsEmulator
     uoffset_imm_lo = undefined
     soffset_imm_hi = (@helpers.soffset_imm(i)) >> 31
     uoffset_imm_lo = (@helpers.soffset_imm(i)) >>> 0
-    "{if(" + @helpers.RSH(i) + ">" + soffset_imm_hi + ")" + @helpers.tRT(i) + "=0;" + "else if(" + @helpers.RSH(i) + "<" + soffset_imm_hi + ")" + @helpers.tRT(i) + "=1;" + "else if(" + @helpers.uRS(i) + "<" + uoffset_imm_lo + ")" + @helpers.tRT(i) + "=1;" + "else " + @helpers.tRT(i) + "=0;" + @helpers.tRTH(i) + "=0}"
+    @helpers.tRT(i) + "=((" + @helpers.RSH(i) + "<" + soffset_imm_hi + ")|((" + @helpers.RSH(i) + "===" + soffset_imm_hi + ")&(" + @helpers.uRS(i) + "<" + uoffset_imm_lo + ")))," + @helpers.tRTH(i) + "=0;"
 
   r4300i_sltiu: (i) ->
     uoffset_imm_lo = undefined
     uoffset_imm_hi = (@helpers.soffset_imm(i) >> 31) >>> 0
     uoffset_imm_lo = (@helpers.soffset_imm(i)) >>> 0
-    "{if(" + @helpers.uRSH(i) + ">" + uoffset_imm_hi + ")" + @helpers.tRT(i) + "=0;" + "else if(" + @helpers.uRSH(i) + "<" + uoffset_imm_hi + ")" + @helpers.tRT(i) + "=1;" + "else if(" + @helpers.uRS(i) + "<" + uoffset_imm_lo + ")" + @helpers.tRT(i) + "=1;" + "else " + @helpers.tRT(i) + "=0;" + @helpers.tRTH(i) + "=0}"
+    @helpers.tRT(i) + "=((" + @helpers.uRSH(i) + "<" + uoffset_imm_hi + ")|((" + @helpers.uRSH(i) + "===" + uoffset_imm_hi + ")&(" + @helpers.uRS(i) + "<" + uoffset_imm_lo + ")))," + @helpers.tRTH(i) + "=0;"
 
   r4300i_cache: (i) ->
     @log "todo: r4300i_cache"
