@@ -777,7 +777,7 @@ class C1964jsEmulator
     @helpers.tRD(i) + "=((" + @helpers.RSH(i) + "<" + @helpers.RTH(i) + ")|((" + @helpers.RSH(i) + "===" + @helpers.RTH(i) + ")&(" + @helpers.uRS(i) + "<" + @helpers.uRT(i) + ")))," + @helpers.tRDH(i) + "=0;"
 
   r4300i_sltu: (i) ->
-    "{if(" + @helpers.uRSH(i) + ">" + @helpers.uRTH(i) + ")" + @helpers.tRD(i) + "=0;" + "else if(" + @helpers.uRSH(i) + "<" + @helpers.uRTH(i) + ")" + @helpers.tRD(i) + "=1;" + "else if(" + @helpers.uRS(i) + "<" + @helpers.uRT(i) + ")" + @helpers.tRD(i) + "=1;" + "else " + @helpers.tRD(i) + "=0;" + @helpers.tRDH(i) + "=0}"
+    @helpers.tRD(i) + "=((" + @helpers.uRSH(i) + "<" + @helpers.uRTH(i) + ")|((" + @helpers.uRSH(i) + "===" + @helpers.uRTH(i) + ")&(" + @helpers.uRS(i) + "<" + @helpers.uRT(i) + ")))," + @helpers.tRDH(i) + "=0;"
 
   r4300i_slti: (i) ->
     uoffset_imm_lo = undefined
