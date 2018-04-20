@@ -606,7 +606,7 @@ class C1964jsEmulator
 
   r4300i_bgtzl: (i) ->
     @stopCompiling = true
-    "if(" + @helpers.RSH(i) + ">0||(" + @helpers.RSH(i) + "===0&&" + @helpers.RS(i) + "!==0)){" + @delaySlot(i, true)
+    "if(" + @helpers.RSH(i) + ">=0&&(" + @helpers.RSH(i) + ">0||" + @helpers.RS(i) + "!==0)){" + @delaySlot(i, true)
 
   r4300i_bltzl: (i) ->
     @stopCompiling = true
@@ -628,7 +628,7 @@ class C1964jsEmulator
 
   r4300i_bgtz: (i) ->
     @stopCompiling = true
-    "if(" + @helpers.RSH(i) + ">0||(" + @helpers.RSH(i) + "===0&&" + @helpers.RS(i) + "!==0)){" + @delaySlot(i, false)
+    "if(" + @helpers.RSH(i) + ">=0&&(" + @helpers.RSH(i) + ">0||" + @helpers.RS(i) + "!==0)){" + @delaySlot(i, false)
 
   r4300i_beql: (i) ->
     @stopCompiling = true
