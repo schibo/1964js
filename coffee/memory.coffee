@@ -132,301 +132,303 @@ class C1964jsMemory
     start >>>= 14
 
     while start < end
-      @region[start] = readRegion8.bind @
-      @region16[start] = readRegion16.bind @
-      @region32[start] = readRegion32.bind @
-      @writeRegion8[start] = writeRegion8.bind @
-      @writeRegion16[start] = writeRegion16.bind @
-      @writeRegion32[start] = writeRegion32.bind @
+      @region[start] = readRegion8
+      @region16[start] = readRegion16
+      @region32[start] = readRegion32
+      @writeRegion8[start] = writeRegion8
+      @writeRegion16[start] = writeRegion16
+      @writeRegion32[start] = writeRegion32
       start++
 
     return
 
-  readDummy8: (a) ->
+  readDummy8: (a) =>
     off_ = a & 0x0000FFFC
     @dummyReadWriteUint8Array[off_]
 
-  readDummy16: (a) ->
+  readDummy16: (a) =>
     off_ = a & 0x0000FFFC
     @dummyReadWriteUint8Array[off_] << 8 | @dummyReadWriteUint8Array[off_ + 1]
 
-  readDummy32: (a) ->
+  readDummy32: (a) =>
     off_ = a & 0x0000FFFC
     @dummyReadWriteUint8Array[off_] << 24 | @dummyReadWriteUint8Array[off_ + 1] << 16 | @dummyReadWriteUint8Array[off_ + 2] << 8 | @dummyReadWriteUint8Array[off_ + 3]
 
-  readRdram8: (a) ->
+  readRdram8: (a) =>
     @rdramUint8Array[a]
 
-  readRdram16: (a) ->
+  readRdram16: (a) =>
     ram = @rdramUint8Array
     ram[a] << 8 | ram[a + 1]
 
-  readRdram32: (a) ->
-    @rdramDataView.getInt32(a, false)
+  readRdram32: (a) =>
+    #@rdramDataView.getInt32(a, false)
+    ram = @rdramUint8Array
+    ram[a] << 24 | ram[a + 1] << 16 | ram[a + 2] << 8 | ram[a + 3]
 
-  readRamRegs0_8: (a) ->
+  readRamRegs0_8: (a) =>
     off_ = a - MEMORY_START_RAMREGS0
     @ramRegs0Uint8Array[off_]
 
-  readRamRegs0_16: (a) ->
+  readRamRegs0_16: (a) =>
     off_ = (a-MEMORY_START_RAMREGS0)
     @ramRegs0Uint8Array[off_] << 8 | @ramRegs0Uint8Array[off_ + 1]
 
-  readRamRegs0_32: (a) ->
+  readRamRegs0_32: (a) =>
     off_ = (a-MEMORY_START_RAMREGS0)
     @ramRegs0Uint8Array[off_] << 24 | @ramRegs0Uint8Array[off_ + 1] << 16 | @ramRegs0Uint8Array[off_ + 2] << 8 | @ramRegs0Uint8Array[off_ + 3]
 
-  readRamRegs4_8: (a) ->
+  readRamRegs4_8: (a) =>
     off_ = a - MEMORY_START_RAMREGS4
     @ramRegs4Uint8Array[off_]
 
-  readRamRegs4_16: (a) ->
+  readRamRegs4_16: (a) =>
     off_ = (a-MEMORY_START_RAMREGS4)
     @ramRegs4Uint8Array[off_] << 8 | @ramRegs4Uint8Array[off_ + 1]
 
-  readRamRegs4_32: (a) ->
+  readRamRegs4_32: (a) =>
     off_ = (a-MEMORY_START_RAMREGS4)
     @ramRegs4Uint8Array[off_] << 24 | @ramRegs4Uint8Array[off_ + 1] << 16 | @ramRegs4Uint8Array[off_ + 2] << 8 | @ramRegs4Uint8Array[off_ + 3]
 
-  readRamRegs8_8: (a) ->
+  readRamRegs8_8: (a) =>
     off_ = a - MEMORY_START_RAMREGS8
     @ramRegs8Uint8Array[off_]
 
-  readRamRegs8_16: (a) ->
+  readRamRegs8_16: (a) =>
     off_ = (a-MEMORY_START_RAMREGS8)
     @ramRegs8Uint8Array[off_] << 8 | @ramRegs8Uint8Array[off_ + 1]
 
-  readRamRegs8_32: (a) ->
+  readRamRegs8_32: (a) =>
     off_ = (a-MEMORY_START_RAMREGS8)
     @ramRegs8Uint8Array[off_] << 24 | @ramRegs8Uint8Array[off_ + 1] << 16 | @ramRegs8Uint8Array[off_ + 2] << 8 | @ramRegs8Uint8Array[off_ + 3]
 
-  readSpMem8: (a) ->
+  readSpMem8: (a) =>
     off_ = a - MEMORY_START_SPMEM
     @spMemUint8Array[off_]
 
-  readSpMem16: (a) ->
+  readSpMem16: (a) =>
     off_ = (a-MEMORY_START_SPMEM)
     @spMemUint8Array[off_] << 8 | @spMemUint8Array[off_ + 1]
 
-  readSpMem32: (a) ->
+  readSpMem32: (a) =>
     off_ = (a-MEMORY_START_SPMEM)
     @spMemUint8Array[off_] << 24 | @spMemUint8Array[off_ + 1] << 16 | @spMemUint8Array[off_ + 2] << 8 | @spMemUint8Array[off_ + 3]
 
-  readSpReg1_8: (a) ->
+  readSpReg1_8: (a) =>
     off_ = a - MEMORY_START_SPREG_1
     @core.interrupts.readSPReg1 off_
 
-  readSpReg1_16: (a) ->
+  readSpReg1_16: (a) =>
     off_ = a - MEMORY_START_SPREG_1
     @core.interrupts.readSPReg1 off_
 
-  readSpReg1_32: (a) ->
+  readSpReg1_32: (a) =>
     off_ = a - MEMORY_START_SPREG_1
     @core.interrupts.readSPReg1 off_
 
-  readSpReg2_8: (a) ->
+  readSpReg2_8: (a) =>
     off_ = a - MEMORY_START_SPREG_2
     @spReg2Uint8Array[off_]
 
-  readSpReg2_16: (a) ->
+  readSpReg2_16: (a) =>
     off_ = (a-MEMORY_START_SPREG_2)
     @spReg2Uint8Array[off_] << 8 | @spReg2Uint8Array[off_ + 1]
 
-  readSpReg2_32: (a) ->
+  readSpReg2_32: (a) =>
     off_ = (a-MEMORY_START_SPREG_2)
     @spReg2Uint8Array[off_] << 24 | @spReg2Uint8Array[off_ + 1] << 16 | @spReg2Uint8Array[off_ + 2] << 8 | @spReg2Uint8Array[off_ + 3]
 
-  readDpc8: (a) ->
+  readDpc8: (a) =>
     off_ = a - MEMORY_START_DPC
     @dpcUint8Array[off_]
 
-  readDpc16: (a) ->
+  readDpc16: (a) =>
     off_ = (a-MEMORY_START_DPC)
     @dpcUint8Array[off_] << 8 | @dpcUint8Array[off_ + 1]
 
-  readDpc32: (a) ->
+  readDpc32: (a) =>
     off_ = (a-MEMORY_START_DPC)
     @dpcUint8Array[off_] << 24 | @dpcUint8Array[off_ + 1] << 16 | @dpcUint8Array[off_ + 2] << 8 | @dpcUint8Array[off_ + 3]
 
-  readDps8: (a) ->
+  readDps8: (a) =>
     off_ = a - MEMORY_START_DPS
     @dpsUint8Array[off_]
 
-  readDps16: (a) ->
+  readDps16: (a) =>
     off_ = (a-MEMORY_START_DPS)
     @dpsUint8Array[off_] << 8 | @dpsUint8Array[off_ + 1]
 
-  readDps32: (a) ->
+  readDps32: (a) =>
     off_ = (a-MEMORY_START_DPS)
     @dpsUint8Array[off_] << 24 | @dpsUint8Array[off_ + 1] << 16 | @dpsUint8Array[off_ + 2] << 8 | @dpsUint8Array[off_ + 3]
 
-  readMi8: (a) ->
+  readMi8: (a) =>
     off_ = a - MEMORY_START_MI
     @miUint8Array[off_]
 
-  readMi16: (a) ->
+  readMi16: (a) =>
     off_ = (a-MEMORY_START_MI)
     @miUint8Array[off_] << 8 | @miUint8Array[off_ + 1]
 
-  readMi32: (a) ->
+  readMi32: (a) =>
     off_ = (a-MEMORY_START_MI)
     @miUint8Array[off_] << 24 | @miUint8Array[off_ + 1] << 16 | @miUint8Array[off_ + 2] << 8 | @miUint8Array[off_ + 3]
 
-  readVi8: (a) ->
+  readVi8: (a) =>
     off_ = a - MEMORY_START_VI
     @core.interrupts.readVI off_
 
-  readVi16: (a) ->
+  readVi16: (a) =>
     off_ = a - MEMORY_START_VI
     @core.interrupts.readVI off_
 
-  readVi32: (a) ->
+  readVi32: (a) =>
     off_ = a - MEMORY_START_VI
     @core.interrupts.readVI off_
 
-  readAi8: (a) ->
+  readAi8: (a) =>
     off_ = a - MEMORY_START_AI
     @core.interrupts.readAI off_
 
-  readAi16: (a) ->
+  readAi16: (a) =>
     off_ = a - MEMORY_START_AI
     @core.interrupts.readAI off_
 
-  readAi32: (a) ->
+  readAi32: (a) =>
     off_ = a - MEMORY_START_AI
     @core.interrupts.readAI off_
 
-  readPi8: (a) ->
+  readPi8: (a) =>
     off_ = a - MEMORY_START_PI
     @piUint8Array[off_]
 
-  readPi16: (a) ->
+  readPi16: (a) =>
     off_ = (a-MEMORY_START_PI)
     @piUint8Array[off_] << 8 | @piUint8Array[off_ + 1]
 
-  readPi32: (a) ->
+  readPi32: (a) =>
     off_ = (a-MEMORY_START_PI)
     @piUint8Array[off_] << 24 | @piUint8Array[off_ + 1] << 16 | @piUint8Array[off_ + 2] << 8 | @piUint8Array[off_ + 3]
 
-  readSi8: (a) ->
+  readSi8: (a) =>
     off_ = a - MEMORY_START_SI
     @core.interrupts.readSI off_
 
-  readSi16: (a) ->
+  readSi16: (a) =>
     off_ = a - MEMORY_START_SI
     @core.interrupts.readSI off_
 
-  readSi32: (a) ->
+  readSi32: (a) =>
     off_ = a - MEMORY_START_SI
     @core.interrupts.readSI off_
 
-  readC2A1_8: (a) ->
+  readC2A1_8: (a) =>
     off_ = a - MEMORY_START_C2A1
     @c2a1Uint8Array[off_]
 
-  readC2A1_16: (a) ->
+  readC2A1_16: (a) =>
     off_ = (a-MEMORY_START_C2A1)
     @c2a1Uint8Array[off_] << 8 | @c2a1Uint8Array[off_ + 1]
 
-  readC2A1_32: (a) ->
+  readC2A1_32: (a) =>
     off_ = (a-MEMORY_START_C2A1)
     @c2a1Uint8Array[off_] << 24 | @c2a1Uint8Array[off_ + 1] << 16 | @c2a1Uint8Array[off_ + 2] << 8 | @c2a1Uint8Array[off_ + 3]
 
-  readC1A1_8: (a) ->
+  readC1A1_8: (a) =>
     off_ = a - MEMORY_START_C1A1
     @c1a1Uint8Array[off_]
 
-  readC1A1_16: (a) ->
+  readC1A1_16: (a) =>
     off_ = (a-MEMORY_START_C1A1)
     @c1a1Uint8Array[off_] << 8 | @c1a1Uint8Array[off_ + 1]
 
-  readC1A1_32: (a) ->
+  readC1A1_32: (a) =>
     off_ = (a-MEMORY_START_C1A1)
     @c1a1Uint8Array[off_] << 24 | @c1a1Uint8Array[off_ + 1] << 16 | @c1a1Uint8Array[off_ + 2] << 8 | @c1a1Uint8Array[off_ + 3]
 
-  readC2A2_8: (a) ->
+  readC2A2_8: (a) =>
     off_ = a - MEMORY_START_C2A2
     @c2a2Uint8Array[off_]
 
-  readC2A2_16: (a) ->
+  readC2A2_16: (a) =>
     off_ = (a-MEMORY_START_C2A2)
     @c2a2Uint8Array[off_] << 8 | @c2a2Uint8Array[off_ + 1]
 
-  readC2A2_32: (a) ->
+  readC2A2_32: (a) =>
     off_ = (a-MEMORY_START_C2A2)
     @c2a2Uint8Array[off_] << 24 | @c2a2Uint8Array[off_ + 1] << 16 | @c2a2Uint8Array[off_ + 2] << 8 | @c2a2Uint8Array[off_ + 3]
 
-  readRom8: (a) ->
+  readRom8: (a) =>
     off_ = a - MEMORY_START_ROM_IMAGE
     @romUint8Array[off_]
 
-  readRom16: (a) ->
+  readRom16: (a) =>
     off_ = (a-MEMORY_START_ROM_IMAGE)
     @romUint8Array[off_] << 8 | @romUint8Array[off_ + 1]
 
-  readRom32: (a) ->
+  readRom32: (a) =>
     off_ = (a-MEMORY_START_ROM_IMAGE)
     @romUint8Array[off_] << 24 | @romUint8Array[off_ + 1] << 16 | @romUint8Array[off_ + 2] << 8 | @romUint8Array[off_ + 3]
 
-  readC1A3_8: (a) ->
+  readC1A3_8: (a) =>
     off_ = a - MEMORY_START_C1A3
     @c1a3Uint8Array[off_]
 
-  readC1A3_16: (a) ->
+  readC1A3_16: (a) =>
     off_ = (a-MEMORY_START_C1A3)
     @c1a3Uint8Array[off_] << 8 | @c1a3Uint8Array[off_ + 1]
 
-  readC1A3_32: (a) ->
+  readC1A3_32: (a) =>
     off_ = (a-MEMORY_START_C1A3)
     @c1a3Uint8Array[off_] << 24 | @c1a3Uint8Array[off_ + 1] << 16 | @c1a3Uint8Array[off_ + 2] << 8 | @c1a3Uint8Array[off_ + 3]
 
-  readRi8: (a) ->
+  readRi8: (a) =>
     off_ = a - MEMORY_START_RI
     @riUint8Array[off_]
 
-  readRi16: (a) ->
+  readRi16: (a) =>
     off_ = (a-MEMORY_START_RI)
     @riUint8Array[off_] << 8 | @riUint8Array[off_ + 1]
 
-  readRi32: (a) ->
+  readRi32: (a) =>
     off_ = (a-MEMORY_START_RI)
     @riUint8Array[off_] << 24 | @riUint8Array[off_ + 1] << 16 | @riUint8Array[off_ + 2] << 8 | @riUint8Array[off_ + 3]
 
-  readPif8: (a) ->
+  readPif8: (a) =>
     off_ = a - MEMORY_START_PIF
     @pifUint8Array[off_]
 
-  readPif16: (a) ->
+  readPif16: (a) =>
     off_ = (a-MEMORY_START_PIF)
     @pifUint8Array[off_] << 8 | @pifUint8Array[off_ + 1]
 
-  readPif32: (a) ->
+  readPif32: (a) =>
     off_ = (a-MEMORY_START_PIF)
     @pifUint8Array[off_] << 24 | @pifUint8Array[off_ + 1] << 16 | @pifUint8Array[off_ + 2] << 8 | @pifUint8Array[off_ + 3]
 
-  readGio8: (a) ->
+  readGio8: (a) =>
     off_ = a - MEMORY_START_GIO
     @gioUint8Array[off_]
 
-  readGio16: (a) ->
+  readGio16: (a) =>
     off_ = (a-MEMORY_START_GIO)
     @gioUint8Array[off_] << 8 | @gioUint8Array[off_ + 1]
 
-  readGio32: (a) ->
+  readGio32: (a) =>
     off_ = (a-MEMORY_START_GIO)
     @gioUint8Array[off_] << 24 | @gioUint8Array[off_ + 1] << 16 | @gioUint8Array[off_ + 2] << 8 | @gioUint8Array[off_ + 3]
 
-  writeRdram8: (val, a) ->
+  writeRdram8: (val, a) =>
     @rdramUint8Array[a] = val
     return
 
-  writeRdram16: (val, a) ->
+  writeRdram16: (val, a) =>
     ram = @rdramUint8Array
     ram[a] = val >> 8
     ram[a + 1] = val
     return
 
-  writeRdram32: (val, a) ->
+  writeRdram32: (val, a) =>
     ram = @rdramUint8Array
     ram[a] = val >> 24
     ram[a + 1] = val >> 16
@@ -434,18 +436,18 @@ class C1964jsMemory
     ram[a + 3] = val
     return
 
-  writeSpMem8: (val, a) ->
+  writeSpMem8: (val, a) =>
     off_ = a - MEMORY_START_SPMEM
     @spMemUint8Array[off_] = val
     return
 
-  writeSpMem16: (val, a) ->
+  writeSpMem16: (val, a) =>
     off_ = a - MEMORY_START_SPMEM
     @spMemUint8Array[off_] = val >> 8
     @spMemUint8Array[off_ + 1] = val
     return
 
-  writeSpMem32: (val, a) ->
+  writeSpMem32: (val, a) =>
     off_ = a - MEMORY_START_SPMEM
     @spMemUint8Array[off_] = val >> 24
     @spMemUint8Array[off_ + 1] = val >> 16
@@ -453,18 +455,18 @@ class C1964jsMemory
     @spMemUint8Array[off_ + 3] = val
     return
 
-  writeRi8: (val, a) ->
+  writeRi8: (val, a) =>
     off_ = a - MEMORY_START_RI
     @riUint8Array[off_] = val
     return
 
-  writeRi16: (val, a) ->
+  writeRi16: (val, a) =>
     off_ = a - MEMORY_START_RI
     @riUint8Array[off_] = val >> 8
     @riUint8Array[off_ + 1] = val
     return
 
-  writeRi32: (val, a) ->
+  writeRi32: (val, a) =>
     off_ = a - MEMORY_START_RI
     @riUint8Array[off_] = val >> 24
     @riUint8Array[off_ + 1] = val >> 16
@@ -472,33 +474,33 @@ class C1964jsMemory
     @riUint8Array[off_ + 3] = val
     return
 
-  writeMi8: (val, a, pc, isDelaySlot) ->
+  writeMi8: (val, a, pc, isDelaySlot) =>
     off_ = a - MEMORY_START_MI
     @core.interrupts.writeMI off_, val, pc, isDelaySlot
     return
 
-  writeMi16: (val, a, pc, isDelaySlot) ->
+  writeMi16: (val, a, pc, isDelaySlot) =>
     off_ = a - MEMORY_START_MI
     @core.interrupts.writeMI off_, val, pc, isDelaySlot
     return
 
-  writeMi32: (val, a, pc, isDelaySlot) ->
+  writeMi32: (val, a, pc, isDelaySlot) =>
     off_ = a - MEMORY_START_MI
     @core.interrupts.writeMI off_, val, pc, isDelaySlot
     return
 
-  writeRamRegs8_8: (val, a) ->
+  writeRamRegs8_8: (val, a) =>
     off_ = a - MEMORY_START_RAMREGS8
     @ramRegs8Uint8Array[off_] = val
     return
 
-  writeRamRegs8_16: (val, a) ->
+  writeRamRegs8_16: (val, a) =>
     off_ = a - MEMORY_START_RAMREGS8
     @ramRegs8Uint8Array[off_] = val >> 8
     @ramRegs8Uint8Array[off_ + 1] = val
     return
 
-  writeRamRegs8_32: (val, a) ->
+  writeRamRegs8_32: (val, a) =>
     off_ = a - MEMORY_START_RAMREGS8
     @ramRegs8Uint8Array[off_] = val >> 24
     @ramRegs8Uint8Array[off_ + 1] = val >> 16
@@ -506,18 +508,18 @@ class C1964jsMemory
     @ramRegs8Uint8Array[off_ + 3] = val
     return
 
-  writeRamRegs4_8: (val, a) ->
+  writeRamRegs4_8: (val, a) =>
     off_ = a - MEMORY_START_RAMREGS4
     @ramRegs4Uint8Array[off_] = val
     return
 
-  writeRamRegs4_16: (val, a) ->
+  writeRamRegs4_16: (val, a) =>
     off_ = a - MEMORY_START_RAMREGS4
     @ramRegs4Uint8Array[off_] = val >> 8
     @ramRegs4Uint8Array[off_ + 1] = val
     return
 
-  writeRamRegs4_32: (val, a) ->
+  writeRamRegs4_32: (val, a) =>
     off_ = a - MEMORY_START_RAMREGS4
     @ramRegs4Uint8Array[off_] = val >> 24
     @ramRegs4Uint8Array[off_ + 1] = val >> 16
@@ -525,18 +527,18 @@ class C1964jsMemory
     @ramRegs4Uint8Array[off_ + 3] = val
     return
 
-  writeRamRegs0_8: (val, a) ->
+  writeRamRegs0_8: (val, a) =>
     off_ = a - MEMORY_START_RAMREGS0
     @ramRegs0Uint8Array[off_] = val
     return
 
-  writeRamRegs0_16: (val, a) ->
+  writeRamRegs0_16: (val, a) =>
     off_ = a - MEMORY_START_RAMREGS0
     @ramRegs0Uint8Array[off_] = val >> 8
     @ramRegs0Uint8Array[off_ + 1] = val
     return
 
-  writeRamRegs0_32: (val, a) ->
+  writeRamRegs0_32: (val, a) =>
     off_ = a - MEMORY_START_RAMREGS0
     @ramRegs0Uint8Array[off_] = val >> 24
     @ramRegs0Uint8Array[off_ + 1] = val >> 16
@@ -544,123 +546,123 @@ class C1964jsMemory
     @ramRegs0Uint8Array[off_ + 3] = val
     return
 
-  writeSpReg1_8: (val, a, pc, isDelaySlot) ->
+  writeSpReg1_8: (val, a, pc, isDelaySlot) =>
     off_ = a - MEMORY_START_SPREG_1
     @core.interrupts.writeSPReg1 off_, val, pc, isDelaySlot
     return
 
-  writeSpReg1_16: (val, a, pc, isDelaySlot) ->
+  writeSpReg1_16: (val, a, pc, isDelaySlot) =>
     off_ = a - MEMORY_START_SPREG_1
     @core.interrupts.writeSPReg1 off_, val, pc, isDelaySlot
     return
 
-  writeSpReg1_32: (val, a, pc, isDelaySlot) ->
+  writeSpReg1_32: (val, a, pc, isDelaySlot) =>
     off_ = a - MEMORY_START_SPREG_1
     @core.interrupts.writeSPReg1 off_, val, pc, isDelaySlot
     return
 
-  writePi8: (val, a, pc, isDelaySlot) ->
+  writePi8: (val, a, pc, isDelaySlot) =>
     off_ = a - MEMORY_START_PI
     @core.interrupts.writePI off_, val, pc, isDelaySlot
     return
 
-  writePi16: (val, a, pc, isDelaySlot) ->
+  writePi16: (val, a, pc, isDelaySlot) =>
     off_ = a - MEMORY_START_PI
     @core.interrupts.writePI off_, val, pc, isDelaySlot
     return
 
-  writePi32: (val, a, pc, isDelaySlot) ->
+  writePi32: (val, a, pc, isDelaySlot) =>
     off_ = a - MEMORY_START_PI
     @core.interrupts.writePI off_, val, pc, isDelaySlot
     return
 
-  writeSi8: (val, a, pc, isDelaySlot) ->
+  writeSi8: (val, a, pc, isDelaySlot) =>
     off_ = a - MEMORY_START_SI
     @core.interrupts.writeSI off_, val, pc, isDelaySlot
     return
 
-  writeSi16: (val, a, pc, isDelaySlot) ->
+  writeSi16: (val, a, pc, isDelaySlot) =>
     off_ = a - MEMORY_START_SI
     @core.interrupts.writeSI off_, val, pc, isDelaySlot
     return
 
-  writeSi32: (val, a, pc, isDelaySlot) ->
+  writeSi32: (val, a, pc, isDelaySlot) =>
     off_ = a - MEMORY_START_SI
     @core.interrupts.writeSI off_, val, pc, isDelaySlot
     return
 
-  writeAi8: (val, a, pc, isDelaySlot) ->
+  writeAi8: (val, a, pc, isDelaySlot) =>
     off_ = a - MEMORY_START_AI
     @core.interrupts.writeAI off_, val, pc, isDelaySlot
     return
 
-  writeAi16: (val, a, pc, isDelaySlot) ->
+  writeAi16: (val, a, pc, isDelaySlot) =>
     off_ = a - MEMORY_START_AI
     @core.interrupts.writeAI off_, val, pc, isDelaySlot
     return
 
-  writeAi32: (val, a, pc, isDelaySlot) ->
+  writeAi32: (val, a, pc, isDelaySlot) =>
     off_ = a - MEMORY_START_AI
     @core.interrupts.writeAI off_, val, pc, isDelaySlot
     return
 
-  writeVi8: (val, a, pc, isDelaySlot) ->
+  writeVi8: (val, a, pc, isDelaySlot) =>
     off_ = a - MEMORY_START_VI
     @core.interrupts.writeVI off_, val, pc, isDelaySlot
     return
 
-  writeVi16: (val, a, pc, isDelaySlot) ->
+  writeVi16: (val, a, pc, isDelaySlot) =>
     off_ = a - MEMORY_START_VI
     @core.interrupts.writeVI off_, val, pc, isDelaySlot
     return
 
-  writeVi32: (val, a, pc, isDelaySlot) ->
+  writeVi32: (val, a, pc, isDelaySlot) =>
     off_ = a - MEMORY_START_VI
     @core.interrupts.writeVI off_, val, pc, isDelaySlot
     return
 
-  writeSpReg2_8: (val, a, pc, isDelaySlot) ->
+  writeSpReg2_8: (val, a, pc, isDelaySlot) =>
     off_ = a - MEMORY_START_SPREG_2
     @core.interrupts.writeSPReg2 off_, val, pc, isDelaySlot
     return
 
-  writeSpReg2_16: (val, a, pc, isDelaySlot) ->
+  writeSpReg2_16: (val, a, pc, isDelaySlot) =>
     off_ = a - MEMORY_START_SPREG_2
     @core.interrupts.writeSPReg2 off_, val, pc, isDelaySlot
     return
 
-  writeSpReg2_32: (val, a, pc, isDelaySlot) ->
+  writeSpReg2_32: (val, a, pc, isDelaySlot) =>
     off_ = a - MEMORY_START_SPREG_2
     @core.interrupts.writeSPReg2 off_, val, pc, isDelaySlot
     return
 
-  writeDpc8: (val, a, pc, isDelaySlot) ->
+  writeDpc8: (val, a, pc, isDelaySlot) =>
     off_ = a - MEMORY_START_DPC
     @core.interrupts.writeDPC off_, val, pc, isDelaySlot
     return
 
-  writeDpc16: (val, a, pc, isDelaySlot) ->
+  writeDpc16: (val, a, pc, isDelaySlot) =>
     off_ = a - MEMORY_START_DPC
     @core.interrupts.writeDPC off_, val, pc, isDelaySlot
     return
 
-  writeDpc32: (val, a, pc, isDelaySlot) ->
+  writeDpc32: (val, a, pc, isDelaySlot) =>
     off_ = a - MEMORY_START_DPC
     @core.interrupts.writeDPC off_, val, pc, isDelaySlot
     return
 
-  writeDps8: (val, a) ->
+  writeDps8: (val, a) =>
     off_ = a - MEMORY_START_DPS
     @dpsUint8Array[off_] = val
     return
 
-  writeDps16: (val, a) ->
+  writeDps16: (val, a) =>
     off_ = a - MEMORY_START_DPS
     @dpsUint8Array[off_] = val >> 8
     @dpsUint8Array[off_ + 1] = val
     return
 
-  writeDps32: (val, a) ->
+  writeDps32: (val, a) =>
     off_ = a - MEMORY_START_DPS
     @dpsUint8Array[off_] = val >> 24
     @dpsUint8Array[off_ + 1] = val >> 16
@@ -668,18 +670,18 @@ class C1964jsMemory
     @dpsUint8Array[off_ + 3] = val
     return
 
-  writeC2A1_8: (val, a) ->
+  writeC2A1_8: (val, a) =>
     off_ = a - MEMORY_START_C2A1
     @c2a1Uint8Array[off_] = val
     return
 
-  writeC2A1_16: (val, a) ->
+  writeC2A1_16: (val, a) =>
     off_ = a - MEMORY_START_C2A1
     @c2a1Uint8Array[off_] = val >> 8
     @c2a1Uint8Array[off_ + 1] = val
     return
 
-  writeC2A1_32: (val, a) ->
+  writeC2A1_32: (val, a) =>
     off_ = a - MEMORY_START_C2A1
     @c2a1Uint8Array[off_] = val >> 24
     @c2a1Uint8Array[off_ + 1] = val >> 16
@@ -687,18 +689,18 @@ class C1964jsMemory
     @c2a1Uint8Array[off_ + 3] = val
     return
 
-  writeC1A1_8: (val, a) ->
+  writeC1A1_8: (val, a) =>
     off_ = a - MEMORY_START_C1A1
     @c1a1Uint8Array[off_] = val
     return
 
-  writeC1A1_16: (val, a) ->
+  writeC1A1_16: (val, a) =>
     off_ = a - MEMORY_START_C1A1
     @c1a1Uint8Array[off_] = val >> 8
     @c1a1Uint8Array[off_ + 1] = val
     return
 
-  writeC1A1_32: (val, a) ->
+  writeC1A1_32: (val, a) =>
     off_ = a - MEMORY_START_C1A1
     @c1a1Uint8Array[off_] = val >> 24
     @c1a1Uint8Array[off_ + 1] = val >> 16
@@ -706,18 +708,18 @@ class C1964jsMemory
     @c1a1Uint8Array[off_ + 3] = val
     return
 
-  writeC2A2_8: (val, a) ->
+  writeC2A2_8: (val, a) =>
     off_ = a - MEMORY_START_C2A2
     @c2a2Uint8Array[off_] = val
     return
 
-  writeC2A2_16: (val, a) ->
+  writeC2A2_16: (val, a) =>
     off_ = a - MEMORY_START_C2A2
     @c2a2Uint8Array[off_] = val >> 8
     @c2a2Uint8Array[off_ + 1] = val
     return
 
-  writeC2A2_32: (val, a) ->
+  writeC2A2_32: (val, a) =>
     off_ = a - MEMORY_START_C2A2
     @c2a2Uint8Array[off_] = val >> 24
     @c2a2Uint8Array[off_ + 1] = val >> 16
@@ -725,19 +727,19 @@ class C1964jsMemory
     @c2a2Uint8Array[off_ + 3] = val
     return
 
-  writeRom8: (val, a) ->
+  writeRom8: (val, a) =>
     alert "attempt to overwrite rom!"
     off_ = a - MEMORY_START_ROM_IMAGE
     @romUint8Array[off_] = val
     return
 
-  writeRom16: (val, a) ->
+  writeRom16: (val, a) =>
     off_ = a - MEMORY_START_ROM_IMAGE
     @romUint8Array[off_] = val >> 8
     @romUint8Array[off_ + 1] = val
     return
 
-  writeRom32: (val, a) ->
+  writeRom32: (val, a) =>
     off_ = a - MEMORY_START_ROM_IMAGE
     @romUint8Array[off_] = val >> 24
     @romUint8Array[off_ + 1] = val >> 16
@@ -745,18 +747,18 @@ class C1964jsMemory
     @romUint8Array[off_ + 3] = val
     return
 
-  writeC1A3_8: (val, a) ->
+  writeC1A3_8: (val, a) =>
     off_ = a - MEMORY_START_C1A3
     @c1a3Uint8Array[off_] = val
     return
 
-  writeC1A3_16: (val, a) ->
+  writeC1A3_16: (val, a) =>
     off_ = a - MEMORY_START_C1A3
     @c1a3Uint8Array[off_] = val >> 8
     @c1a3Uint8Array[off_ + 1] = val
     return
 
-  writeC1A3_32: (val, a) ->
+  writeC1A3_32: (val, a) =>
     off_ = a - MEMORY_START_C1A3
     @c1a3Uint8Array[off_] = val >> 24
     @c1a3Uint8Array[off_ + 1] = val >> 16
@@ -764,18 +766,18 @@ class C1964jsMemory
     @c1a3Uint8Array[off_ + 3] = val
     return
 
-  writePif8: (val, a) ->
+  writePif8: (val, a) =>
     off_ = a - MEMORY_START_PIF
     @pifUint8Array[off_] = val
     return
 
-  writePif16: (val, a) ->
+  writePif16: (val, a) =>
     off_ = a - MEMORY_START_PIF
     @pifUint8Array[off_] = val >> 8
     @pifUint8Array[off_ + 1] = val
     return
 
-  writePif32: (val, a) ->
+  writePif32: (val, a) =>
     off_ = a - MEMORY_START_PIF
     @pifUint8Array[off_] = val >> 24
     @pifUint8Array[off_ + 1] = val >> 16
@@ -783,18 +785,18 @@ class C1964jsMemory
     @pifUint8Array[off_ + 3] = val
     return
 
-  writeGio8: (val, a) ->
+  writeGio8: (val, a) =>
     off_ = a - MEMORY_START_GIO
     @gioUint8Array[off_] = val
     return
 
-  writeGio16: (val, a) ->
+  writeGio16: (val, a) =>
     off_ = a - MEMORY_START_GIO
     @gioUint8Array[off_] = val >> 8
     @gioUint8Array[off_ + 1] = val
     return
 
-  writeGio32: (val, a) ->
+  writeGio32: (val, a) =>
     off_ = a - MEMORY_START_GIO
     @gioUint8Array[off_] = val >> 24
     @gioUint8Array[off_ + 1] = val >> 16
@@ -802,19 +804,19 @@ class C1964jsMemory
     @gioUint8Array[off_ + 3] = val
     return
 
-  writeDummy8: (val, a) ->
+  writeDummy8: (val, a) =>
     #log "writing to invalid memory at " + dec2hex(a)
     off_ = a & 0x0000fffc
     @dummyReadWriteUint8Array[off_] = val
     return
 
-  writeDummy16: (val, a) ->
+  writeDummy16: (val, a) =>
     off_ = a & 0x0000fffc
     @dummyReadWriteUint8Array[off_] = val >> 8
     @dummyReadWriteUint8Array[off_ + 1] = val
     return
 
-  writeDummy32: (val, a) ->
+  writeDummy32: (val, a) =>
     off_ = a & 0x0000fffc
     @dummyReadWriteUint8Array[off_] = val >> 24
     @dummyReadWriteUint8Array[off_ + 1] = val >> 16
@@ -822,7 +824,7 @@ class C1964jsMemory
     @dummyReadWriteUint8Array[off_ + 3] = val
     return
 
-  virtualToPhysical: (a) ->
+  virtualToPhysical: (a) =>
     #uncomment to see where we're loading/storing
     #if ((((a & 0xF0000000)>>>0) isnt 0x80000000) and (((a & 0xF0000000)>>>0) isnt 0xA0000000))
     #  alert(dec2hex(a))
@@ -832,7 +834,7 @@ class C1964jsMemory
     #  alert dec2hex(a) + ' ' + dec2hex(((physRegion[a>>>12]<<16) | a&0x0000ffff))
     return ((@physRegion[a>>>12]<<16) | (a&0x0000ffff))
 
-  readTLB8: (a) ->
+  readTLB8: (a) =>
     a = @virtualToPhysical(a)
 
     region = @region[a>>>14]
@@ -842,7 +844,7 @@ class C1964jsMemory
 
     region(that, a)
 
-  writeTLB8: (val, a, pc, isDelaySlot) ->
+  writeTLB8: (val, a, pc, isDelaySlot) =>
     a = @virtualToPhysical(a)
 
     region = @writeRegion8[a>>>14]
@@ -853,7 +855,7 @@ class C1964jsMemory
     region(that, val, a, pc, isDelaySlot)
     return
 
-  readTLB16: (a) ->
+  readTLB16: (a) =>
     a = @virtualToPhysical(a)
 
     region16 = @region16[a>>>14]
@@ -863,7 +865,7 @@ class C1964jsMemory
 
     region16(that, a)
 
-  writeTLB16: (val, a, pc, isDelaySlot) ->
+  writeTLB16: (val, a, pc, isDelaySlot) =>
     a = @virtualToPhysical(a)
 
     region16 = @writeRegion16[a>>>14]
@@ -874,7 +876,7 @@ class C1964jsMemory
     region16(that, val, a, pc, isDelaySlot)
     return
 
-  readTLB32: (a) ->
+  readTLB32: (a) =>
     a = @virtualToPhysical(a)
 
     region32 = @region32[a>>>14]
@@ -884,7 +886,7 @@ class C1964jsMemory
 
     region32(that, a)
 
-  writeTLB32: (val, a, pc, isDelaySlot) ->
+  writeTLB32: (val, a, pc, isDelaySlot) =>
     a = @virtualToPhysical(a)
 
     region32 = @writeRegion32[a>>>14]
@@ -895,7 +897,7 @@ class C1964jsMemory
     region32(that, val, a, pc, isDelaySlot)
     return
 
-  initPhysRegions: ->
+  initPhysRegions: =>
     #Initialize the TLB Lookup Table
     @physRegion = new Int16Array(0x100000)
     i = 0
@@ -906,61 +908,61 @@ class C1964jsMemory
     return
 
   #getInt32 and getUint32 are identical. they both return signed.
-  getInt8: (region, off_) ->
+  getInt8: (region, off_) =>
     region[off_]
 
-  getInt16: (region, off_) ->
+  getInt16: (region, off_) =>
     region[off_] << 8 | region[off_ + 1]
 
-  getInt32: (uregion, off_) ->
+  getInt32: (uregion, off_) =>
     uregion[off_] << 24 | uregion[off_ + 1] << 16 | uregion[off_ + 2] << 8 | uregion[off_ + 3]
 
-  getUint32: (uregion, off_) ->
+  getUint32: (uregion, off_) =>
     uregion[off_] << 24 | uregion[off_ + 1] << 16 | uregion[off_ + 2] << 8 | uregion[off_ + 3]
 
-  setInt8: (uregion, off_, val) ->
+  setInt8: (uregion, off_, val) =>
     uregion[off_] = val
     return
 
-  setInt32: (uregion, off_, val) ->
+  setInt32: (uregion, off_, val) =>
     uregion[off_] = val >> 24
     uregion[off_ + 1] = val >> 16
     uregion[off_ + 2] = val >> 8
     uregion[off_ + 3] = val
     return
 
-  setInt16: (uregion, off_, val) ->
+  setInt16: (uregion, off_, val) =>
     uregion[off_] = val >> 8
     uregion[off_ + 1] = val
     return
 
-  lb: (addr) ->
+  lb: (addr) =>
     #throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
     a = @virtualToPhysical(addr)
     @region[a>>>14](a)
 
-  lh: (addr) ->
+  lh: (addr) =>
     #throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
     a = @virtualToPhysical(addr)
     @region16[a>>>14](a)
 
-  lw: (addr) ->
+  lw: (addr) =>
     #throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
     a = @virtualToPhysical(addr)
     @region32[a>>>14](a)
 
-  sw: (val, addr, pc, isDelaySlot) ->
+  sw: (val, addr, pc, isDelaySlot) =>
     a = @virtualToPhysical(addr)
     @writeRegion32[a>>>14](val, a, pc, isDelaySlot)
     return
 
   #Same routine as storeWord, but store a byte
-  sb: (val, addr, pc, isDelaySlot) ->
+  sb: (val, addr, pc, isDelaySlot) =>
     a = @virtualToPhysical(addr)
     @writeRegion8[a>>>14](val, a, pc, isDelaySlot)
     return
 
-  sh: (val, addr, pc, isDelaySlot) ->
+  sh: (val, addr, pc, isDelaySlot) =>
     a = @virtualToPhysical(addr)
     @writeRegion16[a>>>14](val, a, pc, isDelaySlot)
     return
