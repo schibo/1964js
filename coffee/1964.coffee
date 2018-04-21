@@ -597,9 +597,13 @@ class C1964jsEmulator
     @stopCompiling = true
     "if(" + @helpers.RSH(i) + ">=0){" + @delaySlot(i, true)
 
+  r4300i_bgtz: (i) ->
+    @stopCompiling = true
+    "if(!(" + @helpers.RSH(i) + "&0x80000000)&!!(" + @helpers.RSH(i) + "|" + @helpers.RS(i) + ")){" + @delaySlot(i, false)
+
   r4300i_bgtzl: (i) ->
     @stopCompiling = true
-    "if(" + @helpers.RSH(i) + ">=0&(" + @helpers.RSH(i) + ">0|!" + @helpers.RS(i) + ")){" + @delaySlot(i, true)
+    "if(!(" + @helpers.RSH(i) + "&0x80000000)&!!(" + @helpers.RSH(i) + "|" + @helpers.RS(i) + ")){" + @delaySlot(i, true)
 
   r4300i_bltzl: (i) ->
     @stopCompiling = true
@@ -618,10 +622,6 @@ class C1964jsEmulator
   r4300i_bltz: (i) ->
     @stopCompiling = true
     "if(" + @helpers.RSH(i) + "<0){" + @delaySlot(i, false)
-
-  r4300i_bgtz: (i) ->
-    @stopCompiling = true
-    "if(" + @helpers.RSH(i) + ">=0&(" + @helpers.RSH(i) + ">0|" + @helpers.RS(i) + "!==0)){" + @delaySlot(i, false)
 
   r4300i_COP1_bc1f: (i) ->
     @stopCompiling = true
