@@ -575,19 +575,19 @@ class C1964jsEmulator
 
   r4300i_beq: (i) ->
     @stopCompiling = true
-    "if(!(" + @helpers.RS(i) + "-" + @helpers.RT(i) + "|" + @helpers.RSH(i) + "-" + @helpers.RTH(i) + ")){" + @delaySlot(i, false)
+    "if(" + @helpers.RS(i) + "===" + @helpers.RT(i) + "&" + @helpers.RSH(i) + "===" + @helpers.RTH(i) + "){" + @delaySlot(i, false)
 
   r4300i_beql: (i) ->
     @stopCompiling = true
-    "if(!(" + @helpers.RS(i) + "-" + @helpers.RT(i) + "|" + @helpers.RSH(i) + "-" + @helpers.RTH(i) + ")){" + @delaySlot(i, true)
+    "if(" + @helpers.RS(i) + "===" + @helpers.RT(i) + "&" + @helpers.RSH(i) + "===" + @helpers.RTH(i) + "){" + @delaySlot(i, true)
 
   r4300i_blez: (i) ->
     @stopCompiling = true
-    "if(" + @helpers.uRSH(i) + "&0x80000000|!(" + @helpers.RSH(i) + "|" + @helpers.RS(i) + ")){" + @delaySlot(i, false)
+    "if(" + @helpers.RSH(i) + "<0|!(" + @helpers.RSH(i) + "|" + @helpers.RS(i) + ")){" + @delaySlot(i, false)
 
   r4300i_blezl: (i) ->
     @stopCompiling = true
-    "if(" + @helpers.uRSH(i) + "&0x80000000|!(" + @helpers.RSH(i) + "|" + @helpers.RS(i) + ")){" + @delaySlot(i, true)
+    "if(" + @helpers.RSH(i) + "<0|!(" + @helpers.RSH(i) + "|" + @helpers.RS(i) + ")){" + @delaySlot(i, true)
 
   r4300i_bgez: (i) ->
     @stopCompiling = true
@@ -599,11 +599,11 @@ class C1964jsEmulator
 
   r4300i_bgtz: (i) ->
     @stopCompiling = true
-    "if(!(" + @helpers.RSH(i) + "&0x80000000)&!!(" + @helpers.RSH(i) + "|" + @helpers.RS(i) + ")){" + @delaySlot(i, false)
+    "if(" + @helpers.RSH(i) + ">=0&(" + @helpers.RSH(i) + "|" + @helpers.RS(i) + ")>0){" + @delaySlot(i, false)
 
   r4300i_bgtzl: (i) ->
     @stopCompiling = true
-    "if(!(" + @helpers.RSH(i) + "&0x80000000)&!!(" + @helpers.RSH(i) + "|" + @helpers.RS(i) + ")){" + @delaySlot(i, true)
+    "if(" + @helpers.RSH(i) + ">=0&(" + @helpers.RSH(i) + "|" + @helpers.RS(i) + ")>0){" + @delaySlot(i, true)
 
   r4300i_bltzl: (i) ->
     @stopCompiling = true
