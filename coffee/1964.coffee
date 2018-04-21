@@ -567,23 +567,27 @@ class C1964jsEmulator
 
   r4300i_bne: (i) ->
     @stopCompiling = true
-    "if(" + @helpers.RS(i) + "!==" + @helpers.RT(i) + "|" + @helpers.RSH(i) + "!==" + @helpers.RTH(i) + "){" + @delaySlot(i, false)
-
-  r4300i_beq: (i) ->
-    @stopCompiling = true
-    "if(" + @helpers.RS(i) + "===" + @helpers.RT(i) + "&" + @helpers.RSH(i) + "===" + @helpers.RTH(i) + "){" + @delaySlot(i, false)
+    "if(" + @helpers.RS(i) + "-" + @helpers.RT(i) + "|" + @helpers.RSH(i) + "-" + @helpers.RTH(i) + "){" + @delaySlot(i, false)
 
   r4300i_bnel: (i) ->
     @stopCompiling = true
-    "if(" + @helpers.RS(i) + "!==" + @helpers.RT(i) + "|" + @helpers.RSH(i) + "!==" + @helpers.RTH(i) + "){" + @delaySlot(i, true)
+    "if(" + @helpers.RS(i) + "-" + @helpers.RT(i) + "|" + @helpers.RSH(i) + "-" + @helpers.RTH(i) + "){" + @delaySlot(i, true)
+
+  r4300i_beq: (i) ->
+    @stopCompiling = true
+    "if(!(" + @helpers.RS(i) + "-" + @helpers.RT(i) + "|" + @helpers.RSH(i) + "-" + @helpers.RTH(i) + ")){" + @delaySlot(i, false)
+
+  r4300i_beql: (i) ->
+    @stopCompiling = true
+    "if(!(" + @helpers.RS(i) + "-" + @helpers.RT(i) + "|" + @helpers.RSH(i) + "-" + @helpers.RTH(i) + ")){" + @delaySlot(i, true)
 
   r4300i_blez: (i) ->
     @stopCompiling = true
-    "if(" + @helpers.RSH(i) + "<0|(" + @helpers.RSH(i) + "===0&" + @helpers.RS(i) + "===0)){" + @delaySlot(i, false)
+    "if(" + @helpers.uRSH(i) + "&0x80000000|!(" + @helpers.RSH(i) + "|" + @helpers.RS(i) + ")){" + @delaySlot(i, false)
 
   r4300i_blezl: (i) ->
     @stopCompiling = true
-    "if(" + @helpers.RSH(i) + "<0|(" + @helpers.RSH(i) + "===0&" + @helpers.RS(i) + "===0)){" + @delaySlot(i, true)
+    "if(" + @helpers.uRSH(i) + "&0x80000000|!(" + @helpers.RSH(i) + "|" + @helpers.RS(i) + ")){" + @delaySlot(i, true)
 
   r4300i_bgez: (i) ->
     @stopCompiling = true
@@ -595,7 +599,7 @@ class C1964jsEmulator
 
   r4300i_bgtzl: (i) ->
     @stopCompiling = true
-    "if(" + @helpers.RSH(i) + ">=0&(" + @helpers.RSH(i) + ">0|" + @helpers.RS(i) + "!==0)){" + @delaySlot(i, true)
+    "if(" + @helpers.RSH(i) + ">=0&(" + @helpers.RSH(i) + ">0|!" + @helpers.RS(i) + ")){" + @delaySlot(i, true)
 
   r4300i_bltzl: (i) ->
     @stopCompiling = true
@@ -619,25 +623,21 @@ class C1964jsEmulator
     @stopCompiling = true
     "if(" + @helpers.RSH(i) + ">=0&(" + @helpers.RSH(i) + ">0|" + @helpers.RS(i) + "!==0)){" + @delaySlot(i, false)
 
-  r4300i_beql: (i) ->
-    @stopCompiling = true
-    "if(" + @helpers.RS(i) + "===" + @helpers.RT(i) + "&(" + @helpers.RSH(i) + "===" + @helpers.RTH(i) + ")){" + @delaySlot(i, true)
-
   r4300i_COP1_bc1f: (i) ->
     @stopCompiling = true
-    "if((t.cp1Con[31]&0x00800000)===0){" + @delaySlot(i, false)
+    "if(!(t.cp1Con[31]&0x00800000)){" + @delaySlot(i, false)
 
   r4300i_COP1_bc1t: (i) ->
     @stopCompiling = true
-    "if((t.cp1Con[31]&0x00800000)!==0){" + @delaySlot(i, false)
+    "if(t.cp1Con[31]&0x00800000){" + @delaySlot(i, false)
 
   r4300i_COP1_bc1tl: (i) ->
     @stopCompiling = true
-    "if((t.cp1Con[31]&0x00800000)!==0){" + @delaySlot(i, true)
+    "if(t.cp1Con[31]&0x00800000){" + @delaySlot(i, true)
 
   r4300i_COP1_bc1fl: (i) ->
     @stopCompiling = true
-    "if((t.cp1Con[31]&0x00800000)===0){" + @delaySlot(i, true)
+    "if(!(t.cp1Con[31]&0x00800000)){" + @delaySlot(i, true)
 
   r4300i_j: (i) ->
     @stopCompiling = true
@@ -766,22 +766,22 @@ class C1964jsEmulator
     @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ")>>31;"
 
   r4300i_slt: (i) ->
-    @helpers.tRD(i) + "=((" + @helpers.RSH(i) + "<" + @helpers.RTH(i) + ")|((" + @helpers.RSH(i) + "===" + @helpers.RTH(i) + ")&(" + @helpers.uRS(i) + "<" + @helpers.uRT(i) + ")))," + @helpers.tRDH(i) + "=0;"
+    @helpers.tRD(i) + "=((" + @helpers.RSH(i) + "<" + @helpers.RTH(i) + ")|(!(" + @helpers.RSH(i) + "-" + @helpers.RTH(i) + ")&(" + @helpers.uRS(i) + "<" + @helpers.uRT(i) + ")))," + @helpers.tRDH(i) + "=0;"
 
   r4300i_sltu: (i) ->
-    @helpers.tRD(i) + "=((" + @helpers.uRSH(i) + "<" + @helpers.uRTH(i) + ")|((" + @helpers.uRSH(i) + "===" + @helpers.uRTH(i) + ")&(" + @helpers.uRS(i) + "<" + @helpers.uRT(i) + ")))," + @helpers.tRDH(i) + "=0;"
+    @helpers.tRD(i) + "=((" + @helpers.uRSH(i) + "<" + @helpers.uRTH(i) + ")|(!(" + @helpers.uRSH(i) + "-" + @helpers.uRTH(i) + ")&(" + @helpers.uRS(i) + "<" + @helpers.uRT(i) + ")))," + @helpers.tRDH(i) + "=0;"
 
   r4300i_slti: (i) ->
     uoffset_imm_lo = undefined
     soffset_imm_hi = (@helpers.soffset_imm(i)) >> 31
     uoffset_imm_lo = (@helpers.soffset_imm(i)) >>> 0
-    @helpers.tRT(i) + "=((" + @helpers.RSH(i) + "<" + soffset_imm_hi + ")|((" + @helpers.RSH(i) + "===" + soffset_imm_hi + ")&(" + @helpers.uRS(i) + "<" + uoffset_imm_lo + ")))," + @helpers.tRTH(i) + "=0;"
+    @helpers.tRT(i) + "=((" + @helpers.RSH(i) + "<" + soffset_imm_hi + ")|(!(" + @helpers.RSH(i) + "- " + soffset_imm_hi + ")&(" + @helpers.uRS(i) + "<" + uoffset_imm_lo + ")))," + @helpers.tRTH(i) + "=0;"
 
   r4300i_sltiu: (i) ->
     uoffset_imm_lo = undefined
     uoffset_imm_hi = (@helpers.soffset_imm(i) >> 31) >>> 0
     uoffset_imm_lo = (@helpers.soffset_imm(i)) >>> 0
-    @helpers.tRT(i) + "=((" + @helpers.uRSH(i) + "<" + uoffset_imm_hi + ")|((" + @helpers.uRSH(i) + "===" + uoffset_imm_hi + ")&(" + @helpers.uRS(i) + "<" + uoffset_imm_lo + ")))," + @helpers.tRTH(i) + "=0;"
+    @helpers.tRT(i) + "=((" + @helpers.uRSH(i) + "<" + uoffset_imm_hi + ")|(!(" + @helpers.uRSH(i) + "- " + uoffset_imm_hi + ")&(" + @helpers.uRS(i) + "<" + uoffset_imm_lo + ")))," + @helpers.tRTH(i) + "=0;"
 
   r4300i_cache: (i) ->
     @log "todo: r4300i_cache"
