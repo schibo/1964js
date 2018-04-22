@@ -37,9 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 #
 # Use a typed-array but access it a byte at a time for endian-safety.
 # Do not use the DataView .getInt16, getInt32, etc functions. These will ensure endian
-# safety but they are a lot slower than accessing an Int8Array() by its index with the [] notation,
-# presumably because Chrome (currently) doesn't compile anything other than nodes in the root DOM.
-# DataView is also only supported in Chrome.
+# safety but they are a lot slower than accessing an Int8Array() by its index with the [] notation.
 #
 #TODO:
 # Long-term: more opcodes/timers/WinGL
@@ -640,7 +638,6 @@ class C1964jsEmulator
   r4300i_j: (i) ->
     @stopCompiling = true
     instruction = undefined
-    string = "{"
     instr_index = ((((@p[0] + offset + 4) & 0xF0000000) | ((i & 0x03FFFFFF) << 2)) | 0)
 
     #delay slot
@@ -650,27 +647,26 @@ class C1964jsEmulator
     speedUp = false
     speedUp = true if ((instr_index >> 0) is (@p[0] + offset) >> 0) and (instruction is 0)
 
-    string += this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
+    string = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     if speedUp is true
       string += "t.m[0]=0;"
     else
       string += "t.m[0]+=" + (@cnt+1) + ";"      
 
-    string += "t.p[0]=" + instr_index + ";return window." + @getFnName(instr_index) + "}"
+    string += "t.p[0]=" + instr_index + ";return window." + @getFnName(instr_index) + ";"
 
   r4300i_jal: (i) ->
     @stopCompiling = true
     pc = undefined
     instruction = undefined
-    string = "{"
     instr_index = ((((@p[0] + offset + 4) & 0xF0000000) | ((i & 0x03FFFFFF) << 2)) | 0)
 
     #delay slot
     instruction = @memory.lw((@p[0] + offset + 4) | 0)
-    string += this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
+    string = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     pc = (@p[0] + offset + 8) | 0
     string += "t.m[0]+=" + (@cnt+1) + ";"
-    string += "t.p[0]=" + instr_index + ";r[31]=" + pc + ";h[31]=" + (pc >> 31) + ";return window." + @getFnName(instr_index) + "}"
+    string += "t.p[0]=" + instr_index + ";r[31]=" + pc + ";h[31]=" + (pc >> 31) + ";return window." + @getFnName(instr_index) + ";"
 
   #should we set the programCounter after the delay slot or before it?
   r4300i_jalr: (i) ->
@@ -679,7 +675,7 @@ class C1964jsEmulator
     opcode = undefined
     link = undefined
     # r[39] is a temp variable specific to vAddr for jalr
-    string = "{ru[39]=" + @helpers.RS(i) + ";"
+    string = "ru[39]=" + @helpers.RS(i) + ";"
     link = (@p[0] + offset + 8) >> 0
     string += @helpers.tRD(i) + "=" + link + ";" + @helpers.tRDH(i) + "=" + (link >> 31) + ";"
 
@@ -688,7 +684,7 @@ class C1964jsEmulator
     opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     string += opcode
     string += "t.m[0]+=" + (@cnt+1) + ";"
-    string += "t.p[0]=ru[39];return window[\"_\"+(ru[39]>>>2)]}"
+    string += "t.p[0]=ru[39];return window[\"_\"+(ru[39]>>>2)];"
     string
 
   r4300i_jr: (i) ->
@@ -696,14 +692,14 @@ class C1964jsEmulator
     instruction = undefined
     opcode = undefined
     # r[37] is a temp variable specific to vAddr for jr
-    string = "{ru[37]=" + @helpers.RS(i) + ";"
+    string = "ru[37]=" + @helpers.RS(i) + ";"
 
     #delay slot
     instruction = @memory.lw((@p[0] + offset + 4) | 0)
     opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     string += opcode
     string += "t.m[0]+=" + (@cnt+1) + ";"
-    string += "t.p[0]=ru[37];return window[\"_\"+(ru[37]>>>2)]}"
+    string += "t.p[0]=ru[37];return window[\"_\"+(ru[37]>>>2)];"
 
   UNUSED: (i) ->
     @log "warning: UNUSED"
@@ -711,10 +707,10 @@ class C1964jsEmulator
 
   r4300i_COP0_eret: (i) ->
     @stopCompiling = true
-    string = "{if((t.cp0[" + consts.STATUS + "]&" + consts.ERL + ")!==0){alert(\"error epc\");t.p[0]=t.cp0[" + consts.ERROREPC + "];"
+    string = "if((t.cp0[" + consts.STATUS + "]&" + consts.ERL + ")!==0){alert(\"error epc\");t.p[0]=t.cp0[" + consts.ERROREPC + "];"
     string += "t.cp0[" + consts.STATUS + "]&=~" + consts.ERL + "}else{t.p[0]=t.cp0[" + consts.EPC + "];t.cp0[" + consts.STATUS + "]&=~" + consts.EXL + "}"
     string += "t.m[0]+=" + (@cnt+1) + ";"
-    string += "t.LLbit=0;return window[\"_\"+(t.p[0]>>>2)]}"
+    string += "t.LLbit=0;return window[\"_\"+(t.p[0]>>>2)];"
 
   r4300i_COP0_mtc0: (i, isDelaySlot) ->
     delaySlot = undefined
@@ -882,10 +878,10 @@ class C1964jsEmulator
     "t.cp1Con[31]=" + @helpers.RT(i) + ";"  if @helpers.fs(i) is 31
 
   r4300i_ld: (i) ->
-    "{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=m.lw((r[38]+4)|0);" + @helpers.tRTH(i) + "=m.lw(r[38])}"
+    @helpers.setVAddr(i) + @helpers.tRT(i) + "=m.lw((r[38]+4)|0);" + @helpers.tRTH(i) + "=m.lw(r[38]);"
 
   r4300i_lld: (i) ->
-    "{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=m.lw((r[38]+4)|0);" + @helpers.tRTH(i) + "=m.lw(r[38]);t.LLbit=1}"
+    @helpers.setVAddr(i) + @helpers.tRT(i) + "=m.lw((r[38]+4)|0);" + @helpers.tRTH(i) + "=m.lw(r[38]);t.LLbit=1;"
 
   #address error exceptions in ld and sd are weird since this is split up
   #into 2 reads or writes. i guess they're fatal exceptions, so
@@ -893,7 +889,7 @@ class C1964jsEmulator
   r4300i_sd: (i, isDelaySlot) ->
     #lo
     a = undefined
-    string = "{" + @helpers.setVAddr(i) + "m.sw(" + @helpers.RT(i) + ",(r[38]+4)|0"
+    string = @helpers.setVAddr(i) + "m.sw(" + @helpers.RT(i) + ",(r[38]+4)|0"
 
     #So we can process exceptions
     if isDelaySlot is true
@@ -909,10 +905,10 @@ class C1964jsEmulator
     #So we can process exceptions
     if isDelaySlot is true
       a = (@p[0] + offset + 4) | 0
-      string += "," + a + ",true)}"
+      string += "," + a + ",true);"
     else
       a = (@p[0] + offset) | 0
-      string += "," + a + ")}"
+      string += "," + a + ");"
     string
 
   r4300i_dmultu: (i) ->
@@ -1004,8 +1000,8 @@ class C1964jsEmulator
     "t.cp1_i[" + @helpers.FT32ArrayView(i) + "]=m.lw(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");"
 
   r4300i_ldc1: (i) ->
-    string = "{" + @helpers.setVAddr(i) + "t.cp1_i[" + @helpers.FT32ArrayView(i) + "]=m.lw((r[38]+4)|0);"
-    string += "t.cp1_i[" + @helpers.FT32HIArrayView(i) + "]=m.lw((r[38])|0)}"
+    string = @helpers.setVAddr(i) + "t.cp1_i[" + @helpers.FT32ArrayView(i) + "]=m.lw((r[38]+4)|0);"
+    string += "t.cp1_i[" + @helpers.FT32HIArrayView(i) + "]=m.lw((r[38])|0);"
 
   r4300i_swc1: (i, isDelaySlot) ->
     a = undefined
@@ -1022,7 +1018,7 @@ class C1964jsEmulator
 
   r4300i_sdc1: (i, isDelaySlot) ->
     a = undefined
-    string = "{" + @helpers.setVAddr(i) + "m.sw(t.cp1_i[" + @helpers.FT32ArrayView(i) + "],(r[38]+4)|0"
+    string = @helpers.setVAddr(i) + "m.sw(t.cp1_i[" + @helpers.FT32ArrayView(i) + "],(r[38]+4)|0"
 
     #So we can process exceptions
     if isDelaySlot is true
@@ -1036,10 +1032,10 @@ class C1964jsEmulator
     #So we can process exceptions
     if isDelaySlot is true
       a = (@p[0] + offset + 4) | 0
-      string += "," + a + ",true)}"
+      string += "," + a + ",true);"
     else
       a = (@p[0] + offset) | 0
-      string += "," + a + ")}"
+      string += "," + a + ");"
     string
 
   r4300i_COP1_mtc1: (i) ->
