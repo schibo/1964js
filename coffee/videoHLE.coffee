@@ -418,18 +418,16 @@ C1964jsVideoHLE = (core, glx) ->
 
     while i < v0 + num
       a = addr + 16 * (i - v0)
+      v = @N64VertexList[i]
 
-      @N64VertexList[i].w = @getVertexW(a)
-      if @N64VertexList[i].w is 0
-        @N64VertexList[i].w = 1.0
-      @N64VertexList[i].x = @getVertexX(a)
-      @N64VertexList[i].y = @getVertexY(a)
-      @N64VertexList[i].z = @getVertexZ(a)
-
-      @N64VertexList[i].u = @getVertexS(a) / 32 / texWidth
-      @N64VertexList[i].v = @getVertexT(a) / 32 / texHeight
-
-
+      v.w = @getVertexW(a)
+      if v.w is 0
+        v.w = 1.0
+      v.x = @getVertexX(a)
+      v.y = @getVertexY(a)
+      v.z = @getVertexZ(a)
+      v.u = @getVertexS(a) / 32 / texWidth
+      v.v = @getVertexT(a) / 32 / texHeight
 
       if @bLightingEnable is true
         @normalMat[0] = @getVertexNormalX a
@@ -439,10 +437,7 @@ C1964jsVideoHLE = (core, glx) ->
 
         mat4.multiplyVec4 @modelViewTransposedInverse, @normalMat, @tempVec4
 
-        @tempVec3[0] = @tempVec4[0]
-        @tempVec3[1] = @tempVec4[1]
-        @tempVec3[2] = @tempVec4[2]
-        vect = vec3.normalize @tempVec3
+        vect = vec3.normalize @tempVec4
 
         # projectiontransposedInverse = mat4.create()
         # mat4.set @gRSP.projectionMtxs[@gRSP.projectionMtxTop], projectiontransposedInverse
@@ -451,20 +446,20 @@ C1964jsVideoHLE = (core, glx) ->
         # mat4.multiply projectiontransposedInverse, @normalMat, @normalMat
 
         vertColor = @lightVertex vect
-        @N64VertexList[i].r = vertColor[0]
-        @N64VertexList[i].g = vertColor[1]
-        @N64VertexList[i].b = vertColor[2]
-        @N64VertexList[i].a = vertColor[3]
+        v.r = vertColor[0]
+        v.g = vertColor[1]
+        v.b = vertColor[2]
+        v.a = vertColor[3]
       else if @bShade is false
-        @N64VertexList[i].r = @primColor[0]
-        @N64VertexList[i].g = @primColor[1]
-        @N64VertexList[i].b = @primColor[2]
-        @N64VertexList[i].a = @primColor[3]
+        v.r = @primColor[0]
+        v.g = @primColor[1]
+        v.b = @primColor[2]
+        v.a = @primColor[3]
       else
-        @N64VertexList[i].r = @getVertexColorR(a)
-        @N64VertexList[i].g = @getVertexColorG(a)
-        @N64VertexList[i].b = @getVertexColorB(a)
-        @N64VertexList[i].a = @getVertexAlpha(a)
+        v.r = @getVertexColorR(a)
+        v.g = @getVertexColorG(a)
+        v.b = @getVertexColorB(a)
+        v.a = @getVertexAlpha(a)
 
       #until we use it..
       #@N64VertexList[i].nx = (@toSByte @getVertexNormalX(a))
@@ -612,15 +607,16 @@ C1964jsVideoHLE = (core, glx) ->
     r = @gRSP.fAmbientLightR
     g = @gRSP.fAmbientLightG
     b = @gRSP.fAmbientLightB
-    a = @gRSP.fAmbientLightA
+    #a = @gRSP.fAmbientLightA
 
     for l in [0...@gRSPnumLights]
-      fCosT = norm[0]*@gRSPlights[l].x + norm[1]*@gRSPlights[l].y + norm[2]*@gRSPlights[l].z
+      light = @gRSPlights[l]
+      fCosT = norm[0]*light.x + norm[1]*light.y + norm[2]*light.z
       if fCosT > 0
-        r += @gRSPlights[l].r * fCosT
-        g += @gRSPlights[l].g * fCosT
-        b += @gRSPlights[l].b * fCosT
-        a += @gRSPlights[l].a * fCosT
+        r += light.r * fCosT
+        g += light.g * fCosT
+        b += light.b * fCosT
+        #a += light.a * fCosT
 
     if r < 0.0
       r = 0.0
@@ -628,16 +624,16 @@ C1964jsVideoHLE = (core, glx) ->
       g = 0.0
     if b < 0.0
       b = 0.0
-    if a < 0.0
-      a = 0.0
+    #if a < 0.0
+    #  a = 0.0
     if r > 255.0
       r = 255.0
     if g > 255.0
       g = 255.0
     if b > 255.0
       b = 255.0
-    if a > 255.0
-      a = 255.0
+    #if a > 255.0
+    #  a = 255.0
 
     return [r, g, b, 255.0]
 
