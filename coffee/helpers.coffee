@@ -180,15 +180,15 @@ C1964jsHelpers = (core, isLittleEndian) ->
 
   @sLogic = (i, n) ->
     if (@rd(i) is @rs(i))
-      @tRD(i) + n + "=" + @RT(i) + "," + @tRDH(i) + "=" + @RD(i) + ">>31;"
+      @tRD(i) + n + "=" + @RT(i) + ";" + @tRDH(i) + "=" + @RD(i) + ">>31;"
     else
-      @tRD(i) + "=" + @RS(i) + n + @RT(i) + "," + @tRDH(i) + "=" + @RD(i) + ">>31;";
+      @tRD(i) + "=" + @RS(i) + n + @RT(i) + ";" + @tRDH(i) + "=" + @RD(i) + ">>31;";
 
   @dLogic = (i, n) ->
     if (@rd(i) is @rs(i))
-      @tRD(i) + n + "=" + @RT(i) + "," + @tRDH(i) + n + "=" + @RTH(i) + ";"
+      @tRD(i) + n + "=" + @RT(i) + ";" + @tRDH(i) + n + "=" + @RTH(i) + ";"
     else
-      @tRD(i) + "=" + @RS(i) + n + @RT(i) + "," + @tRDH(i) + "=" + @RSH(i) + n + @RTH(i) + ";"
+      @tRD(i) + "=" + @RS(i) + n + @RT(i) + ";" + @tRDH(i) + "=" + @RSH(i) + n + @RTH(i) + ";"
 
   @virtualToPhysical = (addr) ->
     "r[35]=" + addr + ";r[36]=((m.physRegion[r[35]>>>12]<<16)|(r[35]&0x0000ffff));"

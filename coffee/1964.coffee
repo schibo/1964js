@@ -21,8 +21,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 # NOTES:
 # fixed bgtz bgtzl
 # improved ldc1,sdc1 ..could still be bugged.
-# Make sure if an opcode has multiple javascript statements that they are enclosed in {} or separated by comma,
-# because the opcode could be a delay slot.
 #
 # possible BUGS in original 1964cpp?:
 # - JAL & JALR instr_index: upper 4 bits are from the pc's delay slot, not the current pc!
@@ -510,7 +508,7 @@ class C1964jsEmulator
     @helpers.dLogic i, "^"
 
   r4300i_nor: (i) ->
-    @helpers.tRD(i) + "=~(" + @helpers.RS(i) + "|" + @helpers.RT(i) + ")," + @helpers.tRDH(i) + "=~(" + @helpers.RSH(i) + "|" + @helpers.RTH(i) + ");"
+    @helpers.tRD(i) + "=~(" + @helpers.RS(i) + "|" + @helpers.RT(i) + ");" + @helpers.tRDH(i) + "=~(" + @helpers.RSH(i) + "|" + @helpers.RTH(i) + ");"
 
   r4300i_and: (i) ->
     @helpers.dLogic i, "&"
@@ -518,19 +516,19 @@ class C1964jsEmulator
   r4300i_lui: (i) ->
     temp = ((i & 0x0000ffff) << 16)
     tempHi = temp >> 31
-    @helpers.tRTH(i) + "=" + tempHi + "," + @helpers.tRT(i) + "=" + temp + ";"
+    @helpers.tRTH(i) + "=" + tempHi + ";" + @helpers.tRT(i) + "=" + temp + ";"
 
   r4300i_lw: (i) ->
  #   @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=m.lw(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + "))>>31;"
     @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=m.region32[r[36]>>>14](m,r[36]))>>31;"
 
   r4300i_lwu: (i) ->
-    #@helpers.tRTH(i) + "=0," + @helpers.tRT(i) + "=m.lw(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");"
+    #@helpers.tRTH(i) + "=0;" + @helpers.tRT(i) + "=m.lw(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");"
     @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRTH(i) + "=0;" + @helpers.tRT(i) + "=m.region32[r[36]>>>14](m,r[36]);"
 
   r4300i_sw: (i, isDelaySlot) ->
     a = undefined
-#    string = "m.sw(" + @helpers.RT(i) + "," + @helpers.RS(i) + "+" + @helpers.soffset_imm(i)
+#    string = "m.sw(" + @helpers.RT(i) + ";" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i)
     string = @helpers.virtualToPhysical("" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + "") + "m.writeRegion32[r[36]>>>14](m," + @helpers.RT(i) + ",r[36]"
 
     #So we can process exceptions
@@ -732,32 +730,32 @@ class C1964jsEmulator
   r4300i_sll: (i) ->
     return ""  if (i & 0x001FFFFF) is 0 # NOP
     if @helpers.rd(i) is @helpers.rt(i)
-      @helpers.tRD(i) + "<<=" + @helpers.sa(i) + "," + @helpers.tRDH(i) + "=" + @helpers.RD(i) + ">>31;"
+      @helpers.tRD(i) + "<<=" + @helpers.sa(i) + ";" + @helpers.tRDH(i) + "=" + @helpers.RD(i) + ">>31;"
     else  
-      @helpers.tRD(i) + "=" + @helpers.RT(i) + "<<" + @helpers.sa(i) + "," + @helpers.tRDH(i) + "=" + @helpers.RD(i) + ">>31;"
+      @helpers.tRD(i) + "=" + @helpers.RT(i) + "<<" + @helpers.sa(i) + ";" + @helpers.tRDH(i) + "=" + @helpers.RD(i) + ">>31;"
 
   r4300i_srl: (i) ->
     sa = @helpers.sa(i)
     if sa > 0
-      @helpers.tRDH(i) + "=0," + @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>>" + sa + ";"
+      @helpers.tRDH(i) + "=0;" + @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>>" + sa + ";"
     else
       #alert "ok"
-      @helpers.tRDH(i) + "=" + @helpers.RT(i) + ">>31," + @helpers.tRD(i) + "=" + @helpers.RT(i) + ";"
+      @helpers.tRDH(i) + "=" + @helpers.RT(i) + ">>31;" + @helpers.tRD(i) + "=" + @helpers.RT(i) + ";"
 
   r4300i_ori: (i) ->
     if @helpers.rt(i) is @helpers.rs(i)
       @helpers.tRT(i) + "|=" + @helpers.offset_imm(i) + ";"
     else
-      @helpers.tRT(i) + "=" + @helpers.RS(i) + "|" + @helpers.offset_imm(i) + "," + @helpers.tRTH(i) + "=" + @helpers.RSH(i) + ";"
+      @helpers.tRT(i) + "=" + @helpers.RS(i) + "|" + @helpers.offset_imm(i) + ";" + @helpers.tRTH(i) + "=" + @helpers.RSH(i) + ";"
 
   r4300i_xori: (i) ->
     if @helpers.rt(i) is @helpers.rs(i)
       @helpers.tRT(i) + "^=" + @helpers.offset_imm(i) + ";"
     else
-      @helpers.tRT(i) + "=" + @helpers.RS(i) + "^" + @helpers.offset_imm(i) + "," + @helpers.tRTH(i) + "=" + @helpers.RSH(i) + ";"
+      @helpers.tRT(i) + "=" + @helpers.RS(i) + "^" + @helpers.offset_imm(i) + ";" + @helpers.tRTH(i) + "=" + @helpers.RSH(i) + ";"
 
   r4300i_andi: (i) ->
-    @helpers.tRTH(i) + "=0," + @helpers.tRT(i) + "=" + @helpers.RS(i) + "&" + @helpers.offset_imm(i) + ";"
+    @helpers.tRTH(i) + "=0;" + @helpers.tRT(i) + "=" + @helpers.RS(i) + "&" + @helpers.offset_imm(i) + ";"
 
   r4300i_addi: (i) ->
     @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ")>>31;"
@@ -766,22 +764,22 @@ class C1964jsEmulator
     @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ")>>31;"
 
   r4300i_slt: (i) ->
-    @helpers.tRD(i) + "=((" + @helpers.RSH(i) + "<" + @helpers.RTH(i) + ")|(!(" + @helpers.RSH(i) + "-" + @helpers.RTH(i) + ")&(" + @helpers.uRS(i) + "<" + @helpers.uRT(i) + ")))," + @helpers.tRDH(i) + "=0;"
+    @helpers.tRD(i) + "=((" + @helpers.RSH(i) + "<" + @helpers.RTH(i) + ")|(!(" + @helpers.RSH(i) + "-" + @helpers.RTH(i) + ")&(" + @helpers.uRS(i) + "<" + @helpers.uRT(i) + ")));" + @helpers.tRDH(i) + "=0;"
 
   r4300i_sltu: (i) ->
-    @helpers.tRD(i) + "=((" + @helpers.uRSH(i) + "<" + @helpers.uRTH(i) + ")|(!(" + @helpers.uRSH(i) + "-" + @helpers.uRTH(i) + ")&(" + @helpers.uRS(i) + "<" + @helpers.uRT(i) + ")))," + @helpers.tRDH(i) + "=0;"
+    @helpers.tRD(i) + "=((" + @helpers.uRSH(i) + "<" + @helpers.uRTH(i) + ")|(!(" + @helpers.uRSH(i) + "-" + @helpers.uRTH(i) + ")&(" + @helpers.uRS(i) + "<" + @helpers.uRT(i) + ")));" + @helpers.tRDH(i) + "=0;"
 
   r4300i_slti: (i) ->
     uoffset_imm_lo = undefined
     soffset_imm_hi = (@helpers.soffset_imm(i)) >> 31
     uoffset_imm_lo = (@helpers.soffset_imm(i)) >>> 0
-    @helpers.tRT(i) + "=((" + @helpers.RSH(i) + "<" + soffset_imm_hi + ")|(!(" + @helpers.RSH(i) + "- " + soffset_imm_hi + ")&(" + @helpers.uRS(i) + "<" + uoffset_imm_lo + ")))," + @helpers.tRTH(i) + "=0;"
+    @helpers.tRT(i) + "=((" + @helpers.RSH(i) + "<" + soffset_imm_hi + ")|(!(" + @helpers.RSH(i) + "- " + soffset_imm_hi + ")&(" + @helpers.uRS(i) + "<" + uoffset_imm_lo + ")));" + @helpers.tRTH(i) + "=0;"
 
   r4300i_sltiu: (i) ->
     uoffset_imm_lo = undefined
     uoffset_imm_hi = (@helpers.soffset_imm(i) >> 31) >>> 0
     uoffset_imm_lo = (@helpers.soffset_imm(i)) >>> 0
-    @helpers.tRT(i) + "=((" + @helpers.uRSH(i) + "<" + uoffset_imm_hi + ")|(!(" + @helpers.uRSH(i) + "- " + uoffset_imm_hi + ")&(" + @helpers.uRS(i) + "<" + uoffset_imm_lo + ")))," + @helpers.tRTH(i) + "=0;"
+    @helpers.tRT(i) + "=((" + @helpers.uRSH(i) + "<" + uoffset_imm_hi + ")|(!(" + @helpers.uRSH(i) + "- " + uoffset_imm_hi + ")&(" + @helpers.uRS(i) + "<" + uoffset_imm_lo + ")));" + @helpers.tRTH(i) + "=0;"
 
   r4300i_cache: (i) ->
     @log "todo: r4300i_cache"
@@ -795,16 +793,16 @@ class C1964jsEmulator
     "t.helpers.inter_mult(r,h," + i + ");"
 
   r4300i_mflo: (i) ->
-    @helpers.tRD(i) + "=r[32]," + @helpers.tRDH(i) + "=h[32];"
+    @helpers.tRD(i) + "=r[32];" + @helpers.tRDH(i) + "=h[32];"
 
   r4300i_mfhi: (i) ->
-    @helpers.tRD(i) + "=r[33]," + @helpers.tRDH(i) + "=h[33];"
+    @helpers.tRD(i) + "=r[33];" + @helpers.tRDH(i) + "=h[33];"
 
   r4300i_mtlo: (i) ->
-    "r[32]=" + @helpers.RS(i) + ",h[32]=" + @helpers.RSH(i) + ";"
+    "r[32]=" + @helpers.RS(i) + ";h[32]=" + @helpers.RSH(i) + ";"
 
   r4300i_mthi: (i) ->
-    "r[33]=" + @helpers.RS(i) + ",h[33]=" + @helpers.RSH(i) + ";"
+    "r[33]=" + @helpers.RS(i) + ";h[33]=" + @helpers.RSH(i) + ";"
 
   r4300i_COP0_mfc0: (i) ->
     string = ""
@@ -814,7 +812,7 @@ class C1964jsEmulator
       when consts.COUNT
         #string += 't.cp0[' + this.helpers.fs(i) + ']-=t.m*2;'; # should this be t.m * 2?
       else
-    string += @helpers.tRT(i) + "=t.cp0[" + @helpers.fs(i) + "]," + @helpers.tRTH(i) + "=t.cp0[" + @helpers.fs(i) + "]>>31;"
+    string += @helpers.tRT(i) + "=t.cp0[" + @helpers.fs(i) + "];" + @helpers.tRTH(i) + "=t.cp0[" + @helpers.fs(i) + "]>>31;"
 
   r4300i_lb: (i) ->
     #"{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=(m.lb(vAddr)<<24)>>24;" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31}"
@@ -921,10 +919,10 @@ class C1964jsEmulator
     "t.helpers.inter_dmultu(r,h," + i + ");"
 
   r4300i_dsll32: (i) ->
-    @helpers.tRDH(i) + "=" + @helpers.RT(i) + "<<" + @helpers.sa(i) + "," + @helpers.tRD(i) + "=0;"
+    @helpers.tRDH(i) + "=" + @helpers.RT(i) + "<<" + @helpers.sa(i) + ";" + @helpers.tRD(i) + "=0;"
 
   r4300i_dsra32: (i) ->
-    @helpers.tRD(i) + "=" + @helpers.RTH(i) + ">>" + @helpers.sa(i) + "," + @helpers.tRDH(i) + "=" + @helpers.RTH(i) + ">>31;"
+    @helpers.tRD(i) + "=" + @helpers.RTH(i) + ">>" + @helpers.sa(i) + ";" + @helpers.tRDH(i) + "=" + @helpers.RTH(i) + ">>31;"
 
   r4300i_ddivu: (i) ->
     "t.helpers.inter_ddivu(r,h," + i + ");"
