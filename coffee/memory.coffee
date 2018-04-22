@@ -889,7 +889,7 @@ class C1964jsMemory
     region32 = that.writeRegion32[a>>>14]
 
     if region32 is that.writeTLB32
-      region32 = that.writeDummy
+      region32 = that.writeDummy32
 
     region32(that, val, a, pc, isDelaySlot)
     return
