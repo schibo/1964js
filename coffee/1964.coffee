@@ -665,8 +665,7 @@ class C1964jsEmulator
     instruction = @memory.lw((@p[0] + offset + 4) | 0)
     string = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     pc = (@p[0] + offset + 8) | 0
-    string += "t.m[0]+=" + (@cnt+1) + ";"
-    string += "t.p[0]=" + instr_index + ";r[31]=" + pc + ";h[31]=" + (pc >> 31) + ";return window." + @getFnName(instr_index) + ";"
+    string += "t.m[0]+=" + (@cnt+1) + ";t.p[0]=" + instr_index + ";r[31]=" + pc + ";h[31]=" + (pc >> 31) + ";return window." + @getFnName(instr_index) + ";"
 
   #should we set the programCounter after the delay slot or before it?
   r4300i_jalr: (i) ->
@@ -683,8 +682,7 @@ class C1964jsEmulator
     instruction = @memory.lw((@p[0] + offset + 4) | 0)
     opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     string += opcode
-    string += "t.m[0]+=" + (@cnt+1) + ";"
-    string += "t.p[0]=ru[39];return window[\"_\"+(ru[39]>>>2)];"
+    string += "t.m[0]+=" + (@cnt+1) + ";t.p[0]=ru[39];return window['_'+(ru[39]>>>2)];"
     string
 
   r4300i_jr: (i) ->
@@ -698,8 +696,7 @@ class C1964jsEmulator
     instruction = @memory.lw((@p[0] + offset + 4) | 0)
     opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     string += opcode
-    string += "t.m[0]+=" + (@cnt+1) + ";"
-    string += "t.p[0]=ru[37];return window[\"_\"+(ru[37]>>>2)];"
+    string += "t.m[0]+=" + (@cnt+1) + ";t.p[0]=ru[37];return window['_'+(ru[37]>>>2)];"
 
   UNUSED: (i) ->
     @log "warning: UNUSED"
@@ -709,8 +706,7 @@ class C1964jsEmulator
     @stopCompiling = true
     string = "if((t.cp0[" + consts.STATUS + "]&" + consts.ERL + ")!==0){alert(\"error epc\");t.p[0]=t.cp0[" + consts.ERROREPC + "];"
     string += "t.cp0[" + consts.STATUS + "]&=~" + consts.ERL + "}else{t.p[0]=t.cp0[" + consts.EPC + "];t.cp0[" + consts.STATUS + "]&=~" + consts.EXL + "}"
-    string += "t.m[0]+=" + (@cnt+1) + ";"
-    string += "t.LLbit=0;return window[\"_\"+(t.p[0]>>>2)];"
+    string += "t.m[0]+=" + (@cnt+1) + ";t.LLbit=0;return window['_'+(t.p[0]>>>2)];"
 
   r4300i_COP0_mtc0: (i, isDelaySlot) ->
     delaySlot = undefined
@@ -769,12 +765,14 @@ class C1964jsEmulator
     uoffset_imm_lo = undefined
     soffset_imm_hi = (@helpers.soffset_imm(i)) >> 31
     uoffset_imm_lo = (@helpers.soffset_imm(i)) >>> 0
+    #space is important after the minus in "- " because soffset_imm_hi could be negative, and -- is decrement operator
     @helpers.tRT(i) + "=((" + @helpers.RSH(i) + "<" + soffset_imm_hi + ")|(!(" + @helpers.RSH(i) + "- " + soffset_imm_hi + ")&(" + @helpers.uRS(i) + "<" + uoffset_imm_lo + ")));" + @helpers.tRTH(i) + "=0;"
 
   r4300i_sltiu: (i) ->
     uoffset_imm_lo = undefined
     uoffset_imm_hi = (@helpers.soffset_imm(i) >> 31) >>> 0
     uoffset_imm_lo = (@helpers.soffset_imm(i)) >>> 0
+    #space is important after the minus in "- " because uoffset_imm_hi could be negative, and -- is decrement operator
     @helpers.tRT(i) + "=((" + @helpers.uRSH(i) + "<" + uoffset_imm_hi + ")|(!(" + @helpers.uRSH(i) + "- " + uoffset_imm_hi + ")&(" + @helpers.uRS(i) + "<" + uoffset_imm_lo + ")));" + @helpers.tRTH(i) + "=0;"
 
   r4300i_cache: (i) ->
@@ -817,7 +815,7 @@ class C1964jsEmulator
 
   r4300i_lbu: (i) ->
     #"{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=(m.lb(vAddr))&0x000000ff;" + @helpers.tRTH(i) + "=0}"
-    #@helpers.tRTH(i) + "=0," + @helpers.tRT(i) + "=m.lb(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ")&0x000000ff;"
+    #@helpers.tRTH(i) + "=0;" + @helpers.tRT(i) + "=m.lb(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ")&0x000000ff;"
     @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRTH(i) + "=0;" + @helpers.tRT(i) + "=m.region[r[36]>>>14](m,r[36])&0x000000ff;"
 
   r4300i_lh: (i) ->
@@ -942,7 +940,7 @@ class C1964jsEmulator
 
   r4300i_sra: (i) ->
     #optimization: sra's r[hi] can safely right-shift RT.
-    string = @helpers.tRDH(i) + "=" + @helpers.RT(i) + ">>31,"
+    string = @helpers.tRDH(i) + "=" + @helpers.RT(i) + ">>31;"
 
     if @helpers.rd(i) is @helpers.rt(i)
       string += @helpers.tRD(i) + ">>=" + @helpers.sa(i) + ";"
