@@ -514,15 +514,13 @@ class C1964jsEmulator
   r4300i_lui: (i) ->
     temp = ((i & 0x0000ffff) << 16)
     tempHi = temp >> 31
-    @helpers.tRTH(i) + "=" + tempHi + ";" + @helpers.tRT(i) + "=" + temp + ";"
+    @helpers.tRT(i) + "=" + temp + ";" + @helpers.tRTH(i) + "=" + tempHi + ";" 
 
   r4300i_lw: (i) ->
- #   @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=m.lw(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + "))>>31;"
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=m.region32[r[36]>>>14](m,r[36]))>>31;"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.region32[r[36]>>>14](m,r[36]);" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31;"
 
   r4300i_lwu: (i) ->
-    #@helpers.tRTH(i) + "=0;" + @helpers.tRT(i) + "=m.lw(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");"
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRTH(i) + "=0;" + @helpers.tRT(i) + "=m.region32[r[36]>>>14](m,r[36]);"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.region32[r[36]>>>14](m,r[36]);" + @helpers.tRTH(i) + "=0;"
 
   r4300i_sw: (i, isDelaySlot) ->
     a = undefined
@@ -729,7 +727,7 @@ class C1964jsEmulator
   r4300i_srl: (i) ->
     sa = @helpers.sa(i)
     if sa > 0
-      @helpers.tRDH(i) + "=0;" + @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>>" + sa + ";"
+      @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>>" + sa + ";" + @helpers.tRDH(i) + "=0;"
     else
       #alert "ok"
       @helpers.tRDH(i) + "=" + @helpers.RT(i) + ">>31;" + @helpers.tRD(i) + "=" + @helpers.RT(i) + ";"
@@ -747,13 +745,13 @@ class C1964jsEmulator
       @helpers.tRT(i) + "=" + @helpers.RS(i) + "^" + @helpers.offset_imm(i) + ";" + @helpers.tRTH(i) + "=" + @helpers.RSH(i) + ";"
 
   r4300i_andi: (i) ->
-    @helpers.tRTH(i) + "=0;" + @helpers.tRT(i) + "=" + @helpers.RS(i) + "&" + @helpers.offset_imm(i) + ";"
+    @helpers.tRT(i) + "=" + @helpers.RS(i) + "&" + @helpers.offset_imm(i) + ";" + @helpers.tRTH(i) + "=0;"
 
   r4300i_addi: (i) ->
-    @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ")>>31;"
+    @helpers.tRT(i) + "=" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ";" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31;"
 
   r4300i_addiu: (i) ->
-    @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ")>>31;"
+    @helpers.tRT(i) + "=" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ";" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31;"
 
   r4300i_slt: (i) ->
     @helpers.tRD(i) + "=((" + @helpers.RSH(i) + "<" + @helpers.RTH(i) + ")|(!(" + @helpers.RSH(i) + "-" + @helpers.RTH(i) + ")&(" + @helpers.uRS(i) + "<" + @helpers.uRT(i) + ")));" + @helpers.tRDH(i) + "=0;"
@@ -809,24 +807,16 @@ class C1964jsEmulator
     string += @helpers.tRT(i) + "=t.cp0[" + @helpers.fs(i) + "];" + @helpers.tRTH(i) + "=t.cp0[" + @helpers.fs(i) + "]>>31;"
 
   r4300i_lb: (i) ->
-    #"{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=(m.lb(vAddr)<<24)>>24;" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31}"
-    #@helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=m.lb(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ")<<24>>24)>>8;"
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=m.region[r[36]>>>14](m,r[36])<<24>>24)>>8;"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.region[r[36]>>>14](m,r[36])<<24>>24;" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>8;"
 
   r4300i_lbu: (i) ->
-    #"{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=(m.lb(vAddr))&0x000000ff;" + @helpers.tRTH(i) + "=0}"
-    #@helpers.tRTH(i) + "=0;" + @helpers.tRT(i) + "=m.lb(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ")&0x000000ff;"
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRTH(i) + "=0;" + @helpers.tRT(i) + "=m.region[r[36]>>>14](m,r[36])&0x000000ff;"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.region[r[36]>>>14](m,r[36])&0x000000ff;" + @helpers.tRTH(i) + "=0;"
 
   r4300i_lh: (i) ->
-    #"{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=(m.lh(vAddr)<<16)>>16;" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31}"
-    #@helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=m.lh(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ")<<16>>16)>>16;"
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRTH(i) + "=(" + @helpers.tRT(i) + "=m.region16[r[36]>>>14](m,r[36])<<16>>16)>>16;"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.region16[r[36]>>>14](m,r[36])<<16>>16;" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>16;";
 
   r4300i_lhu: (i) ->
-    #"{" + @helpers.setVAddr(i) + @helpers.tRT(i) + "=(m.lh(vAddr))&0x0000ffff;" + @helpers.tRTH(i) + "=0}"
-    #@helpers.tRTH(i) + "=0," + @helpers.tRT(i) + "=m.lh(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ")&0x0000ffff;"
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRTH(i) + "=0;" + @helpers.tRT(i) + "=m.region16[r[36]>>>14](m,r[36])&0x0000ffff;"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.region16[r[36]>>>14](m,r[36])&0x0000ffff;" + @helpers.tRTH(i) + "=0;"
 
   r4300i_sb: (i, isDelaySlot) ->
     #"m.sb(" + @helpers.RT(i) + "," + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");"
@@ -855,13 +845,11 @@ class C1964jsEmulator
       string += "," + a + ");"
     string
 
-
   r4300i_srlv: (i) ->
-    @helpers.tRDH(i) + "=(" + @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>>(" + @helpers.RS(i) + "&0x1f))>>31;"
+    @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>>(" + @helpers.RS(i) + "&0x1f);" + @helpers.tRDH(i) + "=" + @helpers.RD(i) + ">>31;"
 
   r4300i_sllv: (i) ->
-    #"{" + @helpers.tRD(i) + "=" + @helpers.RT(i) + "<<(" + @helpers.RS(i) + "&0x1f);" + @helpers.tRDH(i) + "=" + @helpers.RD(i) + ">>31}"
-    @helpers.tRDH(i) + "=(" + @helpers.tRD(i) + "=" + @helpers.RT(i) + "<<(" + @helpers.RS(i) + "&0x1f))>>31;"
+    @helpers.tRD(i) + "=" + @helpers.RT(i) + "<<(" + @helpers.RS(i) + "&0x1f);" + @helpers.tRDH(i) + "=" + @helpers.RD(i) + ">>31;"
 
   r4300i_srav: (i) ->
     #optimization: r[hi] can safely right-shift rt
