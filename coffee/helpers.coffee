@@ -112,6 +112,11 @@ C1964jsHelpers = (core, isLittleEndian) ->
     return "r[34]"  if reg is 0
     "r[" + reg + "]"
 
+  @tuRT = (i) ->
+    reg = (i >> 16 & 0x1f)
+    return "ru[34]"  if reg is 0
+    "ru[" + reg + "]"
+
   @tRTH = (i) ->
     reg = (i >> 16 & 0x1f)
     return "h[34]"  if reg is 0

@@ -517,15 +517,15 @@ class C1964jsEmulator
     @helpers.tRT(i) + "=" + temp + ";" + @helpers.tRTH(i) + "=" + tempHi + ";" 
 
   r4300i_lw: (i) ->
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.region32[r[36]>>>14](m,r[36]);" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31;"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.region32[r[36]>>>16](m,r[36]);" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31;"
 
   r4300i_lwu: (i) ->
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.region32[r[36]>>>14](m,r[36]);" + @helpers.tRTH(i) + "=0;"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.region32[r[36]>>>16](m,r[36]);" + @helpers.tRTH(i) + "=0;"
 
   r4300i_sw: (i, isDelaySlot) ->
     a = undefined
 #    string = "m.sw(" + @helpers.RT(i) + ";" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i)
-    string = @helpers.virtualToPhysical("" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + "") + "m.writeRegion32[r[36]>>>14](m," + @helpers.RT(i) + ",r[36]"
+    string = @helpers.virtualToPhysical("" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + "") + "m.writeRegion32[r[36]>>>16](m," + @helpers.RT(i) + ",r[36]"
 
     #So we can process exceptions
     if isDelaySlot is true
@@ -807,21 +807,21 @@ class C1964jsEmulator
     string += @helpers.tRT(i) + "=t.cp0[" + @helpers.fs(i) + "];" + @helpers.tRTH(i) + "=t.cp0[" + @helpers.fs(i) + "]>>31;"
 
   r4300i_lb: (i) ->
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.region[r[36]>>>14](m,r[36])<<24>>24;" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>8;"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.region[r[36]>>>16](m,r[36])<<24>>24;" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>8;"
 
   r4300i_lbu: (i) ->
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.region[r[36]>>>14](m,r[36])&0x000000ff;" + @helpers.tRTH(i) + "=0;"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tuRT(i) + "=m.region[r[36]>>>16](m,r[36]);" + @helpers.tRTH(i) + "=0;"
 
   r4300i_lh: (i) ->
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.region16[r[36]>>>14](m,r[36])<<16>>16;" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>16;";
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.region16[r[36]>>>16](m,r[36])<<16>>16;" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>16;";
 
   r4300i_lhu: (i) ->
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.region16[r[36]>>>14](m,r[36])&0x0000ffff;" + @helpers.tRTH(i) + "=0;"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tuRT(i) + "=m.region16[r[36]>>>16](m,r[36]);" + @helpers.tRTH(i) + "=0;"
 
   r4300i_sb: (i, isDelaySlot) ->
     #"m.sb(" + @helpers.RT(i) + "," + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");"
-    #string = "a = m.virtualToPhysical(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");m.writeRegion8[a>>>14](m," + @helpers.RT(i) + ",a"
-    string = @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + "m.writeRegion8[r[36]>>>14](m," + @helpers.RT(i) + ",r[36]"
+    #string = "a = m.virtualToPhysical(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");m.writeRegion8[a>>>16](m," + @helpers.RT(i) + ",a"
+    string = @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + "m.writeRegion8[r[36]>>>16](m," + @helpers.RT(i) + ",r[36]"
 
     #So we can process exceptions
     if isDelaySlot is true
@@ -834,7 +834,7 @@ class C1964jsEmulator
 
   r4300i_sh: (i, isDelaySlot) ->
     #"m.sh(" + @helpers.RT(i) + "," + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");"
-    string = @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + "m.writeRegion16[r[36]>>>14](m," + @helpers.RT(i) + ",r[36]"
+    string = @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + "m.writeRegion16[r[36]>>>16](m," + @helpers.RT(i) + ",r[36]"
 
     #So we can process exceptions
     if isDelaySlot is true

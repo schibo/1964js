@@ -91,12 +91,15 @@ class C1964jsMemory
     @ramRegs4Uint8Array = new Uint8Array(0x10000)
     @ramRegs8Uint8Array = new Uint8Array(0x10000)
     @dummyReadWriteUint8Array = new Uint8Array(0x10000)
-    @region = []
-    @region16 = []
-    @region32 = []
-    @writeRegion8 = []
-    @writeRegion16 = []
-    @writeRegion32 = []
+    @lengthy = 50325
+    @region = Array.apply(@readDummy8, Array(@lengthy))
+    @region16 = Array.apply(@readDummy16, Array(@lengthy))
+    @region32 = Array.apply(@readDummy32, Array(@lengthy))
+    @writeRegion8 = Array.apply(@writeDummy8, Array(@lengthy))
+    @writeRegion16 = Array.apply(@writeDummy16, Array(@lengthy))
+    @writeRegion32 = Array.apply(@writeDummy32, Array(@lengthy))
+
+    #todo: fix overlapping ramregs now that we are 0xffff in lut size instead of 0xfffc in lut size
 
     @initRegion 0, 0x80000000, @readTLB8, @writeTLB8, @readTLB16, @writeTLB16, @readTLB32, @writeTLB32
     @initRegion 0x80000000, 0x40000000, @readDummy8, @writeDummy8, @readDummy16, @writeDummy16, @readDummy32, @writeDummy32
@@ -124,10 +127,11 @@ class C1964jsMemory
     @initRegion MEMORY_START_RAMREGS0, MEMORY_SIZE_RAMREGS0, @readRamRegs0_8, @writeRamRegs0_8, @readRamRegs0_16, @writeRamRegs0_16, @readRamRegs0_32, @writeRamRegs0_32
     @initRegion MEMORY_START_RAMREGS8, MEMORY_SIZE_RAMREGS8, @readRamRegs8_8, @writeRamRegs8_8, @readRamRegs8_16, @writeRamRegs8_16, @readRamRegs8_32, @writeRamRegs8_32
     @physRegion = undefined
+    console.log @lengthy
 
   initRegion: (start, size, readRegion8, writeRegion8, readRegion16, writeRegion16, readRegion32, writeRegion32) ->
-    end = (start + size) >>> 14
-    start >>>= 14
+    end = (start + size) >>> 16
+    start >>>= 16
 
     while start < end
       @region[start] = readRegion8
@@ -137,6 +141,7 @@ class C1964jsMemory
       @writeRegion16[start] = writeRegion16
       @writeRegion32[start] = writeRegion32
       start++
+      @lengthy++
 
     return
 
@@ -834,7 +839,7 @@ class C1964jsMemory
   readTLB8: (that, a) ->
     a = that.virtualToPhysical(a)
 
-    region = that.region[a>>>14]
+    region = that.region[a>>>16]
 
     if region is that.readTLB8
       region = that.readDummy8
@@ -844,7 +849,7 @@ class C1964jsMemory
   writeTLB8: (that, val, a, pc, isDelaySlot) ->
     a = that.virtualToPhysical(a)
 
-    region = that.writeRegion8[a>>>14]
+    region = that.writeRegion8[a>>>16]
 
     if region is that.writeTLB8
       region = that.writeDummy8
@@ -855,7 +860,7 @@ class C1964jsMemory
   readTLB16: (that, a) ->
     a = that.virtualToPhysical(a)
 
-    region16 = that.region16[a>>>14]
+    region16 = that.region16[a>>>16]
 
     if region16 is that.readTLB16
       region16 = that.readDummy16
@@ -865,7 +870,7 @@ class C1964jsMemory
   writeTLB16: (that, val, a, pc, isDelaySlot) ->
     a = that.virtualToPhysical(a)
 
-    region16 = that.writeRegion16[a>>>14]
+    region16 = that.writeRegion16[a>>>16]
 
     if region16 is that.writeTLB16
       region16 = that.writeDummy16
@@ -876,7 +881,7 @@ class C1964jsMemory
   readTLB32: (that, a) ->
     a = that.virtualToPhysical(a)
 
-    region32 = that.region32[a>>>14]
+    region32 = that.region32[a>>>16]
 
     if region32 is that.readTLB32
       region32 = that.readDummy32
@@ -886,7 +891,7 @@ class C1964jsMemory
   writeTLB32: (that, val, a, pc, isDelaySlot) ->
     a = that.virtualToPhysical(a)
 
-    region32 = that.writeRegion32[a>>>14]
+    region32 = that.writeRegion32[a>>>16]
 
     if region32 is that.writeTLB32
       region32 = that.writeDummy32
@@ -936,32 +941,32 @@ class C1964jsMemory
   lb: (addr) ->
     #throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
     a = @virtualToPhysical(addr)
-    @region[a>>>14](this, a)
+    @region[a>>>16](this, a)
 
   lh: (addr) ->
     #throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
     a = @virtualToPhysical(addr)
-    @region16[a>>>14](this, a)
+    @region16[a>>>16](this, a)
 
   lw: (addr) ->
     #throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
     a = @virtualToPhysical(addr)
-    @region32[a>>>14](this, a)
+    @region32[a>>>16](this, a)
 
   sw: (val, addr, pc, isDelaySlot) ->
     a = @virtualToPhysical(addr)
-    @writeRegion32[a>>>14](this, val, a, pc, isDelaySlot)
+    @writeRegion32[a>>>16](this, val, a, pc, isDelaySlot)
     return
 
   #Same routine as storeWord, but store a byte
   sb: (val, addr, pc, isDelaySlot) ->
     a = @virtualToPhysical(addr)
-    @writeRegion8[a>>>14](this, val, a, pc, isDelaySlot)
+    @writeRegion8[a>>>16](this, val, a, pc, isDelaySlot)
     return
 
   sh: (val, addr, pc, isDelaySlot) ->
     a = @virtualToPhysical(addr)
-    @writeRegion16[a>>>14](this, val, a, pc, isDelaySlot)
+    @writeRegion16[a>>>16](this, val, a, pc, isDelaySlot)
     return
 
 #hack global space until we export classes properly
