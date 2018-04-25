@@ -546,8 +546,7 @@ class C1964jsEmulator
     opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     #speed hack
     if instruction is 0 and @helpers.soffset_imm(i) is -1
-      c = 0
-      string = opcode + "t.m[0]="+c+";t.p[0]=" + pc + ";return window." + @getFnName(pc) + "}"
+      string = opcode + "t.m[0]=0;t.p[0]=" + pc + ";return window." + @getFnName(pc) + "}"
     else
       c=@cnt+1
       string = opcode + "t.m[0]+="+c+";t.p[0]=" + pc + ";return window." + @getFnName(pc) + "}"
@@ -593,11 +592,11 @@ class C1964jsEmulator
 
   r4300i_bgtz: (i) ->
     @stopCompiling = true
-    "if(" + @helpers.RSH(i) + ">=0&(" + @helpers.RSH(i) + "|" + @helpers.RS(i) + ")>0){" + @delaySlot(i, false)
+    "if(" + @helpers.RSH(i) + ">=0&(" + @helpers.RSH(i) + "|" + @helpers.RS(i) + ")!==0){" + @delaySlot(i, false)
 
   r4300i_bgtzl: (i) ->
     @stopCompiling = true
-    "if(" + @helpers.RSH(i) + ">=0&(" + @helpers.RSH(i) + "|" + @helpers.RS(i) + ")>0){" + @delaySlot(i, true)
+    "if(" + @helpers.RSH(i) + ">=0&(" + @helpers.RSH(i) + "|" + @helpers.RS(i) + ")!==0){" + @delaySlot(i, true)
 
   r4300i_bltzl: (i) ->
     @stopCompiling = true
