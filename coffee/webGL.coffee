@@ -134,7 +134,7 @@ C1964jsWebGL = (core, wireframe) ->
   C1964jsWebGL::beginDList = ->
     # matrices for quad tiles only
     #@gl.viewport 0, 0, @gl.viewportWidth, @gl.viewportHeight
-    newAspect = (window.innerWidth) / (window.innerHeight)
+    newAspect = (self.innerWidth) / (self.innerHeight)
     aspectWidth = @gl.viewportWidth
     aspectHeight = @gl.viewportHeight
     x = 0

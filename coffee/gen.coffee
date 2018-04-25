@@ -37,6 +37,6 @@ C1964jsEmulator::deleteFunction = (k) ->
 
   #allow deletion of this function
   eval fnName + "= function (r, s, t, v){}; delete " + fnName + ";"
-  window[fnName] = null
-  alert "window[fnName] should have been null."  if window[fnName]
+  self[fnName] = null
+  alert "self[fnName] should have been null."  if self[fnName]
   return

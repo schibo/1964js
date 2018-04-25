@@ -29,8 +29,8 @@ class C1964jsPif
     @controlsPresent[2] = false
     @controlsPresent[3] = false
     @g1964buttons = 0x00000000
-    window.onkeydown = this.onKeyDown.bind(this)
-    window.onkeyup = this.onKeyUp.bind(this)
+    self.onkeydown = this.onKeyDown.bind(this)
+    self.onkeyup = this.onKeyUp.bind(this)
     @eepromLoaded = false
     @eepromName = ""
 

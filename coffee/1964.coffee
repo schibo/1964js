@@ -360,12 +360,18 @@ class C1964jsEmulator
       clearInterval @mySetInterval
       return
 
+    m = @m
+    r = @r
+    ru = @ru
+    h = @h
+    hu = @hu
+    p = @p
     while @terminate is false
       #@interrupts.checkInterrupts()
-      if @m[0] >= 0
+      if m[0] >= 0
         @interval += 1
         #@m[0] = -125000 # which is -625000 / (interval+1)
-        @m[0] = -156250 # which is -625000 / (interval+1) / 2
+        m[0] = -156250 # which is -625000 / (interval+1) / 2
         @interrupts.processException @p[0]
         if @interval is 4
           @interval = 0
@@ -379,29 +385,32 @@ class C1964jsEmulator
           break
       else
       #  @interrupts.processException @p[0]
-        pc = @p[0] >>> 2
+        pc = p[0] >>> 2
         fnName = "_" + pc
 
         #this is broken-up so that we can process more interrupts. If we freeze,
         #we probably need to split this up more.
         try
-          fn = window[fnName]
-          @run fn, @r, @ru, @h, @hu
+          fn = self[fnName]
+          @run fn, r, ru, h, hu
         catch e
           #so, we really need to know what type of exception this is,
           #but right now, we're assuming that we need to compile a block due to
           #an attempt to call an undefined function. Are there standard exception types
           #in javascript?
           if e instanceof TypeError
-            fn = @decompileBlock(@p[0])
-            fn = fn(@r, @ru, @h, @hu, @memory, this)
+            fn = @decompileBlock(p[0])
+            fn = fn(r, ru, h, hu, @memory, this)
           else
             throw e
     this
 
   run: (fn, r, ru, h, hu) ->
-    while @m[0] < 0
-      fn = fn(r, ru, h, hu, @memory, this)
+    m = @m
+    mem = @memory
+    t = this
+    while m[0] < 0
+      fn = fn(r, ru, h, hu, mem, t)
     return
 
   repaintWrapper: ->
@@ -416,10 +425,10 @@ class C1964jsEmulator
     return
 
   startEmulator: () ->
-    window.requestAnimationFrame = window.requestAnimationFrame or
-    window.mozRequestAnimationFrame or
-    window.webkitRequestAnimationFrame or
-    window.msRequestAnimationFrame or f(=>
+    self.requestAnimationFrame = self.requestAnimationFrame or
+    self.mozRequestAnimationFrame or
+    self.webkitRequestAnimationFrame or
+    self.msRequestAnimationFrame or f(=>
       return setTimeout f, 0.0)
 
     @terminate = false
@@ -475,17 +484,13 @@ class C1964jsEmulator
     #close out the function
     string += "t.m[0]+=" + @cnt + ";"
     string += "t.p[0]=" + ((pc + offset) >> 0)
-    string += ";return window." + @getFnName((pc + offset) >> 0) + "}"
+    string += ";return self." + @getFnName((pc + offset) >> 0) + "}"
     g = document.createElement("script")
     s = document.getElementsByTagName("script")[@kk]
     @kk += 1
     s.parentNode.insertBefore g, s
     g.text = string
-    window[fnName]
-
-  #purely so v8 can optimize decompileBlock
-  wrapEval: (string) ->
-    eval string
+    self[fnName]
 
   r4300i_add: (i) ->
     @helpers.sLogic i, "+"
@@ -546,10 +551,10 @@ class C1964jsEmulator
     opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     #speed hack
     if instruction is 0 and @helpers.soffset_imm(i) is -1
-      string = opcode + "t.m[0]=0;t.p[0]=" + pc + ";return window." + @getFnName(pc) + "}"
+      string = opcode + "t.m[0]=0;t.p[0]=" + pc + ";return self." + @getFnName(pc) + "}"
     else
       c=@cnt+1
-      string = opcode + "t.m[0]+="+c+";t.p[0]=" + pc + ";return window." + @getFnName(pc) + "}"
+      string = opcode + "t.m[0]+="+c+";t.p[0]=" + pc + ";return self." + @getFnName(pc) + "}"
     
 
     #if likely and if branch not taken, skip delay slot
@@ -650,7 +655,7 @@ class C1964jsEmulator
     else
       string += "t.m[0]+=" + (@cnt+1) + ";"      
 
-    string += "t.p[0]=" + instr_index + ";return window." + @getFnName(instr_index) + ";"
+    string += "t.p[0]=" + instr_index + ";return self." + @getFnName(instr_index) + ";"
 
   r4300i_jal: (i) ->
     @stopCompiling = true
@@ -662,7 +667,7 @@ class C1964jsEmulator
     instruction = @memory.lw((@p[0] + offset + 4) | 0)
     string = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     pc = (@p[0] + offset + 8) | 0
-    string += "t.m[0]+=" + (@cnt+1) + ";t.p[0]=" + instr_index + ";r[31]=" + pc + ";h[31]=" + (pc >> 31) + ";return window." + @getFnName(instr_index) + ";"
+    string += "t.m[0]+=" + (@cnt+1) + ";t.p[0]=" + instr_index + ";r[31]=" + pc + ";h[31]=" + (pc >> 31) + ";return self." + @getFnName(instr_index) + ";"
 
   #should we set the programCounter after the delay slot or before it?
   r4300i_jalr: (i) ->
@@ -679,7 +684,7 @@ class C1964jsEmulator
     instruction = @memory.lw((@p[0] + offset + 4) | 0)
     opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     string += opcode
-    string += "t.m[0]+=" + (@cnt+1) + ";t.p[0]=ru[39];return window['_'+(ru[39]>>>2)];"
+    string += "t.m[0]+=" + (@cnt+1) + ";t.p[0]=ru[39];return self['_'+(ru[39]>>>2)];"
     string
 
   r4300i_jr: (i) ->
@@ -693,7 +698,7 @@ class C1964jsEmulator
     instruction = @memory.lw((@p[0] + offset + 4) | 0)
     opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     string += opcode
-    string += "t.m[0]+=" + (@cnt+1) + ";t.p[0]=ru[37];return window['_'+(ru[37]>>>2)];"
+    string += "t.m[0]+=" + (@cnt+1) + ";t.p[0]=ru[37];return self['_'+(ru[37]>>>2)];"
 
   UNUSED: (i) ->
     @log "warning: UNUSED"
@@ -703,7 +708,7 @@ class C1964jsEmulator
     @stopCompiling = true
     string = "if((t.cp0[" + consts.STATUS + "]&" + consts.ERL + ")!==0){alert(\"error epc\");t.p[0]=t.cp0[" + consts.ERROREPC + "];"
     string += "t.cp0[" + consts.STATUS + "]&=~" + consts.ERL + "}else{t.p[0]=t.cp0[" + consts.EPC + "];t.cp0[" + consts.STATUS + "]&=~" + consts.EXL + "}"
-    string += "t.m[0]+=" + (@cnt+1) + ";t.LLbit=0;return window['_'+(t.p[0]>>>2)];"
+    string += "t.m[0]+=" + (@cnt+1) + ";t.LLbit=0;return self['_'+(t.p[0]>>>2)];"
 
   r4300i_COP0_mtc0: (i, isDelaySlot) ->
     delaySlot = undefined

@@ -20,13 +20,13 @@ g_settings = undefined
 reader = undefined
 @progress = document.querySelector(".percent")
 alertMessage = ""
-unless window.File
-  alertMessage += " window.File"
-else unless window.FileReader
-  alertMessage += " window.FileReader"
-else unless window.FileList
-  alertMessage += " window.FileList"
-else alertMessge += " window.Blob"  unless window.Blob
+unless self.File
+  alertMessage += " self.File"
+else unless self.FileReader
+  alertMessage += " self.FileReader"
+else unless self.FileList
+  alertMessage += " self.FileList"
+else alertMessge += " self.Blob"  unless self.Blob
 log "Unsupported in this browser: " + alertMessage  if alertMessage.length > 0
 @i1964js = undefined
 
@@ -41,7 +41,7 @@ showValue = (newValue) ->
 getUrlVars = ->
   vars = []
   hash = undefined
-  hashes = window.location.href.slice(window.location.href.indexOf("?") + 1).split("&")
+  hashes = self.location.href.slice(self.location.href.indexOf("?") + 1).split("&")
   i = 0
   while i < hashes.length
     hash = hashes[i].split("=")
@@ -193,12 +193,12 @@ document.getElementById("user_panel").ontouchend = (event) ->
 
 showUserPanel = () ->
   document.getElementById("user_panel").className = "show"
-  window.startGradientBackground()
+  self.startGradientBackground()
 
 hideUserPanel = () ->
   document.getElementById("user_panel").className = ""
   #disable the animating background
-  window.stopGradientBackground()
+  self.stopGradientBackground()
 
 document.onmouseup = (event) ->
 
