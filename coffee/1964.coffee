@@ -967,15 +967,22 @@ class C1964jsEmulator
   # r4300i_lwr: (i) ->
   #   string = "{" + @helpers.setVAddr(i)
   #   string += "var vAddrAligned=(r[38]&0xfffffffc)|0;var value=m.lw(vAddrAligned);"
-  #   string += "switch(r[38]&3){case 3:" + @helpers.tRT(i) + "=value;break;"
-  #   string += "case 2:" + @helpers.tRT(i) + "=(" + @helpers.RT(i) + "&0xff000000)|(value>>>8);break;"
+  #   string += "switch(r[38]&3){"
+  #   string += "case 0:" + @helpers.tRT(i) + "=(" + @helpers.RT(i) + "&0xffffff00)|(value>>>24);break;"
   #   string += "case 1:" + @helpers.tRT(i) + "=(" + @helpers.RT(i) + "&0xffff0000)|(value>>>16);break;"
-  #   string += "case 0:" + @helpers.tRT(i) + "=(" + @helpers.RT(i) + "&0xffffff00)|(value>>>24);break;}"
+  #   string += "case 2:" + @helpers.tRT(i) + "=(" + @helpers.RT(i) + "&0xff000000)|(value>>>8);break;"
+  #   string += "case 3:" + @helpers.tRT(i) + "=value;break;}"
   #   string += @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31}"
 
   r4300i_lwr: (i) ->
     string = "{" + @helpers.setVAddr(i)
     string += "var vAddrAligned=(r[38]&0xfffffffc)|0;var value=m.lw(vAddrAligned);"
+    # do not try to optimize further. 24<<8 is 32 but -1<<32 is not the same as -1<<24<<8.
+    # in other words, shifting left by 32 requires 2 operations.
+    # normally, you would not shift at all if it's 32, and we'd just set the target to 0, 
+    # but we don't know if the shift amount is 32 until runtime,
+    # and the optimization here is avoiding the switch (and thus the branching).
+    # if we propagate constants, we could potentially know the shift amount sometimes.
     string += "var cas=r[38]&3;var mask=-1<<(cas<<3)<<8;var shf=32-((cas+1)<<3);"
     string += @helpers.tuRT(i) + "&=mask;" + @helpers.tuRT(i) + "|=(value>>>shf);"
     string += @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31}"
