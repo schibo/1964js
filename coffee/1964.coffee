@@ -360,12 +360,12 @@ class C1964jsEmulator
       clearInterval @mySetInterval
       return
 
-    m = @m
-    r = @r
-    ru = @ru
-    h = @h
-    hu = @hu
-    p = @p
+    `const m = this.m`
+    `const r = this.r`
+    `const ru = this.ru`
+    `const h = this.h`
+    `const hu = this.hu`
+    `const p = this.p`
     while @terminate is false
       #@interrupts.checkInterrupts()
       if m[0] >= 0
@@ -406,9 +406,9 @@ class C1964jsEmulator
     this
 
   run: (fn, r, ru, h, hu) ->
-    m = @m
-    mem = @memory
-    t = this
+    `const m = this.m`
+    `const mem = this.memory`
+    `const t = this`
     while m[0] < 0
       fn = fn(r, ru, h, hu, mem, t)
     return
@@ -951,10 +951,10 @@ class C1964jsEmulator
 
   r4300i_lwl: (i) ->
     string = "{" + @helpers.setVAddr(i)
-    string += "var vAddrAligned=(r[38]&0xfffffffc)|0;var value=m.lw(vAddrAligned);"
+    string += "const vAddrAligned=(r[38]&0xfffffffc)|0;const value=m.lw(vAddrAligned);"
     # r[38] = vAddress
 
-    string += "var cas=r[38]&3;var mask=-1>>>(24-(cas<<3))>>>8;var shf=(cas<<3);"
+    string += "const cas=r[38]&3;const mask=-1>>>(24-(cas<<3))>>>8;const shf=(cas<<3);"
     string += @helpers.tuRT(i) + "&=mask;" + @helpers.tuRT(i) + "|=((value<<shf)>>>0);"
 
 #    string += "switch(r[38]&3){case 0:" + @helpers.tRT(i) + "=value;break;"
@@ -976,20 +976,20 @@ class C1964jsEmulator
 
   r4300i_lwr: (i) ->
     string = "{" + @helpers.setVAddr(i)
-    string += "var vAddrAligned=(r[38]&0xfffffffc)|0;var value=m.lw(vAddrAligned);"
+    string += "const vAddrAligned=(r[38]&0xfffffffc)|0;const value=m.lw(vAddrAligned);"
     # do not try to optimize further. 24<<8 is 32 but -1<<32 is not the same as -1<<24<<8.
     # in other words, shifting left by 32 requires 2 operations.
     # normally, you would not shift at all if it's 32, and we'd just set the target to 0, 
     # but we don't know if the shift amount is 32 until runtime,
     # and the optimization here is avoiding the switch (and thus the branching).
     # if we propagate constants, we could potentially know the shift amount sometimes.
-    string += "var cas=r[38]&3;var mask=-1<<(cas<<3)<<8;var shf=32-((cas+1)<<3);"
+    string += "const cas=r[38]&3;const mask=-1<<(cas<<3)<<8;const shf=32-((cas+1)<<3);"
     string += @helpers.tuRT(i) + "&=mask;" + @helpers.tuRT(i) + "|=(value>>>shf);"
     string += @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31}"
 
   r4300i_swl: (i) ->
     string = "{" + @helpers.setVAddr(i)
-    string += "var vAddrAligned=(r[38]&0xfffffffc)|0;var value=m.lw(vAddrAligned);"
+    string += "const vAddrAligned=(r[38]&0xfffffffc)|0;var value=m.lw(vAddrAligned);"
     string += "switch(r[38]&3){case 0:value=" + @helpers.RT(i) + ";break;"
     string += "case 1:value=((value&0xff000000)|(" + @helpers.RT(i) + ">>>8));break;"
     string += "case 2:value=((value&0xffff0000)|(" + @helpers.RT(i) + ">>>16));break;"
@@ -998,7 +998,7 @@ class C1964jsEmulator
 
   r4300i_swr: (i) ->
     string = "{" + @helpers.setVAddr(i)
-    string += "var vAddrAligned=(r[38]&0xfffffffc)|0;var value=m.lw(vAddrAligned);"
+    string += "const vAddrAligned=(r[38]&0xfffffffc)|0;var value=m.lw(vAddrAligned);"
     string += "switch(r[38]&3){case 3:value=" + @helpers.RT(i) + ";break;"
     string += "case 2:value=((value & 0x000000FF)|((" + @helpers.RT(i) + "<<8)>>>0));break;"
     string += "case 1:value=((value & 0x0000FFFF)|((" + @helpers.RT(i) + "<<16)>>>0));break;"
