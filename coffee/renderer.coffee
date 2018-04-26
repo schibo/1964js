@@ -58,11 +58,18 @@ C1964jsRenderer = (settings, glx, webGL) ->
 
     @videoHLE = videoHLE
 
-    nextPow2Width = videoHLE.pow2roundup tileWidth
-    nextPow2Height = videoHLE.pow2roundup tileHeight
+    supportsNonPowerOf2 = true
 
-    widthscale = tileWidth / nextPow2Width
-    heightscale = tileHeight / nextPow2Height
+    if !supportsNonPowerOf2
+      nextPow2Width = videoHLE.pow2roundup tileWidth
+      nextPow2Height = videoHLE.pow2roundup tileHeight
+      widthscale = tileWidth / nextPow2Width
+      heightscale = tileHeight / nextPow2Height
+    else
+      nextPow2Width = tileWidth
+      nextPow2Height = tileHeight
+      widthscale = 1.0
+      heightscale = 1.0
 
     rectWidth = xh-xl
     rectHeight = yh-yl
@@ -130,7 +137,7 @@ C1964jsRenderer = (settings, glx, webGL) ->
     dstRowOffset = 0
     dstRowStride = nextPow2Width
     srcRowStride = tile.line<<3
-    srcRowOffset = tile.tmem
+    srcRowOffset = tile.tmem<<3
 
     if videoHLE.cycleType is 3 or isFillRect is true
       # no need to copy`
