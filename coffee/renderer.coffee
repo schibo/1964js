@@ -93,11 +93,15 @@ C1964jsRenderer = (settings, glx, webGL) ->
     tileWidth = ((tile.lrs >> 2) + 1) - tile.uls
     tileHeight = ((tile.lrt >> 2) + 1) - tile.ult
 
+    supportsNonPowerOf2 = true
+    if !supportsNonPowerOf2
+      nextPow2Width = @videoHLE.pow2roundup (tileWidth*4)
+      nextPow2Height = @videoHLE.pow2roundup tileHeight
+    else
+      nextPow2Width = tileWidth*4
+      nextPow2Height = tileHeight
 
-    nextPow2Width = @videoHLE.pow2roundup tileWidth
-    nextPow2Height = @videoHLE.pow2roundup tileHeight
-
-    textureSize = nextPow2Width * nextPow2Height * 4
+    textureSize = nextPow2Width * nextPow2Height
     #hacky texture cache unique id (want to see how fast we currently are)
 
     if tileWidth is undefined or tileHeight is undefined
@@ -111,22 +115,22 @@ C1964jsRenderer = (settings, glx, webGL) ->
       textureId = (tmem[randomPixel]>>>0) << 24 | (tmem[randomPixel+nextPow2Width+1]>>>0) << 16 | (tmem[randomPixel+nextPow2Width*2+1]>>>0) << 8 | tmem[randomPixel+nextPow2Width*3+1]>>>0
       return @textureCache[textureId] if @textureCache[textureId]?
 
-    if (nextPow2Width isnt tileWidth) or (nextPow2Height isnt tileHeight)
-      # handle non-power of 2 textures
-      if @canvas is undefined
-        @canvas = document.getElementById('Canvas');
-      @canvas.width = tileWidth
-      @canvas.height = tileHeight
-      context = @canvas.getContext('2d')
-      imageData = context.createImageData(nextPow2Width, nextPow2Height)
-      texture = imageData.data
-    else
-      texture = new Uint8Array(textureSize)
+    # if (nextPow2Width isnt tileWidth) or (nextPow2Height isnt tileHeight)
+    #   # handle non-power of 2 textures
+    #   if @canvas is undefined
+    #     @canvas = document.getElementById('Canvas');
+    #   @canvas.width = tileWidth
+    #   @canvas.height = tileHeight
+    #   context = @canvas.getContext('2d')
+    #   imageData = context.createImageData(nextPow2Width, nextPow2Height)
+    #   texture = imageData.data
+    # else
+    texture = new Uint8Array(textureSize)
 
     dstRowOffset = 0
-    dstRowStride = nextPow2Width * 4
+    dstRowStride = nextPow2Width
     srcRowStride = tile.line<<3
-    srcRowOffset = tile.tmem<<3
+    srcRowOffset = tile.tmem
 
     if videoHLE.cycleType is 3 or isFillRect is true
       # no need to copy`
@@ -240,10 +244,10 @@ C1964jsRenderer = (settings, glx, webGL) ->
 
    # if @useTextureCache is true
    #   return @textureCache[textureId]
-    if (nextPow2Width isnt tileWidth) or (nextPow2Height isnt tileHeight)
-      context.putImageData(imageData, 0, 0);
-      return @canvas
-    return texture
+   # if (nextPow2Width isnt tileWidth) or (nextPow2Height isnt tileHeight)
+   #   context.putImageData(imageData, 0, 0);
+   #   return @canvas
+    return {textureData:texture, nextPow2Width: nextPow2Width, nextPow2Height: nextPow2Height}
 
   initQuad = (xl, yl, xh, yh, sl, tl, sh, th, videoHLE) ->
     vertices = [xh, yh, 0.0, xh, yl, 0.0, xl, yl, 0.0, xl, yh, 0.0]
@@ -273,16 +277,14 @@ C1964jsRenderer = (settings, glx, webGL) ->
 
     #console.log "Binding Texture Size: "+tileWidth+" x "+tileHeight+" -> "+canvaswidth+" x "+canvasheight
 
-    textureData = @formatTexture(tile, tmem, videoHLE, isFillRect)
-    if textureData isnt undefined
+    tData = @formatTexture(tile, tmem, videoHLE, isFillRect)
+
+    if tData isnt undefined and tData.textureData isnt undefined
+      textureData = tData.textureData
+
       gl.activeTexture(gl.TEXTURE0)
       gl.bindTexture(gl.TEXTURE_2D, @colorsTexture0)
-      if textureData instanceof HTMLElement
-        #it's a canvas
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textureData)
-      else
-        gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, nextPow2Width, nextPow2Height, 0, gl.RGBA, gl.UNSIGNED_BYTE, textureData)
-
+      gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, tileWidth, tileHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, textureData)
 
       wrapS = gl.REPEAT
       wrapT = gl.REPEAT

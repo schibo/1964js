@@ -1358,7 +1358,8 @@ C1964jsVideoHLE = (core, glx) ->
       tile = @textureTile[tileno]
       tileWidth = ((tile.lrs >> 2) + 1) - tile.uls
       tileHeight = ((tile.lrt >> 2) + 1) - tile.ult
-      textureData = @renderer.formatTexture(tile, @tmem, this)
+      tData = @renderer.formatTexture(tile, @tmem, this)
+      textureData = tData.textureData
       if textureData isnt undefined
         @gl.activeTexture(@gl.TEXTURE0)
         @gl.bindTexture(@gl.TEXTURE_2D, @colorsTexture0)
@@ -1376,11 +1377,7 @@ C1964jsVideoHLE = (core, glx) ->
         @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_WRAP_T, wrapT)
         @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MAG_FILTER, @gl.LINEAR)
         @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MIN_FILTER, @gl.NEAREST)
-        if textureData instanceof HTMLElement
-          # it's a canvas element
-          @gl.texImage2D(@gl.TEXTURE_2D, 0, @gl.RGBA, @gl.RGBA, @gl.UNSIGNED_BYTE, textureData)
-        else
-          @gl.texImage2D(@gl.TEXTURE_2D, 0, @gl.RGBA, tileWidth, tileHeight, 0, @gl.RGBA, @gl.UNSIGNED_BYTE, textureData)
+        @gl.texImage2D(@gl.TEXTURE_2D, 0, @gl.RGBA, tileWidth, tileHeight, 0, @gl.RGBA, @gl.UNSIGNED_BYTE, textureData)
 
     #@gl.uniform1i @core.webGL.shaderProgram.otherModeL, @otherModeL
     #@gl.uniform1i @core.webGL.shaderProgram.otherModeH, @otherModeH
