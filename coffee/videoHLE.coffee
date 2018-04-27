@@ -136,7 +136,7 @@ C1964jsVideoHLE = (core, glx) ->
     @gRSP.projectionMtxs[i] = mat4.create()
     @gRSP.modelviewMtxs[i] = mat4.create()
     i += 1
-  @gRSP.vertexMult = 10
+  @gRSP.vertexMult = 0.1
   @triangleVertexTextureCoordBuffer = `undefined`
   @resetMatrices()
   @combine = new Uint32Array(16)
@@ -426,8 +426,8 @@ C1964jsVideoHLE = (core, glx) ->
       v.x = @getVertexX(a)
       v.y = @getVertexY(a)
       v.z = @getVertexZ(a)
-      v.u = @getVertexS(a) / 32 / texWidth
-      v.v = @getVertexT(a) / 32 / texHeight
+      v.u = @getVertexS(a) / (texWidth<<5)
+      v.v = @getVertexT(a) / (texHeight<<5)
 
       if @bLightingEnable is true
         @normalMat[0] = @getVertexNormalX a
@@ -693,8 +693,8 @@ C1964jsVideoHLE = (core, glx) ->
     #SetZBias(0);
     @gRSP.numVertices = 0
     @gRSP.curTile = 0
-    @gRSP.fTexScaleX = 1 / 32.0
-    @gRSP.fTexScaleY = 1 / 32.0
+#    @gRSP.fTexScaleX = 1 / 32.0
+#    @gRSP.fTexScaleY = 1 / 32.0
 
     @gl.clearDepth 1.0
     @gl.depthMask true
@@ -878,9 +878,9 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::RSP_GBI1_Tri1 = (pc) ->
-    v0 = @getGbi0Tri1V0(pc) / @gRSP.vertexMult
-    v1 = @getGbi0Tri1V1(pc) / @gRSP.vertexMult
-    v2 = @getGbi0Tri1V2(pc) / @gRSP.vertexMult
+    v0 = @getGbi0Tri1V0(pc) * @gRSP.vertexMult
+    v1 = @getGbi0Tri1V1(pc) * @gRSP.vertexMult
+    v2 = @getGbi0Tri1V2(pc) * @gRSP.vertexMult
     flag = @getGbi0Tri1Flag(pc)
     #console.log "Tri1: "+v0+", "+v1+", "+v2+"   Flag: "+flag
     didSucceed = @prepareTriangle v0, v1, v2
@@ -1161,33 +1161,33 @@ C1964jsVideoHLE = (core, glx) ->
     true
 
   C1964jsVideoHLE::setBlendFunc = () ->
-    CYCLE_TYPE_1 = 0
-    CYCLE_TYPE_2 = 1
-    CYCLE_TYPE_COPY = 2
-    CYCLE_TYPE_FILL = 3
-    CVG_DST_CLAMP = 0
-    CVG_DST_WRAP = 0x100
-    CVG_DST_FULL = 0x200
-    CVG_DST_SAVE = 0x300
-    BLEND_NOOP = 0x0000
-    BLEND_NOOP5 = 0xcc48
-    BLEND_NOOP4 = 0xcc08
-    BLEND_FOG_ASHADE = 0xc800
-    BLEND_FOG_3 = 0xc000
-    BLEND_FOG_MEM = 0xc440
-    BLEND_FOG_APRIM = 0xc400
-    BLEND_BLENDCOLOR = 0x8c88
-    BLEND_BI_AFOG = 0x8400
-    BLEND_BI_AIN = 0x8040
-    BLEND_MEM = 0x4c40
-    BLEND_FOG_MEM_3 = 0x44c0
-    BLEND_NOOP3 = 0x0c48
-    BLEND_PASS = 0x0c08
-    BLEND_FOG_MEM_IN_MEM = 0x0440
-    BLEND_FOG_MEM_FOG_MEM = 0x04c0
-    BLEND_OPA = 0x0044
-    BLEND_XLU = 0x0040
-    BLEND_MEM_ALPHA_IN = 0x4044
+    `const CYCLE_TYPE_1 = 0`
+    `const CYCLE_TYPE_2 = 1`
+    `const CYCLE_TYPE_COPY = 2`
+    `const CYCLE_TYPE_FILL = 3`
+    `const CVG_DST_CLAMP = 0`
+    `const CVG_DST_WRAP = 0x100`
+    `const CVG_DST_FULL = 0x200`
+    `const CVG_DST_SAVE = 0x300`
+    `const BLEND_NOOP = 0x0000`
+    `const BLEND_NOOP5 = 0xcc48`
+    `const BLEND_NOOP4 = 0xcc08`
+    `const BLEND_FOG_ASHADE = 0xc800`
+    `const BLEND_FOG_3 = 0xc000`
+    `const BLEND_FOG_MEM = 0xc440`
+    `const BLEND_FOG_APRIM = 0xc400`
+    `const BLEND_BLENDCOLOR = 0x8c88`
+    `const BLEND_BI_AFOG = 0x8400`
+    `const BLEND_BI_AIN = 0x8040`
+    `const BLEND_MEM = 0x4c40`
+    `const BLEND_FOG_MEM_3 = 0x44c0`
+    `const BLEND_NOOP3 = 0x0c48`
+    `const BLEND_PASS = 0x0c08`
+    `const BLEND_FOG_MEM_IN_MEM = 0x0440`
+    `const BLEND_FOG_MEM_FOG_MEM = 0x04c0`
+    `const BLEND_OPA = 0x0044`
+    `const BLEND_XLU = 0x0040`
+    `const BLEND_MEM_ALPHA_IN = 0x4044`
 
     blendMode1 = @otherModeL >>> 16 & 0xCCCC
     blendMode2 = @otherModeL >>> 16 & 0x3333
