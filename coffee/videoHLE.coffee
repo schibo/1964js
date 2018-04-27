@@ -1327,6 +1327,9 @@ C1964jsVideoHLE = (core, glx) ->
     zUpd = (@otherModeL & consts.Z_UPDATE) isnt 0
     if ((zBufferMode and zCmp) or zUpd)
       @gl.enable @gl.DEPTH_TEST
+#      @gl.depthFunc @gl.LEQUAL
+#      @gl.depthRange 0, 0.0001 # fixes shadows
+#      @gl.depthMask true
     else
       @gl.disable @gl.DEPTH_TEST
     @gl.depthMask zUpd
