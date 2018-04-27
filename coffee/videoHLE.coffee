@@ -50,7 +50,6 @@ C1964jsVideoHLE = (core, glx) ->
   @gRSPnumLights = 0
   @matToLoad = mat4.create()
   @lightingMat = mat4.create()
-  @gRSPworldProject = mat4.create()
   @triangleVertexPositionBuffer = `undefined`
   @triangleVertexColorBuffer = `undefined`
   @dlistStackPointer = 0
@@ -82,6 +81,7 @@ C1964jsVideoHLE = (core, glx) ->
   @colorsTexture0 = @gl.createTexture()
   @colorsTexture1 = @gl.createTexture()
   @renderStateChanged = false
+  @inverseTransposeCalculated = false
 
   @normalMat = new Float32Array(4)
   @transformed = mat4.create()
@@ -279,6 +279,7 @@ C1964jsVideoHLE = (core, glx) ->
     if bPush is true
       if @gRSP.projectionMtxTop >= (@RICE_MATRIX_STACK - 1)
         @gRSP.bMatrixIsUpdated = true
+        @inverseTransposeCalculated = false
         return
       @gRSP.projectionMtxTop += 1
       # We should store the current projection matrix...
@@ -294,6 +295,7 @@ C1964jsVideoHLE = (core, glx) ->
       else
         mat4.multiply @gRSP.projectionMtxs[@gRSP.projectionMtxTop], mat, @gRSP.projectionMtxs[@gRSP.projectionMtxTop]
     @gRSP.bMatrixIsUpdated = true
+    @inverseTransposeCalculated = false
 
     #hack to show Mario's head (as an ortho projection. This if/else is wrong.
     if @gRSP.projectionMtxs[@gRSP.projectionMtxTop][14] > 0
@@ -306,6 +308,7 @@ C1964jsVideoHLE = (core, glx) ->
     if bPush is true
       if @gRSP.modelViewMtxTop >= (@RICE_MATRIX_STACK - 1)
         @gRSP.bMatrixIsUpdated = true
+        @inverseTransposeCalculated = false
         return
       @gRSP.modelViewMtxTop += 1
       if bReplace
@@ -321,6 +324,7 @@ C1964jsVideoHLE = (core, glx) ->
         # Multiply modelView matrix
         mat4.multiply @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], mat, @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop]
     @gRSP.bMatrixIsUpdated = true
+    @inverseTransposeCalculated = false
     return
 
   C1964jsVideoHLE::RSP_GBI0_Mtx = (pc) ->
@@ -391,30 +395,17 @@ C1964jsVideoHLE = (core, glx) ->
       @processVertexData addr, v0, num
     return
 
-  C1964jsVideoHLE::updateCombinedMatrix = ->
-    return #this is set in the shader
-    if @gRSP.bMatrixIsUpdated
-      pmtx = undefined
-      vmtx = @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop]
-      pmtx = @gRSP.projectionMtxs[@gRSP.projectionMtxTop]
-      mat4.multiply pmtx, vmtx, @gRSPworldProject
-
-      #this.gRSPworldProject = this.gRSP.modelviewMtxs[this.gRSP.modelViewMtxTop] * this.gRSP.projectionMtxs[this.gRSP.projectionMtxTop];
-      @gRSP.bMatrixIsUpdated = false
-    return
-
   C1964jsVideoHLE::processVertexData = (addr, v0, num) ->
     a = undefined
-    @updateCombinedMatrix()
     i = v0
 
     texWidth = ((@textureTile[@activeTile].lrs >> 2) + 1) - @textureTile[@activeTile].uls
     texHeight = ((@textureTile[@activeTile].lrt >> 2) + 1) - @textureTile[@activeTile].ult
 
-
-    if @bLightingEnable is true
+    if @inverseTransposeCalculated is false and @bLightingEnable is true and @gRSP.bMatrixIsUpdated is true
       mat4.inverse @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], @modelViewInverse
       mat4.transpose @modelViewInverse, @modelViewTransposedInverse
+      @inverseTransposeCalculated = true
 
     while i < v0 + num
       a = addr + 16 * (i - v0)
@@ -715,12 +706,11 @@ C1964jsVideoHLE = (core, glx) ->
       i += 1
 
     @gRSP.bMatrixIsUpdated = false
-    @updateCombinedMatrix()
+    @inverseTransposeCalculated = false
     return
 
   C1964jsVideoHLE::RSP_RDP_InsertMatrix = ->
     @videoLog "TODO: Insert Matrix"
-    @updateCombinedMatrix()
     @gRSP.bMatrixIsUpdated = false
     return
 
@@ -863,6 +853,7 @@ C1964jsVideoHLE = (core, glx) ->
       @gRSP.modelViewMtxTop--
       @gRSPmodelViewTop = @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop]
       @gRSP.bMatrixIsUpdated = true
+      @inverseTransposeCalculated = false
     return
 
   C1964jsVideoHLE::RSP_GBI1_PopMtx = (pc) ->
