@@ -520,15 +520,15 @@ class C1964jsEmulator
     @helpers.tRT(i) + "=" + temp + ";" + @helpers.tRTH(i) + "=" + tempHi + ";" 
 
   r4300i_lw: (i) ->
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.region32[r[36]>>>16](m,r[36]);" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31;"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.LW[r[36]>>>16](m,r[36]);" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31;"
 
   r4300i_lwu: (i) ->
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.region32[r[36]>>>16](m,r[36]);" + @helpers.tRTH(i) + "=0;"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.LW[r[36]>>>16](m,r[36]);" + @helpers.tRTH(i) + "=0;"
 
   r4300i_sw: (i, isDelaySlot) ->
     a = undefined
 #    string = "m.sw(" + @helpers.RT(i) + ";" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i)
-    string = @helpers.virtualToPhysical("" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + "") + "m.ww[r[36]>>>16](m," + @helpers.RT(i) + ",r[36]"
+    string = @helpers.virtualToPhysical("" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + "") + "m.SW[r[36]>>>16](m," + @helpers.RT(i) + ",r[36]"
 
     #So we can process exceptions
     if isDelaySlot is true
@@ -621,19 +621,19 @@ class C1964jsEmulator
 
   r4300i_COP1_bc1f: (i) ->
     @stopCompiling = true
-    "if(!(t.cp1Con[31]&0x00800000)){" + @delaySlot(i, false)
+    "if(!(t.cp1Con[31]&0x800000)){" + @delaySlot(i, false)
 
   r4300i_COP1_bc1t: (i) ->
     @stopCompiling = true
-    "if(t.cp1Con[31]&0x00800000){" + @delaySlot(i, false)
+    "if(t.cp1Con[31]&0x800000){" + @delaySlot(i, false)
 
   r4300i_COP1_bc1tl: (i) ->
     @stopCompiling = true
-    "if(t.cp1Con[31]&0x00800000){" + @delaySlot(i, true)
+    "if(t.cp1Con[31]&0x800000){" + @delaySlot(i, true)
 
   r4300i_COP1_bc1fl: (i) ->
     @stopCompiling = true
-    "if(!(t.cp1Con[31]&0x00800000)){" + @delaySlot(i, true)
+    "if(!(t.cp1Con[31]&0x800000)){" + @delaySlot(i, true)
 
   r4300i_j: (i) ->
     @stopCompiling = true
@@ -809,21 +809,21 @@ class C1964jsEmulator
     string += @helpers.tRT(i) + "=t.cp0[" + @helpers.fs(i) + "];" + @helpers.tRTH(i) + "=t.cp0[" + @helpers.fs(i) + "]>>31;"
 
   r4300i_lb: (i) ->
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.region[r[36]>>>16](m,r[36])<<24>>24;" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>8;"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.LB[r[36]>>>16](m,r[36])<<24>>24;" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>8;"
 
   r4300i_lbu: (i) ->
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tuRT(i) + "=m.region[r[36]>>>16](m,r[36]);" + @helpers.tRTH(i) + "=0;"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tuRT(i) + "=m.LB[r[36]>>>16](m,r[36]);" + @helpers.tRTH(i) + "=0;"
 
   r4300i_lh: (i) ->
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.region16[r[36]>>>16](m,r[36])<<16>>16;" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>16;";
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.LH[r[36]>>>16](m,r[36])<<16>>16;" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>16;";
 
   r4300i_lhu: (i) ->
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tuRT(i) + "=m.region16[r[36]>>>16](m,r[36]);" + @helpers.tRTH(i) + "=0;"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tuRT(i) + "=m.LH[r[36]>>>16](m,r[36]);" + @helpers.tRTH(i) + "=0;"
 
   r4300i_sb: (i, isDelaySlot) ->
     #"m.sb(" + @helpers.RT(i) + "," + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");"
-    #string = "a = m.virtualToPhysical(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");m.writeRegion8[a>>>16](m," + @helpers.RT(i) + ",a"
-    string = @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + "m.writeRegion8[r[36]>>>16](m," + @helpers.RT(i) + ",r[36]"
+    #string = "a = m.virtualToPhysical(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");m.SB[a>>>16](m," + @helpers.RT(i) + ",a"
+    string = @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + "m.SB[r[36]>>>16](m," + @helpers.RT(i) + ",r[36]"
 
     #So we can process exceptions
     if isDelaySlot is true
@@ -836,7 +836,7 @@ class C1964jsEmulator
 
   r4300i_sh: (i, isDelaySlot) ->
     #"m.sh(" + @helpers.RT(i) + "," + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");"
-    string = @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + "m.writeRegion16[r[36]>>>16](m," + @helpers.RT(i) + ",r[36]"
+    string = @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + "m.SH[r[36]>>>16](m," + @helpers.RT(i) + ",r[36]"
 
     #So we can process exceptions
     if isDelaySlot is true
@@ -949,7 +949,7 @@ class C1964jsEmulator
 
   r4300i_lwl: (i) ->
     string = "{" + @helpers.setVAddr(i)
-    string += "const vAddrAligned=(r[38]&0xfffffffc)|0;const value=m.lw(vAddrAligned);"
+    string += "const vAddrAligned=(r[38]&-4)|0;const value=m.lw(vAddrAligned);"
     # r[38] = vAddress
 
     string += "const cas=r[38]&3;const mask=-1>>>(24-(cas<<3))>>>8;const shf=(cas<<3);"
@@ -974,7 +974,7 @@ class C1964jsEmulator
 
   r4300i_lwr: (i) ->
     string = "{" + @helpers.setVAddr(i)
-    string += "const vAddrAligned=(r[38]&0xfffffffc)|0;const value=m.lw(vAddrAligned);"
+    string += "const vAddrAligned=(r[38]&-4)|0;const value=m.lw(vAddrAligned);"
     # do not try to optimize further. 24<<8 is 32 but -1<<32 is not the same as -1<<24<<8.
     # in other words, shifting left by 32 requires 2 operations.
     # normally, you would not shift at all if it's 32, and we'd just set the target to 0, 
@@ -987,7 +987,7 @@ class C1964jsEmulator
 
   r4300i_swl: (i) ->
     string = "{" + @helpers.setVAddr(i)
-    string += "const vAddrAligned=(r[38]&0xfffffffc)|0;var value=m.lw(vAddrAligned);"
+    string += "const vAddrAligned=(r[38]&-4)|0;var value=m.lw(vAddrAligned);"
     string += "switch(r[38]&3){case 0:value=" + @helpers.RT(i) + ";break;"
     string += "case 1:value=((value&0xff000000)|(" + @helpers.RT(i) + ">>>8));break;"
     string += "case 2:value=((value&0xffff0000)|(" + @helpers.RT(i) + ">>>16));break;"
@@ -996,11 +996,11 @@ class C1964jsEmulator
 
   r4300i_swr: (i) ->
     string = "{" + @helpers.setVAddr(i)
-    string += "const vAddrAligned=(r[38]&0xfffffffc)|0;var value=m.lw(vAddrAligned);"
+    string += "const vAddrAligned=(r[38]&-4)|0;var value=m.lw(vAddrAligned);"
     string += "switch(r[38]&3){case 3:value=" + @helpers.RT(i) + ";break;"
-    string += "case 2:value=((value & 0x000000FF)|((" + @helpers.RT(i) + "<<8)>>>0));break;"
-    string += "case 1:value=((value & 0x0000FFFF)|((" + @helpers.RT(i) + "<<16)>>>0));break;"
-    string += "case 0:value=((value & 0x00FFFFFF)|((" + @helpers.RT(i) + "<<24)>>>0));break;}"
+    string += "case 2:value=((value & 0xFF)|((" + @helpers.RT(i) + "<<8)>>>0));break;"
+    string += "case 1:value=((value & 0xFFFF)|((" + @helpers.RT(i) + "<<16)>>>0));break;"
+    string += "case 0:value=((value & 0xFFFFFF)|((" + @helpers.RT(i) + "<<24)>>>0));break;}"
     string += "m.sw(value,vAddrAligned,false)}"
 
   r4300i_lwc1: (i) ->
