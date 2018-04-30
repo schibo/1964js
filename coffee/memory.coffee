@@ -97,7 +97,7 @@ class C1964jsMemory
     @region32 = Array.apply(@readDummy32, Array(@lengthy))
     @writeRegion8 = Array.apply(@writeDummy8, Array(@lengthy))
     @writeRegion16 = Array.apply(@writeDummy16, Array(@lengthy))
-    @writeRegion32 = Array.apply(@writeDummy32, Array(@lengthy))
+    @ww = Array.apply(@writeDummy32, Array(@lengthy))
 
     #todo: fix overlapping ramregs now that we are 0xffff in lut size instead of 0xfffc in lut size
 
@@ -126,10 +126,10 @@ class C1964jsMemory
     @initRegion MEMORY_START_GIO, MEMORY_SIZE_GIO, @readGio8, @writeGio8, @readGio16, @writeGio16, @readGio32, @writeGio32
     @initRegion MEMORY_START_RAMREGS0, MEMORY_SIZE_RAMREGS0, @readRamRegs0_8, @writeRamRegs0_8, @readRamRegs0_16, @writeRamRegs0_16, @readRamRegs0_32, @writeRamRegs0_32
     @initRegion MEMORY_START_RAMREGS8, MEMORY_SIZE_RAMREGS8, @readRamRegs8_8, @writeRamRegs8_8, @readRamRegs8_16, @writeRamRegs8_16, @readRamRegs8_32, @writeRamRegs8_32
-    @physRegion = undefined
+    @t = undefined
     console.log @lengthy
 
-  initRegion: (start, size, readRegion8, writeRegion8, readRegion16, writeRegion16, readRegion32, writeRegion32) ->
+  initRegion: (start, size, readRegion8, writeRegion8, readRegion16, writeRegion16, readRegion32, ww) ->
     end = (start + size) >>> 16
     start >>>= 16
 
@@ -139,7 +139,7 @@ class C1964jsMemory
       @region32[start] = readRegion32
       @writeRegion8[start] = writeRegion8
       @writeRegion16[start] = writeRegion16
-      @writeRegion32[start] = writeRegion32
+      @ww[start] = ww
       start++
       @lengthy++
 
@@ -832,9 +832,9 @@ class C1964jsMemory
     #  alert(dec2hex(a))
 
     #uncomment to verify non-tlb lookup.
-    #if dec2hex(a) != dec2hex(((physRegion[a>>>12]<<16) | a&0x0000ffff))
-    #  alert dec2hex(a) + ' ' + dec2hex(((physRegion[a>>>12]<<16) | a&0x0000ffff))
-    return ((@physRegion[a>>>12]<<16) | (a&0x0000ffff))
+    #if dec2hex(a) != dec2hex(((t[a>>>12]<<16) | a&0x0000ffff))
+    #  alert dec2hex(a) + ' ' + dec2hex(((t[a>>>12]<<16) | a&0x0000ffff))
+    return ((@t[a>>>12]<<16) | (a&0x0000ffff))
 
   readTLB8: (that, b) ->
     `const a = that.virtualToPhysical(b)`
@@ -891,7 +891,7 @@ class C1964jsMemory
   writeTLB32: (that, val, b, pc, isDelaySlot) ->
     `const a = that.virtualToPhysical(b)`
 
-    region32 = that.writeRegion32[a>>>16]
+    region32 = that.ww[a>>>16]
 
     if region32 is that.writeTLB32
       region32 = that.writeDummy32
@@ -899,13 +899,13 @@ class C1964jsMemory
     region32(that, val, a, pc, isDelaySlot)
     return
 
-  initPhysRegions: ->
+  initts: ->
     #Initialize the TLB Lookup Table
-    @physRegion = new Int16Array(0x100000)
+    @t = new Int16Array(0x100000)
     i = 0
     #todo: replace with call to buildTLBHelper clear
     while i < 0x100000
-      @physRegion[i] = (i & 0x1ffff) >>> 4
+      @t[i] = (i & 0x1ffff) >>> 4
       i++
     return
 
@@ -955,7 +955,7 @@ class C1964jsMemory
 
   sw: (val, addr, pc, isDelaySlot) ->
     `const a = this.virtualToPhysical(addr)`
-    @writeRegion32[a>>>16](this, val, a, pc, isDelaySlot)
+    @ww[a>>>16](this, val, a, pc, isDelaySlot)
     return
 
   #Same routine as storeWord, but store a byte

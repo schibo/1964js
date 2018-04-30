@@ -345,7 +345,7 @@ class C1964jsEmulator
     lastITLBIndex = 0
     lastDTLBIndex = 0
 
-    @memory.initPhysRegions()
+    @memory.initts()
     return
 
   runLoop: () =>
@@ -528,7 +528,7 @@ class C1964jsEmulator
   r4300i_sw: (i, isDelaySlot) ->
     a = undefined
 #    string = "m.sw(" + @helpers.RT(i) + ";" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i)
-    string = @helpers.virtualToPhysical("" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + "") + "m.writeRegion32[r[36]>>>16](m," + @helpers.RT(i) + ",r[36]"
+    string = @helpers.virtualToPhysical("" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + "") + "m.ww[r[36]>>>16](m," + @helpers.RT(i) + ",r[36]"
 
     #So we can process exceptions
     if isDelaySlot is true

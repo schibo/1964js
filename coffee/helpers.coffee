@@ -196,7 +196,7 @@ C1964jsHelpers = (core, isLittleEndian) ->
       @tRD(i) + "=" + @RS(i) + n + @RT(i) + ";" + @tRDH(i) + "=" + @RSH(i) + n + @RTH(i) + ";"
 
   @virtualToPhysical = (addr) ->
-    "r[35]=" + addr + ";r[36]=((m.physRegion[r[35]>>>12]<<16)|(r[35]&0x0000ffff));"
+    "r[35]=" + addr + ";r[36]=(m.t[r[35]>>>12]<<16)|(r[35]&0xffff);"
 
   #//////////////////////////
   #Interpreted opcode helpers
@@ -607,14 +607,14 @@ C1964jsHelpers = (core, isLittleEndian) ->
 
     if (clear is true) #clear unconditionally or if (entry & 3)? If so, why?
       while i < lend
-        @core.memory.physRegion[i] = (i & 0x1ffff) >>> 4
+        @core.memory.t[i] = (i & 0x1ffff) >>> 4
         i++
     else #if (entry & 0x3) #why?
       realAddress = (0x80000000 | (((entry << 6)>>>0) & (mask >>> 1))) >>> 0
 
       while i < lend
         real = (realAddress + (i << 12) - start) & 0x1fffffff
-        @core.memory.physRegion[i] = real >>> 16
+        @core.memory.t[i] = real >>> 16
         i++
     return
 
