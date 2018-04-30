@@ -185,6 +185,7 @@ class C1964jsEmulator
     @crc1 = 0
     @crc2 = 0
     @romName = new Uint8Array 20
+    return
 
     #runTest();
 

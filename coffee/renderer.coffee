@@ -34,22 +34,22 @@ C1964jsRenderer = (settings, glx, webGL) ->
   @colorsTexture0 = gl.createTexture()
 
   @videoHLE = undefined
-  fivetoeight = [0x00,0x08,0x10,0x18,0x21,0x29,0x31,0x39,0x42,0x4A,0x52,0x5A,0x63,0x6B,0x73,0x7B,0x84,0x8C,0x94,0x9C,0xA5,0xAD,0xB5,0xBD,0xC6,0xCE,0xD6,0xDE,0xE7,0xEF,0xF7,0xFF]
-  fourtoeight = [0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xaa,0xbb,0xcc,0xdd,0xee,0xff]
-  threetoeight = [
-    0x00,   # 000 -> 00 00 00 00
-    0x24,   # 001 -> 00 10 01 00
-    0x49,   # 010 -> 01 00 10 01
-    0x6d,   # 011 -> 01 10 11 01
-    0x92,   # 100 -> 10 01 00 10
-    0xb6,   # 101 -> 10 11 01 10
-    0xdb,   # 110 -> 11 01 10 11
-    0xff    # 111 -> 11 11 11 11
+  `const fivetoeight = [0x00,0x08,0x10,0x18,0x21,0x29,0x31,0x39,0x42,0x4A,0x52,0x5A,0x63,0x6B,0x73,0x7B,0x84,0x8C,0x94,0x9C,0xA5,0xAD,0xB5,0xBD,0xC6,0xCE,0xD6,0xDE,0xE7,0xEF,0xF7,0xFF]
+  const fourtoeight = [0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xaa,0xbb,0xcc,0xdd,0xee,0xff]
+  const threetoeight = [
+    0x00,   // 000 -> 00 00 00 00
+    0x24,   // 001 -> 00 10 01 00
+    0x49,   // 010 -> 01 00 10 01
+    0x6d,   // 011 -> 01 10 11 01
+    0x92,   // 100 -> 10 01 00 10
+    0xb6,   // 101 -> 10 11 01 10
+    0xdb,   // 110 -> 11 01 10 11
+    0xff    // 111 -> 11 11 11 11
   ]
-  onetoeight = [
-    0x00,   # 0 -> 00 00 00 00
-    0xff    # 1 -> 11 11 11 11
-  ]
+  const onetoeight = [
+    0x00,   // 0 -> 00 00 00 00
+    0xff    // 1 -> 11 11 11 11
+  ]`
 
   @textureCache = new Object()
 
@@ -85,8 +85,8 @@ C1964jsRenderer = (settings, glx, webGL) ->
 
     xTrans = 160
     yTrans = 120
-    xl = (xl-xTrans)/xTrans
-    xh = (xh-xTrans)/xTrans
+    xl = (xl-xTrans)*0.00625 #0.000625 is 1.0/160.0
+    xh = (xh-xTrans)*0.00625
     yl = -(yl-yTrans)/yTrans
     yh = -(yh-yTrans)/yTrans
 
@@ -107,7 +107,7 @@ C1964jsRenderer = (settings, glx, webGL) ->
       nextPow2Width = @videoHLE.pow2roundup (tileWidth*4)
       nextPow2Height = @videoHLE.pow2roundup tileHeight
     else
-      nextPow2Width = tileWidth*4
+      nextPow2Width = tileWidth<<2
       nextPow2Height = tileHeight
 
     textureSize = nextPow2Width * nextPow2Height
@@ -137,8 +137,8 @@ C1964jsRenderer = (settings, glx, webGL) ->
     texture = @texture
 
     dstRowOffset = 0
-    dstRowStride = nextPow2Width
-    srcRowStride = tile.line<<3
+    `const dstRowStride = nextPow2Width`
+    `const srcRowStride = tile.line<<3`
     srcRowOffset = tile.tmem<<3
 
     if videoHLE.cycleType is 3 or isFillRect is true
@@ -150,17 +150,17 @@ C1964jsRenderer = (settings, glx, webGL) ->
         when consts.TXT_FMT_RGBA # rgba
           switch tile.siz
             when consts.TXT_SIZE_16b # rgba5551
-              j=0
-              while j < tileHeight
-                i=0
+              j=-tileHeight
+              while j < 0
+                i=-tileWidth
                 srcOffset = srcRowOffset
                 dstOffset = dstRowOffset
-                while i < tileWidth
+                while i < 0
                   color16 = tmem[srcOffset]<<8 | tmem[srcOffset+1]
                   texture[dstOffset] = fivetoeight[color16 >> 11 & 0x1F]
                   texture[dstOffset + 1] = fivetoeight[color16 >> 6 & 0x1F]
                   texture[dstOffset + 2] = fivetoeight[color16 >> 1 & 0x1F]
-                  texture[dstOffset + 3] = if ((color16 & 0x01) is 0) then 0x00 else 0xFF
+                  texture[dstOffset + 3] = (color16 & 0x01) << 31 >> 31
                   i++
                   srcOffset += 2
                   dstOffset += 4
@@ -172,12 +172,12 @@ C1964jsRenderer = (settings, glx, webGL) ->
         when consts.TXT_FMT_IA # ia
           switch tile.siz
             when consts.TXT_SIZE_8b # ia8
-              j=0
-              while j < tileHeight
-                i=0
+              j=-tileHeight
+              while j < 0
+                i=-tileWidth
                 srcOffset = srcRowOffset
                 dstOffset = dstRowOffset
-                while i < tileWidth
+                while i < 0
                   b = tmem[srcOffset]
                   I = fourtoeight[(b >>> 4)& 0x0F]
                   a = fourtoeight[b & 0x0F]
@@ -192,12 +192,12 @@ C1964jsRenderer = (settings, glx, webGL) ->
                 srcRowOffset += srcRowStride
                 dstRowOffset += dstRowStride
             when consts.TXT_SIZE_4b # ia4
-              j=0
-              while j < tileHeight
-                i=0
+              j=-tileHeight
+              while j < 0
+                i=-tileWidth
                 srcOffset = srcRowOffset
                 dstOffset = dstRowOffset
-                while i < tileWidth
+                while i < 0
                   b = tmem[srcOffset]
                   I0 = threetoeight[(b & 0xe0)>>>5]
                   a0 = onetoeight[(b & 0x10)>>>4]
@@ -228,12 +228,12 @@ C1964jsRenderer = (settings, glx, webGL) ->
                 srcRowOffset += srcRowStride
                 dstRowOffset += dstRowStride
             when consts.TXT_SIZE_16b # ia16
-              j=0
-              while j < tileHeight
-                i=0
+              j=-tileHeight
+              while j < 0
+                i=-tileWidth
                 srcOffset = srcRowOffset
                 dstOffset = dstRowOffset
-                while i < tileWidth
+                while i < 0
                   I = tmem[srcOffset]
                   a = tmem[srcOffset+1]
                   texture[dstOffset] = I
