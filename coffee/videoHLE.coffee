@@ -1060,19 +1060,19 @@ C1964jsVideoHLE = (core, glx) ->
 
   C1964jsVideoHLE::DLParser_SetTile = (pc) ->
     tile = @getSetTileTile(pc)
-    @textureTile[tile].fmt = @getSetTileFmt(pc);
-    @textureTile[tile].siz = @getSetTileSiz(pc);
-    @textureTile[tile].line = @getSetTileLine(pc);
-    @textureTile[tile].tmem = @getSetTileTmem(pc);
-    @textureTile[tile].pal = @getSetTilePal(pc);
-    @textureTile[tile].cmt = @getSetTileCmt(pc);
-    @textureTile[tile].cms = @getSetTileCms(pc);
-    @textureTile[tile].mirrorS = @getSetTileMirrorS(pc);
-    @textureTile[tile].mirrorT = @getSetTileMirrorT(pc);
-    @textureTile[tile].maskt = @getSetTileMaskt(pc);
-    @textureTile[tile].masks = @getSetTileMasks(pc);
-    @textureTile[tile].shiftt = @getSetTileShiftt(pc);
-    @textureTile[tile].shifts = @getSetTileShifts(pc);
+    @textureTile[tile].fmt = @getSetTileFmt(pc)
+    @textureTile[tile].siz = @getSetTileSiz(pc)
+    @textureTile[tile].line = @getSetTileLine(pc)
+    @textureTile[tile].tmem = @getSetTileTmem(pc)
+    @textureTile[tile].pal = @getSetTilePal(pc)
+    @textureTile[tile].cmt = @getSetTileCmt(pc)
+    @textureTile[tile].cms = @getSetTileCms(pc)
+    @textureTile[tile].mirrorS = @getSetTileMirrorS(pc)
+    @textureTile[tile].mirrorT = @getSetTileMirrorT(pc)
+    @textureTile[tile].maskt = @getSetTileMaskt(pc)
+    @textureTile[tile].masks = @getSetTileMasks(pc)
+    @textureTile[tile].shiftt = @getSetTileShiftt(pc)
+    @textureTile[tile].shifts = @getSetTileShifts(pc)
     #if @combineD0 == 4
     #console.log "SetTile:"+tile+" FMT:"+@textureTile[tile].fmt+" SIZ:"+@textureTile[tile].siz+" LINE: "+@textureTile[tile].line+" TMEM:"+@textureTile[tile].tmem+" PAL:"+@textureTile[tile].pal+" CMS/T:"+@textureTile[tile].cms+"/"+@textureTile[tile].cmt+" MASKS/T:"+@textureTile[tile].masks+"/"+@textureTile[tile].maskt+" SHIFTS/T:"+@textureTile[tile].shifts+"/"+@textureTile[tile].shiftt
     return

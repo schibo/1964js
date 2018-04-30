@@ -156,16 +156,6 @@ class C1964jsEmulator
     @webGL = new C1964jsWebGL(this, userSettings.wireframe)
     @log = (message) ->
       console.log message
-
-  # function init()
-  #   r[32] = LO for mult
-  #   r[33] = HI for mult
-  #   r[34] = write-only. to protect r0, write here.
-  init: (buffer) ->
-    k = undefined
-    x = undefined
-    i = undefined
-    y = undefined
     @endianTest()
     @helpers = new C1964jsHelpers(this, @isLittleEndian)
     @initTLB()
@@ -181,18 +171,32 @@ class C1964jsEmulator
     @flushDynaCache()
     @showFB = true
     @webGL.hide3D()
+    #canvas
+    @ctx = document.getElementById("Canvas").getContext("2d")
+    @ImDat = @ctx.createImageData(320, 240)
+    @stopCompiling = false
+    @docElement = document.getElementById("screen")
+    @errorElement = document.getElementById("error")
+    @p = new Int32Array(1)
+    #set ram size
+    MEMORY_SIZE_NO_EXPANSION = 0x400000
+    MEMORY_SIZE_WITH_EXPANSION = 0x800000
+    @currentRdramSize = MEMORY_SIZE_WITH_EXPANSION
+    @crc1 = 0
+    @crc2 = 0
+    @romName = new Uint8Array 20
 
     #runTest();
+
+  # function init()
+  #   r[32] = LO for mult
+  #   r[33] = HI for mult
+  #   r[34] = write-only. to protect r0, write here.
+  init: (buffer) ->
     @memory.rom = buffer
 
     #rom = new Uint8Array(buffer);
     @memory.romUint8Array = buffer
-    @docElement = document.getElementById("screen")
-    @errorElement = document.getElementById("error")
-
-    #canvas
-    @ctx = document.getElementById("Canvas").getContext("2d")
-    @ImDat = @ctx.createImageData(320, 240)
 
     #fill alpha
     i = 3
@@ -204,7 +208,6 @@ class C1964jsEmulator
         i += 4
         x += 1
       y += 1
-    @stopCompiling = false
     @byteSwap @memory.rom
 
     #copy first 4096 bytes to sp_dmem and run from there.
@@ -221,22 +224,15 @@ class C1964jsEmulator
     @cp0[consts.PREVID] = 0x00000b00
     @cp1Con[0] = 0x00000511
 
-    @p = new Int32Array(1)
     @p[0] = 0xA4000040 #set programCounter to start of SP_MEM and after the 64 byte ROM header.
     @memory.setInt32 @memory.miUint8Array, consts.MI_VERSION_REG, 0x01010101
     @memory.setInt32 @memory.riUint8Array, consts.RI_CONFIG_REG, 0x00000001
     @memory.setInt32 @memory.viUint8Array, consts.VI_INTR_REG, 0x000003FF
     @memory.setInt32 @memory.viUint8Array, consts.VI_V_SYNC_REG, 0x000000D1
     @memory.setInt32 @memory.viUint8Array, consts.VI_H_SYNC_REG, 0x000D2047
-
-    #set ram size
-    MEMORY_SIZE_NO_EXPANSION = 0x400000
-    MEMORY_SIZE_WITH_EXPANSION = 0x800000
-    @currentRdramSize = MEMORY_SIZE_WITH_EXPANSION
     
     # rom header
     #copy rom name
-    @romName = new Uint8Array 20
     for i in [0...20]
       @romName[i] = @memory.rom[32+i]
     #copy crc1
@@ -310,14 +306,15 @@ class C1964jsEmulator
 
     #endian-safe blit: rgba5551
     y = -240 * 320
+    `const u8 = this.memory.rdramUint8Array`
     while y isnt 0
-      hi = @memory.rdramUint8Array[k]
-      lo = @memory.rdramUint8Array[k + 1]
+      hi = u8[k]
+      lo = u8[k + 1]
       out[i] = (hi & 0xF8)
       out[i + 1] = (((hi << 5) | (lo >>> 3)) & 0xF8)
       out[i + 2] = (lo << 2 & 0xF8)
-      hi = @memory.rdramUint8Array[k + 2]
-      lo = @memory.rdramUint8Array[k + 3]
+      hi = u8[k + 2]
+      lo = u8[k + 3]
       out[i + 4] = (hi & 0xF8)
       out[i + 5] = (((hi << 5) | (lo >>> 3)) & 0xF8)
       out[i + 6] = (lo << 2 & 0xF8)

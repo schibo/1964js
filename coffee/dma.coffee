@@ -46,8 +46,10 @@ class C1964jsDMA
       if from + end + 1 > @memory.rom.byteLength
         transfer = @memory.rom.byteLength - from - 1
         remaining = end - transfer
+      `const d = this.memory.rdramUint8Array`
+      `const r = this.memory.romUint8Array`
       while transfer >= 0
-        @memory.rdramUint8Array[to] = @memory.romUint8Array[from]
+        d[to] = r[from]
         to++
         from++
         --transfer
@@ -57,7 +59,7 @@ class C1964jsDMA
     else
       alert "pi reading from somewhere other than cartridge domain"
       while end-- >= 0
-        @memory.rdramUint8Array[to] = @memory.lb(from)
+        d[to] = @memory.lb(from)
         from++
         to++
 
