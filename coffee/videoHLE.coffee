@@ -83,7 +83,7 @@ C1964jsVideoHLE = (core, glx) ->
   @renderStateChanged = false
   @inverseTransposeCalculated = false
 
-  @normalMat = new Float32Array(4)
+  @normalMat = new Int32Array(4)
   @transformed = mat4.create()
   @nonTransformed = mat4.create()
   @modelViewInverse = mat4.create()
@@ -353,13 +353,15 @@ C1964jsVideoHLE = (core, glx) ->
     a = undefined
     k = 0
     i = 0
+    `const u8 = this.core.memory.rdramUint8Array`
     while i < 4
       j = 0
       while j < 4
         a = addr + (i << 3) + (j << 1)
-        hi = (@core.memory.rdramUint8Array[a] << 8 | @core.memory.rdramUint8Array[a + 1]) & 0x0000FFFF
-        lo = (@core.memory.rdramUint8Array[a + 32] << 8 | @core.memory.rdramUint8Array[a + 32 + 1]) & 0x0000FFFF
-        @matToLoad[k] = (((hi << 16) | lo)>>0) / 65536.0
+        hi = (u8[a] << 8 | u8[a + 1]) & 0x0000FFFF
+        lo = (u8[a + 32] << 8 | u8[a + 32 + 1]) & 0x0000FFFF
+        # 0.0000152587890625 is 1.0/65536.0
+        @matToLoad[k] = (((hi << 16) | lo)>>0) * 0.0000152587890625
         k += 1
         j += 1
       i += 1
@@ -396,69 +398,82 @@ C1964jsVideoHLE = (core, glx) ->
     return
 
   C1964jsVideoHLE::processVertexData = (addr, v0, num) ->
-    a = undefined
-    i = v0
+    a = addr|0
+    i = v0|0
+    `const tile = this.textureTile[this.activeTile]`
+    `const texWidth = (((tile.lrs >> 2) + 1) - tile.uls)|0`
+    `const texHeight = (((tile.lrt >> 2) + 1) - tile.ult)|0`
+    `const sMult = 1.0 / (texWidth<<5)`
+    `const tMult = 1.0 / (texHeight<<5)`
+    `const end = (v0 + num)|0`
+    `const n = this.normalMat`
 
-    texWidth = ((@textureTile[@activeTile].lrs >> 2) + 1) - @textureTile[@activeTile].uls
-    texHeight = ((@textureTile[@activeTile].lrt >> 2) + 1) - @textureTile[@activeTile].ult
+    if @bLightingEnable is true
+      if @inverseTransposeCalculated is false and @gRSP.bMatrixIsUpdated is true
+        mat4.inverse @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], @modelViewInverse
+        mat4.transpose @modelViewInverse, @modelViewTransposedInverse
+        @inverseTransposeCalculated = true
 
-    if @inverseTransposeCalculated is false and @bLightingEnable is true and @gRSP.bMatrixIsUpdated is true
-      mat4.inverse @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], @modelViewInverse
-      mat4.transpose @modelViewInverse, @modelViewTransposedInverse
-      @inverseTransposeCalculated = true
+      while i < end
+        v = @N64VertexList[i]
+        n[0] = @getVertexNormalX a
+        i += 1
+        n[1] = @getVertexNormalY a
+        n[2] = @getVertexNormalZ a
+        n[3] = 1.0
 
-    while i < v0 + num
-      a = addr + 16 * (i - v0)
-      v = @N64VertexList[i]
-
-      v.w = @getVertexW(a)
-      if v.w is 0
-        v.w = 1.0
-      v.x = @getVertexX(a)
-      v.y = @getVertexY(a)
-      v.z = @getVertexZ(a)
-      v.u = @getVertexS(a) / (texWidth<<5)
-      v.v = @getVertexT(a) / (texHeight<<5)
-
-      if @bLightingEnable is true
-        @normalMat[0] = @getVertexNormalX a
-        @normalMat[1] = @getVertexNormalY a
-        @normalMat[2] = @getVertexNormalZ a
-        @normalMat[3] = 1.0
-
-        mat4.multiplyVec4 @modelViewTransposedInverse, @normalMat, @tempVec4
-
+        mat4.multiplyVec4 @modelViewTransposedInverse, n, @tempVec4
+        v.u = @getVertexS(a) * sMult
+        v.w = @getVertexW(a)
+        v.x = @getVertexX(a)
         vect = vec3.normalize @tempVec4
-
-        # projectiontransposedInverse = mat4.create()
-        # mat4.set @gRSP.projectionMtxs[@gRSP.projectionMtxTop], projectiontransposedInverse
-        # mat4.transpose projectiontransposedInverse, projectiontransposedInverse
-        # mat4.inverse projectiontransposedInverse, projectiontransposedInverse
-        # mat4.multiply projectiontransposedInverse, @normalMat, @normalMat
+        v.y = @getVertexY(a)
+        v.z = @getVertexZ(a)
+        v.v = @getVertexT(a) * tMult
 
         vertColor = @lightVertex vect
         v.r = vertColor[0]
         v.g = vertColor[1]
+        a += 16
         v.b = vertColor[2]
         v.a = vertColor[3]
-      else if @bShade is false
-        v.r = @primColor[0]
-        v.g = @primColor[1]
-        v.b = @primColor[2]
-        v.a = @primColor[3]
-      else
+
+        #until we use it..
+        #@N64VertexList[i].nx = (@toSByte @getVertexNormalX(a))
+        #@N64VertexList[i].ny = (@toSByte @getVertexNormalY(a))
+        #@N64VertexList[i].nz = (@toSByte @getVertexNormalZ(a))
+
+        #console.log "Vertex "+i+": XYZ("+@N64VertexList[i].x+" , "+@N64VertexList[i].y+" , "+@N64VertexList[i].z+") ST("+@N64VertexList[i].s+" , "+@N64VertexList[i].t+") RGBA("+@N64VertexList[i].r+" , "+@N64VertexList[i].g+" , "+@N64VertexList[i].b+" , "+@N64VertexList[i].a+") N("+@N64VertexList[i].nx+" , "+@N64VertexList[i].ny+" , "+@N64VertexList[i].nz+")"
+    else if @bShade is true
+      while i < end
+        v = @N64VertexList[i]
+        v.u = @getVertexS(a) * sMult
+        v.w = @getVertexW(a)
+        v.x = @getVertexX(a)
+        v.y = @getVertexY(a)
+        i += 1
+        v.z = @getVertexZ(a)
+        v.v = @getVertexT(a) * tMult
         v.r = @getVertexColorR(a)
         v.g = @getVertexColorG(a)
         v.b = @getVertexColorB(a)
         v.a = @getVertexAlpha(a)
-
-      #until we use it..
-      #@N64VertexList[i].nx = (@toSByte @getVertexNormalX(a))
-      #@N64VertexList[i].ny = (@toSByte @getVertexNormalY(a))
-      #@N64VertexList[i].nz = (@toSByte @getVertexNormalZ(a))
-
-      #console.log "Vertex "+i+": XYZ("+@N64VertexList[i].x+" , "+@N64VertexList[i].y+" , "+@N64VertexList[i].z+") ST("+@N64VertexList[i].s+" , "+@N64VertexList[i].t+") RGBA("+@N64VertexList[i].r+" , "+@N64VertexList[i].g+" , "+@N64VertexList[i].b+" , "+@N64VertexList[i].a+") N("+@N64VertexList[i].nx+" , "+@N64VertexList[i].ny+" , "+@N64VertexList[i].nz+")"
-      i += 1
+        a += 16
+    else
+      while i < end
+        v = @N64VertexList[i]
+        v.u = @getVertexS(a) * sMult
+        v.w = @getVertexW(a)
+        v.r = @primColor[0]
+        v.x = @getVertexX(a)
+        v.v = @getVertexT(a) * tMult
+        i += 1
+        v.g = @primColor[1]
+        v.y = @getVertexY(a)
+        v.b = @primColor[2]
+        v.z = @getVertexZ(a)
+        v.a = @primColor[3]
+        a += 16
     return
 
   C1964jsVideoHLE::DLParser_SetCImg = (pc) ->
@@ -626,7 +641,12 @@ C1964jsVideoHLE = (core, glx) ->
     #if a > 255.0
     #  a = 255.0
 
-    return [r, g, b, 255.0]
+    light = new Float32Array(4)
+    light[0] = r
+    light[1] = g
+    light[2] = b
+    light[3] = 255.0
+    return light
 
   C1964jsVideoHLE::RSP_MoveMemLight = (dwLight, dwAddr, pc) ->
     if dwLight >= 16

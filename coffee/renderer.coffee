@@ -20,6 +20,8 @@ useExternalTextures = false #for loading community texture packs
 C1964jsRenderer = (settings, glx, webGL) ->
   gl = glx
   @canvas = undefined
+  @texture = new Uint8Array(1024*1024*4)
+
 
   texrectVertexPositionBuffer = gl.createBuffer()
   texrectVertexTextureCoordBuffer = gl.createBuffer()
@@ -132,7 +134,7 @@ C1964jsRenderer = (settings, glx, webGL) ->
     #   imageData = context.createImageData(nextPow2Width, nextPow2Height)
     #   texture = imageData.data
     # else
-    texture = new Uint8Array(textureSize)
+    texture = @texture
 
     dstRowOffset = 0
     dstRowStride = nextPow2Width
