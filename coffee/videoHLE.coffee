@@ -350,6 +350,7 @@ class C1964jsVideoHLE
     k = 0
     i = 0
     `const u8 = this.core.memory.rdramUint8Array`
+    `const matToLoad = this.matToLoad`
     while i < 4
       j = 0
       while j < 4
@@ -357,7 +358,7 @@ class C1964jsVideoHLE
         hi = (u8[a] << 8 | u8[a + 1]) & 0x0000FFFF
         lo = (u8[a + 32] << 8 | u8[a + 32 + 1]) & 0x0000FFFF
         # 0.0000152587890625 is 1.0/65536.0
-        @matToLoad[k] = (((hi << 16) | lo)>>0) * 0.0000152587890625
+        matToLoad[k] = (((hi << 16) | lo)>>0) * 0.0000152587890625
         k += 1
         j += 1
       i += 1
@@ -395,7 +396,8 @@ class C1964jsVideoHLE
 
   processVertexData: (addr, v0, num) ->
     a = addr|0
-    i = v0|0
+    i = -num
+    `const vo = v0+num`
     `const tile = this.textureTile[this.activeTile]`
     `const texWidth = (((tile.lrs >> 2) + 1) - tile.uls)|0`
     `const texHeight = (((tile.lrt >> 2) + 1) - tile.ult)|0`
@@ -410,8 +412,8 @@ class C1964jsVideoHLE
         mat4.transpose @modelViewInverse, @modelViewTransposedInverse
         @inverseTransposeCalculated = true
 
-      while i < end
-        v = @N64VertexList[i]
+      while i < 0
+        v = @N64VertexList[vo+i]
         n[0] = @getVertexNormalX a
         i += 1
         n[1] = @getVertexNormalY a
@@ -441,8 +443,8 @@ class C1964jsVideoHLE
 
         #console.log "Vertex "+i+": XYZ("+@N64VertexList[i].x+" , "+@N64VertexList[i].y+" , "+@N64VertexList[i].z+") ST("+@N64VertexList[i].s+" , "+@N64VertexList[i].t+") RGBA("+@N64VertexList[i].r+" , "+@N64VertexList[i].g+" , "+@N64VertexList[i].b+" , "+@N64VertexList[i].a+") N("+@N64VertexList[i].nx+" , "+@N64VertexList[i].ny+" , "+@N64VertexList[i].nz+")"
     else if @bShade is true
-      while i < end
-        v = @N64VertexList[i]
+      while i < 0
+        v = @N64VertexList[vo+i]
         v.u = @getVertexS(a) * sMult
         v.w = @getVertexW(a)
         v.x = @getVertexX(a)
@@ -456,8 +458,8 @@ class C1964jsVideoHLE
         v.a = @getVertexAlpha(a)
         a += 16
     else
-      while i < end
-        v = @N64VertexList[i]
+      while i < 0
+        v = @N64VertexList[vo+i]
         v.u = @getVertexS(a) * sMult
         v.w = @getVertexW(a)
         v.r = @primColor[0]
@@ -1045,8 +1047,11 @@ class C1964jsVideoHLE
     if bytesToXfer > 4096
       console.error "LoadBlock is making too large of a transfer. "+bytesToXfer+" bytes"
     i=0
+    `const u8 = this.core.memory.rdramUint8Array
+    const addr = this.texImg.addr
+    const tmem = this.tmem`
     while i < bytesToXfer
-      @tmem[i]= @core.memory.rdramUint8Array[@texImg.addr+i]
+      tmem[i]= u8[addr+i]
       i++
     return
 
