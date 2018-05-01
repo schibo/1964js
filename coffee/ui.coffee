@@ -56,8 +56,8 @@ initTryCatch = (buffer) ->
     if @i1964js isnt `undefined` and @i1964js?
       @i1964js.stopEmulatorAndCleanup()
 
-    @i1964js = new C1964jsEmulator(g_settings)
-    @i1964js.init buffer
+    @i1964js = new C1964jsEmulator g_settings, buffer
+    @i1964js.startEmulator()
   catch e
     if @i1964js isnt `undefined` and @i1964js?
       @i1964js.terminate = true

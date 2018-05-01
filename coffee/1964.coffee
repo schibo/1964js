@@ -71,7 +71,7 @@ class C1964jsEmulator
     ->
       fn.call me
 
-  constructor: (userSettings) ->
+  constructor: (userSettings, buffer) ->
     #@runLoop = @callBind @runLoop, this
     i = undefined
     @settings = userSettings
@@ -185,7 +185,6 @@ class C1964jsEmulator
     @crc1 = 0
     @crc2 = 0
     @romName = new Uint8Array 20
-    return
 
     #runTest();
 
@@ -193,7 +192,6 @@ class C1964jsEmulator
   #   r[32] = LO for mult
   #   r[33] = HI for mult
   #   r[34] = write-only. to protect r0, write here.
-  init: (buffer) ->
     @memory.rom = buffer
 
     #rom = new Uint8Array(buffer);
@@ -253,7 +251,6 @@ class C1964jsEmulator
     while i < 35
       @h[i] = @r[i] >> 31
       i += 1
-    @startEmulator()
     return
 
   #swap to 0x80371240

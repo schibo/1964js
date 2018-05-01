@@ -36,7 +36,7 @@ C1964jsEmulator::deleteFunction = (k) ->
   s.parentNode.removeChild s
 
   #allow deletion of this function
-  eval fnName + "= function (r, s, t, v){}; delete " + fnName + ";"
-  self[fnName] = null
+  eval fnName + "= function (r, s, t, v){}; " + fnName + "= undefined;"
+  self[fnName] = undefined
   alert "self[fnName] should have been null."  if self[fnName]
   return
