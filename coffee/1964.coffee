@@ -361,12 +361,16 @@ class C1964jsEmulator
     `const h = this.h`
     `const hu = this.hu`
     `const p = this.p`
+
+    fn = @decompileBlock(p[0])
+
     while @terminate is false
       #@interrupts.checkInterrupts()
       if m[0] >= 0
         @interval += 1
         #@m[0] = -125000 # which is -625000 / (interval+1)
         m[0] = -156250 # which is -625000 / (interval+1) / 2
+        pc = @p[0]
         @interrupts.processException @p[0]
         if @interval is 4
           @interval = 0
@@ -377,17 +381,22 @@ class C1964jsEmulator
           @interrupts.triggerVIInterrupt 0, false #if ((@memory.getUint32(@memory.miUint8Array, consts.MI_INTR_REG) & consts.MI_INTR_VI) isnt 0)
         else if @interval is 2
           @interrupts.checkInterrupts()
+          if pc isnt p[0]
+            pc = p[0] >>> 2
+            fnName = "_" + pc
+            fn = self[fnName]
           break
+        if pc isnt p[0]
+          pc = p[0] >>> 2
+          fnName = "_" + pc
+          fn = self[fnName]
       else
       #  @interrupts.processException @p[0]
-        pc = p[0] >>> 2
-        fnName = "_" + pc
 
         #this is broken-up so that we can process more interrupts. If we freeze,
         #we probably need to split this up more.
         try
-          fn = self[fnName]
-          @run fn, r, ru, h, hu
+          fn = @run fn, r, ru, h, hu
         catch e
           #so, we really need to know what type of exception this is,
           #but right now, we're assuming that we need to compile a block due to
@@ -406,7 +415,7 @@ class C1964jsEmulator
     `const t = this`
     while m[0] < 0
       fn = fn(r, ru, h, hu, mem, t)
-    return
+    return fn
 
   repaintWrapper: ->
     @repaint @ctx, @ImDat

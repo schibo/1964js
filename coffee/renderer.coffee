@@ -151,11 +151,11 @@ C1964jsRenderer = (settings, glx, webGL) ->
           switch tile.siz
             when consts.TXT_SIZE_16b # rgba5551
               j=-tileHeight
-              while j != 0
+              while j < 0
                 i=-tileWidth
                 srcOffset = srcRowOffset
                 dstOffset = dstRowOffset
-                while i isnt 0
+                while i < 0
                   color16 = tmem[srcOffset]<<8 | tmem[srcOffset+1]
                   texture[dstOffset] = fivetoeight[color16 >> 11 & 0x1F]
                   texture[dstOffset + 1] = fivetoeight[color16 >> 6 & 0x1F]
@@ -173,11 +173,11 @@ C1964jsRenderer = (settings, glx, webGL) ->
           switch tile.siz
             when consts.TXT_SIZE_8b # ia8
               j=-tileHeight
-              while j isnt 0
+              while j < 0
                 i=-tileWidth
                 srcOffset = srcRowOffset
                 dstOffset = dstRowOffset
-                while i isnt 0
+                while i < 0
                   b = tmem[srcOffset]
                   I = fourtoeight[(b >>> 4)& 0x0F]
                   a = fourtoeight[b & 0x0F]
@@ -193,11 +193,11 @@ C1964jsRenderer = (settings, glx, webGL) ->
                 dstRowOffset += dstRowStride
             when consts.TXT_SIZE_4b # ia4
               j=-tileHeight
-              while j isnt 0
+              while j < 0
                 i=-tileWidth
                 srcOffset = srcRowOffset
                 dstOffset = dstRowOffset
-                while i isnt 0
+                while i < 0
                   b = tmem[srcOffset]
                   I0 = threetoeight[(b & 0xe0)>>>5]
                   a0 = onetoeight[(b & 0x10)>>>4]
@@ -229,11 +229,11 @@ C1964jsRenderer = (settings, glx, webGL) ->
                 dstRowOffset += dstRowStride
             when consts.TXT_SIZE_16b # ia16
               j=-tileHeight
-              while j isnt 0
+              while j < 0
                 i=-tileWidth
                 srcOffset = srcRowOffset
                 dstOffset = dstRowOffset
-                while i isnt 0
+                while i < 0
                   I = tmem[srcOffset]
                   a = tmem[srcOffset+1]
                   texture[dstOffset] = I
