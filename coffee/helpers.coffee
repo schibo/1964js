@@ -672,7 +672,7 @@ C1964jsHelpers = (core, isLittleEndian) ->
 
 #hack global space until we export classes properly
 #node.js uses exports; browser uses this (window)
-root = exports ? this
+root = exports ? self
 root.C1964jsHelpers = C1964jsHelpers
 #print out a hex number
 root.dec2hex = (u) ->

@@ -68,8 +68,7 @@ class C1964jsMemory
   constructor: (@core) ->
     @romUint8Array = `undefined` # set after rom is loaded.
     @rom = `undefined` # set after rom is loaded.
-    @rdramUint8Array = new Uint8Array(0x800000);
-
+    @rdramUint8Array = new Uint8Array(0x800000)
     @spMemUint8Array = new Uint8Array(0x10000)
     @spReg1Uint8Array = new Uint8Array(0x10000)
     @spReg2Uint8Array = new Uint8Array(0x10000)
@@ -430,7 +429,7 @@ class C1964jsMemory
     ram[a + 1] = val
     return
 
-  writeRdram32: (that, val, a) ->
+  writeRdram32: (that, val, ###* number ###a) ->
     `const ram = that.rdramUint8Array`
     ram[a] = val >> 24
     ram[a + 1] = val >> 16
@@ -451,10 +450,11 @@ class C1964jsMemory
 
   writeSpMem32: (that, val, a) ->
     `const off_ = a - MEMORY_START_SPMEM`
-    that.spMemUint8Array[off_] = val >> 24
-    that.spMemUint8Array[off_ + 1] = val >> 16
-    that.spMemUint8Array[off_ + 2] = val >> 8
-    that.spMemUint8Array[off_ + 3] = val
+    `const mem = that.spMemUint8Array`
+    mem[off_] = val >> 24
+    mem[off_ + 1] = val >> 16
+    mem[off_ + 2] = val >> 8
+    mem[off_ + 3] = val
     return
 
   writeRi8: (that, val, a) ->
@@ -971,5 +971,5 @@ class C1964jsMemory
 
 #hack global space until we export classes properly
 #node.js uses exports; browser uses this (window)
-root = exports ? this
+root = exports ? self
 root.C1964jsMemory = C1964jsMemory

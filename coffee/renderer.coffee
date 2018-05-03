@@ -347,5 +347,5 @@ C1964jsRenderer = (settings, glx, webGL) ->
   return this
 #hack global space until we export classes properly
 #node.js uses exports; browser uses this (window)
-root = exports ? this
+root = exports ? self
 root.C1964jsRenderer = C1964jsRenderer

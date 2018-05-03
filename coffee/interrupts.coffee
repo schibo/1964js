@@ -582,5 +582,5 @@ C1964jsInterrupts = (core, cp0) ->
 
 #hack global space until we export classes properly
 #node.js uses exports; browser uses this (window)
-root = exports ? this
+root = exports ? self
 root.C1964jsInterrupts = C1964jsInterrupts

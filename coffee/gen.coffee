@@ -21,6 +21,7 @@ C1964jsEmulator::flushDynaCache = ->
   while @kk
     @kk -= 1
     @deleteFunction @kk
+  @fnLut = new Map()
   return
 
 #must not use strict here.

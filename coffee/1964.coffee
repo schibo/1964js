@@ -147,6 +147,7 @@ class C1964jsEmulator
     @gprh = new ArrayBuffer(35*4)
     @h = new Int32Array(@gprh)
     @hu = new Uint32Array(@gprh)
+    @fnLut = [];#new Map()
 
     #hook-up system objects
     @memory = new C1964jsMemory(this)
@@ -383,13 +384,11 @@ class C1964jsEmulator
           @interrupts.checkInterrupts()
           if pc isnt p[0]
             pc = p[0] >>> 2
-            fnName = "_" + pc
-            fn = self[fnName]
+            fn = @fnLut[pc]
           break
         if pc isnt p[0]
           pc = p[0] >>> 2
-          fnName = "_" + pc
-          fn = self[fnName]
+          fn = @fnLut[pc]
       else
       #  @interrupts.processException @p[0]
 
@@ -494,6 +493,7 @@ class C1964jsEmulator
     @kk += 1
     s.parentNode.insertBefore g, s
     g.text = string
+    @fnLut[pc>>>2] = self[fnName]
     self[fnName]
 
   r4300i_add: (i) ->
@@ -688,7 +688,7 @@ class C1964jsEmulator
     instruction = @memory.lw((@p[0] + offset + 4) | 0)
     opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     string += opcode
-    string += "t.m[0]+=" + (@cnt+1) + ";t.p[0]=ru[39];return self['_'+(ru[39]>>>2)];"
+    string += "t.m[0]+=" + (@cnt+1) + ";t.p[0]=ru[39];return t.fnLut[ru[39]>>>2];"
     string
 
   r4300i_jr: (i) ->
@@ -702,7 +702,7 @@ class C1964jsEmulator
     instruction = @memory.lw((@p[0] + offset + 4) | 0)
     opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     string += opcode
-    string += "t.m[0]+=" + (@cnt+1) + ";t.p[0]=ru[37];return self['_'+(ru[37]>>>2)];"
+    string += "t.m[0]+=" + (@cnt+1) + ";t.p[0]=ru[37];return t.fnLut[ru[37]>>>2];"
 
   UNUSED: (i) ->
     @log "warning: UNUSED"
@@ -712,7 +712,7 @@ class C1964jsEmulator
     @stopCompiling = true
     string = "if((t.cp0[" + consts.STATUS + "]&" + consts.ERL + ")!==0){alert(\"error epc\");t.p[0]=t.cp0[" + consts.ERROREPC + "];"
     string += "t.cp0[" + consts.STATUS + "]&=~" + consts.ERL + "}else{t.p[0]=t.cp0[" + consts.EPC + "];t.cp0[" + consts.STATUS + "]&=~" + consts.EXL + "}"
-    string += "t.m[0]+=" + (@cnt+1) + ";t.LLbit=0;return self['_'+(t.p[0]>>>2)];"
+    string += "t.m[0]+=" + (@cnt+1) + ";t.LLbit=0;return t.fnLut[t.p[0]>>>2];"
 
   r4300i_COP0_mtc0: (i, isDelaySlot) ->
     delaySlot = undefined
@@ -753,13 +753,22 @@ class C1964jsEmulator
       @helpers.tRT(i) + "=" + @helpers.RS(i) + "^" + @helpers.offset_imm(i) + ";" + @helpers.tRTH(i) + "=" + @helpers.RSH(i) + ";"
 
   r4300i_andi: (i) ->
-    @helpers.tRT(i) + "=" + @helpers.RS(i) + "&" + @helpers.offset_imm(i) + ";" + @helpers.tRTH(i) + "=0;"
+    if @helpers.rt(i) is @helpers.rs(i)
+      @helpers.tRT(i) + "&=" + @helpers.offset_imm(i) + ";" + @helpers.tRTH(i) + "=0;"
+    else
+      @helpers.tRT(i) + "=" + @helpers.RS(i) + "&" + @helpers.offset_imm(i) + ";" + @helpers.tRTH(i) + "=0;"
 
   r4300i_addi: (i) ->
-    @helpers.tRT(i) + "=" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ";" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31;"
+    if @helpers.rt(i) is @helpers.rs(i)
+      @helpers.tRT(i) + "+=" + @helpers.soffset_imm(i) + ";" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31;"  
+    else
+      @helpers.tRT(i) + "=" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ";" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31;"
 
   r4300i_addiu: (i) ->
-    @helpers.tRT(i) + "=" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ";" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31;"
+    if @helpers.rt(i) is @helpers.rs(i)
+      @helpers.tRT(i) + "+=" + @helpers.soffset_imm(i) + ";" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31;"  
+    else
+      @helpers.tRT(i) + "=" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ";" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31;"
 
   r4300i_slt: (i) ->
     @helpers.tRD(i) + "=((" + @helpers.RSH(i) + "<" + @helpers.RTH(i) + ")|(!(" + @helpers.RSH(i) + "-" + @helpers.RTH(i) + ")&(" + @helpers.uRS(i) + "<" + @helpers.uRT(i) + ")));" + @helpers.tRDH(i) + "=0;"
@@ -1286,6 +1295,6 @@ class C1964jsEmulator
 
 #hack global space until we export classes properly
 #node.js uses exports; browser uses this (window)
-root = exports ? this
+root = exports ? self
 root.C1964jsEmulator = C1964jsEmulator
 root.consts = consts
