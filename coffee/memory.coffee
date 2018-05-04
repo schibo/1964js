@@ -145,26 +145,26 @@ class C1964jsMemory
     return
 
   readDummy8: (that, a) ->
-    `const off_ = a & 0x0000FFFC`
+    `const off_ = a & 0xFFFC`
     that.dummyReadWriteUint8Array[off_]
 
   readDummy16: (that, a) ->
-    `const off_ = a & 0x0000FFFC`
+    `const off_ = a & 0xFFFC`
     that.dummyReadWriteUint8Array[off_] << 8 | that.dummyReadWriteUint8Array[off_ + 1]
 
   readDummy32: (that, a) ->
-    `const off_ = a & 0x0000FFFC`
+    `const off_ = a & 0xFFFC`
     that.dummyReadWriteUint8Array[off_] << 24 | that.dummyReadWriteUint8Array[off_ + 1] << 16 | that.dummyReadWriteUint8Array[off_ + 2] << 8 | that.dummyReadWriteUint8Array[off_ + 3]
 
   readRdram8: (that, a) ->
     that.rdramUint8Array[a]
 
   readRdram16: (that, a) ->
-    ram = that.rdramUint8Array
+    `const ram = that.rdramUint8Array`
     ram[a] << 8 | ram[a + 1]
 
   readRdram32: (that, a) ->
-    ram = that.rdramUint8Array
+    `const ram = that.rdramUint8Array`
     ram[a] << 24 | ram[a + 1] << 16 | ram[a + 2] << 8 | ram[a + 3]
 
   readRamRegs0_8: (that, a) ->

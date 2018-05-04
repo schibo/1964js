@@ -577,11 +577,17 @@ class C1964jsEmulator
 
   r4300i_beq: (i) ->
     @stopCompiling = true
-    "if(" + @helpers.RS(i) + "===" + @helpers.RT(i) + "&" + @helpers.RSH(i) + "===" + @helpers.RTH(i) + "){" + @delaySlot(i, false)
+    if @helpers.rs(i) is @helpers.rt(i)
+      "{" + @delaySlot(i, false)
+    else
+      "if(" + @helpers.RS(i) + "===" + @helpers.RT(i) + "&" + @helpers.RSH(i) + "===" + @helpers.RTH(i) + "){" + @delaySlot(i, false)
 
   r4300i_beql: (i) ->
     @stopCompiling = true
-    "if(" + @helpers.RS(i) + "===" + @helpers.RT(i) + "&" + @helpers.RSH(i) + "===" + @helpers.RTH(i) + "){" + @delaySlot(i, true)
+    if @helpers.rs(i) is @helpers.rt(i)
+      "{" + @delaySlot(i, true)
+    else
+      "if(" + @helpers.RS(i) + "===" + @helpers.RT(i) + "&" + @helpers.RSH(i) + "===" + @helpers.RTH(i) + "){" + @delaySlot(i, true)
 
   r4300i_blez: (i) ->
     @stopCompiling = true
