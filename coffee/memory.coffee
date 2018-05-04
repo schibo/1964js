@@ -429,7 +429,7 @@ class C1964jsMemory
     ram[a + 1] = val
     return
 
-  writeRdram32: (that, val, ###* number ###a) ->
+  writeRdram32: (that, val, a) ->
     `const ram = that.rdramUint8Array`
     ram[a] = val >> 24
     ram[a + 1] = val >> 16
