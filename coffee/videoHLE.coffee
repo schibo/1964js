@@ -349,14 +349,14 @@ class C1964jsVideoHLE
     a = undefined
     k = 0
     i = 0
-    `const u8 = this.core.memory.rdramUint8Array`
+    `const u8 = this.core.memory.u8`
     `const matToLoad = this.matToLoad`
     while i < 4
       j = 0
       while j < 4
         a = addr + (i << 3) + (j << 1)
-        hi = (u8[a] << 8 | u8[a + 1]) & 0x0000FFFF
-        lo = (u8[a + 32] << 8 | u8[a + 32 + 1]) & 0x0000FFFF
+        hi = (u8[a] << 8 | u8[a + 1])
+        lo = (u8[a + 32] << 8 | u8[a + 32 + 1])
         # 0.0000152587890625 is 1.0/65536.0
         matToLoad[k] = (((hi << 16) | lo)>>0) * 0.0000152587890625
         k += 1
@@ -394,6 +394,63 @@ class C1964jsVideoHLE
       @processVertexData addr, v0, num
     return
 
+  processLights: (vo, i, a, sMult, tMult) ->
+    `const n = this.normalMat`
+    while i < 0
+      v = @N64VertexList[vo+i]
+      n[0] = @getVertexNormalX a
+      i += 1
+      n[1] = @getVertexNormalY a
+      n[2] = @getVertexNormalZ a
+      #n[3] = 1.0
+
+      tempVec3 = new Float32Array 3
+      mat4.multiplyVec3 @modelViewTransposedInverse, n, tempVec3
+      v.u = @getVertexS(a) * sMult
+      v.w = @getVertexW(a)
+      v.x = @getVertexX(a)
+      vect = vec3.normalize tempVec3
+      v.y = @getVertexY(a)
+      v.z = @getVertexZ(a)
+      v.v = @getVertexT(a) * tMult
+      @lightVertex vect, v
+      a += 16
+    return
+
+  processShades: (vo, i, a, sMult, tMult) ->
+    while i < 0
+      v = @N64VertexList[vo+i]
+      v.w = @getVertexW(a)
+      v.x = @getVertexX(a)
+      v.y = @getVertexY(a)
+      i += 1
+      v.u = @getVertexS(a) * sMult
+      v.z = @getVertexZ(a)
+      v.r = @getVertexColorR(a)
+      v.g = @getVertexColorG(a)
+      v.b = @getVertexColorB(a)
+      v.a = @getVertexAlpha(a)
+      v.v = @getVertexT(a) * tMult
+      a += 16
+    return
+
+  processPrims: (vo, i, a, sMult, tMult) ->
+    while i < 0
+      v = @N64VertexList[vo+i]
+      v.w = @getVertexW(a)
+      v.r = @primColor[0]
+      v.x = @getVertexX(a)
+      i += 1
+      v.u = @getVertexS(a) * sMult
+      v.g = @primColor[1]
+      v.y = @getVertexY(a)
+      v.b = @primColor[2]
+      v.z = @getVertexZ(a)
+      v.a = @primColor[3]
+      v.v = @getVertexT(a) * tMult
+      a += 16
+    return
+
   processVertexData: (addr, v0, num) ->
     a = addr|0
     i = -num
@@ -403,75 +460,17 @@ class C1964jsVideoHLE
     `const texHeight = (((tile.lrt >> 2) + 1) - tile.ult)|0`
     `const sMult = 1.0 / (texWidth<<5)`
     `const tMult = 1.0 / (texHeight<<5)`
-    `const end = (v0 + num)|0`
-    `const n = this.normalMat`
 
     if @bLightingEnable is true
       if @inverseTransposeCalculated is false and @gRSP.bMatrixIsUpdated is true
         mat4.inverse @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop], @modelViewInverse
         mat4.transpose @modelViewInverse, @modelViewTransposedInverse
         @inverseTransposeCalculated = true
-
-      while i < 0
-        v = @N64VertexList[vo+i]
-        n[0] = @getVertexNormalX a
-        i += 1
-        n[1] = @getVertexNormalY a
-        n[2] = @getVertexNormalZ a
-        n[3] = 1.0
-
-        mat4.multiplyVec4 @modelViewTransposedInverse, n, @tempVec4
-        v.u = @getVertexS(a) * sMult
-        v.w = @getVertexW(a)
-        v.x = @getVertexX(a)
-        vect = vec3.normalize @tempVec4
-        v.y = @getVertexY(a)
-        v.z = @getVertexZ(a)
-        v.v = @getVertexT(a) * tMult
-
-        vertColor = @lightVertex vect
-        v.r = vertColor[0]
-        v.g = vertColor[1]
-        a += 16
-        v.b = vertColor[2]
-        v.a = vertColor[3]
-
-        #until we use it..
-        #@N64VertexList[i].nx = (@toSByte @getVertexNormalX(a))
-        #@N64VertexList[i].ny = (@toSByte @getVertexNormalY(a))
-        #@N64VertexList[i].nz = (@toSByte @getVertexNormalZ(a))
-
-        #console.log "Vertex "+i+": XYZ("+@N64VertexList[i].x+" , "+@N64VertexList[i].y+" , "+@N64VertexList[i].z+") ST("+@N64VertexList[i].s+" , "+@N64VertexList[i].t+") RGBA("+@N64VertexList[i].r+" , "+@N64VertexList[i].g+" , "+@N64VertexList[i].b+" , "+@N64VertexList[i].a+") N("+@N64VertexList[i].nx+" , "+@N64VertexList[i].ny+" , "+@N64VertexList[i].nz+")"
+      @processLights vo, i, a, sMult, tMult
     else if @bShade is true
-      while i < 0
-        v = @N64VertexList[vo+i]
-        v.u = @getVertexS(a) * sMult
-        v.w = @getVertexW(a)
-        v.x = @getVertexX(a)
-        v.y = @getVertexY(a)
-        i += 1
-        v.z = @getVertexZ(a)
-        v.v = @getVertexT(a) * tMult
-        v.r = @getVertexColorR(a)
-        v.g = @getVertexColorG(a)
-        v.b = @getVertexColorB(a)
-        v.a = @getVertexAlpha(a)
-        a += 16
+      @processShades vo, i, a, sMult, tMult
     else
-      while i < 0
-        v = @N64VertexList[vo+i]
-        v.u = @getVertexS(a) * sMult
-        v.w = @getVertexW(a)
-        v.r = @primColor[0]
-        v.x = @getVertexX(a)
-        v.v = @getVertexT(a) * tMult
-        i += 1
-        v.g = @primColor[1]
-        v.y = @getVertexY(a)
-        v.b = @primColor[2]
-        v.z = @getVertexZ(a)
-        v.a = @primColor[3]
-        a += 16
+      @processPrims vo, i, a, sMult, tMult
     return
 
   DLParser_SetCImg: (pc) ->
@@ -538,8 +537,8 @@ class C1964jsVideoHLE
     # @combineC1a = 0xFF if @combineC1a is 7
     # @combineD1a = 0xFF if @combineD1a is 7
 
-    w0 = @core.memory.rdramUint8Array[pc] << 24 | @core.memory.rdramUint8Array[pc + 1] << 16 | @core.memory.rdramUint8Array[pc + 2] << 8 | @core.memory.rdramUint8Array[pc + 3]
-    w1 = @core.memory.rdramUint8Array[pc + 4] << 24 | @core.memory.rdramUint8Array[pc + 5] << 16 | @core.memory.rdramUint8Array[pc + 6] << 8 | @core.memory.rdramUint8Array[pc + 7]
+    w0 = @core.memory.u8[pc] << 24 | @core.memory.u8[pc + 1] << 16 | @core.memory.u8[pc + 2] << 8 | @core.memory.u8[pc + 3]
+    w1 = @core.memory.u8[pc + 4] << 24 | @core.memory.u8[pc + 5] << 16 | @core.memory.u8[pc + 6] << 8 | @core.memory.u8[pc + 7]
 
     #if (@combineD0 == 4)
     #  console.log " a0:" + @combineA0 + " b0:" + @combineB0 + " c0:" + @combineC0 + " d0:" + @combineD0 + " a0a:" + @combineA0a + " b0a:" + @combineB0a + " c0a:" + @combineC0a + " d0a:" + @combineD0a + " a1:" + @combineA1 + " b1:" + @combineB1 + " c1:" + @combineC1 + " d1:" + @combineD1 + " a1a:" + @combineA1a + " b1a:" + @combineB1a + " c1a:" + @combineC1a + " d1a:" + @combineD1a
@@ -556,7 +555,7 @@ class C1964jsVideoHLE
       when consts.RSP_MOVE_WORD_SEGMENT
         dwBase = undefined
         dwSegment = (@getGbi0MoveWordOffset(pc) >> 2) & 0x0F
-        dwBase = @getGbi0MoveWordValue(pc) & 0x00FFFFFF
+        dwBase = @getGbi0MoveWordValue(pc) & 0xFFFFFF
         @segments[dwSegment] = dwBase
       when consts.RSP_MOVE_WORD_NUMLIGHT
         dwNumLights = (@getGbi0MoveWordValue(pc)<< 1 >>> 6)-1
@@ -607,7 +606,7 @@ class C1964jsVideoHLE
     @gRSPlights[dwLight].z = lightVec[2]
     return
 
-  lightVertex: (norm) ->
+  lightVertex: (norm, v) ->
     r = @gRSP.fAmbientLightR
     g = @gRSP.fAmbientLightG
     b = @gRSP.fAmbientLightB
@@ -639,12 +638,10 @@ class C1964jsVideoHLE
     #if a > 255.0
     #  a = 255.0
 
-    light = new Float32Array(4)
-    light[0] = r
-    light[1] = g
-    light[2] = b
-    light[3] = 255.0
-    return light
+    v.r = r
+    v.g = g
+    v.b = b
+    v.a = 255.0
 
   RSP_MoveMemLight: (dwLight, dwAddr, pc) ->
     if dwLight >= 16
@@ -1042,12 +1039,12 @@ class C1964jsVideoHLE
     lrs = @getLoadBlockLrs(pc)
     dxt = @getLoadBlockDxt(pc)
     #console.log "LoadBlock: Tile:"+tile+" UL("+uls+"/"+ult+") LRS:"+lrs+" DXT: 0x"+dec2hex(dxt)
-    #textureAddr = @core.memory.rdramUint8Array[@texImg.addr])
+    #textureAddr = @core.memory.u8[@texImg.addr])
     bytesToXfer = (lrs+1) * @textureTile[tile].siz
     if bytesToXfer > 4096
       console.error "LoadBlock is making too large of a transfer. "+bytesToXfer+" bytes"
     i=0
-    `const u8 = this.core.memory.rdramUint8Array
+    `const u8 = this.core.memory.u8
     const addr = this.texImg.addr
     const tmem = this.tmem`
     while i < bytesToXfer

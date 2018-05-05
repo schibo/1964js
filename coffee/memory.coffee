@@ -68,7 +68,7 @@ class C1964jsMemory
   constructor: (@core) ->
     @romUint8Array = `undefined` # set after rom is loaded.
     @rom = `undefined` # set after rom is loaded.
-    @rdramUint8Array = new Uint8Array(0x800000)
+    @u8 = new Uint8Array(0x800000) # RDRAM
     @spMemUint8Array = new Uint8Array(0x10000)
     @spReg1Uint8Array = new Uint8Array(0x10000)
     @spReg2Uint8Array = new Uint8Array(0x10000)
@@ -141,7 +141,6 @@ class C1964jsMemory
       @SW[start] = SW
       start++
       @lengthy++
-
     return
 
   readDummy8: (that, a) ->
@@ -157,14 +156,14 @@ class C1964jsMemory
     that.dummyReadWriteUint8Array[off_] << 24 | that.dummyReadWriteUint8Array[off_ + 1] << 16 | that.dummyReadWriteUint8Array[off_ + 2] << 8 | that.dummyReadWriteUint8Array[off_ + 3]
 
   readRdram8: (that, a) ->
-    that.rdramUint8Array[a]
+    that.u8[a]
 
   readRdram16: (that, a) ->
-    `const ram = that.rdramUint8Array`
+    `const ram = that.u8`
     ram[a] << 8 | ram[a + 1]
 
   readRdram32: (that, a) ->
-    `const ram = that.rdramUint8Array`
+    `const ram = that.u8`
     ram[a] << 24 | ram[a + 1] << 16 | ram[a + 2] << 8 | ram[a + 3]
 
   readRamRegs0_8: (that, a) ->
@@ -420,17 +419,17 @@ class C1964jsMemory
     that.gioUint8Array[off_] << 24 | that.gioUint8Array[off_ + 1] << 16 | that.gioUint8Array[off_ + 2] << 8 | that.gioUint8Array[off_ + 3]
 
   writeRdram8: (that, val, a) ->
-    that.rdramUint8Array[a] = val
+    that.u8[a] = val
     return
 
   writeRdram16: (that, val, a) ->
-    `const ram = that.rdramUint8Array`
+    `const ram = that.u8`
     ram[a] = val >> 8
     ram[a + 1] = val
     return
 
   writeRdram32: (that, val, a) ->
-    `const ram = that.rdramUint8Array`
+    `const ram = that.u8`
     ram[a] = val >> 24
     ram[a + 1] = val >> 16
     ram[a + 2] = val >> 8

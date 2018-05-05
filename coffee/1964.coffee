@@ -242,7 +242,7 @@ class C1964jsEmulator
 
     @pif.eepromName = @pif.binArrayToJson(@romName) + "-" + dec2hex(@crc1) + dec2hex(@crc2) + ".eep"
     
-    @memory.setInt32 @memory.rdramUint8Array, bootCode.rdramSizeAddress, @currentRdramSize 
+    @memory.setInt32 @memory.u8, bootCode.rdramSizeAddress, @currentRdramSize 
 
     #this.memory.setInt32(this.memory.spReg1Uint8Array, SP_STATUS_REG, SP_STATUS_HALT);
     #1964cpp sets this then clears it in RCP_Reset() !
@@ -296,8 +296,6 @@ class C1964jsEmulator
     out = undefined
     i = 0
     y = undefined
-    hi = undefined
-    lo = undefined
     return  unless @showFB
     #get origin
     k = @memory.getInt32(@memory.viUint8Array, consts.VI_ORIGIN_REG) & 0x00FFFFFF
@@ -305,18 +303,14 @@ class C1964jsEmulator
 
     #endian-safe blit: rgba5551
     y = -240 * 320
-    `const u8 = this.memory.rdramUint8Array`
+    `const u8 = this.memory.u8`
     while y isnt 0
-      hi = u8[k]
-      lo = u8[k + 1]
-      out[i] = (hi & 0xF8)
-      out[i + 1] = (((hi << 5) | (lo >>> 3)) & 0xF8)
-      out[i + 2] = (lo << 2 & 0xF8)
-      hi = u8[k + 2]
-      lo = u8[k + 3]
-      out[i + 4] = (hi & 0xF8)
-      out[i + 5] = (((hi << 5) | (lo >>> 3)) & 0xF8)
-      out[i + 6] = (lo << 2 & 0xF8)
+      out[i] = (u8[k] & 0xF8)
+      out[i + 2] = (u8[k + 1] << 2 & 0xF8)
+      out[i + 1] = (((u8[k] << 5) | (u8[k + 1] >>> 3)) & 0xF8)
+      out[i + 4] = (u8[k + 2] & 0xF8)
+      out[i + 6] = (u8[k + 3] << 2 & 0xF8)
+      out[i + 5] = (((u8[k + 2] << 5) | (u8[k + 3] >>> 3)) & 0xF8)
       k += 4
       i += 8
       y += 2

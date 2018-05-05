@@ -46,7 +46,7 @@ class C1964jsDMA
       if from + end + 1 > @memory.rom.byteLength
         transfer = @memory.rom.byteLength - from - 1
         remaining = end - transfer
-      `const d = this.memory.rdramUint8Array`
+      `const d = this.memory.u8`
       `const r = this.memory.romUint8Array`
       while transfer >= 0
         d[to] = r[from]
@@ -79,7 +79,7 @@ class C1964jsDMA
     from &= 0x0000ffff
     @pif.processPif()
     while end >= 0
-      @memory.rdramUint8Array[to] = @memory.pifUint8Array[from]
+      @memory.u8[to] = @memory.pifUint8Array[from]
       to++
       from++
       --end
@@ -114,7 +114,7 @@ class C1964jsDMA
     to &= 0x0000ffff
     from &= 0x0fffffff
     while end >= 0
-      @memory.pifUint8Array[to] = @memory.rdramUint8Array[from]
+      @memory.pifUint8Array[to] = @memory.u8[from]
       to++
       from++
       --end
@@ -136,7 +136,7 @@ class C1964jsDMA
     to &= 0x00001fff
     from &= 0x00ffffff
     while end >= 0
-      @memory.spMemUint8Array[to] = @memory.rdramUint8Array[from]
+      @memory.spMemUint8Array[to] = @memory.u8[from]
       to++
       from++
       --end
