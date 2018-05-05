@@ -16,26 +16,26 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.###
 
 C1964jsVideoHLE::getGbi0MoveWordOffset = (pc) ->
-  (@core.memory.u8[pc+1]<<8 | @core.memory.u8[pc+2])>>>0
+  @core.memory.u8[pc+1]<<8 | @core.memory.u8[pc+2]
 
 C1964jsVideoHLE::getGbi0MoveWordType = (pc) ->
-  @core.memory.u8[pc+3] & 0x00ff
+  @core.memory.u8[pc+3]
 
 C1964jsVideoHLE::getGbi0MoveWordValue = (pc) ->
   #@core.memory.getInt32 @core.memory.u8, pc + 4
-  (@core.memory.u8[pc+4]<<24 | @core.memory.u8[pc+5]<<16 | @core.memory.u8[pc+6]<<8 | @core.memory.u8[pc+7])>>>0
+  @core.memory.u8[pc+4]<<24 | @core.memory.u8[pc+5]<<16 | @core.memory.u8[pc+6]<<8 | @core.memory.u8[pc+7]
 
 #GBI0 Dlist struct
 C1964jsVideoHLE::getGbi0DlistParam = (pc) ->
   #(@core.memory.u8[pc] << 24 | @core.memory.u8[pc + 1] << 16 | @core.memory.u8[pc + 2] << 8 | @core.memory.u8[pc + 3]) >>> 16 & 0x00ff
-  (@core.memory.u8[pc + 1]) & 0x0FF
+  @core.memory.u8[pc + 1]
 
 C1964jsVideoHLE::getGbi0DlistAddr = (pc) -> #this will probably be generic getGbi0Addr
   #@core.memory.getInt32 @core.memory.u8, pc + 4
-  (@core.memory.u8[pc+4]<<24 | @core.memory.u8[pc+5]<<16 | @core.memory.u8[pc+6]<<8 | @core.memory.u8[pc+7])>>>0
+  @core.memory.u8[pc+4]<<24 | @core.memory.u8[pc+5]<<16 | @core.memory.u8[pc+6]<<8 | @core.memory.u8[pc+7]
 
 C1964jsVideoHLE::getCommand = (pc) ->
-  @core.memory.u8[pc] & 0x00ff
+  @core.memory.u8[pc]
 
 #GBI0 Tri1 struct
 C1964jsVideoHLE::getGbi0Tri1Flag = (pc) ->
@@ -96,25 +96,28 @@ C1964jsVideoHLE::getVertexT = (pc) ->
   (@core.memory.u8[pc + 10]<<8 | @core.memory.u8[pc + 11])<<16>>16
 
 C1964jsVideoHLE::getVertexColorR = (pc) ->
-  @core.memory.u8[pc+12] >>> 0
+  @core.memory.u8[pc+12]
 
 C1964jsVideoHLE::getVertexColorG = (pc) ->
-  @core.memory.u8[pc+13] >>> 0
+  @core.memory.u8[pc+13]
 
 C1964jsVideoHLE::getVertexColorB = (pc) ->
-  @core.memory.u8[pc+14] >>> 0
+  @core.memory.u8[pc+14]
 
 C1964jsVideoHLE::getVertexAlpha = (pc) ->
-  @core.memory.u8[pc+15] >>> 0
+  @core.memory.u8[pc+15]
 
 C1964jsVideoHLE::getVertexNormalX = (pc) ->
-  (@core.memory.u8[pc+12] << 24 | @core.memory.u8[pc+13] << 16 | @core.memory.u8[pc+14] << 8 | @core.memory.u8[pc+15]) >> 24
+  #(@core.memory.u8[pc+12] << 24 | @core.memory.u8[pc+13] << 16 | @core.memory.u8[pc+14] << 8 | @core.memory.u8[pc+15]) >> 24
+  @core.memory.u8[pc+12] << 24 >> 24
 
 C1964jsVideoHLE::getVertexNormalY = (pc) ->
-  (@core.memory.u8[pc+12] << 24 | @core.memory.u8[pc+13] << 16 | @core.memory.u8[pc+14] << 8 | @core.memory.u8[pc+15]) << 8 >> 24
+  #(@core.memory.u8[pc+12] << 24 | @core.memory.u8[pc+13] << 16 | @core.memory.u8[pc+14] << 8 | @core.memory.u8[pc+15]) << 8 >> 24
+  @core.memory.u8[pc+13] << 24 >> 24
 
 C1964jsVideoHLE::getVertexNormalZ = (pc) ->
-  (@core.memory.u8[pc+12] << 24 | @core.memory.u8[pc+13] << 16 | @core.memory.u8[pc+14] << 8 | @core.memory.u8[pc+15]) << 16 >> 24
+  #(@core.memory.u8[pc+12] << 24 | @core.memory.u8[pc+13] << 16 | @core.memory.u8[pc+14] << 8 | @core.memory.u8[pc+15]) << 16 >> 24
+  @core.memory.u8[pc+14] << 24 >> 24
 
 C1964jsVideoHLE::getVertexNormalA = (pc) ->
   (@core.memory.u8[pc+12] << 24 | @core.memory.u8[pc+13] << 16 | @core.memory.u8[pc+14] << 8 | @core.memory.u8[pc+15]) << 24 >> 24
@@ -139,18 +142,29 @@ C1964jsVideoHLE::getTextureLevel = (pc) ->
   (@core.memory.u8[pc] << 24 | @core.memory.u8[pc+1] << 16 | @core.memory.u8[pc+2] << 8 | @core.memory.u8[pc+3]) >> 11 & 7
 
 C1964jsVideoHLE::getTextureTile = (pc) ->
-  (@core.memory.u8[pc] << 24 | @core.memory.u8[pc+1] << 16 | @core.memory.u8[pc+2] << 8 | @core.memory.u8[pc+3]) >> 8 & 7
+  #(@core.memory.u8[pc] << 24 | @core.memory.u8[pc+1] << 16 | @core.memory.u8[pc+2] << 8 | @core.memory.u8[pc+3]) >> 8 & 7
+  @core.memory.u8[pc+2] & 7
 
 C1964jsVideoHLE::getTextureOn = (pc) ->
-  (@core.memory.u8[pc] << 24 | @core.memory.u8[pc+1] << 16 | @core.memory.u8[pc+2] << 8 | @core.memory.u8[pc+3]) & 15
+  #(@core.memory.u8[pc] << 24 | @core.memory.u8[pc+1] << 16 | @core.memory.u8[pc+2] << 8 | @core.memory.u8[pc+3]) & 15
+  @core.memory.u8[pc+3] & 15
 
 C1964jsVideoHLE::getTextureScaleS = (pc) ->
-  (@core.memory.u8[pc+4] << 24 | @core.memory.u8[pc+5] << 16 | @core.memory.u8[pc+6] << 8 | @core.memory.u8[pc+7]) >> 16 & 0xFFFF
+  #(@core.memory.u8[pc+4] << 24 | @core.memory.u8[pc+5] << 16 | @core.memory.u8[pc+6] << 8 | @core.memory.u8[pc+7]) >> 16 & 0xFFFF
+  @core.memory.u8[pc+4] << 8 | @core.memory.u8[pc+5]
 
 C1964jsVideoHLE::getTextureScaleT = (pc) ->
-  (@core.memory.u8[pc+4] << 24 | @core.memory.u8[pc+5] << 16 | @core.memory.u8[pc+6] << 8 | @core.memory.u8[pc+7]) & 0xFFFF
+  #(@core.memory.u8[pc+4] << 24 | @core.memory.u8[pc+5] << 16 | @core.memory.u8[pc+6] << 8 | @core.memory.u8[pc+7]) & 0xFFFF
+  @core.memory.u8[pc+6] << 8 | @core.memory.u8[pc+7]
 
 #Combine Struct
+
+C1964jsVideoHLE::getCombineLo = (pc) ->
+  @core.memory.u8[pc] << 24 | @core.memory.u8[pc+1] << 16 | @core.memory.u8[pc+2] << 8 | @core.memory.u8[pc+3]
+
+C1964jsVideoHLE::getCombineHi = (pc) ->
+  @core.memory.u8[pc+4] << 24 | @core.memory.u8[pc+5] << 16 | @core.memory.u8[pc+6] << 8 | @core.memory.u8[pc+7]
+
 C1964jsVideoHLE::getCombineA0 = (pc) ->
   ((@core.memory.u8[pc] << 24 | @core.memory.u8[pc+1] << 16 | @core.memory.u8[pc+2] << 8 | @core.memory.u8[pc+3]) >> 20) & 15
 
@@ -199,7 +213,6 @@ C1964jsVideoHLE::getCombineC1a = (pc) ->
 C1964jsVideoHLE::getCombineD1a = (pc) ->
   (@core.memory.u8[pc+4] << 24 | @core.memory.u8[pc+5] << 16 | @core.memory.u8[pc+6] << 8 | @core.memory.u8[pc+7]) & 7
 
-
 #GBI0 matrix struct
 C1964jsVideoHLE::gbi0isProjectionMatrix = (pc) ->
   (if ((@core.memory.u8[pc + 1] & 1) isnt 0) then true else false)
@@ -229,10 +242,12 @@ C1964jsVideoHLE::getTexRectXh = (pc) ->
 
 #Y coordinate of lower right
 C1964jsVideoHLE::getTexRectYh = (pc) ->
-  (@core.memory.u8[pc] << 24 | @core.memory.u8[pc + 1] << 16 | @core.memory.u8[pc + 2] << 8 | @core.memory.u8[pc + 3]) & 0xFFF
+  #(@core.memory.u8[pc] << 24 | @core.memory.u8[pc + 1] << 16 | @core.memory.u8[pc + 2] << 8 | @core.memory.u8[pc + 3]) & 0xFFF
+  (@core.memory.u8[pc + 2] << 8 | @core.memory.u8[pc + 3]) & 0xFFF
 
 C1964jsVideoHLE::getTexRectTileNo = (pc) ->
-  (@core.memory.u8[pc+4] << 24 | @core.memory.u8[pc+5] << 16 | @core.memory.u8[pc+6] << 8 | @core.memory.u8[pc+7]) >>> 24 & 7
+  #(@core.memory.u8[pc+4] << 24 | @core.memory.u8[pc+5] << 16 | @core.memory.u8[pc+6] << 8 | @core.memory.u8[pc+7]) >>> 24 & 7
+  @core.memory.u8[pc+4] & 7
 
 #X coordinate of upper left
 C1964jsVideoHLE::getTexRectXl = (pc) ->
@@ -240,13 +255,16 @@ C1964jsVideoHLE::getTexRectXl = (pc) ->
 
 #Y coordinate of upper left
 C1964jsVideoHLE::getTexRectYl = (pc) ->
-  (@core.memory.u8[pc+4] << 24 | @core.memory.u8[pc+5] << 16 | @core.memory.u8[pc+6] << 8 | @core.memory.u8[pc+7]) & 0xFFF
+  #(@core.memory.u8[pc+4] << 24 | @core.memory.u8[pc+5] << 16 | @core.memory.u8[pc+6] << 8 | @core.memory.u8[pc+7]) & 0xFFF
+  (@core.memory.u8[pc+6] << 8 | @core.memory.u8[pc+7]) & 0xFFF
 
 C1964jsVideoHLE::getTexRectS = (pc) ->
-  (@core.memory.u8[pc+12] << 24 | @core.memory.u8[pc+13] << 16 | @core.memory.u8[pc+14] << 8 | @core.memory.u8[pc+15]) >>> 16 & 0xFFFF
+  #(@core.memory.u8[pc+12] << 24 | @core.memory.u8[pc+13] << 16 | @core.memory.u8[pc+14] << 8 | @core.memory.u8[pc+15]) >>> 16 & 0xFFFF
+  @core.memory.u8[pc+12] << 8 | @core.memory.u8[pc+13]
 
 C1964jsVideoHLE::getTexRectT = (pc) ->
-  (@core.memory.u8[pc+12] << 24 | @core.memory.u8[pc+13] << 16 | @core.memory.u8[pc+14] << 8 | @core.memory.u8[pc+15]) & 0xFFFF
+  #(@core.memory.u8[pc+12] << 24 | @core.memory.u8[pc+13] << 16 | @core.memory.u8[pc+14] << 8 | @core.memory.u8[pc+15]) & 0xFFFF
+  @core.memory.u8[pc+14] << 8 | @core.memory.u8[pc+15]
 
 C1964jsVideoHLE::getTexRectDsDx = (pc) ->
   @core.memory.getInt32(@core.memory.u8, pc + 20) >>> 16 & 0xFFFF

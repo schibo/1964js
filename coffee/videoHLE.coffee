@@ -504,41 +504,44 @@ class C1964jsVideoHLE
     return
 
   DLParser_SetCombine: (pc) ->
-    @combine[0] = @getCombineA0(pc)
-    @combine[2] = @getCombineB0(pc)
-    @combine[4] = @getCombineC0(pc)
-    @combine[6] = @getCombineD0(pc)
+    `const lo = this.getCombineLo(pc) >>> 0`
+    `const hi = this.getCombineHi(pc) >>> 0`
+
+    @combine[0] = (lo >> 20) & 15 # @getCombineA0(pc)
+    @combine[2] = (hi >> 28) & 15 # @getCombineB0(pc)
+    @combine[4] = (lo >> 15) & 31 # @getCombineC0(pc)
+    @combine[6] = (hi >> 15) & 7 # @getCombineD0(pc)
     # @combineA0 = 0xFF if @combineA0 is 15
     # @combineB0 = 0xFF if @combineB0 is 15
     # @combineC0 = 0xFF if @combineC0 is 31
     # @combineD0 = 0xFF if @combineD0 is 7
-    @combine[1] = @getCombineA0a(pc)
-    @combine[3] = @getCombineB0a(pc)
-    @combine[5] = @getCombineC0a(pc)
-    @combine[7] = @getCombineD0a(pc)
+    @combine[1] = (lo >> 12) & 7 # @getCombineA0a(pc)
+    @combine[3] = (hi >> 12) & 7 # @getCombineB0a(pc)
+    @combine[5] = (lo >> 9) & 7 # @getCombineC0a(pc)
+    @combine[7] = (hi >> 9) & 7 # @getCombineD0a(pc)
     # @combineA0a = 0xFF if @combineA0a is 7
     # @combineB0a = 0xFF if @combineB0a is 7
     # @combineC0a = 0xFF if @combineC0a is 7
     # @combineD0a = 0xFF if @combineD0a is 7
-    @combine[8] = @getCombineA1(pc)
-    @combine[10] = @getCombineB1(pc)
-    @combine[12] = @getCombineC1(pc)
-    @combine[14] = @getCombineD1(pc)
+    @combine[8] = (lo >> 5) & 15 # @getCombineA1(pc)
+    @combine[10] = (hi >> 24) & 15 # @getCombineB1(pc)
+    @combine[12] = lo & 31 # @getCombineC1(pc)
+    @combine[14] = (hi >> 6) & 7 # @getCombineD1(pc)
     # @combineA1 = 0xFF if @combineA1 is 15
     # @combineB1 = 0xFF if @combineB1 is 15
     # @combineC1 = 0xFF if @combineC1 is 31
     # @combineD1 = 0xFF if @combineD1 is 7
-    @combine[9] = @getCombineA1a(pc)
-    @combine[11] = @getCombineB1a(pc)
-    @combine[13] = @getCombineC1a(pc)
-    @combine[15] = @getCombineD1a(pc)
+    @combine[9] = (hi >> 21) & 7 # @getCombineA1a(pc)
+    @combine[11] = (hi >> 3) & 7 # @getCombineB1a(pc)
+    @combine[13] = (hi >> 18) & 7 # @getCombineC1a(pc)
+    @combine[15] = hi & 7 # @getCombineD1a(pc)
     # @combineA1a = 0xFF if @combineA1a is 7
     # @combineB1a = 0xFF if @combineB1a is 7
     # @combineC1a = 0xFF if @combineC1a is 7
     # @combineD1a = 0xFF if @combineD1a is 7
 
-    w0 = @core.memory.u8[pc] << 24 | @core.memory.u8[pc + 1] << 16 | @core.memory.u8[pc + 2] << 8 | @core.memory.u8[pc + 3]
-    w1 = @core.memory.u8[pc + 4] << 24 | @core.memory.u8[pc + 5] << 16 | @core.memory.u8[pc + 6] << 8 | @core.memory.u8[pc + 7]
+ #   w0 = @core.memory.u8[pc] << 24 | @core.memory.u8[pc + 1] << 16 | @core.memory.u8[pc + 2] << 8 | @core.memory.u8[pc + 3]
+ #   w1 = @core.memory.u8[pc + 4] << 24 | @core.memory.u8[pc + 5] << 16 | @core.memory.u8[pc + 6] << 8 | @core.memory.u8[pc + 7]
 
     #if (@combineD0 == 4)
     #  console.log " a0:" + @combineA0 + " b0:" + @combineB0 + " c0:" + @combineC0 + " d0:" + @combineD0 + " a0a:" + @combineA0a + " b0a:" + @combineB0a + " c0a:" + @combineC0a + " d0a:" + @combineD0a + " a1:" + @combineA1 + " b1:" + @combineB1 + " c1:" + @combineC1 + " d1:" + @combineD1 + " a1a:" + @combineA1a + " b1a:" + @combineB1a + " c1a:" + @combineC1a + " d1a:" + @combineD1a
@@ -642,6 +645,7 @@ class C1964jsVideoHLE
     v.g = g
     v.b = b
     v.a = 255.0
+    return
 
   RSP_MoveMemLight: (dwLight, dwAddr, pc) ->
     if dwLight >= 16
@@ -695,7 +699,6 @@ class C1964jsVideoHLE
     @gRSP.projectionMtxTop = 0
     @gRSP.modelViewMtxTop = 0
 
-
     #SetZBias(0);
     @gRSP.numVertices = 0
     @gRSP.curTile = 0
@@ -705,7 +708,6 @@ class C1964jsVideoHLE
     @gl.clearDepth 1.0
     @gl.depthMask true
     @gl.clear @gl.DEPTH_BUFFER_BIT
-
     return
 
   resetMatrices: ->
@@ -714,7 +716,7 @@ class C1964jsVideoHLE
     mat4.identity @gRSP.modelviewMtxs[0]
     mat4.identity @gRSP.projectionMtxs[0]
 
-    i = 0;
+    i = 0
     while (i < @RICE_MATRIX_STACK)
       mat4.identity @gRSP.projectionMtxs[i]
       mat4.identity @gRSP.modelviewMtxs[i]
@@ -1011,9 +1013,7 @@ class C1964jsVideoHLE
     return
 
   DLParser_RDPSetOtherModeL: (otherModeL) ->
-    if (otherModeL & consts.RDP_ALPHA_COMPARE_THRESHOLD) isnt 0
-      @alphaTestEnabled = 1
-    else if (otherModeL & consts.RDP_ALPHA_COMPARE_DITHER) isnt 0
+    if (otherModeL & (consts.RDP_ALPHA_COMPARE_THRESHOLD|consts.RDP_ALPHA_COMPARE_DITHER)) isnt 0
       @alphaTestEnabled = 1
     else
       @alphaTestEnabled = 0

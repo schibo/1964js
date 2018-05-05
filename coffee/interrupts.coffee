@@ -575,8 +575,8 @@ C1964jsInterrupts = (core, cp0) ->
     #    this.triggerVIInterrupt(0, false);
     @setException consts.EXC_INT, 0, core.p, false  if (cp0[consts.CAUSE] & cp0[consts.STATUS] & 0x0000FF00) isnt 0
 
-#do not process interrupts here as we don't have support for
-#interrupts in delay slots. processs them in the main runLoop.
+    #do not process interrupts here as we don't have support for
+    #interrupts in delay slots. process them in the main runLoop.
     return
   return this
 
