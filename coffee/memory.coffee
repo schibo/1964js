@@ -66,36 +66,144 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 
 class C1964jsMemory
   constructor: (@core) ->
+    ###*
+     * @const
+    ###
     @romUint8Array = `undefined` # set after rom is loaded.
+    ###*
+     * @const
+    ###
     @rom = `undefined` # set after rom is loaded.
+    ###*
+     * @const
+    ###
     @u8 = new Uint8Array(0x800000) # RDRAM
+    ###*
+     * @const
+    ###
     @spMemUint8Array = new Uint8Array(0x10000)
+    ###*
+     * @const
+    ###
     @spReg1Uint8Array = new Uint8Array(0x10000)
+    ###*
+     * @const
+    ###
     @spReg2Uint8Array = new Uint8Array(0x10000)
+    ###*
+     * @const
+    ###
     @dpcUint8Array = new Uint8Array(0x10000)
+    ###*
+     * @const
+    ###
     @dpsUint8Array = new Uint8Array(0x10000)
+    ###*
+     * @const
+    ###
     @miUint8Array = new Uint8Array(0x10000)
+    ###*
+     * @const
+    ###
     @viUint8Array = new Uint8Array(0x10000)
+    ###*
+     * @const
+    ###
     @aiUint8Array = new Uint8Array(0x10000)
+    ###*
+     * @const
+    ###
     @piUint8Array = new Uint8Array(0x10000)
+    ###*
+     * @const
+    ###
     @siUint8Array = new Uint8Array(0x10000)
+    ###*
+     * @const
+    ###
     @c2a1Uint8Array = new Uint8Array(0x10000)
+    ###*
+     * @const
+    ###
     @c1a1Uint8Array = new Uint8Array(0x10000)
+    ###*
+     * @const
+    ###
     @c2a2Uint8Array = new Uint8Array(0x10000)
+    ###*
+     * @const
+    ###
     @c1a3Uint8Array = new Uint8Array(0x10000)
+    ###*
+     * @const
+    ###
     @riUint8Array = new Uint8Array(0x10000)
+    ###*
+     * @const
+    ###
     @pifUint8Array = new Uint8Array(0x10000)
+    ###*
+     * @const
+    ###
     @gioUint8Array = new Uint8Array(0x10000)
+    ###*
+     * @const
+    ###
     @ramRegs0Uint8Array = new Uint8Array(0x10000)
+    ###*
+     * @const
+    ###
     @ramRegs4Uint8Array = new Uint8Array(0x10000)
+    ###*
+     * @const
+    ###
     @ramRegs8Uint8Array = new Uint8Array(0x10000)
+    ###*
+     * @const
+    ###
     @dummyReadWriteUint8Array = new Uint8Array(0x10000)
     @lengthy = 50325
+
+    ###*
+     * Load Byte
+     * @type {!Array<!function(!C1964jsMemory, number): number>}
+     * @const
+    ###
     @LB = Array.apply(@readDummy8, Array(@lengthy))
+
+    ###*
+     * Load Half
+     * @type {!Array<!function(!C1964jsMemory, number): number>}
+     * @const
+    ###
     @LH = Array.apply(@readDummy16, Array(@lengthy))
+
+    ###*
+     * Load Word
+     * @type {!Array<!function(!C1964jsMemory, number): number>}
+     * @const
+    ###    
     @LW = Array.apply(@readDummy32, Array(@lengthy))
+
+    ###*
+     * Store byte
+     * @type {!Array<!function(!C1964jsMemory, number, number)>}
+     * @const
+    ###    
     @SB = Array.apply(@writeDummy8, Array(@lengthy))
+
+    ###*
+     * Store Half
+     * @type {!Array<!function(!C1964jsMemory, number, number)>}
+     * @const
+    ###    
     @SH = Array.apply(@writeDummy16, Array(@lengthy))
+
+    ###*
+     * Store Word
+     * @type {!Array<!function(!C1964jsMemory, number, number)>}
+     * @const
+    ###    
     @SW = Array.apply(@writeDummy32, Array(@lengthy))
 
     #todo: fix overlapping ramregs now that we are 0xffff in lut size instead of 0xfffc in lut size

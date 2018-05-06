@@ -175,6 +175,10 @@ class C1964jsEmulator
     @webGL.hide3D()
     #canvas
     @ctx = document.getElementById("Canvas").getContext("2d")
+
+    ###*
+     * @const
+    ###    
     @ImDat = @ctx.createImageData(320, 240)
     @stopCompiling = false
     @docElement = document.getElementById("screen")

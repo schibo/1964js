@@ -25,6 +25,9 @@ class C1964jsVideoHLE
 
     i = undefined
     @core = core #only needed for gfxHelpers prototypes to access.
+    ###*
+     * @const
+    ###
     @gl = glx
 
     @fogIsImplemented = false #enable this when we supoort fog
@@ -39,14 +42,22 @@ class C1964jsVideoHLE
     @textureTile = []
     @zDepthImage = {fmt: 0, siz: 0, width: 0, addr: 0}
     @zColorImage = {fmt: 0, siz: 0, width: 0, addr: 0}
+    ###*
+     * @const
+    ###
     @N64VertexList = []
-    @vtxTransformed = []
-    @vtxNonTransformed = []
-    @vecProjected = []
-    @vtxProjected5 = []
     @geometryMode = 0
+    ###*
+     * @const
+    ###
     @gRSP = {}
+    ###*
+     * @const
+    ###
     @gRSPlights = [{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]
+    ###*
+     * @const
+    ###
     @gRSPn64lights = [{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}]
     @gRSPnumLights = 0
     @matToLoad = mat4.create()
@@ -59,12 +70,33 @@ class C1964jsVideoHLE
     @texImg = {}
     @segments = []
     @gl.useProgram @core.webGL.shaderProgram
+    ###*
+     * @const
+    ###
     @primColor = [0.0, 0.0, 0.0, 0.0]
+    ###*
+     * @const
+    ###
     @fillColor = [0.0, 0.0, 0.0, 0.0]
+    ###*
+     * @const
+    ###
     @blendColor = [0.0, 0.0, 0.0, 0.0]
+    ###*
+     * @const
+    ###
     @envColor = [0.0, 0.0, 0.0, 0.0]
+    ###*
+     * @const
+    ###
     @triVertices = new Float32Array(16384)
+    ###*
+     * @const
+    ###
     @triColorVertices = new Uint8Array(16384)
+    ###*
+     * @const
+    ###
     @triTextureCoords = new Float32Array(16384)
 
     @tempVec4 = new Float32Array 4
@@ -84,10 +116,17 @@ class C1964jsVideoHLE
     @renderStateChanged = false
     @inverseTransposeCalculated = false
 
+    ###*
+     * @const
+    ###
     @normalMat = new Int32Array(4)
-    @transformed = mat4.create()
-    @nonTransformed = mat4.create()
+    ###*
+     * @const
+    ###
     @modelViewInverse = mat4.create()
+    ###*
+     * @const
+    ###
     @modelViewTransposedInverse = mat4.create()
 
     # Native Viewport
@@ -100,7 +139,7 @@ class C1964jsVideoHLE
 
     ###*
      * Microcode 0 LUT
-     * @type {!Array<!Function>}
+     * @type {!Array<!function(number)>}
      * @const
     ###
     @microcodeMap0 = [@RSP_GBI1_SpNoop, @RSP_GBI0_Mtx, @RSP_GBI1_Reserved, @RSP_GBI1_MoveMem,
@@ -170,6 +209,11 @@ class C1964jsVideoHLE
 
 
     #todo: different microcodes support
+
+    ###*
+     * Microcode 0 LUT
+     * @const
+    ###
     @currentMicrocodeMap = @microcodeMap0
     i = 0
     while i < @MAX_TILES
