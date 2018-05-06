@@ -148,6 +148,7 @@ class C1964jsEmulator
     @h = new Int32Array(@gprh)
     @hu = new Uint32Array(@gprh)
     @fnLut = [];#new Map()
+    @fn = undefined
 
     #hook-up system objects
     @memory = new C1964jsMemory(this)
@@ -357,14 +358,16 @@ class C1964jsEmulator
     `const hu = this.hu`
     `const p = this.p`
 
+    fn = @fn
+
     while @terminate is false
       #@interrupts.checkInterrupts()
       if m[0] >= 0
         @interval += 1
         #@m[0] = -125000 # which is -625000 / (interval+1)
         m[0] = -156250 # which is -625000 / (interval+1) / 2
-        pc = @p[0]
-        @interrupts.processException @p[0]
+        pc = p[0]
+        @interrupts.processException p[0]
         if @interval is 4
           @interval = 0
           @repaintWrapper()
@@ -395,9 +398,10 @@ class C1964jsEmulator
           #in javascript?
           if e instanceof TypeError
             fn = @decompileBlock(p[0])
-            fn = fn(r, ru, h, hu, @memory, this)
+            #fn = fn(r, ru, h, hu, @memory, this)
           else
             throw e
+    @fn = fn
     this
 
   run: (fn, r, ru, h, hu) ->
