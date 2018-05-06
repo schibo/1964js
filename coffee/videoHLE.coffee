@@ -119,7 +119,7 @@ class C1964jsVideoHLE
     ###*
      * @const
     ###
-    @normalMat = new Int32Array(4)
+    @normalMat = new Float32Array(4)
     ###*
      * @const
     ###
@@ -516,8 +516,7 @@ class C1964jsVideoHLE
       n[2] = @getVertexNormalZ a
       #n[3] = 1.0
 
-      tempVec3 = new Float32Array 3
-      mat4.multiplyVec3 @modelViewTransposedInverse, n, tempVec3
+      tempVec3 = mat4.multiplyVec3 @modelViewTransposedInverse, n
       v.u = @getVertexS(a) * sMult
       v.w = @getVertexW(a)
       v.x = @getVertexX(a)
