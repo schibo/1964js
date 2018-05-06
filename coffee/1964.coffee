@@ -307,11 +307,11 @@ class C1964jsEmulator
     `const u8 = this.memory.u8`
     while y isnt 0
       out[i] = (u8[k] & 0xF8)
-      out[i + 2] = (u8[k + 1] << 2 & 0xF8)
       out[i + 1] = (((u8[k] << 5) | (u8[k + 1] >>> 3)) & 0xF8)
+      out[i + 2] = (u8[k + 1] << 2 & 0xF8)
       out[i + 4] = (u8[k + 2] & 0xF8)
-      out[i + 6] = (u8[k + 3] << 2 & 0xF8)
       out[i + 5] = (((u8[k + 2] << 5) | (u8[k + 3] >>> 3)) & 0xF8)
+      out[i + 6] = (u8[k + 3] << 2 & 0xF8)
       k += 4
       i += 8
       y += 2

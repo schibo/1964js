@@ -154,8 +154,9 @@ C1964jsWebGL = (core, wireframe) ->
 
     @gl.viewport x, y, aspectWidth, aspectHeight
     #needed for game selection screen in mario
-    mat4.perspective 90, (@gl.viewportWidth/@gl.viewportHeight), 1.0, 1023.0, pMatrix
+    #mat4.perspective 90, (@gl.viewportWidth/@gl.viewportHeight), 1.0, 1023.0, pMatrix
     mat4.identity mvMatrix
+    mat4.identity pMatrix
     mat4.translate mvMatrix, [0.0, 0.0, -(@gl.viewportWidth/@gl.viewportHeight)]
     return
 

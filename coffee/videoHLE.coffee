@@ -98,6 +98,77 @@ class C1964jsVideoHLE
     @n64ViewportRight = 320
     @n64ViewportBottom = 240
 
+    ###*
+     * Microcode 0 LUT
+     * @type {!Array<!Function>}
+     * @const
+    ###
+    @microcodeMap0 = [@RSP_GBI1_SpNoop, @RSP_GBI0_Mtx, @RSP_GBI1_Reserved, @RSP_GBI1_MoveMem,
+    @RSP_GBI0_Vtx, @RSP_GBI1_Reserved, @RSP_GBI0_DL, @RSP_GBI1_Reserved,
+    @RSP_GBI1_Reserved, @RSP_GBI0_Sprite2DBase, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_GBI0_Tri4, @RSP_GBI1_RDPHalf_Cont, @RSP_GBI1_RDPHalf_2,
+    @RSP_GBI1_RDPHalf_1, @RSP_GBI1_Line3D, @RSP_GBI1_ClearGeometryMode, @RSP_GBI1_SetGeometryMode,
+    @RSP_GBI1_EndDL, @RSP_GBI1_SetOtherModeL, @RSP_GBI1_SetOtherModeH, @RSP_GBI1_Texture,
+    @RSP_GBI1_MoveWord, @RSP_GBI1_PopMtx, @RSP_GBI1_CullDL, @RSP_GBI1_Tri1,
+    @RSP_GBI1_Noop, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RDP_TriFill, @RDP_TriFillZ, @RDP_TriTxtr, @RDP_TriTxtrZ,
+    @RDP_TriShade, @RDP_TriShadeZ, @RDP_TriShadeTxtr, @RDP_TriShadeTxtrZ,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+    @DLParser_TexRect, @DLParser_TexRectFlip, @DLParser_RDPLoadSynch, @DLParser_RDPPipeSynch,
+    @DLParser_RDPTileSynch, @DLParser_RDPFullSynch, @DLParser_SetKeyGB, @DLParser_SetKeyR,
+    @DLParser_SetConvert, @DLParser_SetScissor, @DLParser_SetPrimDepth, @DLParser_RDPSetOtherMode,
+    @DLParser_LoadTLut, @RSP_RDP_Nothing, @DLParser_SetTileSize, @DLParser_LoadBlock,
+    @DLParser_LoadTile, @DLParser_SetTile, @DLParser_FillRect, @DLParser_SetFillColor,
+    @DLParser_SetFogColor, @DLParser_SetBlendColor, @DLParser_SetPrimColor, @DLParser_SetEnvColor,
+    @DLParser_SetCombine, @DLParser_SetTImg, @DLParser_SetZImg, @DLParser_SetCImg]
+
+
     #todo: different microcodes support
     @currentMicrocodeMap = @microcodeMap0
     i = 0
@@ -186,7 +257,7 @@ class C1964jsVideoHLE
       cmd = @getCommand(pc)
       func = @currentMicrocodeMap[cmd]
       @dlistStack[@dlistStackPointer].pc += 8
-      this[func] pc
+      func.call this, pc
       if @dlistStackPointer >= 0
         @dlistStack[@dlistStackPointer].countdown -= 1
         @dlistStackPointer -= 1  if @dlistStack[@dlistStackPointer].countdown < 0
@@ -344,9 +415,8 @@ class C1964jsVideoHLE
       return
     i = undefined
     j = undefined
-    lo = undefined
-    hi = undefined
-    a = undefined
+    a = addr
+    b = undefined
     k = 0
     i = 0
     `const u8 = this.core.memory.u8`
@@ -354,12 +424,10 @@ class C1964jsVideoHLE
     while i < 4
       j = 0
       while j < 4
-        a = addr + (i << 3) + (j << 1)
-        hi = (u8[a] << 8 | u8[a + 1])
-        lo = (u8[a + 32] << 8 | u8[a + 32 + 1])
         # 0.0000152587890625 is 1.0/65536.0
-        matToLoad[k] = (((hi << 16) | lo)>>0) * 0.0000152587890625
+        matToLoad[k] = ((u8[a] << 24 | u8[a + 1] << 16 | u8[a + 32] << 8 | u8[a + 32 + 1])>>0) * 0.0000152587890625
         k += 1
+        a += 2
         j += 1
       i += 1
     return
@@ -899,7 +967,7 @@ class C1964jsVideoHLE
     pc = @dlistStack[@dlistStackPointer].pc
     cmd = @getCommand(pc)
     func = @currentMicrocodeMap[cmd]
-    if func is "RSP_GBI1_Tri1"
+    if func is @RSP_GBI1_Tri1
       return #loops until not tri1, then it will drawScene
 
     if @renderStateChanged is true
