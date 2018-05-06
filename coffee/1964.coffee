@@ -357,8 +357,6 @@ class C1964jsEmulator
     `const hu = this.hu`
     `const p = this.p`
 
-    fn = @decompileBlock(p[0])
-
     while @terminate is false
       #@interrupts.checkInterrupts()
       if m[0] >= 0
