@@ -100,7 +100,7 @@ class C1964jsVideoHLE
     @triTextureCoords = new Float32Array(16384)
 
     @tempVec4 = new Float32Array 4
-    @tempVec3 = new Float32Array 3
+    @tempVec3Buffer = new ArrayBuffer(3 * @MAX_VERTICES * 4)
 
     @otherModeL = 0
     @otherModeH = 0
@@ -508,6 +508,7 @@ class C1964jsVideoHLE
 
   processLights: (vo, i, a, sMult, tMult) ->
     `const n = this.normalMat`
+    o = 0
     while i < 0
       v = @N64VertexList[vo+i]
       n[0] = @getVertexNormalX a
@@ -516,7 +517,7 @@ class C1964jsVideoHLE
       n[2] = @getVertexNormalZ a
       #n[3] = 1.0
 
-      tempVec3 = new Float32Array 3
+      tempVec3 = new Float32Array(@tempVec3Buffer, o)
       mat4.multiplyVec3 @modelViewTransposedInverse, n, tempVec3
       v.u = @getVertexS(a) * sMult
       v.w = @getVertexW(a)
@@ -527,6 +528,7 @@ class C1964jsVideoHLE
       v.v = @getVertexT(a) * tMult
       @lightVertex vect, v
       a += 16
+      o += 12
     return
 
   processShades: (vo, i, a, sMult, tMult) ->
@@ -964,7 +966,7 @@ class C1964jsVideoHLE
   RSP_GBI1_Texture: (pc) ->
     tile = @getTextureTile(pc)
     @activeTile = tile
-    @textureTile[tile].on    = @getTextureOn(pc)
+    @textureTile[tile].on = @getTextureOn(pc)
     @textureTile[tile].level = @getTextureLevel(pc)
     @textureTile[tile].scales = @getTextureScaleS(pc) / 0x8000
     @textureTile[tile].scalet = @getTextureScaleT(pc) / 0x8000
