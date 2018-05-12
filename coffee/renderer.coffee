@@ -34,9 +34,9 @@ C1964jsRenderer = (settings, glx, webGL) ->
   @colorsTexture0 = gl.createTexture()
 
   @videoHLE = undefined
-  `const fivetoeight = [0x00,0x08,0x10,0x18,0x21,0x29,0x31,0x39,0x42,0x4A,0x52,0x5A,0x63,0x6B,0x73,0x7B,0x84,0x8C,0x94,0x9C,0xA5,0xAD,0xB5,0xBD,0xC6,0xCE,0xD6,0xDE,0xE7,0xEF,0xF7,0xFF]
-  const fourtoeight = [0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xaa,0xbb,0xcc,0xdd,0xee,0xff]
-  const threetoeight = [
+  `const fivetoeight = new Uint8Array([0x00,0x08,0x10,0x18,0x21,0x29,0x31,0x39,0x42,0x4A,0x52,0x5A,0x63,0x6B,0x73,0x7B,0x84,0x8C,0x94,0x9C,0xA5,0xAD,0xB5,0xBD,0xC6,0xCE,0xD6,0xDE,0xE7,0xEF,0xF7,0xFF])
+  const fourtoeight = new Uint8Array([0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xaa,0xbb,0xcc,0xdd,0xee,0xff])
+  const threetoeight = new Uint8Array([
     0x00,   // 000 -> 00 00 00 00
     0x24,   // 001 -> 00 10 01 00
     0x49,   // 010 -> 01 00 10 01
@@ -45,18 +45,18 @@ C1964jsRenderer = (settings, glx, webGL) ->
     0xb6,   // 101 -> 10 11 01 10
     0xdb,   // 110 -> 11 01 10 11
     0xff    // 111 -> 11 11 11 11
-  ]
-  const onetoeight = [
+  ])
+  const onetoeight = new Uint8Array([
     0x00,   // 0 -> 00 00 00 00
     0xff    // 1 -> 11 11 11 11
-  ]`
+  ])`
 
   @textureCache = new Object()
 
   @texRect = (xl, yl, xh, yh, s, t, dsdx, dtdy, tile, tmem, videoHLE, isFillRect) ->
 
-    tileWidth = ((tile.lrs >> 2) + 1) - tile.uls
-    tileHeight = ((tile.lrt >> 2) + 1) - tile.ult
+    tileWidth = (((tile.lrs >> 2) + 1) - tile.uls)|0
+    tileHeight = (((tile.lrt >> 2) + 1) - tile.ult)|0
 
     @videoHLE = videoHLE
 
@@ -99,8 +99,8 @@ C1964jsRenderer = (settings, glx, webGL) ->
 
     return undefined if tile.lrs is undefined or tile.lrt is undefined or tile.uls is undefined or tile.ult is undefined
 
-    tileWidth = ((tile.lrs >> 2) + 1) - tile.uls
-    tileHeight = ((tile.lrt >> 2) + 1) - tile.ult
+    tileWidth = ((tile.lrs >> 2) + 1) - (tile.uls|0)
+    tileHeight = ((tile.lrt >> 2) + 1) - (tile.ult|0)
 
     supportsNonPowerOf2 = true
     if !supportsNonPowerOf2
@@ -118,11 +118,11 @@ C1964jsRenderer = (settings, glx, webGL) ->
       e.message = "Undefined tile dimensions"
       throw e
 
-    @useTextureCache = false #change to true to try texture cache
-    if @useTextureCache is true
-      randomPixel = nextPow2Width * nextPow2Height
-      textureId = (tmem[randomPixel]>>>0) << 24 | (tmem[randomPixel+nextPow2Width+1]>>>0) << 16 | (tmem[randomPixel+nextPow2Width*2+1]>>>0) << 8 | tmem[randomPixel+nextPow2Width*3+1]>>>0
-      return @textureCache[textureId] if @textureCache[textureId]?
+    # @useTextureCache = false #change to true to try texture cache
+    # if @useTextureCache is true
+    #   randomPixel = nextPow2Width * nextPow2Height
+    #   textureId = (tmem[randomPixel]>>>0) << 24 | (tmem[randomPixel+nextPow2Width+1]>>>0) << 16 | (tmem[randomPixel+nextPow2Width*2+1]>>>0) << 8 | tmem[randomPixel+nextPow2Width*3+1]>>>0
+    #   return @textureCache[textureId] if @textureCache[textureId]?
 
     # if (nextPow2Width isnt tileWidth) or (nextPow2Height isnt tileHeight)
     #   # handle non-power of 2 textures
@@ -150,104 +150,21 @@ C1964jsRenderer = (settings, glx, webGL) ->
         when consts.TXT_FMT_RGBA # rgba
           switch tile.siz
             when consts.TXT_SIZE_16b # rgba5551
-              j=-tileHeight
-              while j < 0
-                i=-tileWidth
-                srcOffset = srcRowOffset
-                dstOffset = dstRowOffset
-                while i < 0
-                  color16 = tmem[srcOffset]<<8 | tmem[srcOffset+1]
-                  texture[dstOffset] = fivetoeight[color16 >> 11 & 0x1F]
-                  texture[dstOffset + 1] = fivetoeight[color16 >> 6 & 0x1F]
-                  texture[dstOffset + 2] = fivetoeight[color16 >> 1 & 0x1F]
-                  texture[dstOffset + 3] = (color16 & 0x01) << 31 >> 31
-                  i++
-                  srcOffset += 2
-                  dstOffset += 4
-                j++
-                srcRowOffset += srcRowStride
-                dstRowOffset += dstRowStride
+              @blitRGBA16 texture, tmem, tileWidth, tileHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride
             else
               console.error "TODO: tile format " + tile.fmt + ", tile.size:" + tile.siz
         when consts.TXT_FMT_IA # ia
           switch tile.siz
             when consts.TXT_SIZE_8b # ia8
-              j=-tileHeight
-              while j < 0
-                i=-tileWidth
-                srcOffset = srcRowOffset
-                dstOffset = dstRowOffset
-                while i < 0
-                  b = tmem[srcOffset]
-                  I = fourtoeight[(b >>> 4)& 0x0F]
-                  a = fourtoeight[b & 0x0F]
-                  texture[dstOffset] = I
-                  texture[dstOffset + 1] = I
-                  texture[dstOffset + 2] = I
-                  texture[dstOffset + 3] = a
-                  i++
-                  srcOffset += 1
-                  dstOffset += 4
-                j++
-                srcRowOffset += srcRowStride
-                dstRowOffset += dstRowStride
+              @blitIA8 texture, tmem, tileWidth, tileHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride
             when consts.TXT_SIZE_4b # ia4
-              j=-tileHeight
-              while j < 0
-                i=-tileWidth
-                srcOffset = srcRowOffset
-                dstOffset = dstRowOffset
-                while i < 0
-                  b = tmem[srcOffset]
-                  I0 = threetoeight[(b & 0xe0)>>>5]
-                  a0 = onetoeight[(b & 0x10)>>>4]
-                  I1 = threetoeight[(b & 0x0e)>>>1]
-                  a1 = onetoeight[(b & 0x01)>>>0]
-                  texture[dstOffset] = I0
-                  texture[dstOffset + 1] = I0
-                  texture[dstOffset + 2] = I0
-                  texture[dstOffset + 3] = a0
-                  texture[dstOffset + 4] = I1
-                  texture[dstOffset + 5] = I1
-                  texture[dstOffset + 6] = I1
-                  texture[dstOffset + 7] = a1
-                  i+=2
-                  srcOffset += 1
-                  dstOffset += 8
-                if tileWidth & 1
-                  I0 = threetoeight[(b & 0xe0)>>>5]
-                  a0 = onetoeight[(b & 0x10)>>>4]
-                  texture[dstOffset] = I0
-                  texture[dstOffset + 1] = I0
-                  texture[dstOffset + 2] = I0
-                  texture[dstOffset + 3] = a0
-                  i+=1
-                  srcOffset += 1
-                  dstOffset += 4
-                j++
-                srcRowOffset += srcRowStride
-                dstRowOffset += dstRowStride
+              @blitIA4 texture, tmem, tileWidth, tileHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride
             when consts.TXT_SIZE_16b # ia16
-              j=-tileHeight
-              while j < 0
-                i=-tileWidth
-                srcOffset = srcRowOffset
-                dstOffset = dstRowOffset
-                while i < 0
-                  I = tmem[srcOffset]
-                  a = tmem[srcOffset+1]
-                  texture[dstOffset] = I
-                  texture[dstOffset + 1] = I
-                  texture[dstOffset + 2] = I
-                  texture[dstOffset + 3] = a
-                  i++
-                  srcOffset += 2
-                  dstOffset += 4
-                j++
-                srcRowOffset += srcRowStride
-                dstRowOffset += dstRowStride
+              @blitIA16 texture, tmem, tileWidth, tileHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride
             else
               console.error "TODO: tile format " + tile.fmt + ", tile.size" + tile.siz
+        when consts.TXT_FMT_CI
+
         else
           console.error "TODO: tile format " + tile.fmt + ", tile.size" + tile.siz
 
@@ -270,6 +187,107 @@ C1964jsRenderer = (settings, glx, webGL) ->
     gl.bufferData gl.ARRAY_BUFFER, new Float32Array(textureCoords), gl.STATIC_DRAW
     texrectVertexTextureCoordBuffer.itemSize = 2
     texrectVertexTextureCoordBuffer.numItems = 4
+    return
+
+  @blitRGBA16 = (texture, tmem, width, height, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
+    j=-height
+    while j < 0
+      i=-width
+      srcOffset = srcRowOffset
+      dstOffset = dstRowOffset
+      while i < 0
+        color16 = tmem[srcOffset]<<8 | tmem[srcOffset+1]
+        texture[dstOffset] = fivetoeight[color16 >> 11 & 0x1F]
+        texture[dstOffset + 1] = fivetoeight[color16 >> 6 & 0x1F]
+        texture[dstOffset + 2] = fivetoeight[color16 >> 1 & 0x1F]
+        texture[dstOffset + 3] = color16 << 31 >> 31
+        i++
+        srcOffset += 2
+        dstOffset += 4
+      j++
+      srcRowOffset += srcRowStride
+      dstRowOffset += dstRowStride
+    return
+
+  @blitIA8 = (texture, tmem, width, height, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
+    j=-height
+    while j < 0
+      i=-width
+      srcOffset = srcRowOffset
+      dstOffset = dstRowOffset
+      while i < 0
+        b = tmem[srcOffset]
+        I = fourtoeight[(b >>> 4) & 0xF]
+        a = fourtoeight[b & 0xF]
+        texture[dstOffset] = I
+        texture[dstOffset + 1] = I
+        texture[dstOffset + 2] = I
+        texture[dstOffset + 3] = a
+        i++
+        srcOffset += 1
+        dstOffset += 4
+      j++
+      srcRowOffset += srcRowStride
+      dstRowOffset += dstRowStride
+    return
+
+  @blitIA4 = (texture, tmem, width, height, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
+    j=-height
+    while j < 0
+      i=-width
+      srcOffset = srcRowOffset
+      dstOffset = dstRowOffset
+      while i < 0
+        b = tmem[srcOffset]
+        I0 = threetoeight[(b & 0xe0)>>>5]
+        a0 = onetoeight[(b & 0x10)>>>4]
+        I1 = threetoeight[(b & 0x0e)>>>1]
+        a1 = onetoeight[b & 0x01]
+        texture[dstOffset] = I0
+        texture[dstOffset + 1] = I0
+        texture[dstOffset + 2] = I0
+        texture[dstOffset + 3] = a0
+        texture[dstOffset + 4] = I1
+        texture[dstOffset + 5] = I1
+        texture[dstOffset + 6] = I1
+        texture[dstOffset + 7] = a1
+        i+=2
+        srcOffset += 1
+        dstOffset += 8
+      if width & 1
+        I0 = threetoeight[(b & 0xe0)>>>5]
+        a0 = onetoeight[(b & 0x10)>>>4]
+        texture[dstOffset] = I0
+        texture[dstOffset + 1] = I0
+        texture[dstOffset + 2] = I0
+        texture[dstOffset + 3] = a0
+        i+=1
+        srcOffset += 1
+        dstOffset += 4
+      j++
+      srcRowOffset += srcRowStride
+      dstRowOffset += dstRowStride
+    return
+
+  @blitIA16 = (texture, tmem, width, height, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
+    j=-height
+    while j < 0
+      i=-width
+      srcOffset = srcRowOffset
+      dstOffset = dstRowOffset
+      while i < 0
+        I = tmem[srcOffset]
+        a = tmem[srcOffset+1]
+        texture[dstOffset] = I
+        texture[dstOffset + 1] = I
+        texture[dstOffset + 2] = I
+        texture[dstOffset + 3] = a
+        i++
+        srcOffset += 2
+        dstOffset += 4
+      j++
+      srcRowOffset += srcRowStride
+      dstRowOffset += dstRowStride
     return
 
   @draw = (tile, tmem, videoHLE, nextPow2Width, nextPow2Height, tileWidth, tileHeight, isFillRect) ->
