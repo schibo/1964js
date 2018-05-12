@@ -509,6 +509,8 @@ class C1964jsVideoHLE
   processLights: (vo, i, a, sMult, tMult) ->
     `const n = this.normalMat`
     o = 0
+    vo |= 0
+    i |= 0
     while i < 0
       v = @N64VertexList[vo+i]
       n[0] = @getVertexNormalX a
@@ -518,14 +520,14 @@ class C1964jsVideoHLE
       #n[3] = 1.0
 
       tempVec3 = new Float32Array(@tempVec3Buffer, o)
-      mat4.multiplyVec3 @modelViewTransposedInverse, n, tempVec3
       v.u = @getVertexS(a) * sMult
       v.w = @getVertexW(a)
-      v.x = @getVertexX(a)
-      vect = vec3.normalize tempVec3
+      mat4.multiplyVec3 @modelViewTransposedInverse, n, tempVec3
       v.y = @getVertexY(a)
       v.z = @getVertexZ(a)
+      vect = vec3.normalize tempVec3
       v.v = @getVertexT(a) * tMult
+      v.x = @getVertexX(a)
       @lightVertex vect, v
       a += 16
       o += 12
