@@ -32,12 +32,12 @@ C1964jsEmulator::deleteFunction = (k) ->
   splitResult = undefined
   s = document.getElementsByTagName("script")[k]
   splitResult = s.text.split("_")
-  splitResult = splitResult[1].split("(")
+  splitResult = splitResult[1].split("=")
   fnName = "_" + splitResult[0]
   s.parentNode.removeChild s
 
   #allow deletion of this function
-  eval fnName + "= function (r, s, t, v){}; " + fnName + "= undefined;"
+  eval "if (typeof " + fnName + " !== 'undefined') delete " + fnName + ";"
   self[fnName] = undefined
   alert "self[fnName] should have been null."  if self[fnName]
   return

@@ -69,23 +69,23 @@ C1964jsHelpers = (core, isLittleEndian) ->
 
   @RS = (i) ->
     reg = (i >> 21 & 0x1f)
-    return "0"  if reg is 0
-    "r[" + reg + "]"
+    return "~-1"  if reg is 0
+    "~~r[" + reg + "]"
 
   @RSH = (i) ->
     reg = (i >> 21 & 0x1f)
-    return "0"  if reg is 0
-    "h[" + reg + "]"
+    return "~-1"  if reg is 0
+    "~~h[" + reg + "]"
 
   @uRS = (i) ->
     reg = (i >> 21 & 0x1f)
-    return "0"  if reg is 0
-    "ru[" + reg + "]"
+    return "~-1"  if reg is 0
+    "(r[" + reg + "]>>>0)"
 
   @uRSH = (i) ->
     reg = (i >> 21 & 0x1f)
-    return "0"  if reg is 0
-    "hu[" + reg + "]"
+    return "~-1"  if reg is 0
+    "(h[" + reg + "]>>>0)"
 
   @tRS = (i) ->
     reg = (i >> 21 & 0x1f)
@@ -112,11 +112,6 @@ C1964jsHelpers = (core, isLittleEndian) ->
     return "r[34]"  if reg is 0
     "r[" + reg + "]"
 
-  @tuRT = (i) ->
-    reg = (i >> 16 & 0x1f)
-    return "ru[34]"  if reg is 0
-    "ru[" + reg + "]"
-
   @tRTH = (i) ->
     reg = (i >> 16 & 0x1f)
     return "h[34]"  if reg is 0
@@ -124,52 +119,52 @@ C1964jsHelpers = (core, isLittleEndian) ->
 
   @RD = (i) ->
     reg = (i >> 11 & 0x1f)
-    return "0"  if reg is 0
-    "r[" + reg + "]"
+    return "~-1"  if reg is 0
+    "~~r[" + reg + "]"
 
   @RDH = (i) ->
     reg = (i >> 11 & 0x1f)
-    return "0"  if reg is 0
-    "h[" + reg + "]"
+    return "~-1"  if reg is 0
+    "~~h[" + reg + "]"
 
   @uRD = (i) ->
     reg = (i >> 11 & 0x1f)
-    return "0"  if reg is 0
-    "ru[" + reg + "]"
+    return "~-1"  if reg is 0
+    "(r[" + reg + "]>>>0)"
 
   @uRDH = (i) ->
     reg = (i >> 11 & 0x1f)
-    return "0"  if reg is 0
-    "hu[" + reg + "]"
+    return "~-1"  if reg is 0
+    "(h[" + reg + "]>>>0)"
 
   @RT = (i) ->
     reg = (i >> 16 & 0x1f)
-    return "0"  if reg is 0
-    "r[" + reg + "]"
+    return "~-1"  if reg is 0
+    "~~r[" + reg + "]"
 
   @RTH = (i) ->
     reg = (i >> 16 & 0x1f)
-    return "0"  if reg is 0
-    "h[" + reg + "]"
+    return "~-1"  if reg is 0
+    "~~h[" + reg + "]"
 
   @uRT = (i) ->
     reg = (i >> 16 & 0x1f)
-    return "0"  if reg is 0
-    "ru[" + reg + "]"
+    return "~-1"  if reg is 0
+    "(r[" + reg + "]>>>0)"
 
   @uRTH = (i) ->
     reg = (i >> 16 & 0x1f)
-    return "0"  if reg is 0
-    "hu[" + reg + "]"
+    return "~-1"  if reg is 0
+    "(h[" + reg + "]>>>0)"
 
   @rt = (i) ->
     i >> 16 & 0x1f
 
   @offset_imm = (i) ->
-    i & 0x0000ffff
+    i & 0xffff
 
   @soffset_imm = (i) ->
-    ((i & 0x0000ffff) << 16) >> 16
+    i << 16 >> 16
 
   @setVAddr = (i) ->
     "r[38]=" + @RS(i) + "+" + @soffset_imm(i) + ";"

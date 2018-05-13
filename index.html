@@ -171,6 +171,7 @@
       vec4 green = vec4(0.0, 1.0, 0.0, 1.0);
       vec4 a0, b0, c0, d0;
       vec4 a1, b1, c1, d1;
+      vec4 tex2d;
       
       int combined=0;
       int tex0=1;
@@ -191,40 +192,42 @@
          } 
          else
          {
+      
+           tex2d = texture2D(uSampler, vec2(vTextureCoord.st));
            a0 = b0 = c0 = d0 = vec4(1.0, 1.0, 1.0, 0.0);
            if (uCombineA0 == tex0)
-             a0.rgb = texture2D(uSampler, vec2(vTextureCoord.st)).rgb;
+             a0.rgb = tex2d.rgb;
            if (uCombineA0a == tex0)
-             a0.a = texture2D(uSampler, vec2(vTextureCoord.st)).a;
+             a0.a = tex2d.a;
            if (uCombineB0 == tex0)
-             b0.rgb = texture2D(uSampler, vec2(vTextureCoord.st)).rgb;
+             b0.rgb = tex2d.rgb;
            if (uCombineB0a == tex0)
-             b0.a = texture2D(uSampler, vec2(vTextureCoord.st)).a;
+             b0.a = tex2d.a;
            if (uCombineC0 == tex0)
-             c0.rgb = texture2D(uSampler, vec2(vTextureCoord.st)).rgb;
+             c0.rgb = tex2d.rgb;
            if (uCombineC0a == tex0)
-             c0.a = texture2D(uSampler, vec2(vTextureCoord.st)).a;
+             c0.a = tex2d.a;
            if (uCombineD0 == tex0)
-             d0.rgb = texture2D(uSampler, vec2(vTextureCoord.st)).rgb;
+             d0.rgb = tex2d.rgb;
            if (uCombineD0a == tex0)
-             d0.a = texture2D(uSampler, vec2(vTextureCoord.st)).a;
+             d0.a = tex2d.a;
       
            if (uCombineA0 == tex1)
-             a0.rgb = texture2D(uSampler, vec2(vTextureCoord.st)).rgb;
+             a0.rgb = tex2d.rgb;
            if (uCombineA0a == tex1)
-             a0.a = texture2D(uSampler, vec2(vTextureCoord.st)).a;
+             a0.a = tex2d.a;
            if (uCombineB0 == tex1)
-             b0.rgb = texture2D(uSampler, vec2(vTextureCoord.st)).rgb;
+             b0.rgb = tex2d.rgb;
            if (uCombineB0a == tex1)
-             b0.a = texture2D(uSampler, vec2(vTextureCoord.st)).a;
+             b0.a = tex2d.a;
            if (uCombineC0 == tex1)
-             c0.rgb = texture2D(uSampler, vec2(vTextureCoord.st)).rgb;
+             c0.rgb = tex2d.rgb;
            if (uCombineC0a == tex1)
-             c0.a = texture2D(uSampler, vec2(vTextureCoord.st)).a;
+             c0.a = tex2d.a;
            if (uCombineD0 == tex1)
-             d0.rgb = texture2D(uSampler, vec2(vTextureCoord.st)).rgb;
+             d0.rgb = tex2d.rgb;
            if (uCombineD0a == tex1)
-             d0.a = texture2D(uSampler, vec2(vTextureCoord.st)).a;
+             d0.a = tex2d.a;
       
            if (uCombineA0 == prim)
              a0.rgb = uPrimColor.rgb;
@@ -279,9 +282,9 @@
       
            // alpha combiner
            if (uCombineC0a == 8)
-             c0.a = texture2D(uSampler, vec2(vTextureCoord.st)).a;
+             c0.a = tex2d.a;
            if (uCombineC0a == 9)
-             c0.a = texture2D(uSampler, vec2(vTextureCoord.st)).a;
+             c0.a = tex2d.a;
            if (uCombineC0a == 10)
              c0.a = uPrimColor.a;
            if (uCombineC0a == 11)
@@ -330,8 +333,8 @@
            //vec4 combined = (a0-b0) * c0 + d0; 
       
            gl_FragColor = (a0-b0) * c0 + d0;
-           if (uAlphaTestEnabled == 1 && gl_FragColor.a < uBlendColor.a)
-             discard;
+           // if (uAlphaTestEnabled == 1 && gl_FragColor.a < uBlendColor.a)
+           //   discard;
       
            if (cycleType == 1) //2-cycle
            {
@@ -355,38 +358,38 @@
                d1.a = gl_FragColor.a;
       
              if (uCombineA1 == tex0)
-               a1.rgb = texture2D(uSampler, vec2(vTextureCoord.st)).rgb;
+               a1.rgb = tex2d.rgb;
              if (uCombineA1a == tex0)
-               a1.a = texture2D(uSampler, vec2(vTextureCoord.st)).a;
+               a1.a = tex2d.a;
              if (uCombineB1 == tex0)
-               b1.rgb = texture2D(uSampler, vec2(vTextureCoord.st)).rgb;
+               b1.rgb = tex2d.rgb;
              if (uCombineB1a == tex0)
-               b1.a = texture2D(uSampler, vec2(vTextureCoord.st)).a;
+               b1.a = tex2d.a;
              if (uCombineC1 == tex0)
-               c1.rgb = texture2D(uSampler, vec2(vTextureCoord.st)).rgb;
+               c1.rgb = tex2d.rgb;
              if (uCombineC1a == tex0)
-               c1.a = texture2D(uSampler, vec2(vTextureCoord.st)).a;
+               c1.a = tex2d.a;
              if (uCombineD1 == tex0)
-               d1.rgb = texture2D(uSampler, vec2(vTextureCoord.st)).rgb;
+               d1.rgb = tex2d.rgb;
              if (uCombineD1a == tex0)
-               d1.a = texture2D(uSampler, vec2(vTextureCoord.st)).a;
+               d1.a = tex2d.a;
       
              if (uCombineA1 == tex1)
-               a1.rgb = texture2D(uSampler, vec2(vTextureCoord.st)).rgb;
+               a1.rgb = tex2d.rgb;
              if (uCombineA1a == tex1)
-               a1.a = texture2D(uSampler, vec2(vTextureCoord.st)).a;
+               a1.a = tex2d.a;
              if (uCombineB1 == tex1)
-               b1.rgb = texture2D(uSampler, vec2(vTextureCoord.st)).rgb;
+               b1.rgb = tex2d.rgb;
              if (uCombineB1a == tex1)
-               b1.a = texture2D(uSampler, vec2(vTextureCoord.st)).a;
+               b1.a = tex2d.a;
              if (uCombineC1 == tex1)
-               c1.rgb = texture2D(uSampler, vec2(vTextureCoord.st)).rgb;
+               c1.rgb = tex2d.rgb;
              if (uCombineC1a == tex1)
-               c1.a = texture2D(uSampler, vec2(vTextureCoord.st)).a;
+               c1.a = tex2d.a;
              if (uCombineD1 == tex1)
-               d1.rgb = texture2D(uSampler, vec2(vTextureCoord.st)).rgb;
+               d1.rgb = tex2d.rgb;
              if (uCombineD1a == tex1)
-               d1.a = texture2D(uSampler, vec2(vTextureCoord.st)).a;
+               d1.a = tex2d.a;
       
              if (uCombineA1 == prim)
                a1.rgb = uPrimColor.rgb;
@@ -443,9 +446,9 @@
              if (uCombineC1a == 7)
                c1.a = gl_FragColor.a;
              if (uCombineC1a == 8)
-               c1.a = texture2D(uSampler, vec2(vTextureCoord.st)).a;
+               c1.a = tex2d.a;
              if (uCombineC1a == 9)
-               c1.a = texture2D(uSampler, vec2(vTextureCoord.st)).a;
+               c1.a = tex2d.a;
              if (uCombineC1a == 10)
                c1.a = uPrimColor.a;
              if (uCombineC1a == 11)
@@ -493,8 +496,8 @@
       
            gl_FragColor = (a1-b1) * c1 + d1;
            //  gl_FragColor.a = 0.5;
-            if (uAlphaTestEnabled == 1 && gl_FragColor.a < uBlendColor.a)
-              discard;
+           //  if (uAlphaTestEnabled == 1 && gl_FragColor.a < uBlendColor.a)
+           //    discard;
            }            
          }
        }

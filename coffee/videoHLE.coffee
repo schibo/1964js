@@ -870,7 +870,7 @@ class C1964jsVideoHLE
     @otherModeL &= ~mask
     @otherModeL |= @getOtherModeL pc+4
     #alert dec2hex @otherModeL
-    @DLParser_RDPSetOtherModeL(@otherModel)
+    @DLParser_RDPSetOtherModeL(@otherModeL)
     @renderStateChanged = true
     return
 
@@ -1085,7 +1085,7 @@ class C1964jsVideoHLE
       yh += 1.0
 
     #console.log "Texrect: UL("+xl+","+yl+") LR("+xh+","+yh+") Tile:"+tileno+" TexCoord:("+s+","+t+") TexSlope:("+dsdx+","+dtdy+")"
-    @renderer.texRect xl, yl, xh, yh, s, t, dsdx, dtdy, @textureTile[tileno], @tmem, this, isFillRect
+    @renderer.texRect tileno, xl, yl, xh, yh, s, t, dsdx, dtdy, @textureTile[tileno], @tmem, this, isFillRect
     @hasTexture = true
     #@setDepthTest()
     #@drawScene false, 7
@@ -1161,15 +1161,31 @@ class C1964jsVideoHLE
       console.error "LoadBlock is making too large of a transfer. "+bytesToXfer+" bytes"
     i=0
     `const u8 = this.core.memory.u8
-    const addr = this.texImg.addr
+    addr = this.texImg.addr|0
     const tmem = this.tmem`
     while i < bytesToXfer
-      tmem[i]= u8[addr+i]
+      tmem[i] = u8[addr]
       i++
+      addr++
     return
 
   DLParser_LoadTile: (pc) ->
-    @videoLog "TODO: DLParser_LoadTile"
+    tile = @getLoadBlockTile(pc)
+    lrs = @textureTile[tile].lrs
+    #console.log "LoadBlock: Tile:"+tile+" UL("+uls+"/"+ult+") LRS:"+lrs+" DXT: 0x"+dec2hex(dxt)
+    #textureAddr = @core.memory.u8[@texImg.addr])
+    bytesToXfer = (lrs+1) * @textureTile[tile].siz
+    bytesToXfer = 4096
+    if bytesToXfer > 4096
+      console.error "LoadTile is making too large of a transfer. "+bytesToXfer+" bytes"
+    i=0
+    `const u8 = this.core.memory.u8
+    addr = this.texImg.addr|0
+    const tmem = this.tmem`
+    while i < bytesToXfer
+      tmem[i] = u8[addr]
+      i++
+      addr++
     return
 
   DLParser_SetTile: (pc) ->
@@ -1187,6 +1203,8 @@ class C1964jsVideoHLE
     @textureTile[tile].masks = @getSetTileMasks(pc)
     @textureTile[tile].shiftt = @getSetTileShiftt(pc)
     @textureTile[tile].shifts = @getSetTileShifts(pc)
+    @textureTile[tile].otherModeL = @otherModeL
+
     #if @combineD0 == 4
     #console.log "SetTile:"+tile+" FMT:"+@textureTile[tile].fmt+" SIZ:"+@textureTile[tile].siz+" LINE: "+@textureTile[tile].line+" TMEM:"+@textureTile[tile].tmem+" PAL:"+@textureTile[tile].pal+" CMS/T:"+@textureTile[tile].cms+"/"+@textureTile[tile].cmt+" MASKS/T:"+@textureTile[tile].masks+"/"+@textureTile[tile].maskt+" SHIFTS/T:"+@textureTile[tile].shifts+"/"+@textureTile[tile].shiftt
     return
@@ -1207,7 +1225,6 @@ class C1964jsVideoHLE
     #   if @zDepthImage.addr isnt @zColorImage.addr
     #     @gl.clearColor 1.0, @fillColor[1], @fillColor[2], 1.0
     #     @gl.clear @gl.COLOR_BUFFER_BIT
-
     return
 
   DLParser_SetFillColor: (pc) ->
@@ -1489,7 +1506,7 @@ class C1964jsVideoHLE
       tData = @renderer.formatTexture(tile, @tmem, this)
       textureData = tData.textureData
       if textureData isnt undefined
-        @gl.activeTexture(@gl.TEXTURE0)
+        @gl.activeTexture(@gl.TEXTURE0 + tileno)
         @gl.bindTexture(@gl.TEXTURE_2D, @colorsTexture0)
         wrapS = @gl.REPEAT
         wrapT = @gl.REPEAT
@@ -1501,10 +1518,10 @@ class C1964jsVideoHLE
           wrapT = @gl.CLAMP_TO_EDGE
         else if tile.cmt is consts.RDP_TXT_MIRROR
           wrapT = @gl.MIRRORED_REPEAT
-        @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_WRAP_S, wrapS)
-        @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_WRAP_T, wrapT)
-        @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MAG_FILTER, @gl.LINEAR)
-        @gl.texParameteri(@gl.TEXTURE_2D, @gl.TEXTURE_MIN_FILTER, @gl.NEAREST)
+        @gl.texParameterf(@gl.TEXTURE_2D, @gl.TEXTURE_WRAP_S, wrapS)
+        @gl.texParameterf(@gl.TEXTURE_2D, @gl.TEXTURE_WRAP_T, wrapT)
+        @gl.texParameterf(@gl.TEXTURE_2D, @gl.TEXTURE_MAG_FILTER, @gl.LINEAR)
+        @gl.texParameterf(@gl.TEXTURE_2D, @gl.TEXTURE_MIN_FILTER, @gl.NEAREST)
         @gl.texImage2D(@gl.TEXTURE_2D, 0, @gl.RGBA, tileWidth, tileHeight, 0, @gl.RGBA, @gl.UNSIGNED_BYTE, textureData)
 
     #@gl.uniform1i @core.webGL.shaderProgram.otherModeL, @otherModeL

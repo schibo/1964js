@@ -108,7 +108,6 @@ class C1964jsEmulator
     # temps start at r[35]
     @gpr = new ArrayBuffer(35*4 + 4*5) # 32GPRs, 1 dummy location to catch attempts to write to r0, and 1 lo and 1 hi, 4 temporary vars.
     @r = new Int32Array(@gpr)
-    @ru = new Uint32Array(@gpr)
     @r[0] = 0
     @r[1] = 0
     @r[2] = 0xd1731be9
@@ -146,7 +145,6 @@ class C1964jsEmulator
     @r[34] = 0
     @gprh = new ArrayBuffer(35*4)
     @h = new Int32Array(@gprh)
-    @hu = new Uint32Array(@gprh)
     @fnLut = [];#new Map()
     @fn = undefined
 
@@ -357,9 +355,7 @@ class C1964jsEmulator
 
     `const m = this.m`
     `const r = this.r`
-    `const ru = this.ru`
     `const h = this.h`
-    `const hu = this.hu`
     `const p = this.p`
 
     fn = @fn
@@ -394,7 +390,7 @@ class C1964jsEmulator
         #this is broken-up so that we can process more interrupts. If we freeze,
         #we probably need to split this up more.
         try
-          fn = @run fn, r, ru, h, hu
+          fn = @run fn, r, h
         catch e
           #so, we really need to know what type of exception this is,
           #but right now, we're assuming that we need to compile a block due to
@@ -402,18 +398,18 @@ class C1964jsEmulator
           #in javascript?
           if e instanceof TypeError
             fn = @decompileBlock(p[0])
-            #fn = fn(r, ru, h, hu, @memory, this)
+            #fn = fn(r, h, @memory, this)
           else
             throw e
     @fn = fn
     this
 
-  run: (fn, r, ru, h, hu) ->
+  run: (fn, r, h) ->
     `const m = this.m`
     `const mem = this.memory`
     `const t = this`
     while m[0] < 0
-      fn = fn(r, ru, h, hu, mem, t)
+      fn = fn(r, h, mem, t)
     return fn
 
   repaintWrapper: ->
@@ -475,7 +471,7 @@ class C1964jsEmulator
     fnName = "_" + (pc >>> 2)
 
     #Syntax: function(register, hiRegister, this.memory, this)
-    string = "function " + fnName + "(r,ru,h,hu,m,t){"
+    string = "var " + fnName + "=(r,h,m,t)=>{"
     until @stopCompiling
       instruction = @memory.lw(pc + offset)
       @cnt += 1
@@ -485,16 +481,15 @@ class C1964jsEmulator
     @stopCompiling = false
 
     #close out the function
-    string += "t.m[0]+=" + @cnt + ";"
-    string += "t.p[0]=" + ((pc + offset) >> 0)
-    string += ";return self." + @getFnName((pc + offset) >> 0) + "}"
+    string += "t.m[0]+=" + @cnt
+    string += ";t.p[0]=" + ((pc + offset)|0)
+    string += ";return self." + @getFnName((pc + offset)|0) + "}"
     g = document.createElement("script")
     s = document.getElementsByTagName("script")[@kk]
     @kk += 1
     s.parentNode.insertBefore g, s
     g.text = string
     @fnLut[pc>>>2] = self[fnName]
-    self[fnName]
 
   r4300i_add: (i) ->
     @helpers.sLogic i, "+"
@@ -686,7 +681,7 @@ class C1964jsEmulator
     opcode = undefined
     link = undefined
     # r[39] is a temp variable specific to vAddr for jalr
-    string = "ru[39]=" + @helpers.RS(i) + ";"
+    string = "r[39]=" + @helpers.RS(i) + ";"
     link = (@p[0] + offset + 8) >> 0
     string += @helpers.tRD(i) + "=" + link + ";" + @helpers.tRDH(i) + "=" + (link >> 31) + ";"
 
@@ -694,7 +689,7 @@ class C1964jsEmulator
     instruction = @memory.lw((@p[0] + offset + 4) | 0)
     opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     string += opcode
-    string += "t.m[0]+=" + (@cnt+1) + ";t.p[0]=ru[39];return t.fnLut[ru[39]>>>2];"
+    string += "t.m[0]+=" + (@cnt+1) + ";t.p[0]=r[39];return t.fnLut[r[39]>>>2];"
     string
 
   r4300i_jr: (i) ->
@@ -702,13 +697,13 @@ class C1964jsEmulator
     instruction = undefined
     opcode = undefined
     # r[37] is a temp variable specific to vAddr for jr
-    string = "ru[37]=" + @helpers.RS(i) + ";"
+    string = "r[37]=" + @helpers.RS(i) + ";"
 
     #delay slot
     instruction = @memory.lw((@p[0] + offset + 4) | 0)
     opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
     string += opcode
-    string += "t.m[0]+=" + (@cnt+1) + ";t.p[0]=ru[37];return t.fnLut[ru[37]>>>2];"
+    string += "t.m[0]+=" + (@cnt+1) + ";t.p[0]=r[37];return t.fnLut[r[37]>>>2];"
 
   UNUSED: (i) ->
     @log "warning: UNUSED"
@@ -833,13 +828,13 @@ class C1964jsEmulator
     @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.LB[r[36]>>>16](m,r[36])<<24>>24;" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>8;"
 
   r4300i_lbu: (i) ->
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tuRT(i) + "=m.LB[r[36]>>>16](m,r[36]);" + @helpers.tRTH(i) + "=0;"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.LB[r[36]>>>16](m,r[36]);" + @helpers.tRTH(i) + "=0;"
 
   r4300i_lh: (i) ->
     @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.LH[r[36]>>>16](m,r[36])<<16>>16;" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>16;";
 
   r4300i_lhu: (i) ->
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tuRT(i) + "=m.LH[r[36]>>>16](m,r[36]);" + @helpers.tRTH(i) + "=0;"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.LH[r[36]>>>16](m,r[36]);" + @helpers.tRTH(i) + "=0;"
 
   r4300i_sb: (i, isDelaySlot) ->
     #"m.sb(" + @helpers.RT(i) + "," + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");"
@@ -974,7 +969,7 @@ class C1964jsEmulator
     # r[38] = vAddress
 
     string += "const cas=r[38]&3;const mask=-1>>>(24-(cas<<3))>>>8;const shf=(cas<<3);"
-    string += @helpers.tuRT(i) + "&=mask;" + @helpers.tuRT(i) + "|=((value<<shf)>>>0);"
+    string += @helpers.tRT(i) + "&=mask;" + @helpers.tRT(i) + "|=((value<<shf)>>>0);"
 
 #    string += "switch(r[38]&3){case 0:" + @helpers.tRT(i) + "=value;break;"
 #    string += "case 1:" + @helpers.tRT(i) + "=(" + @helpers.RT(i) + "&0x000000ff)|((value<<8)>>>0);break;"
@@ -1003,12 +998,12 @@ class C1964jsEmulator
     # and the optimization here is avoiding the switch (and thus the branching).
     # if we propagate constants, we could potentially know the shift amount sometimes.
     string += "const cas=r[38]&3;const mask=-1<<(cas<<3)<<8;const shf=32-((cas+1)<<3);"
-    string += @helpers.tuRT(i) + "&=mask;" + @helpers.tuRT(i) + "|=(value>>>shf);"
+    string += @helpers.tRT(i) + "&=mask;" + @helpers.tRT(i) + "|=(value>>>shf);"
     string += @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31}"
 
   r4300i_swl: (i) ->
     string = "{" + @helpers.setVAddr(i)
-    string += "const vAddrAligned=(r[38]&-4)|0;var value=m.lw(vAddrAligned);"
+    string += "const vAddrAligned=(r[38]&-4)|0;let value=m.lw(vAddrAligned);"
     string += "switch(r[38]&3){case 0:value=" + @helpers.RT(i) + ";break;"
     string += "case 1:value=((value&0xff000000)|(" + @helpers.RT(i) + ">>>8));break;"
     string += "case 2:value=((value&0xffff0000)|(" + @helpers.RT(i) + ">>>16));break;"
@@ -1017,7 +1012,7 @@ class C1964jsEmulator
 
   r4300i_swr: (i) ->
     string = "{" + @helpers.setVAddr(i)
-    string += "const vAddrAligned=(r[38]&-4)|0;var value=m.lw(vAddrAligned);"
+    string += "const vAddrAligned=(r[38]&-4)|0;let value=m.lw(vAddrAligned);"
     string += "switch(r[38]&3){case 3:value=" + @helpers.RT(i) + ";break;"
     string += "case 2:value=((value & 0xFF)|((" + @helpers.RT(i) + "<<8)>>>0));break;"
     string += "case 1:value=((value & 0xFFFF)|((" + @helpers.RT(i) + "<<16)>>>0));break;"
