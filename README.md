@@ -43,7 +43,7 @@ The script is known to work on Mac OS X 10.13.4 and Ubuntu 14.04.3 LTS/15.10 64-
 
 # About the emulator
 
-1964js is (kind of) a port of our Nintendo 64 emulator for Windows called 1964. 1964 was written in C and C++ for Windows. You can still grab that [here](http://1964emu.emulation64.com "Emulation64 1964 page").
+1964js is (kind of) a port of our Nintendo 64 emulator for Windows called 1964. 1964 was written in C and C++ for Windows. You can still grab that [here](http://1964emu.emulation64.com "Emulation64 1964 page"). [Source on GitHub](https://github.com/schibo/1964 "1964 on GitHub")
 
 This project is still in the early stages. The initial goal of this project was to see how well Google Chrome's V8 JavaScript compiler performs.
 
