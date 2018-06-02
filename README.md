@@ -1,3 +1,6 @@
+[![1964js video](https://i1.ytimg.com/vi/bbPi9pfN5dE/hqdefault.jpg)](https://www.youtube.com/watch?v=bbPi9pfN5dE "1964js Playing Super Mario 64")
+
+
 # 1964js
 This is the first Nintendo 64 emulator for JavaScript. Visit the [blog](http://1964js.com/blog/index.html "1964js blog") on [1964js.com](http://1964js.com "1964js website") to see videos and to download the original Windows version of 1964.
 
