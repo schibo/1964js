@@ -159,6 +159,7 @@ class C1964jsEmulator
     @endianTest()
     @helpers = new C1964jsHelpers(this, @isLittleEndian)
     @initTLB()
+    @initOpcodeMap()
 
     #todo: verity that r[8] is 0x070
     cancelAnimFrame @request
@@ -475,7 +476,7 @@ class C1964jsEmulator
     until @stopCompiling
       instruction = @memory.lw(pc + offset)
       @cnt += 1
-      string += this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction)
+      string += @CPU_instruction(instruction)
       offset += 4
       throw Error "too many instructions! bailing."  if offset > 10000
     @stopCompiling = false
@@ -547,7 +548,7 @@ class C1964jsEmulator
     string = undefined
     pc = (@p[0] + offset + 4 + (@helpers.soffset_imm(i) << 2)) | 0
     instruction = @memory.lw((@p[0] + offset + 4) | 0)
-    opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
+    opcode = @CPU_instruction(instruction, true)
     #speed hack
     if instruction is 0 and @helpers.soffset_imm(i) is -1
       string = opcode + "t.m[0]=0;t.p[0]=" + pc + ";return self." + @getFnName(pc) + "}"
@@ -654,7 +655,7 @@ class C1964jsEmulator
     speedUp = false
     speedUp = true if ((instr_index >> 0) is (@p[0] + offset) >> 0) and (instruction is 0)
 
-    string = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
+    string = @CPU_instruction(instruction, true)
     if speedUp is true
       string += "t.m[0]=0"
     else
@@ -670,7 +671,7 @@ class C1964jsEmulator
 
     #delay slot
     instruction = @memory.lw((@p[0] + offset + 4) | 0)
-    string = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
+    string = @CPU_instruction(instruction, true)
     pc = (@p[0] + offset + 8) | 0
     string += "t.m[0]+=" + (@cnt+1) + ";t.p[0]=" + instr_index + ";r[31]=" + pc + ";h[31]=" + (pc >> 31) + ";return self." + @getFnName(instr_index) + ";"
 
@@ -687,7 +688,7 @@ class C1964jsEmulator
 
     #delay slot
     instruction = @memory.lw((@p[0] + offset + 4) | 0)
-    opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
+    opcode = @CPU_instruction(instruction, true)
     string += opcode
     string += "t.m[0]+=" + (@cnt+1) + ";t.p[0]=r[39];return t.fnLut[r[39]>>>2];"
     string
@@ -701,7 +702,7 @@ class C1964jsEmulator
 
     #delay slot
     instruction = @memory.lw((@p[0] + offset + 4) | 0)
-    opcode = this[@CPU_instruction[instruction >> 26 & 0x3f]](instruction, true)
+    opcode = @CPU_instruction(instruction, true)
     string += opcode
     string += "t.m[0]+=" + (@cnt+1) + ";t.p[0]=r[37];return t.fnLut[r[37]>>>2];"
 
