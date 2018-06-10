@@ -68,6 +68,9 @@ class C1964jsMemoryLE extends C1964jsMemory
 
   constructor: (core) ->
     super(core)
+    @u16 = new Uint16Array(@ramArrayBuffer)
+    @u32 = new Uint32Array(@ramArrayBuffer)
+    @ramRegs0Uint16Array = new Uint16Array(@ramRegs0Uint8Array)
     return
 
   readDummy8: (that, a) ->
@@ -83,15 +86,15 @@ class C1964jsMemoryLE extends C1964jsMemory
     that.dummyReadWriteUint8Array[off_] << 24 | that.dummyReadWriteUint8Array[off_ + 1] << 16 | that.dummyReadWriteUint8Array[off_ + 2] << 8 | that.dummyReadWriteUint8Array[off_ + 3]
 
   readRdram8: (that, a) ->
-    that.u8[a]
+    that.u8[a^3]
 
   readRdram16: (that, a) ->
-    `const ram = that.u8`
-    ram[a] << 8 | ram[a + 1]
+    `const ram = that.u16`
+    ram[(a>>>1)^1]
 
   readRdram32: (that, a) ->
-    `const ram = that.u8`
-    ram[a] << 24 | ram[a + 1] << 16 | ram[a + 2] << 8 | ram[a + 3]
+    `const ram = that.u32`
+    ram[a>>>2]
 
   readRamRegs0_8: (that, a) ->
     `const off_ = a - MEMORY_START_RAMREGS0`

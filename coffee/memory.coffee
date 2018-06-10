@@ -74,98 +74,205 @@ class C1964jsMemory
      * @const
     ###
     @rom = `undefined` # set after rom is loaded.
+
     ###*
      * @const
     ###
-    @u8Buffer = new ArrayBuffer(0x800000)
+    @ramArrayBuffer = new ArrayBuffer(0x800000)
     ###*
      * @const
     ###
-    @u8 = new Uint8Array(@u8Buffer) # RDRAM
+    @u8 = new Uint8Array(@ramArrayBuffer) # RDRAM
+
     ###*
      * @const
     ###
-    @spMemUint8Array = new Uint8Array(0x10000)
+    @spMemUint8ArrayBuffer = new ArrayBuffer(0x800000)
     ###*
      * @const
     ###
-    @spReg1Uint8Array = new Uint8Array(0x10000)
+    @spMemUint8Array = new Uint8Array(@spMemUint8ArrayBuffer)
+
     ###*
      * @const
     ###
-    @spReg2Uint8Array = new Uint8Array(0x10000)
+    @spReg1Uint8ArrayBuffer = new ArrayBuffer(0x10000)
     ###*
      * @const
     ###
-    @dpcUint8Array = new Uint8Array(0x10000)
+    @spReg1Uint8Array = new Uint8Array(@spReg1Uint8ArrayBuffer)
+
     ###*
      * @const
     ###
-    @dpsUint8Array = new Uint8Array(0x10000)
+    @spReg2Uint8ArrayBuffer = new ArrayBuffer(0x10000)
     ###*
      * @const
     ###
-    @miUint8Array = new Uint8Array(0x10000)
+    @spReg2Uint8Array = new Uint8Array(@spReg2Uint8ArrayBuffer)
+    
     ###*
      * @const
     ###
-    @viUint8Array = new Uint8Array(0x10000)
+    @dpcUint8ArrayBuffer = new ArrayBuffer(0x10000)
     ###*
      * @const
     ###
-    @aiUint8Array = new Uint8Array(0x10000)
+    @dpcUint8Array = new Uint8Array(@dpcUint8ArrayBuffer)
+    
     ###*
      * @const
     ###
-    @piUint8Array = new Uint8Array(0x10000)
+    @dpsUint8ArrayBuffer = new ArrayBuffer(0x10000)
     ###*
      * @const
     ###
-    @siUint8Array = new Uint8Array(0x10000)
+    @dpsUint8Array = new Uint8Array(@dpsUint8ArrayBuffer)
+    
     ###*
      * @const
     ###
-    @c2a1Uint8Array = new Uint8Array(0x10000)
+    @miUint8ArrayBuffer = new ArrayBuffer(0x10000)
     ###*
      * @const
     ###
-    @c1a1Uint8Array = new Uint8Array(0x10000)
+    @miUint8Array = new Uint8Array(@miUint8ArrayBuffer)
+    
     ###*
      * @const
     ###
-    @c2a2Uint8Array = new Uint8Array(0x10000)
+    @viUint8ArrayBuffer = new ArrayBuffer(0x10000)
     ###*
      * @const
     ###
-    @c1a3Uint8Array = new Uint8Array(0x10000)
+    @viUint8Array = new Uint8Array(@viUint8ArrayBuffer)
+    
     ###*
      * @const
     ###
-    @riUint8Array = new Uint8Array(0x10000)
+    @aiUint8ArrayBuffer = new ArrayBuffer(0x10000)
     ###*
      * @const
     ###
-    @pifUint8Array = new Uint8Array(0x10000)
+    @aiUint8Array = new Uint8Array(@aiUint8ArrayBuffer)
+    
     ###*
      * @const
     ###
-    @gioUint8Array = new Uint8Array(0x10000)
+    @piUint8ArrayBuffer = new ArrayBuffer(0x10000)
     ###*
      * @const
     ###
-    @ramRegs0Uint8Array = new Uint8Array(0x10000)
+    @piUint8Array = new Uint8Array(@piUint8ArrayBuffer)
+    
     ###*
      * @const
     ###
-    @ramRegs4Uint8Array = new Uint8Array(0x10000)
+    @siUint8ArrayBuffer = new ArrayBuffer(0x10000)
     ###*
      * @const
     ###
-    @ramRegs8Uint8Array = new Uint8Array(0x10000)
+    @siUint8Array = new Uint8Array(@siUint8ArrayBuffer)
+    
     ###*
      * @const
     ###
-    @dummyReadWriteUint8Array = new Uint8Array(0x10000)
+    @c2a1Uint8ArrayBuffer = new ArrayBuffer(0x10000)
+    ###*
+     * @const
+    ###
+    @c2a1Uint8Array = new Uint8Array(@c2a1Uint8ArrayBuffer)
+    
+    ###*
+     * @const
+    ###
+    @c1a1Uint8ArrayBuffer = new ArrayBuffer(0x10000)
+    ###*
+     * @const
+    ###
+    @c1a1Uint8Array = new Uint8Array(@c1a1Uint8ArrayBuffer)
+    
+    ###*
+     * @const
+    ###
+    @c2a2Uint8ArrayBuffer = new ArrayBuffer(0x10000)
+    ###*
+     * @const
+    ###
+    @c2a2Uint8Array = new Uint8Array(@c2a2Uint8ArrayBuffer)
+    
+    ###*
+     * @const
+    ###
+    @c1a3Uint8ArrayBuffer = new ArrayBuffer(0x10000)
+    ###*
+     * @const
+    ###
+    @c1a3Uint8Array = new Uint8Array(@c1a3Uint8ArrayBuffer)
+    
+    ###*
+     * @const
+    ###
+    @riUint8ArrayBuffer = new ArrayBuffer(0x10000)
+    ###*
+     * @const
+    ###
+    @riUint8Array = new Uint8Array(@riUint8ArrayBuffer)
+    
+    ###*
+     * @const
+    ###
+    @pifUint8ArrayBuffer = new ArrayBuffer(0x10000)
+    ###*
+     * @const
+    ###
+    @pifUint8Array = new Uint8Array(@pifUint8ArrayBuffer)
+    
+    ###*
+     * @const
+    ###
+    @gioUint8ArrayBuffer = new ArrayBuffer(0x10000)
+    ###*
+     * @const
+    ###
+    @gioUint8Array = new Uint8Array(@gioUint8ArrayBuffer)
+    
+    ###*
+     * @const
+    ###
+    @ramRegs0Uint8ArrayBuffer = new ArrayBuffer(0x10000)
+    ###*
+     * @const
+    ###
+    @ramRegs0Uint8Array = new Uint8Array(@ramRegs0Uint8ArrayBuffer)
+    
+    ###*
+     * @const
+    ###
+    @ramRegs4Uint8ArrayBuffer = new ArrayBuffer(0x10000)
+    ###*
+     * @const
+    ###
+    @ramRegs4Uint8Array = new Uint8Array(@ramRegs4Uint8ArrayBuffer)
+    
+    ###*
+     * @const
+    ###
+    @ramRegs8Uint8ArrayBuffer = new ArrayBuffer(0x10000)
+    ###*
+     * @const
+    ###
+    @ramRegs8Uint8Array = new Uint8Array(@ramRegs8Uint8ArrayBuffer)
+    
+    ###*
+     * @const
+    ###
+    @dummyReadWriteUint8ArrayBuffer = new ArrayBuffer(0x10000)
+    ###*
+     * @const
+    ###
+    @dummyReadWriteUint8Array = new Uint8Array(@dummyReadWriteUint8ArrayBuffer)
+    
     @lengthy = 50325
 
     ###*
