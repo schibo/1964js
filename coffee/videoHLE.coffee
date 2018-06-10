@@ -1161,7 +1161,7 @@ class C1964jsVideoHLE
       console.error "LoadBlock is making too large of a transfer. "+bytesToXfer+" bytes"
     i=0
     `const u8 = this.core.memory.u8
-    addr = this.texImg.addr|0
+    var addr = this.texImg.addr|0
     const tmem = this.tmem`
     while i < bytesToXfer
       tmem[i] = u8[addr]

@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 #console.log(message);
 
 "use strict"
-class C1964jsDma
+class C1964jsDmaLE
   constructor: (memory, interrupts, pif) ->
     @startTime = 0
     @memory = memory
@@ -49,7 +49,7 @@ class C1964jsDma
       `const d = this.memory.u8`
       `const r = this.memory.romUint8Array`
       while transfer >= 0
-        d[to] = r[from]
+        d[to^3] = r[from^3]
         to++
         from++
         --transfer
@@ -59,7 +59,7 @@ class C1964jsDma
     else
       alert "pi reading from somewhere other than cartridge domain"
       while end-- >= 0
-        d[to] = @memory.lb(from)
+        d[to^3] = @memory.lb(from)
         from++
         to++
 
@@ -79,7 +79,7 @@ class C1964jsDma
     from &= 0x0000ffff
     @pif.processPif()
     while end >= 0
-      @memory.u8[to] = @memory.pifUint8Array[from]
+      @memory.u8[to^3] = @memory.pifUint8Array[from^3]
       to++
       from++
       --end
@@ -114,7 +114,7 @@ class C1964jsDma
     to &= 0x0000ffff
     from &= 0x0fffffff
     while end >= 0
-      @memory.pifUint8Array[to] = @memory.u8[from]
+      @memory.pifUint8Array[to^3] = @memory.u8[from^3]
       to++
       from++
       --end
@@ -136,7 +136,7 @@ class C1964jsDma
     to &= 0x00001fff
     from &= 0x00ffffff
     while end >= 0
-      @memory.spMemUint8Array[to] = @memory.u8[from]
+      @memory.spMemUint8Array[to^3] = @memory.u8[from^3]
       to++
       from++
       --end
@@ -152,7 +152,7 @@ class C1964jsDma
 #hack global space until we export classes properly
 #node.js uses exports; browser uses this (window)
 root = exports ? self
-root.C1964jsDma = C1964jsDma
+root.C1964jsDmaLE = C1964jsDmaLE
 root.log = (message) ->
   "use strict"
   console.log message

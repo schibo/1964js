@@ -349,7 +349,7 @@ class C1964jsMemory
     @initRegion MEMORY_START_RAMREGS0, MEMORY_SIZE_RAMREGS0, @readRamRegs0_8, @writeRamRegs0_8, @readRamRegs0_16, @writeRamRegs0_16, @readRamRegs0_32, @writeRamRegs0_32
     @initRegion MEMORY_START_RAMREGS8, MEMORY_SIZE_RAMREGS8, @readRamRegs8_8, @writeRamRegs8_8, @readRamRegs8_16, @writeRamRegs8_16, @readRamRegs8_32, @writeRamRegs8_32
     @t = undefined
-    console.log @lengthy
+    console.log "lengthy0 = " + @lengthy
     return
 
   initRegion: (start, size, LB, SB, readLH, SH, readLW, SW) ->
@@ -364,7 +364,7 @@ class C1964jsMemory
       @SH[start] = SH
       @SW[start] = SW
       start++
-      @lengthy++
+      #@lengthy++
     return
 
   readDummy8: (that, a) ->
@@ -1133,32 +1133,17 @@ class C1964jsMemory
     return
 
   #getInt32 and getUint32 are identical. they both return signed.
-  getInt8: (region, off_) ->
-    region[off_]
-
-  getInt16: (region, off_) ->
-    region[off_] << 8 | region[off_ + 1]
-
   getInt32: (uregion, off_) ->
     uregion[off_] << 24 | uregion[off_ + 1] << 16 | uregion[off_ + 2] << 8 | uregion[off_ + 3]
 
   getUint32: (uregion, off_) ->
     uregion[off_] << 24 | uregion[off_ + 1] << 16 | uregion[off_ + 2] << 8 | uregion[off_ + 3]
 
-  setInt8: (uregion, off_, val) ->
-    uregion[off_] = val
-    return
-
   setInt32: (uregion, off_, val) ->
     uregion[off_] = val >> 24
     uregion[off_ + 1] = val >> 16
     uregion[off_ + 2] = val >> 8
     uregion[off_ + 3] = val
-    return
-
-  setInt16: (uregion, off_, val) ->
-    uregion[off_] = val >> 8
-    uregion[off_ + 1] = val
     return
 
   lb: (addr) ->

@@ -35,6 +35,7 @@ class C1964jsPif
     @eepromName = ""
 
   processPif: ->
+    console.log "Processing PIF..."
     cmd = undefined
     device = 0
     count = 0
