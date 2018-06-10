@@ -70,7 +70,7 @@ class C1964jsMemoryLE extends C1964jsMemory
     super(core)
     @u16 = new Uint16Array(@ramArrayBuffer)
     @u32 = new Uint32Array(@ramArrayBuffer)
-    @ramRegs0Uint16Array = new Uint16Array(@ramRegs0Uint8Array)
+    @ramRegs0Uint16Array = new Uint16Array(@ramRegs0Uint8ArrayBuffer)
     return
 
   readDummy8: (that, a) ->

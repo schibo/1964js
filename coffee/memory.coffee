@@ -65,11 +65,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 `const MEMORY_SIZE_ROM = 0x4000000`
 
 class C1964jsMemory
+
+
+
   constructor: (@core) ->
     ###*
      * @const
     ###
     @romUint8Array = `undefined` # set after rom is loaded.
+
     ###*
      * @const
     ###
@@ -87,7 +91,7 @@ class C1964jsMemory
     ###*
      * @const
     ###
-    @spMemUint8ArrayBuffer = new ArrayBuffer(0x800000)
+    @spMemUint8ArrayBuffer = new ArrayBuffer(0x10000)
     ###*
      * @const
     ###

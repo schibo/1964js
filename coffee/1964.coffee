@@ -90,7 +90,7 @@ class C1964jsEmulator
     @NUM_CHANNELS = 1
     @NUM_SAMPLES = 40000
     @SAMPLE_RATE = 40000
-    @useByteCompatibilityMode = false #slower, but works for any endian system because memory loads and stores are accessed one byte at a time.
+    @useByteCompatibilityMode = true #slower, but works for any endian system because memory loads and stores are accessed one byte at a time.
     @isLittleEndian = 0
     @isBigEndian = 0
     @interval = 0
@@ -223,7 +223,7 @@ class C1964jsEmulator
       y += 1
 
 
-    if @useByteCompatibilityMode is false
+    if @useByteCompatibilityMode is true
       @byteSwap @memory.rom 
     else if @isLittleEndian
       @byteSwapLE @memory.rom
