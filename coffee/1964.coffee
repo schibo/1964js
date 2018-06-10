@@ -90,6 +90,7 @@ class C1964jsEmulator
     @NUM_CHANNELS = 1
     @NUM_SAMPLES = 40000
     @SAMPLE_RATE = 40000
+    @useByteCompatibilityMode = true #slower, but works for any endian system because memory loads and stores are accessed one byte at a time.
     @isLittleEndian = 0
     @isBigEndian = 0
     @interval = 0
@@ -148,15 +149,23 @@ class C1964jsEmulator
     @fnLut = [];#new Map()
     @fn = undefined
 
+    @log = (message) ->
+      console.log message
+    @endianTest()
+
     #hook-up system objects
-    @memory = new C1964jsMemory(this)
+
+    if @useByteCompatibilityMode is true
+      @memory = new C1964jsMemoryLE(@)
+    else if @isLittleEndian is true
+      @memory = new C1964jsMemoryLE(@)
+    else
+      @memory = new C1964jsMemory(@)    
+    
     @interrupts = new C1964jsInterrupts(this, @cp0)
     @pif = new C1964jsPif(@memory.pifUint8Array)
     @dma = new C1964jsDMA(@memory, @interrupts, @pif)
     @webGL = new C1964jsWebGL(this, userSettings.wireframe)
-    @log = (message) ->
-      console.log message
-    @endianTest()
     @helpers = new C1964jsHelpers(this, @isLittleEndian)
     @initTLB()
     @initOpcodeMap()
@@ -212,7 +221,14 @@ class C1964jsEmulator
         i += 4
         x += 1
       y += 1
-    @byteSwap @memory.rom
+
+
+    if @useByteCompatibilityMode is true
+      @byteSwap @memory.rom 
+    else if @isLittleEndian
+      @byteSwapLE @memory.rom
+    else
+      @byteSwap @memory.rom 
 
     #copy first 4096 bytes to sp_dmem and run from there.
     k = 0
@@ -240,9 +256,9 @@ class C1964jsEmulator
     for i in [0...20]
       @romName[i] = @memory.rom[32+i]
     #copy crc1
-    @crc1 = (@memory.rom[16] << 24 | @memory.rom[17] << 16 | @memory.rom[18] << 8 | @memory.rom[19]) >>> 0
+    @crc1 = @memory.getUint32 @memory.rom, 16
     #copy crc2
-    @crc2 = (@memory.rom[20] << 24 | @memory.rom[21] << 16 | @memory.rom[22] << 8 | @memory.rom[23]) >>> 0
+    @crc2 = @memory.getUint32 @memory.rom, 20
 
     @pif.eepromName = @pif.binArrayToJson(@romName) + "-" + dec2hex(@crc1) + dec2hex(@crc2) + ".eep"
     
@@ -279,6 +295,28 @@ class C1964jsEmulator
         @log "Unhandled byte order: 0x" + dec2hex(fmt)
     console.log "swap done"
     return
+
+  byteSwapLE: (rom) ->
+    k = undefined
+    fmt = undefined
+    temp = undefined
+    console.log "byte swapping..."
+    fmt = @memory.getUint32(rom, 0)
+    switch fmt >>> 0
+      when 0x40123780
+        alert "help: support odd byte lengths for this swap"  if (rom.byteLength % 2) isnt 0
+        k = 0
+        while k < rom.byteLength
+          temp = rom[k]
+          rom[k] = rom[k + 1]
+          rom[k + 1] = temp
+          k += 2
+      when 0x12408037
+      else
+        @log "Unhandled byte order: 0x" + dec2hex(fmt)
+    console.log "swap done"
+    return
+
 
   endianTest: ->
     ii = new ArrayBuffer(2)
@@ -403,7 +441,7 @@ class C1964jsEmulator
           else
             throw e
     @fn = fn
-    this
+    @
 
   run: (fn, r, h) ->
     `const m = this.m`
