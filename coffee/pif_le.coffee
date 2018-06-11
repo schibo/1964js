@@ -18,21 +18,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 #globals consts, log
 "use strict"
 
-class C1964jsPif
-  constructor: (pifUint8Array) ->
-    @pifUint8Array = pifUint8Array
-    @eepromStatusByte = 0x80
-    @controlsPresent = new Array(4)
-    @eeprom = new Uint8Array(0x1000) #16KB
-    @controlsPresent[0] = true
-    @controlsPresent[1] = false
-    @controlsPresent[2] = false
-    @controlsPresent[3] = false
-    @g1964buttons = 0x00000000
-    self.onkeydown = this.onKeyDown.bind(this)
-    self.onkeyup = this.onKeyUp.bind(this)
-    @eepromLoaded = false
-    @eepromName = ""
+class C1964jsPifLE extends C1964jsPif
 
   processPif: ->
     cmd = undefined
@@ -41,10 +27,10 @@ class C1964jsPif
     pifRamStart = consts.MEMORY_START_PIF_RAM - consts.MEMORY_START_PIF
     
     #todo: pif ram decryption
-    throw Error "todo: decrypt"  if (@pifUint8Array[pifRamStart] is 0xff) and (@pifUint8Array[pifRamStart + 1] is 0xff) and (@pifUint8Array[pifRamStart + 2] is 0xff) and (@pifUint8Array[pifRamStart + 3] is 0xff) #see iPif.cpp. the first 4 dwords will be -1, not just the first 4 bytes. Make pifUint32Array and use it 4 times.
+    throw Error "todo: decrypt"  if (@pifUint8Array[(pifRamStart^3)] is 0xff) and (@pifUint8Array[(pifRamStart + 1)^3] is 0xff) and (@pifUint8Array[(pifRamStart + 2)^3] is 0xff) and (@pifUint8Array[(pifRamStart + 3)^3] is 0xff) #see iPif.cpp. the first 4 dwords will be -1, not just the first 4 bytes. Make pifUint32Array and use it 4 times.
     count = 0
     while count < 64
-      cmd = @pifUint8Array[pifRamStart + count]
+      cmd = @pifUint8Array[(pifRamStart + count)^3]
       if cmd is 0xFE #Command block ready
         break
       #no-op commands (0xFD is from Command & Conquer)
@@ -59,24 +45,24 @@ class C1964jsPif
           device += 1
 
           #size of Command-Bytes + size of Answer-Bytes + 2 for the 2 size Bytes (1 is in count++)
-          count += cmd + (@pifUint8Array[pifRamStart + count + 1] & 0x3F) + 1
+          count += cmd + (@pifUint8Array[(pifRamStart + count + 1)^3] & 0x3F) + 1
         else
           log "Device > 4. Device = " + device
           break
       count += 1
-    @pifUint8Array[pifRamStart + 63] = 0 #Set the last bit to 0 (successful return)
+    @pifUint8Array[(pifRamStart + 63)^3] = 0 #Set the last bit to 0 (successful return)
     return
 
   processEeprom: (pifRamStart, count) ->
-    switch @pifUint8Array[pifRamStart + count + 2]
+    switch @pifUint8Array[(pifRamStart + count + 2)^3]
       when 0xFF, 0x00
-        @pifUint8Array[pifRamStart + count + 3] = 0x00
-        @pifUint8Array[pifRamStart + count + 4] = @eepromStatusByte
-        @pifUint8Array[pifRamStart + count + 5] = 0x00
+        @pifUint8Array[(pifRamStart + count + 3)^3] = 0x00
+        @pifUint8Array[(pifRamStart + count + 4)^3] = @eepromStatusByte
+        @pifUint8Array[(pifRamStart + count + 5)^3] = 0x00
       when 0x04 #Read from Eeprom
-        @readEeprom(pifRamStart, count + 4, @pifUint8Array[pifRamStart + count + 3] * 8)
+        @readEeprom(pifRamStart, count + 4, @pifUint8Array[(pifRamStart + count + 3)^3] * 8)
       when 0x05 #Write to Eeprom
-        @writeEeprom(pifRamStart, count + 4, @pifUint8Array[pifRamStart + count + 3] * 8)
+        @writeEeprom(pifRamStart, count + 4, @pifUint8Array[(pifRamStart + count + 3)^3] * 8)
       else
     false
 
@@ -108,53 +94,55 @@ class C1964jsPif
     localStorage.setItem @eepromName, @binArrayToJson @eeprom
     return
 
+  # keep files stored as big-endian
+
   readEeprom: (pifRamStart, count, offset) ->
     @loadEepromFile()
-    @pifUint8Array[pifRamStart + count] = @eeprom[offset]
-    @pifUint8Array[pifRamStart + count + 1] = @eeprom[offset + 1]
-    @pifUint8Array[pifRamStart + count + 2] = @eeprom[offset + 2]
-    @pifUint8Array[pifRamStart + count + 3] = @eeprom[offset + 3]
-    @pifUint8Array[pifRamStart + count + 4] = @eeprom[offset + 4]
-    @pifUint8Array[pifRamStart + count + 5] = @eeprom[offset + 5]
-    @pifUint8Array[pifRamStart + count + 6] = @eeprom[offset + 6]
-    @pifUint8Array[pifRamStart + count + 7] = @eeprom[offset + 7]
+    @pifUint8Array[(pifRamStart + count)^3] = @eeprom[offset]
+    @pifUint8Array[(pifRamStart + count + 1)^3] = @eeprom[offset + 1]
+    @pifUint8Array[(pifRamStart + count + 2)^3] = @eeprom[offset + 2]
+    @pifUint8Array[(pifRamStart + count + 3)^3] = @eeprom[offset + 3]
+    @pifUint8Array[(pifRamStart + count + 4)^3] = @eeprom[offset + 4]
+    @pifUint8Array[(pifRamStart + count + 5)^3] = @eeprom[offset + 5]
+    @pifUint8Array[(pifRamStart + count + 6)^3] = @eeprom[offset + 6]
+    @pifUint8Array[(pifRamStart + count + 7)^3] = @eeprom[offset + 7]
     return
 
   writeEeprom: (pifRamStart, count, offset) ->
     @loadEepromFile()
-    @eeprom[offset] = @pifUint8Array[pifRamStart + count]
-    @eeprom[offset + 1] = @pifUint8Array[pifRamStart + count + 1]
-    @eeprom[offset + 2] = @pifUint8Array[pifRamStart + count + 2]
-    @eeprom[offset + 3] = @pifUint8Array[pifRamStart + count + 3]
-    @eeprom[offset + 4] = @pifUint8Array[pifRamStart + count + 4]
-    @eeprom[offset + 5] = @pifUint8Array[pifRamStart + count + 5]
-    @eeprom[offset + 6] = @pifUint8Array[pifRamStart + count + 6]
-    @eeprom[offset + 7] = @pifUint8Array[pifRamStart + count + 7]
+    @eeprom[offset] = @pifUint8Array[(pifRamStart + count)^3]
+    @eeprom[offset + 1] = @pifUint8Array[(pifRamStart + count + 1)^3]
+    @eeprom[offset + 2] = @pifUint8Array[(pifRamStart + count + 2)^3]
+    @eeprom[offset + 3] = @pifUint8Array[(pifRamStart + count + 3)^3]
+    @eeprom[offset + 4] = @pifUint8Array[(pifRamStart + count + 4)^3]
+    @eeprom[offset + 5] = @pifUint8Array[(pifRamStart + count + 5)^3]
+    @eeprom[offset + 6] = @pifUint8Array[(pifRamStart + count + 6)^3]
+    @eeprom[offset + 7] = @pifUint8Array[(pifRamStart + count + 7)^3]
     @writeEepromFile()
     return
 
   processController: (count, device, pifRamStart) ->
     if @controlsPresent[device] is false
-      @pifUint8Array[pifRamStart + count + 1] |= 0x80
-      @pifUint8Array[pifRamStart + count + 3] = 0
-      @pifUint8Array[pifRamStart + count + 4] = 0
-      @pifUint8Array[pifRamStart + count + 5] = 0
+      @pifUint8Array[(pifRamStart + count + 1)^3] |= 0x80
+      @pifUint8Array[(pifRamStart + count + 3)^3] = 0
+      @pifUint8Array[(pifRamStart + count + 4)^3] = 0
+      @pifUint8Array[(pifRamStart + count + 5)^3] = 0
       return true
     buttons = undefined
-    cmd = @pifUint8Array[pifRamStart + count + 2]
+    cmd = @pifUint8Array[(pifRamStart + count + 2)^3]
     switch cmd
       #0xFF could be something like Reset Controller and return the status
       when 0xFF, 0 #0x00 return the status
-        @pifUint8Array[pifRamStart + count + 3] = 5 #For Adaptoid
-        @pifUint8Array[pifRamStart + count + 4] = 0 #For Adaptoid
+        @pifUint8Array[(pifRamStart + count + 3)^3] = 5 #For Adaptoid
+        @pifUint8Array[(pifRamStart + count + 4)^3] = 0 #For Adaptoid
         #todo: mempak, sram, eeprom save save & rumblepak
-        @pifUint8Array[pifRamStart + count + 5] = 0 #no mempak (For Adaptoid)
+        @pifUint8Array[(pifRamStart + count + 5)^3] = 0 #no mempak (For Adaptoid)
       when 1
         buttons = @readControllerData()
-        @pifUint8Array[pifRamStart + count + 3] = buttons >> 24
-        @pifUint8Array[pifRamStart + count + 4] = buttons >> 16
-        @pifUint8Array[pifRamStart + count + 5] = buttons >> 8
-        @pifUint8Array[pifRamStart + count + 6] = buttons
+        @pifUint8Array[(pifRamStart + count + 3)^3] = buttons >> 24
+        @pifUint8Array[(pifRamStart + count + 4)^3] = buttons >> 16
+        @pifUint8Array[(pifRamStart + count + 5)^3] = buttons >> 8
+        @pifUint8Array[(pifRamStart + count + 6)^3] = buttons
       when 2, 3
         log "todo: read/write controller pak"
         return false
@@ -168,4 +156,4 @@ class C1964jsPif
 #hack global space until we export classes properly
 #node.js uses exports; browser uses this (window)
 root = exports ? self
-root.C1964jsPif = C1964jsPif
+root.C1964jsPifLE = C1964jsPifLE

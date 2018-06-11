@@ -90,8 +90,8 @@ class C1964jsEmulator
     @NUM_CHANNELS = 1
     @NUM_SAMPLES = 40000
     @SAMPLE_RATE = 40000
-    @useByteCompatibilityMode = false #if true, slower, but works for any endian system because memory loads and stores are accessed one byte at a time.
-    @isLittleEndian = 0
+    @useByteCompatibilityMode = false #if true, slower, but works for any endian system because memory loads and stores are accessed one byte at a time. Overrides endian check if true.
+    @isLittleEndian = 0 # determined by the system. If is little endian, memory is reordered to little-endian to optimize loads and stores.
     @isBigEndian = 0
     @interval = 0
     @m = new Int32Array(1)
@@ -164,7 +164,7 @@ class C1964jsEmulator
     else if @isLittleEndian is 1
       @memory = new C1964jsMemoryLE @
       @interrupts = new C1964jsInterrupts @, @cp0
-      @pif = new C1964jsPif @memory.pifUint8Array
+      @pif = new C1964jsPifLE @memory.pifUint8Array
       @dma = new C1964jsDmaLE @memory, @interrupts, @pif
     else
       @memory = new C1964jsMemory(@)
@@ -213,7 +213,7 @@ class C1964jsEmulator
   #   r[32] = LO for mult
   #   r[33] = HI for mult
   #   r[34] = write-only. to protect r0, write here.
-    @memory.rom = buffer
+    @memory.rom = new Uint8Array buffer
 
     #fill alpha
     i = 3
@@ -327,6 +327,7 @@ class C1964jsEmulator
     switch fmt >>> 0
       when 0x12408037 #37804012 in memory
         #needs to be 0x40123780
+        alert "help: support odd byte lengths for this swap"  if (rom.byteLength % 2) isnt 0
         alert "help: support odd byte lengths for this swap"  if (rom.byteLength % 4) isnt 0
         k = 0
         while k < rom.byteLength
@@ -359,6 +360,32 @@ class C1964jsEmulator
       @isLittleEndian = 0
       @isBigEndian = 1
     return
+
+  repaintLE: (ctx, ImDat) ->
+    out = undefined
+    i = 0
+    y = undefined
+    return  unless @showFB
+    #get origin
+    k = @memory.getInt32(@memory.viUint8Array, consts.VI_ORIGIN_REG) & 0x00FFFFFF
+    out = ImDat.data
+
+    #endian-safe blit: rgba5551
+    y = -240 * 320
+    `const u8 = this.memory.u8`
+    while y isnt 0
+      out[i] = (u8[k+3] & 0xF8)
+      out[i + 1] = (((u8[k+3] << 5) | (u8[k + 2] >>> 3)) & 0xF8)
+      out[i + 2] = (u8[k + 2] << 2 & 0xF8)
+      out[i + 4] = (u8[k + 1] & 0xF8)
+      out[i + 5] = (((u8[k + 1] << 5) | (u8[k] >>> 3)) & 0xF8)
+      out[i + 6] = (u8[k] << 2 & 0xF8)
+      k += 4
+      i += 8
+      y += 2
+    ctx.putImageData ImDat, 0, 0
+    return
+
 
   repaint: (ctx, ImDat) ->
     out = undefined
@@ -478,7 +505,10 @@ class C1964jsEmulator
     return fn
 
   repaintWrapper: ->
-    @repaint @ctx, @ImDat
+    if @isLittleEndian is 1
+      @repaintLE @ctx, @ImDat
+    else
+      @repaint @ctx, @ImDat
     return
 
   asyncFastLoop: () ->    

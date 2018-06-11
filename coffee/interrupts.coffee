@@ -516,7 +516,12 @@ C1964jsInterrupts = (core, cp0) ->
         #log "bad sp task"
         break
       when consts.GFX_TASK
-        core.videoHLE = new C1964jsVideoHLE(core, core.webGL.gl)  if core.videoHLE is null or core.videoHLE is `undefined`
+        if core.videoHLE is null or core.videoHLE is `undefined`
+          if core.isLittleEndian is 1 and core.useByteCompatibilityMode is false
+            core.videoHLE = new C1964jsVideoHLEle(core, core.webGL.gl)
+          else
+            core.videoHLE = new C1964jsVideoHLE(core, core.webGL.gl)
+
         wireframe = document.getElementById("wireframe")
         core.settings.wireframe = false
         core.settings.wireframe = true if wireframe isnt null and wireframe.checked

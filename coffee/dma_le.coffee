@@ -155,5 +155,4 @@ root = exports ? self
 root.C1964jsDmaLE = C1964jsDmaLE
 root.log = (message) ->
   "use strict"
-  console.log message
   return

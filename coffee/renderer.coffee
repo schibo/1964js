@@ -17,48 +17,47 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 
 useExternalTextures = false #for loading community texture packs
 
-C1964jsRenderer = (settings, glx, webGL) ->
-  gl = glx
-  @canvas = undefined
-  @texture = new Uint8Array(1024*1024*4)
+`const fivetoeight = new Uint8Array([0x00,0x08,0x10,0x18,0x21,0x29,0x31,0x39,0x42,0x4A,0x52,0x5A,0x63,0x6B,0x73,0x7B,0x84,0x8C,0x94,0x9C,0xA5,0xAD,0xB5,0xBD,0xC6,0xCE,0xD6,0xDE,0xE7,0xEF,0xF7,0xFF])
+const fourtoeight = new Uint8Array([0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xaa,0xbb,0xcc,0xdd,0xee,0xff])
+const threetoeight = new Uint8Array([
+  0x00,   // 000 -> 00 00 00 00
+  0x24,   // 001 -> 00 10 01 00
+  0x49,   // 010 -> 01 00 10 01
+  0x6d,   // 011 -> 01 10 11 01
+  0x92,   // 100 -> 10 01 00 10
+  0xb6,   // 101 -> 10 11 01 10
+  0xdb,   // 110 -> 11 01 10 11
+  0xff    // 111 -> 11 11 11 11
+])
+const onetoeight = new Uint8Array([
+  0x00,   // 0 -> 00 00 00 00
+  0xff    // 1 -> 11 11 11 11
+])`
 
+class C1964jsRenderer
+  constructor: (settings, glx, webGL) ->
+    @settings = settings
+    @gl = glx
+    @webGL = webGL
+    @canvas = undefined
+    @texture = new Uint8Array(1024*1024*4)
 
-  texrectVertexPositionBuffer = gl.createBuffer()
-  texrectVertexTextureCoordBuffer = gl.createBuffer()
-  texrectVertexIndexBuffer = gl.createBuffer()
-  texrectVertexIndices = [0, 1, 2, 0, 2, 3]
-  gl.bindBuffer gl.ELEMENT_ARRAY_BUFFER, texrectVertexIndexBuffer
-  gl.bufferData gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(texrectVertexIndices), gl.STATIC_DRAW
-  texrectVertexIndexBuffer.itemSize = 1
-  texrectVertexIndexBuffer.numItems = 6
-  @colorsTexture0 = gl.createTexture()
+    @texrectVertexPositionBuffer = @gl.createBuffer()
+    @texrectVertexTextureCoordBuffer = @gl.createBuffer()
+    @texrectVertexIndexBuffer = @gl.createBuffer()
+    @texrectVertexIndices = [0, 1, 2, 0, 2, 3]
+    @gl.bindBuffer @gl.ELEMENT_ARRAY_BUFFER, @texrectVertexIndexBuffer
+    @gl.bufferData @gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(@texrectVertexIndices), @gl.STATIC_DRAW
+    @texrectVertexIndexBuffer.itemSize = 1
+    @texrectVertexIndexBuffer.numItems = 6
+    @colorsTexture0 = @gl.createTexture()
 
-  @videoHLE = undefined
-  `const fivetoeight = new Uint8Array([0x00,0x08,0x10,0x18,0x21,0x29,0x31,0x39,0x42,0x4A,0x52,0x5A,0x63,0x6B,0x73,0x7B,0x84,0x8C,0x94,0x9C,0xA5,0xAD,0xB5,0xBD,0xC6,0xCE,0xD6,0xDE,0xE7,0xEF,0xF7,0xFF])
-  const fourtoeight = new Uint8Array([0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xaa,0xbb,0xcc,0xdd,0xee,0xff])
-  const threetoeight = new Uint8Array([
-    0x00,   // 000 -> 00 00 00 00
-    0x24,   // 001 -> 00 10 01 00
-    0x49,   // 010 -> 01 00 10 01
-    0x6d,   // 011 -> 01 10 11 01
-    0x92,   // 100 -> 10 01 00 10
-    0xb6,   // 101 -> 10 11 01 10
-    0xdb,   // 110 -> 11 01 10 11
-    0xff    // 111 -> 11 11 11 11
-  ])
-  const onetoeight = new Uint8Array([
-    0x00,   // 0 -> 00 00 00 00
-    0xff    // 1 -> 11 11 11 11
-  ])`
+    @textureCache = new Object()
 
-  @textureCache = new Object()
-
-  @texRect = (tileno, xl, yl, xh, yh, s, t, dsdx, dtdy, tile, tmem, videoHLE, isFillRect) ->
+  texRect: (tileno, xl, yl, xh, yh, s, t, dsdx, dtdy, tile, tmem, videoHLE, isFillRect) ->
 
     tileWidth = (((tile.lrs >> 2) + 1) - tile.uls)|0
     tileHeight = (((tile.lrt >> 2) + 1) - tile.ult)|0
-
-    @videoHLE = videoHLE
 
     supportsNonPowerOf2 = true
 
@@ -90,13 +89,11 @@ C1964jsRenderer = (settings, glx, webGL) ->
     yl = -(yl-yTrans)/yTrans
     yh = -(yh-yTrans)/yTrans
 
-    initQuad xl, yl, xh, yh, sl, tl, sh, th, videoHLE
-    @draw tileno, tile, tmem, videoHLE, nextPow2Width, nextPow2Height, tileWidth, tileHeight, isFillRect
+    @initQuad xl, yl, xh, yh, sl, tl, sh, th, videoHLE
+    @draw @gl, tileno, tile, tmem, videoHLE, nextPow2Width, nextPow2Height, tileWidth, tileHeight, isFillRect
     return
 
-  @formatTexture = (tile, tmem, videoHLE, isFillRect) ->
-    @videoHLE = videoHLE
-
+  formatTexture: (tile, tmem, videoHLE, isFillRect) ->
     return undefined if tile.lrs is undefined or tile.lrt is undefined or tile.uls is undefined or tile.ult is undefined
 
     tileWidth = ((tile.lrs >> 2) + 1) - (tile.uls|0)
@@ -104,8 +101,8 @@ C1964jsRenderer = (settings, glx, webGL) ->
 
     supportsNonPowerOf2 = true
     if !supportsNonPowerOf2
-      nextPow2Width = @videoHLE.pow2roundup (tileWidth*4)
-      nextPow2Height = @videoHLE.pow2roundup tileHeight
+      nextPow2Width = videoHLE.pow2roundup (tileWidth*4)
+      nextPow2Height = videoHLE.pow2roundup tileHeight
     else
       nextPow2Width = tileWidth<<2
       nextPow2Height = tileHeight
@@ -188,21 +185,21 @@ C1964jsRenderer = (settings, glx, webGL) ->
    #   return @canvas
     return {textureData:texture, nextPow2Width: nextPow2Width, nextPow2Height: nextPow2Height}
 
-  initQuad = (xl, yl, xh, yh, sl, tl, sh, th, videoHLE) ->
+  initQuad: (xl, yl, xh, yh, sl, tl, sh, th, videoHLE) ->
     vertices = [xh, yh, 0.0, xh, yl, 0.0, xl, yl, 0.0, xl, yh, 0.0]
-    gl.bindBuffer gl.ARRAY_BUFFER, texrectVertexPositionBuffer
-    gl.bufferData gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW
-    texrectVertexPositionBuffer.itemSize = 3
-    texrectVertexPositionBuffer.numItems = 4
+    @gl.bindBuffer @gl.ARRAY_BUFFER, @texrectVertexPositionBuffer
+    @gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(vertices), @gl.DYNAMIC_DRAW
+    @texrectVertexPositionBuffer.itemSize = 3
+    @texrectVertexPositionBuffer.numItems = 4
 
     textureCoords = [sh, th, sh, tl, sl, tl, sl, th]
-    gl.bindBuffer gl.ARRAY_BUFFER, texrectVertexTextureCoordBuffer
-    gl.bufferData gl.ARRAY_BUFFER, new Float32Array(textureCoords), gl.STATIC_DRAW
-    texrectVertexTextureCoordBuffer.itemSize = 2
-    texrectVertexTextureCoordBuffer.numItems = 4
+    @gl.bindBuffer @gl.ARRAY_BUFFER, @texrectVertexTextureCoordBuffer
+    @gl.bufferData @gl.ARRAY_BUFFER, new Float32Array(textureCoords), @gl.STATIC_DRAW
+    @texrectVertexTextureCoordBuffer.itemSize = 2
+    @texrectVertexTextureCoordBuffer.numItems = 4
     return
 
-  @convertRGBA16 = (texture, tm, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
+  convertRGBA16: (texture, tm, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
     `const tmem = tm` 
     `const height = texHeight|0`
     `const width = texWidth|0`
@@ -227,7 +224,7 @@ C1964jsRenderer = (settings, glx, webGL) ->
       dstRowOffset += dstRowStride
     return
 
-  @convertIA8 = (texture, tm, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
+  convertIA8: (texture, tm, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
     `const tmem = tm` 
     `const height = texHeight|0`
     `const width = texWidth|0`
@@ -252,7 +249,7 @@ C1964jsRenderer = (settings, glx, webGL) ->
       dstRowOffset += dstRowStride
     return
 
-  @convertCI4_RGBA16 = (texture, tm, palette, ram, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
+  convertCI4_RGBA16: (texture, tm, palette, ram, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
     `const tmem = tm`
     `const pal = palette`
     `const height = texHeight|0`
@@ -285,7 +282,7 @@ C1964jsRenderer = (settings, glx, webGL) ->
       dstRowOffset += dstRowStride
     return
 
-  @convertCI8_RGBA16 = (texture, tm, palette, ram, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
+  convertCI8_RGBA16: (texture, tm, palette, ram, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
     `const tmem = tm`
     `const pal = palette`
     `const height = texHeight|0`
@@ -313,7 +310,7 @@ C1964jsRenderer = (settings, glx, webGL) ->
     return
 
 
-  @convertCI8_IA16 = (texture, tm, palette, ram, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
+  convertCI8_IA16: (texture, tm, palette, ram, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
     `const tmem = tm`
     `const pal = palette`
     `const height = texHeight|0`
@@ -342,13 +339,13 @@ C1964jsRenderer = (settings, glx, webGL) ->
     return
 
 
-  @convertIA16ToRGBA = (wIA) ->
+  convertIA16ToRGBA: (wIA) ->
     intensity = (wIA >> 8) & 0xFF
     alpha     = (wIA     ) & 0xFF
     return @COLOR_RGBA dwIntensity, dwIntensity, dwIntensity, dwAlpha
 
 
-  @convertIA4 = (texture, tm, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
+  convertIA4: (texture, tm, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
     `const tmem = tm` 
     `const height = texHeight|0`
     `const width = texWidth|0`
@@ -388,7 +385,7 @@ C1964jsRenderer = (settings, glx, webGL) ->
       dstRowOffset += dstRowStride
     return
 
-  @convertIA16 = (texture, tm, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
+  convertIA16: (texture, tm, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
     `const tmem = tm` 
     `const height = texHeight|0`
     `const width = texWidth|0`
@@ -412,17 +409,17 @@ C1964jsRenderer = (settings, glx, webGL) ->
       dstRowOffset += dstRowStride
     return
 
-  @draw = (tileno, tile, tmem, videoHLE, nextPow2Width, nextPow2Height, tileWidth, tileHeight, isFillRect) ->
+  draw: (gl, tileno, tile, tmem, videoHLE, nextPow2Width, nextPow2Height, tileWidth, tileHeight, isFillRect) ->
     videoHLE.setBlendFunc()
 #    gl.useProgram webGL.shaderProgram
 
-    gl.enableVertexAttribArray webGL.shaderProgram.vertexPositionAttribute
-    gl.bindBuffer gl.ARRAY_BUFFER, texrectVertexPositionBuffer
-    gl.vertexAttribPointer webGL.shaderProgram.vertexPositionAttribute, texrectVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0
+    gl.enableVertexAttribArray @webGL.shaderProgram.vertexPositionAttribute
+    gl.bindBuffer gl.ARRAY_BUFFER, @texrectVertexPositionBuffer
+    gl.vertexAttribPointer @webGL.shaderProgram.vertexPositionAttribute, @texrectVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0
 
-    gl.enableVertexAttribArray webGL.shaderProgram.textureCoordAttribute
-    gl.bindBuffer gl.ARRAY_BUFFER, texrectVertexTextureCoordBuffer
-    gl.vertexAttribPointer webGL.shaderProgram.textureCoordAttribute, texrectVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0
+    gl.enableVertexAttribArray @webGL.shaderProgram.textureCoordAttribute
+    gl.bindBuffer gl.ARRAY_BUFFER, @texrectVertexTextureCoordBuffer
+    gl.vertexAttribPointer @webGL.shaderProgram.textureCoordAttribute, @texrectVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0
 
     #console.log "Binding Texture Size: "+tileWidth+" x "+tileHeight+" -> "+canvaswidth+" x "+canvasheight
 
@@ -450,41 +447,40 @@ C1964jsRenderer = (settings, glx, webGL) ->
 
       gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
       gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-      gl.uniform1i webGL.shaderProgram.samplerUniform, @colorsTexture0
+      gl.uniform1i @webGL.shaderProgram.samplerUniform, @colorsTexture0
 
       if videoHLE.primColor.length > 0
-        gl.uniform4fv webGL.shaderProgram.uPrimColor, videoHLE.primColor
+        gl.uniform4fv @webGL.shaderProgram.uPrimColor, videoHLE.primColor
 
       if videoHLE.fillColor.length > 0
-        gl.uniform4fv webGL.shaderProgram.uFillColor, videoHLE.fillColor
+        gl.uniform4fv @webGL.shaderProgram.uFillColor, videoHLE.fillColor
 
       if videoHLE.blendColor.length > 0
-        gl.uniform4fv webGL.shaderProgram.uBlendColor, videoHLE.blendColor
+        gl.uniform4fv @webGL.shaderProgram.uBlendColor, videoHLE.blendColor
 
       if videoHLE.envColor.length > 0
-        gl.uniform4fv webGL.shaderProgram.uEnvColor, videoHLE.envColor
+        gl.uniform4fv @webGL.shaderProgram.uEnvColor, videoHLE.envColor
 
 
       if isFillRect is true
         cycleType = 3
       else 
         cycleType = videoHLE.cycleType
-      gl.uniform1i webGL.shaderProgram.cycleType, cycleType
+      gl.uniform1i @webGL.shaderProgram.cycleType, cycleType
 
-    gl.bindBuffer gl.ELEMENT_ARRAY_BUFFER, texrectVertexIndexBuffer
-    webGL.setMatrixUniforms webGL.shaderProgram
+    gl.bindBuffer gl.ELEMENT_ARRAY_BUFFER, @texrectVertexIndexBuffer
+    @webGL.setMatrixUniforms @webGL.shaderProgram
    # webGL.setCombineUniforms videoHLE, webGL.shaderProgram
 
-    if settings.wireframe is true
-      gl.drawElements gl.LINE_LOOP, texrectVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0
+    if @settings.wireframe is true
+      gl.drawElements gl.LINE_LOOP, @texrectVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0
     else
-      gl.drawElements gl.TRIANGLES, texrectVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0
+      gl.drawElements gl.TRIANGLES, @texrectVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0
 
-    texrectVertexTextureCoordBuffer.numItems = 0
-    texrectVertexPositionBuffer.numItems = 0
+    @texrectVertexTextureCoordBuffer.numItems = 0
+    @texrectVertexPositionBuffer.numItems = 0
     return
 
-  return this
 #hack global space until we export classes properly
 #node.js uses exports; browser uses this (window)
 root = exports ? self
