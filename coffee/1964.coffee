@@ -246,7 +246,7 @@ class C1964jsEmulator
     while k < 0x1000
       @memory.spMemUint8Array[k] = @memory.rom[k]
       k += 1
-    if @isLittleEndian
+    if @isLittleEndian is 1
       @r[20] = @getTVSystem(@memory.romUint8Array[0x3D^3])
     else
       @r[20] = @getTVSystem(@memory.romUint8Array[0x3D])
@@ -864,6 +864,9 @@ class C1964jsEmulator
     @log "todo: r4300i_cache"
     @stopCompiling = true
     ""
+
+  r4300i_ll: (i) ->
+    @helpers.setVAddr(i) + @helpers.tRT(i) + "=m.lw((r[38])|0);" + "t.LLbit=1;"
 
   r4300i_multu: (i) ->
     "t.helpers.inter_multu(r,h," + i + ");"
