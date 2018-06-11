@@ -157,23 +157,23 @@ class C1964jsEmulator
 
 
     if @useByteCompatibilityMode is true
-      @memory = new C1964jsMemory(@)
-      @interrupts = new C1964jsInterrupts(this, @cp0)
-      @pif = new C1964jsPif(@memory.pifUint8Array)
-      @dma = new C1964jsDma(@memory, @interrupts, @pif)
+      @memory = new C1964jsMemory @
+      @interrupts = new C1964jsInterrupts @, @cp0
+      @pif = new C1964jsPif @memory.pifUint8Array
+      @dma = new C1964jsDma @memory, @interrupts, @pif
     else if @isLittleEndian is 1
-      @memory = new C1964jsMemoryLE(@)
-      @interrupts = new C1964jsInterrupts(this, @cp0)
-      @pif = new C1964jsPif(@memory.pifUint8Array)
-      @dma = new C1964jsDmaLE(@memory, @interrupts, @pif)
+      @memory = new C1964jsMemoryLE @
+      @interrupts = new C1964jsInterrupts @, @cp0
+      @pif = new C1964jsPif @memory.pifUint8Array
+      @dma = new C1964jsDmaLE @memory, @interrupts, @pif
     else
       @memory = new C1964jsMemory(@)
-      @interrupts = new C1964jsInterrupts(this, @cp0)
-      @pif = new C1964jsPif(@memory.pifUint8Array)
-      @dma = new C1964jsDma(@memory, @interrupts, @pif)
+      @interrupts = new C1964jsInterrupts @, @cp0
+      @pif = new C1964jsPif @memory.pifUint8Array
+      @dma = new C1964jsDma @memory, @interrupts, @pif
     
-    @webGL = new C1964jsWebGL(this, userSettings.wireframe)
-    @helpers = new C1964jsHelpers(this, @isLittleEndian)
+    @webGL = new C1964jsWebGL @, userSettings.wireframe
+    @helpers = new C1964jsHelpers @, @isLittleEndian
     @initTLB()
     @initOpcodeMap()
 
@@ -279,13 +279,9 @@ class C1964jsEmulator
     #copy crc2
     @crc2 = @memory.getUint32 @memory.rom, 20
 
-
-
-
     @pif.eepromName = @pif.binArrayToJson(@romName) + "-" + dec2hex(@crc1) + dec2hex(@crc2) + ".eep"
 
     console.log "EEPRom name = " + @pif.eepromName
-
     
     @memory.setInt32 @memory.u8, bootCode.rdramSizeAddress, @currentRdramSize 
 
