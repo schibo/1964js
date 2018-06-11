@@ -797,6 +797,9 @@ class C1964jsEmulator
     @stopCompiling = true
     ""
 
+  r4300i_ll: (i) ->
+    @helpers.setVAddr(i) + @helpers.tRT(i) + "=m.lw((r[38])|0);" + "t.LLbit=1;"
+
   r4300i_multu: (i) ->
     "t.helpers.inter_multu(r,h," + i + ");"
 
