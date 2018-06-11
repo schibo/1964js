@@ -657,7 +657,7 @@ class C1964jsMemoryLE extends C1964jsMemory
 
   writeC2A2_32: (that, val, a) ->
     `const off_ = a - MEMORY_START_C2A2`
-    that.c2a2Uint32Array[off_>>>2] = vall
+    that.c2a2Uint32Array[off_>>>2] = val
     return
 
   writeRom8: (that, val, a) ->
