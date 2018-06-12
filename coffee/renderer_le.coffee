@@ -48,8 +48,8 @@ class C1964jsRendererLE extends C1964jsRenderer
       srcOffset = srcRowOffset|0
       dstOffset = dstRowOffset|0
       while i < 0
-        hi = tmem[srcOffset]|0
-        lo = tmem[srcOffset+1]|0
+        hi = tmem[srcOffset^3]|0
+        lo = tmem[(srcOffset+1)^3]|0
         i++
         texture[dstOffset] = fivetoeight[hi >>> 3]
         srcOffset += 2
@@ -73,7 +73,7 @@ class C1964jsRendererLE extends C1964jsRenderer
       srcOffset = srcRowOffset
       dstOffset = dstRowOffset
       while i < 0
-        b = tmem[srcOffset]|0
+        b = tmem[srcOffset^3]|0
         i++
         I = ((b >>> 4) & 0xF) | (b & 0xF0) 
         srcOffset += 1
@@ -100,8 +100,8 @@ class C1964jsRendererLE extends C1964jsRenderer
       srcOffset = srcRowOffset
       dstOffset = dstRowOffset
       while i < 0
-        bHi = tmem[srcOffset]&0xF0 >>> 4
-        bLo = tmem[srcOffset]&0xF
+        bHi = tmem[srcOffset^3]&0xF0 >>> 4
+        bLo = tmem[srcOffset^3]&0xF
         colorHi = u8[pal+bHi]<<8 | u8[pal+bHi+1]
         colorLo = u8[pal+bLo]<<8 | u8[pal+bLo+1]
         i++
@@ -133,7 +133,7 @@ class C1964jsRendererLE extends C1964jsRenderer
       srcOffset = srcRowOffset
       dstOffset = dstRowOffset
       while i < 0
-        b = tmem[srcOffset]
+        b = tmem[srcOffset^3]
         color = u8[pal+b]<<8 | u8[pal+b+1]
         i++
         srcOffset += 1
@@ -161,7 +161,7 @@ class C1964jsRendererLE extends C1964jsRenderer
       srcOffset = srcRowOffset
       dstOffset = dstRowOffset
       while i < 0
-        b = tmem[srcOffset]
+        b = tmem[srcOffset^3]
         I = u8[pal+b]
         a = u8[pal+b+1]
         i++
@@ -194,7 +194,7 @@ class C1964jsRendererLE extends C1964jsRenderer
       srcOffset = srcRowOffset
       dstOffset = dstRowOffset
       while i < 0
-        b = tmem[srcOffset]|0
+        b = tmem[srcOffset^3]|0
         i+=2
         I0 = threetoeight[(b & 0xe0)>>>5]
         srcOffset += 1
@@ -209,7 +209,7 @@ class C1964jsRendererLE extends C1964jsRenderer
         texture[dstOffset + 7] = b << 31 >> 31
         dstOffset += 8
       if width & 1
-        b = tmem[srcOffset]|0
+        b = tmem[srcOffset^3]|0
         i+=1
         I0 = threetoeight[(b & 0xe0)>>>5]
         srcOffset += 1
@@ -234,12 +234,12 @@ class C1964jsRendererLE extends C1964jsRenderer
       srcOffset = srcRowOffset
       dstOffset = dstRowOffset
       while i < 0
-        I = tmem[srcOffset]|0
+        I = tmem[srcOffset^3]|0
         i++
         texture[dstOffset] = I
         texture[dstOffset + 1] = I
         texture[dstOffset + 2] = I
-        texture[dstOffset + 3] = tmem[srcOffset+1]
+        texture[dstOffset + 3] = tmem[(srcOffset+1)^3]
         srcOffset += 2
         dstOffset += 4
       j++
