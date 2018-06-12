@@ -65,103 +65,218 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 `const MEMORY_SIZE_ROM = 0x4000000`
 
 class C1964jsMemory
+
+
+
   constructor: (@core) ->
     ###*
      * @const
     ###
     @romUint8Array = `undefined` # set after rom is loaded.
+
     ###*
      * @const
     ###
     @rom = `undefined` # set after rom is loaded.
+
     ###*
      * @const
     ###
-    @u8 = new Uint8Array(0x800000) # RDRAM
+    @ramArrayBuffer = new ArrayBuffer(0x800000)
     ###*
      * @const
     ###
-    @spMemUint8Array = new Uint8Array(0x10000)
+    @u8 = new Uint8Array(@ramArrayBuffer) # RDRAM
+
     ###*
      * @const
     ###
-    @spReg1Uint8Array = new Uint8Array(0x10000)
+    @spMemUint8ArrayBuffer = new ArrayBuffer(0x10000)
     ###*
      * @const
     ###
-    @spReg2Uint8Array = new Uint8Array(0x10000)
+    @spMemUint8Array = new Uint8Array(@spMemUint8ArrayBuffer)
+
     ###*
      * @const
     ###
-    @dpcUint8Array = new Uint8Array(0x10000)
+    @spReg1Uint8ArrayBuffer = new ArrayBuffer(0x10000)
     ###*
      * @const
     ###
-    @dpsUint8Array = new Uint8Array(0x10000)
+    @spReg1Uint8Array = new Uint8Array(@spReg1Uint8ArrayBuffer)
+
     ###*
      * @const
     ###
-    @miUint8Array = new Uint8Array(0x10000)
+    @spReg2Uint8ArrayBuffer = new ArrayBuffer(0x10000)
     ###*
      * @const
     ###
-    @viUint8Array = new Uint8Array(0x10000)
+    @spReg2Uint8Array = new Uint8Array(@spReg2Uint8ArrayBuffer)
+    
     ###*
      * @const
     ###
-    @aiUint8Array = new Uint8Array(0x10000)
+    @dpcUint8ArrayBuffer = new ArrayBuffer(0x10000)
     ###*
      * @const
     ###
-    @piUint8Array = new Uint8Array(0x10000)
+    @dpcUint8Array = new Uint8Array(@dpcUint8ArrayBuffer)
+    
     ###*
      * @const
     ###
-    @siUint8Array = new Uint8Array(0x10000)
+    @dpsUint8ArrayBuffer = new ArrayBuffer(0x10000)
     ###*
      * @const
     ###
-    @c2a1Uint8Array = new Uint8Array(0x10000)
+    @dpsUint8Array = new Uint8Array(@dpsUint8ArrayBuffer)
+    
     ###*
      * @const
     ###
-    @c1a1Uint8Array = new Uint8Array(0x10000)
+    @miUint8ArrayBuffer = new ArrayBuffer(0x10000)
     ###*
      * @const
     ###
-    @c2a2Uint8Array = new Uint8Array(0x10000)
+    @miUint8Array = new Uint8Array(@miUint8ArrayBuffer)
+    
     ###*
      * @const
     ###
-    @c1a3Uint8Array = new Uint8Array(0x10000)
+    @viUint8ArrayBuffer = new ArrayBuffer(0x10000)
     ###*
      * @const
     ###
-    @riUint8Array = new Uint8Array(0x10000)
+    @viUint8Array = new Uint8Array(@viUint8ArrayBuffer)
+    
     ###*
      * @const
     ###
-    @pifUint8Array = new Uint8Array(0x10000)
+    @aiUint8ArrayBuffer = new ArrayBuffer(0x10000)
     ###*
      * @const
     ###
-    @gioUint8Array = new Uint8Array(0x10000)
+    @aiUint8Array = new Uint8Array(@aiUint8ArrayBuffer)
+    
     ###*
      * @const
     ###
-    @ramRegs0Uint8Array = new Uint8Array(0x10000)
+    @piUint8ArrayBuffer = new ArrayBuffer(0x10000)
     ###*
      * @const
     ###
-    @ramRegs4Uint8Array = new Uint8Array(0x10000)
+    @piUint8Array = new Uint8Array(@piUint8ArrayBuffer)
+    
     ###*
      * @const
     ###
-    @ramRegs8Uint8Array = new Uint8Array(0x10000)
+    @siUint8ArrayBuffer = new ArrayBuffer(0x10000)
     ###*
      * @const
     ###
-    @dummyReadWriteUint8Array = new Uint8Array(0x10000)
+    @siUint8Array = new Uint8Array(@siUint8ArrayBuffer)
+    
+    ###*
+     * @const
+    ###
+    @c2a1Uint8ArrayBuffer = new ArrayBuffer(0x10000)
+    ###*
+     * @const
+    ###
+    @c2a1Uint8Array = new Uint8Array(@c2a1Uint8ArrayBuffer)
+    
+    ###*
+     * @const
+    ###
+    @c1a1Uint8ArrayBuffer = new ArrayBuffer(0x10000)
+    ###*
+     * @const
+    ###
+    @c1a1Uint8Array = new Uint8Array(@c1a1Uint8ArrayBuffer)
+    
+    ###*
+     * @const
+    ###
+    @c2a2Uint8ArrayBuffer = new ArrayBuffer(0x10000)
+    ###*
+     * @const
+    ###
+    @c2a2Uint8Array = new Uint8Array(@c2a2Uint8ArrayBuffer)
+    
+    ###*
+     * @const
+    ###
+    @c1a3Uint8ArrayBuffer = new ArrayBuffer(0x10000)
+    ###*
+     * @const
+    ###
+    @c1a3Uint8Array = new Uint8Array(@c1a3Uint8ArrayBuffer)
+    
+    ###*
+     * @const
+    ###
+    @riUint8ArrayBuffer = new ArrayBuffer(0x10000)
+    ###*
+     * @const
+    ###
+    @riUint8Array = new Uint8Array(@riUint8ArrayBuffer)
+    
+    ###*
+     * @const
+    ###
+    @pifUint8ArrayBuffer = new ArrayBuffer(0x10000)
+    ###*
+     * @const
+    ###
+    @pifUint8Array = new Uint8Array(@pifUint8ArrayBuffer)
+    
+    ###*
+     * @const
+    ###
+    @gioUint8ArrayBuffer = new ArrayBuffer(0x10000)
+    ###*
+     * @const
+    ###
+    @gioUint8Array = new Uint8Array(@gioUint8ArrayBuffer)
+    
+    ###*
+     * @const
+    ###
+    @ramRegs0Uint8ArrayBuffer = new ArrayBuffer(0x10000)
+    ###*
+     * @const
+    ###
+    @ramRegs0Uint8Array = new Uint8Array(@ramRegs0Uint8ArrayBuffer)
+    
+    ###*
+     * @const
+    ###
+    @ramRegs4Uint8ArrayBuffer = new ArrayBuffer(0x10000)
+    ###*
+     * @const
+    ###
+    @ramRegs4Uint8Array = new Uint8Array(@ramRegs4Uint8ArrayBuffer)
+    
+    ###*
+     * @const
+    ###
+    @ramRegs8Uint8ArrayBuffer = new ArrayBuffer(0x10000)
+    ###*
+     * @const
+    ###
+    @ramRegs8Uint8Array = new Uint8Array(@ramRegs8Uint8ArrayBuffer)
+    
+    ###*
+     * @const
+    ###
+    @dummyReadWriteUint8ArrayBuffer = new ArrayBuffer(0x10000)
+    ###*
+     * @const
+    ###
+    @dummyReadWriteUint8Array = new Uint8Array(@dummyReadWriteUint8ArrayBuffer)
+    
     @lengthy = 50325
 
     ###*
@@ -234,7 +349,8 @@ class C1964jsMemory
     @initRegion MEMORY_START_RAMREGS0, MEMORY_SIZE_RAMREGS0, @readRamRegs0_8, @writeRamRegs0_8, @readRamRegs0_16, @writeRamRegs0_16, @readRamRegs0_32, @writeRamRegs0_32
     @initRegion MEMORY_START_RAMREGS8, MEMORY_SIZE_RAMREGS8, @readRamRegs8_8, @writeRamRegs8_8, @readRamRegs8_16, @writeRamRegs8_16, @readRamRegs8_32, @writeRamRegs8_32
     @t = undefined
-    console.log @lengthy
+    console.log "lengthy0 = " + @lengthy
+    return
 
   initRegion: (start, size, LB, SB, readLH, SH, readLW, SW) ->
     end = (start + size) >>> 16
@@ -248,7 +364,7 @@ class C1964jsMemory
       @SH[start] = SH
       @SW[start] = SW
       start++
-      @lengthy++
+      #@lengthy++
     return
 
   readDummy8: (that, a) ->
@@ -1017,32 +1133,17 @@ class C1964jsMemory
     return
 
   #getInt32 and getUint32 are identical. they both return signed.
-  getInt8: (region, off_) ->
-    region[off_]
-
-  getInt16: (region, off_) ->
-    region[off_] << 8 | region[off_ + 1]
-
   getInt32: (uregion, off_) ->
     uregion[off_] << 24 | uregion[off_ + 1] << 16 | uregion[off_ + 2] << 8 | uregion[off_ + 3]
 
   getUint32: (uregion, off_) ->
     uregion[off_] << 24 | uregion[off_ + 1] << 16 | uregion[off_ + 2] << 8 | uregion[off_ + 3]
 
-  setInt8: (uregion, off_, val) ->
-    uregion[off_] = val
-    return
-
   setInt32: (uregion, off_, val) ->
     uregion[off_] = val >> 24
     uregion[off_ + 1] = val >> 16
     uregion[off_ + 2] = val >> 8
     uregion[off_ + 3] = val
-    return
-
-  setInt16: (uregion, off_, val) ->
-    uregion[off_] = val >> 8
-    uregion[off_ + 1] = val
     return
 
   lb: (addr) ->

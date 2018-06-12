@@ -66,8 +66,7 @@ initTryCatch = (buffer) ->
 
 uncompressAndRun = (romPath, response) ->
   if romPath.split(".").pop().toLowerCase() isnt "zip"
-    buffer = new Uint8Array(response)
-    @romLength = buffer.byteLength
+    buffer = response
     initTryCatch buffer
   else
     #This zip library seems to only work if there is one file in the root of the zip's filesystem.
@@ -76,8 +75,7 @@ uncompressAndRun = (romPath, response) ->
     unzipper.addEventListener bitjs.archive.UnarchiveEvent.Type.EXTRACT, (e) ->
       if e.unarchivedFile
         console.log "extracted: " + e.unarchivedFile.filename
-        buffer = new Uint8Array(e.unarchivedFile.fileData)
-        @romLength = buffer.byteLength
+        buffer = e.unarchivedFile.fileData.buffer
         initTryCatch buffer
     unzipper.addEventListener bitjs.archive.UnarchiveEvent.Type.INFO, (e) ->
       console.log "zip info: " + e.msg

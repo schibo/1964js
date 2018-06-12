@@ -60,7 +60,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 # everywhere it is currently used implicitly uses it as a 32bit int. In a few cases, if it is assigned to a float, it could be larger than 32bits.
 #
 ###jslint bitwise: true, evil: true, undef: false, todo: true, browser: true, devel: true###
-###globals Int32Array, ArrayBuffer, Float32Array, C1964jsMemory, C1964jsInterrupts, C1964jsConstants, C1964jsPif, C1964jsDMA, Float64Array, C1964jsWebGL, cancelAnimFrame, C1964jsHelpers, dec2hex, Uint8Array, Uint16Array, requestAnimFrame###
+###globals Int32Array, ArrayBuffer, Float32Array, C1964jsMemory, C1964jsInterrupts, C1964jsConstants, C1964jsPif, C1964jsDma, Float64Array, C1964jsWebGL, cancelAnimFrame, C1964jsHelpers, dec2hex, Uint8Array, Uint16Array, requestAnimFrame###
 
 "use strict"
 consts = new C1964jsConstants()
@@ -90,7 +90,8 @@ class C1964jsEmulator
     @NUM_CHANNELS = 1
     @NUM_SAMPLES = 40000
     @SAMPLE_RATE = 40000
-    @isLittleEndian = 0
+    @useByteCompatibilityMode = false #if true, slower, but works for any endian system because memory loads and stores are accessed one byte at a time. Overrides endian check if true.
+    @isLittleEndian = 0 # determined by the system. If is little endian, memory is reordered to little-endian to optimize loads and stores.
     @isBigEndian = 0
     @interval = 0
     @m = new Int32Array(1)
@@ -148,16 +149,31 @@ class C1964jsEmulator
     @fnLut = [];#new Map()
     @fn = undefined
 
-    #hook-up system objects
-    @memory = new C1964jsMemory(this)
-    @interrupts = new C1964jsInterrupts(this, @cp0)
-    @pif = new C1964jsPif(@memory.pifUint8Array)
-    @dma = new C1964jsDMA(@memory, @interrupts, @pif)
-    @webGL = new C1964jsWebGL(this, userSettings.wireframe)
     @log = (message) ->
       console.log message
     @endianTest()
-    @helpers = new C1964jsHelpers(this, @isLittleEndian)
+
+    #hook-up system objects
+
+
+    if @useByteCompatibilityMode is true
+      @memory = new C1964jsMemory @
+      @interrupts = new C1964jsInterrupts @, @cp0
+      @pif = new C1964jsPif @memory.pifUint8Array
+      @dma = new C1964jsDma @memory, @interrupts, @pif
+    else if @isLittleEndian is 1
+      @memory = new C1964jsMemoryLE @
+      @interrupts = new C1964jsInterrupts @, @cp0
+      @pif = new C1964jsPifLE @memory.pifUint8Array
+      @dma = new C1964jsDmaLE @memory, @interrupts, @pif
+    else
+      @memory = new C1964jsMemory(@)
+      @interrupts = new C1964jsInterrupts @, @cp0
+      @pif = new C1964jsPif @memory.pifUint8Array
+      @dma = new C1964jsDma @memory, @interrupts, @pif
+    
+    @webGL = new C1964jsWebGL @, userSettings.wireframe
+    @helpers = new C1964jsHelpers @, @isLittleEndian
     @initTLB()
     @initOpcodeMap()
 
@@ -197,10 +213,7 @@ class C1964jsEmulator
   #   r[32] = LO for mult
   #   r[33] = HI for mult
   #   r[34] = write-only. to protect r0, write here.
-    @memory.rom = buffer
-
-    #rom = new Uint8Array(buffer);
-    @memory.romUint8Array = buffer
+    @memory.rom = new Uint8Array buffer
 
     #fill alpha
     i = 3
@@ -212,14 +225,31 @@ class C1964jsEmulator
         i += 4
         x += 1
       y += 1
-    @byteSwap @memory.rom
+
+    if @useByteCompatibilityMode is true
+      @byteSwap @memory.rom 
+    else if @isLittleEndian is 1
+      @byteSwapLE @memory.rom
+    else
+      @byteSwap @memory.rom 
+
+    #rom = new Uint8Array(buffer);
+    @memory.romUint8Array = @memory.rom
+
+    if @useByteCompatibilityMode is false
+      @memory.romUint16Array = new Uint16Array(buffer)
+      @memory.romUint32Array = new Uint32Array(buffer)
+
 
     #copy first 4096 bytes to sp_dmem and run from there.
     k = 0
     while k < 0x1000
       @memory.spMemUint8Array[k] = @memory.rom[k]
       k += 1
-    @r[20] = @getTVSystem(@memory.romUint8Array[0x3D])
+    if @isLittleEndian is 1
+      @r[20] = @getTVSystem(@memory.romUint8Array[0x3D^3])
+    else
+      @r[20] = @getTVSystem(@memory.romUint8Array[0x3D])
     bootCode = @getBootCode()
     @r[22] = bootCode.cic
     @cp0[consts.STATUS] = 0x70400004
@@ -237,14 +267,21 @@ class C1964jsEmulator
     
     # rom header
     #copy rom name
-    for i in [0...20]
-      @romName[i] = @memory.rom[32+i]
+    if @isLittleEndian is 1
+      for i in [0...20]
+        @romName[i] = @memory.rom[(32+i)^3]
+    else
+      for i in [0...20]
+        @romName[i] = @memory.rom[(32+i)]
+
     #copy crc1
-    @crc1 = (@memory.rom[16] << 24 | @memory.rom[17] << 16 | @memory.rom[18] << 8 | @memory.rom[19]) >>> 0
+    @crc1 = @memory.getUint32 @memory.rom, 16
     #copy crc2
-    @crc2 = (@memory.rom[20] << 24 | @memory.rom[21] << 16 | @memory.rom[22] << 8 | @memory.rom[23]) >>> 0
+    @crc2 = @memory.getUint32 @memory.rom, 20
 
     @pif.eepromName = @pif.binArrayToJson(@romName) + "-" + dec2hex(@crc1) + dec2hex(@crc2) + ".eep"
+
+    console.log "EEPRom name = " + @pif.eepromName
     
     @memory.setInt32 @memory.u8, bootCode.rdramSizeAddress, @currentRdramSize 
 
@@ -280,6 +317,34 @@ class C1964jsEmulator
     console.log "swap done"
     return
 
+  byteSwapLE: (rom) ->
+    k = undefined
+    fmt = undefined
+    temp = undefined
+    temp2 = undefined
+    console.log "byte swapping..."
+    fmt = @memory.getUint32(rom, 0)
+    switch fmt >>> 0
+      when 0x12408037 #37804012 in memory
+        #needs to be 0x40123780
+        alert "help: support odd byte lengths for this swap"  if (rom.byteLength % 2) isnt 0
+        alert "help: support odd byte lengths for this swap"  if (rom.byteLength % 4) isnt 0
+        k = 0
+        while k < rom.byteLength
+          temp = rom[k] 
+          temp1 = rom[k+1] 
+          rom[k] = rom[k+2]
+          rom[k+1] = rom[k+3]
+          rom[k+2] = temp
+          rom[k+3] = temp1
+          k += 4
+      when 0x40123780
+      else
+        @log "Unhandled byte order: 0x" + dec2hex(fmt)
+    console.log "swap done"
+    return
+
+
   endianTest: ->
     ii = new ArrayBuffer(2)
     iiSetView = new Uint8Array(ii)
@@ -295,6 +360,32 @@ class C1964jsEmulator
       @isLittleEndian = 0
       @isBigEndian = 1
     return
+
+  repaintLE: (ctx, ImDat) ->
+    out = undefined
+    i = 0
+    y = undefined
+    return  unless @showFB
+    #get origin
+    k = @memory.getInt32(@memory.viUint8Array, consts.VI_ORIGIN_REG) & 0x00FFFFFF
+    out = ImDat.data
+
+    #endian-safe blit: rgba5551
+    y = -240 * 320
+    `const u8 = this.memory.u8`
+    while y isnt 0
+      out[i] = (u8[k+3] & 0xF8)
+      out[i + 1] = (((u8[k+3] << 5) | (u8[k + 2] >>> 3)) & 0xF8)
+      out[i + 2] = (u8[k + 2] << 2 & 0xF8)
+      out[i + 4] = (u8[k + 1] & 0xF8)
+      out[i + 5] = (((u8[k + 1] << 5) | (u8[k] >>> 3)) & 0xF8)
+      out[i + 6] = (u8[k] << 2 & 0xF8)
+      k += 4
+      i += 8
+      y += 2
+    ctx.putImageData ImDat, 0, 0
+    return
+
 
   repaint: (ctx, ImDat) ->
     out = undefined
@@ -403,7 +494,7 @@ class C1964jsEmulator
           else
             throw e
     @fn = fn
-    this
+    @
 
   run: (fn, r, h) ->
     `const m = this.m`
@@ -414,7 +505,10 @@ class C1964jsEmulator
     return fn
 
   repaintWrapper: ->
-    @repaint @ctx, @ImDat
+    if @isLittleEndian is 1
+      @repaintLE @ctx, @ImDat
+    else
+      @repaint @ctx, @ImDat
     return
 
   asyncFastLoop: () ->    

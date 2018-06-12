@@ -133,10 +133,6 @@ C1964jsVideoHLE::getVertexLightZ = (pc) ->
   @core.memory.u8[pc+10] << 24>> 24
 
 
-
-C1964jsVideoHLE::toSByte = (ub) ->
-  if ub > 127 then return ub - 256 else return ub
-
 #Texture Struct
 C1964jsVideoHLE::getTextureLevel = (pc) ->
   (@core.memory.u8[pc] << 24 | @core.memory.u8[pc+1] << 16 | @core.memory.u8[pc+2] << 8 | @core.memory.u8[pc+3]) >> 11 & 7

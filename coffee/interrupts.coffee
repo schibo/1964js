@@ -112,49 +112,49 @@ C1964jsInterrupts = (core, cp0) ->
 
   @triggerPIInterrupt = (pc, isFromDelaySlot) ->
     @setFlag core.memory.miUint8Array, consts.MI_INTR_REG, consts.MI_INTR_PI
-    value = core.memory.miUint8Array[consts.MI_INTR_MASK_REG] << 24 | core.memory.miUint8Array[consts.MI_INTR_MASK_REG + 1] << 16 | core.memory.miUint8Array[consts.MI_INTR_MASK_REG + 2] << 8 | core.memory.miUint8Array[consts.MI_INTR_MASK_REG + 3]
+    value = core.memory.getInt32 core.memory.miUint8Array, consts.MI_INTR_MASK_REG
     @setException consts.EXC_INT, consts.CAUSE_IP3, pc, isFromDelaySlot  if (value & consts.MI_INTR_MASK_PI) isnt 0
     return
 
   @triggerSPInterrupt = (pc, isFromDelaySlot) ->
     @setFlag core.memory.miUint8Array, consts.MI_INTR_REG, consts.MI_INTR_SP
-    value = core.memory.miUint8Array[consts.MI_INTR_MASK_REG] << 24 | core.memory.miUint8Array[consts.MI_INTR_MASK_REG + 1] << 16 | core.memory.miUint8Array[consts.MI_INTR_MASK_REG + 2] << 8 | core.memory.miUint8Array[consts.MI_INTR_MASK_REG + 3]
+    value = core.memory.getInt32 core.memory.miUint8Array, consts.MI_INTR_MASK_REG
     @setException consts.EXC_INT, consts.CAUSE_IP3, pc, isFromDelaySlot  if (value & consts.MI_INTR_MASK_SP) isnt 0
     return
 
   @triggerVIInterrupt = (pc, isFromDelaySlot) ->
     @setFlag core.memory.miUint8Array, consts.MI_INTR_REG, consts.MI_INTR_VI
-    value = core.memory.miUint8Array[consts.MI_INTR_MASK_REG] << 24 | core.memory.miUint8Array[consts.MI_INTR_MASK_REG + 1] << 16 | core.memory.miUint8Array[consts.MI_INTR_MASK_REG + 2] << 8 | core.memory.miUint8Array[consts.MI_INTR_MASK_REG + 3]
+    value = core.memory.getInt32 core.memory.miUint8Array, consts.MI_INTR_MASK_REG
     @setException consts.EXC_INT, consts.CAUSE_IP3, pc, isFromDelaySlot  if (value & consts.MI_INTR_MASK_VI) isnt 0
     return
 
   @triggerSIInterrupt = (pc, isFromDelaySlot) ->
     @setFlag core.memory.miUint8Array, consts.MI_INTR_REG, consts.MI_INTR_SI
-    value = core.memory.miUint8Array[consts.MI_INTR_MASK_REG] << 24 | core.memory.miUint8Array[consts.MI_INTR_MASK_REG + 1] << 16 | core.memory.miUint8Array[consts.MI_INTR_MASK_REG + 2] << 8 | core.memory.miUint8Array[consts.MI_INTR_MASK_REG + 3]
+    value = core.memory.getInt32 core.memory.miUint8Array, consts.MI_INTR_MASK_REG
     @setException consts.EXC_INT, consts.CAUSE_IP3, pc, isFromDelaySlot  if (value & consts.MI_INTR_MASK_SI) isnt 0
     return
 
   @triggerAIInterrupt = (pc, isFromDelaySlot) ->
     @setFlag core.memory.miUint8Array, consts.MI_INTR_REG, consts.MI_INTR_AI
-    value = core.memory.miUint8Array[consts.MI_INTR_MASK_REG] << 24 | core.memory.miUint8Array[consts.MI_INTR_MASK_REG + 1] << 16 | core.memory.miUint8Array[consts.MI_INTR_MASK_REG + 2] << 8 | core.memory.miUint8Array[consts.MI_INTR_MASK_REG + 3]
+    value = core.memory.getInt32 core.memory.miUint8Array, consts.MI_INTR_MASK_REG
     @setException consts.EXC_INT, consts.CAUSE_IP3, pc, isFromDelaySlot  if (value & consts.MI_INTR_MASK_AI) isnt 0
     return
 
   @triggerDPInterrupt = (pc, isFromDelaySlot) ->
     @setFlag core.memory.miUint8Array, consts.MI_INTR_REG, consts.MI_INTR_DP
-    value = core.memory.miUint8Array[consts.MI_INTR_MASK_REG] << 24 | core.memory.miUint8Array[consts.MI_INTR_MASK_REG + 1] << 16 | core.memory.miUint8Array[consts.MI_INTR_MASK_REG + 2] << 8 | core.memory.miUint8Array[consts.MI_INTR_MASK_REG + 3]
+    value = core.memory.getInt32 core.memory.miUint8Array, consts.MI_INTR_MASK_REG
     @setException consts.EXC_INT, consts.CAUSE_IP3, pc, isFromDelaySlot  if (value & consts.MI_INTR_MASK_DP) isnt 0
     return
 
   @triggerRspBreak = ->
     @setFlag core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_TASKDONE | consts.SP_STATUS_BROKE | consts.SP_STATUS_HALT
-    value = core.memory.spReg1Uint8Array[consts.SP_STATUS_REG] << 24 | core.memory.spReg1Uint8Array[consts.SP_STATUS_REG + 1] << 16 | core.memory.spReg1Uint8Array[consts.SP_STATUS_REG + 2] << 8 | core.memory.spReg1Uint8Array[consts.SP_STATUS_REG + 3]
+    value = core.memory.getInt32 core.memory.spReg1Uint8Array, consts.SP_STATUS_REG
     @triggerSPInterrupt 0, false  if (value & consts.SP_STATUS_INTR_BREAK) isnt 0
     return
 
   @clearMIInterrupt = (flag) ->
     @clrFlag core.memory.miUint8Array, consts.MI_INTR_REG, flag
-    miIntrMaskReg = core.memory.miUint8Array[consts.MI_INTR_MASK_REG] << 24 | core.memory.miUint8Array[consts.MI_INTR_MASK_REG + 1] << 16 | core.memory.miUint8Array[consts.MI_INTR_MASK_REG + 2] << 8 | core.memory.miUint8Array[consts.MI_INTR_MASK_REG + 3]
+    miIntrMaskReg = core.memory.getInt32 core.memory.miUint8Array, consts.MI_INTR_MASK_REG
     cp0[consts.CAUSE] &= ~consts.CAUSE_IP3  if (miIntrMaskReg & (core.memory.getUint32(core.memory.miUint8Array, consts.MI_INTR_REG))) is 0
     return
 
@@ -172,12 +172,10 @@ C1964jsInterrupts = (core, cp0) ->
         #can service an interrupt immediately without setting rt[i]
 
         #return currentHack;
-        #return ((core.memory.getInt32(core.memory.viUint8Array, offset) & 0xfffffffe) + currentHack) | 0
-        return (((core.memory.viUint8Array[offset] << 24 | core.memory.viUint8Array[offset + 1] << 16 | core.memory.viUint8Array[offset + 2] << 8 | core.memory.viUint8Array[offset + 3]) & 0xfffffffe) + currentHack) | 0
+        return ((core.memory.getInt32(core.memory.viUint8Array, offset) & 0xfffffffe) + currentHack) | 0
       else
         #log "unhandled video interface for vi offset: " + offset
-        #return core.memory.getInt32 core.memory.viUint8Array, offset
-        return (core.memory.viUint8Array[offset] << 24 | core.memory.viUint8Array[offset + 1] << 16 | core.memory.viUint8Array[offset + 2] << 8 | core.memory.viUint8Array[offset + 3])
+        return core.memory.getInt32 core.memory.viUint8Array, offset
 
   @writeVI = (offset, value, pc, isFromDelaySlot) ->
     switch offset
@@ -518,7 +516,12 @@ C1964jsInterrupts = (core, cp0) ->
         #log "bad sp task"
         break
       when consts.GFX_TASK
-        core.videoHLE = new C1964jsVideoHLE(core, core.webGL.gl)  if core.videoHLE is null or core.videoHLE is `undefined`
+        if core.videoHLE is null or core.videoHLE is `undefined`
+          if core.isLittleEndian is 1 and core.useByteCompatibilityMode is false
+            core.videoHLE = new C1964jsVideoHLEle(core, core.webGL.gl)
+          else
+            core.videoHLE = new C1964jsVideoHLE(core, core.webGL.gl)
+
         wireframe = document.getElementById("wireframe")
         core.settings.wireframe = false
         core.settings.wireframe = true if wireframe isnt null and wireframe.checked

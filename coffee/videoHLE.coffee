@@ -66,7 +66,12 @@ class C1964jsVideoHLE
     @triangleVertexColorBuffer = `undefined`
     @dlistStackPointer = 0
     @dlistStack = []
-    @renderer = new C1964jsRenderer(@core.settings, @core.webGL.gl, @core.webGL)
+
+    if core.isLittleEndian is 1 and core.useByteCompatibilityMode is false
+      @renderer = new C1964jsRendererLE @core.settings, @core.webGL.gl, @core.webGL
+    else
+      @renderer = new C1964jsRenderer @core.settings, @core.webGL.gl, @core.webGL
+    
     @texImg = {}
     @segments = []
     @gl.useProgram @core.webGL.shaderProgram
@@ -282,7 +287,7 @@ class C1964jsVideoHLE
 
   dlParserProcess: ->
     @dlistStackPointer = 0
-    @dlistStack[@dlistStackPointer].pc = (@core.memory.spMemUint8Array[consts.TASK_DATA_PTR] << 24 | @core.memory.spMemUint8Array[consts.TASK_DATA_PTR + 1] << 16 | @core.memory.spMemUint8Array[consts.TASK_DATA_PTR + 2] << 8 | @core.memory.spMemUint8Array[consts.TASK_DATA_PTR + 3])>>>0
+    @dlistStack[@dlistStackPointer].pc = @core.memory.getUint32(@core.memory.spMemUint8Array, consts.TASK_DATA_PTR)>>>0
     @dlistStack[@dlistStackPointer].countdown = consts.MAX_DL_COUNT
 
     #see RSP_Parser.cpp
@@ -1161,7 +1166,7 @@ class C1964jsVideoHLE
       console.error "LoadBlock is making too large of a transfer. "+bytesToXfer+" bytes"
     i=0
     `const u8 = this.core.memory.u8
-    addr = this.texImg.addr|0
+    var addr = this.texImg.addr|0
     const tmem = this.tmem`
     while i < bytesToXfer
       tmem[i] = u8[addr]
