@@ -339,6 +339,15 @@ class C1964jsEmulator
           rom[k+3] = temp1
           k += 4
       when 0x40123780
+        k = 0
+        while k < rom.byteLength
+          temp = rom[k+3] 
+          rom[k+3] = rom[k]
+          rom[k] = temp
+          temp = rom[k+1]
+          rom[k+1] = rom[k+2]
+          rom[k+2] = temp
+          k += 4
       else
         @log "Unhandled byte order: 0x" + dec2hex(fmt)
     console.log "swap done"
