@@ -73,6 +73,7 @@ class C1964jsMemoryLE extends C1964jsMemory
     @romUint32Array = `undefined`
 
     @u16 = new Uint16Array(@ramArrayBuffer)
+    @s16 = new Int16Array(@ramArrayBuffer)
     @u32 = new Uint32Array(@ramArrayBuffer)
 
     @spMemUint16Array = new Uint16Array(@spMemUint8ArrayBuffer)

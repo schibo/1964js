@@ -49,7 +49,7 @@ C1964jsVideoHLEle::getGbi0MoveWordType = (pc) ->
 
 C1964jsVideoHLEle::getGbi0MoveWordValue = (pc) ->
   #@core.memory.getInt32 @core.memory.u8, pc + 4
-  @core.memory.u8[pc+7]<<24 | @core.memory.u8[pc+6]<<16 | @core.memory.u8[pc+5]<<8 | @core.memory.u8[pc+4]
+  @core.memory.u32[(pc+4)>>>2]
 
 #GBI0 Dlist struct
 C1964jsVideoHLEle::getGbi0DlistParam = (pc) ->
@@ -58,7 +58,7 @@ C1964jsVideoHLEle::getGbi0DlistParam = (pc) ->
 
 C1964jsVideoHLEle::getGbi0DlistAddr = (pc) -> #this will probably be generic getGbi0Addr
   #@core.memory.getInt32 @core.memory.u8, pc + 4
-  @core.memory.u8[pc+7]<<24 | @core.memory.u8[pc+6]<<16 | @core.memory.u8[pc+5]<<8 | @core.memory.u8[pc+4]
+  @core.memory.u32[(pc+4)>>>2]
 
 C1964jsVideoHLEle::getCommand = (pc) ->
   @core.memory.u8[pc+3]
@@ -84,33 +84,33 @@ C1964jsVideoHLEle::getGbi0NumVertices = (pc) ->
 
 C1964jsVideoHLEle::getGbi0Vertex0 = (pc) ->
   #(@core.memory.u32[pc>>>2]) >>> 16 & 0x0F
-  (@core.memory.u8[pc+2]) & 0x0F
+  @core.memory.u8[pc+2] & 0x0F
 
 
 #Fiddled vertex struct - Legacy
 C1964jsVideoHLEle::getFiddledVertexX = (pc) ->
-  (@core.memory.u32[pc>>>2]) >> 16
+  @core.memory.u32[pc>>>2] >> 16
 
 C1964jsVideoHLEle::getFiddledVertexY = (pc) ->
-  (@core.memory.u32[pc>>>2]) << 16 >> 16
+  @core.memory.u32[pc>>>2] << 16 >> 16
 
 C1964jsVideoHLEle::getFiddledVertexZ = (pc) ->
-  (@core.memory.u32[(pc+4)>>>2]) >> 16
+  @core.memory.u32[(pc+4)>>>2] >> 16
 
 #Vertex Struct
 C1964jsVideoHLEle::getVertexX = (pc) ->
   #if ((pc>>>0) > 0x00800000)
   #  alert "oops"
-  (@core.memory.u8[pc+3] << 24 | @core.memory.u8[pc+2] << 16) >> 16
+  @core.memory.s16[(pc>>>1)^1]
 
 C1964jsVideoHLEle::getVertexY = (pc) ->
-  (@core.memory.u8[pc+1] << 24 | @core.memory.u8[pc] << 16) >> 16
+  @core.memory.s16[pc>>>1]
 
 C1964jsVideoHLEle::getVertexZ = (pc) ->
-  (@core.memory.u8[pc+7] << 24 | @core.memory.u8[pc+6] << 16) >> 16
+  @core.memory.s16[((pc+4)>>>1)^1]
 
 C1964jsVideoHLEle::getVertexW = (pc) ->
-  (@core.memory.u8[pc+5] << 24 | @core.memory.u8[pc+4] << 16) >> 16
+  @core.memory.s16[(pc+4)>>>1]
 
 
 C1964jsVideoHLEle::getVertexS = (pc) ->
@@ -358,7 +358,7 @@ C1964jsVideoHLEle::getSetTileTmem = (pc) ->
   (@core.memory.u32[pc>>>2]) & 0x1FF
 
 C1964jsVideoHLEle::getSetTileTile = (pc) ->
-  (@core.memory.u32[(pc+4)>>>2]) >> 24 & 7
+  (@core.memory.u8[(pc+4)^3]) & 7
 
 C1964jsVideoHLEle::getSetTilePal = (pc) ->
   (@core.memory.u32[(pc+4)>>>2]) >> 20 & 15
@@ -390,7 +390,7 @@ C1964jsVideoHLEle::getSetTileShifts = (pc) ->
 #LoadBlock
 
 C1964jsVideoHLEle::getLoadBlockTile = (pc) ->
-  (@core.memory.u32[(pc+4)>>>2]) >> 24 & 7
+  (@core.memory.u8[(pc+4)^3]) & 7
 
 C1964jsVideoHLEle::getLoadBlockUls = (pc) ->
   (@core.memory.u32[pc>>>2]) >> 12 & 0xFFF
@@ -407,7 +407,7 @@ C1964jsVideoHLEle::getLoadBlockDxt = (pc) ->
 #SetTileSize
 
 C1964jsVideoHLEle::getSetTileSizeTile = (pc) ->
-  (@core.memory.u32[(pc+4)>>>2]) >> 24 & 7
+  (@core.memory.u8[(pc+4)^3]) & 7
 
 C1964jsVideoHLEle::getSetTileSizeUls = (pc) ->
   (@core.memory.u32[pc>>>2]) >> 12 & 0xFFF
@@ -430,24 +430,24 @@ C1964jsVideoHLEle::getSetPrimColorL = (pc) ->
   (@core.memory.u32[pc>>>2]) & 0xFF
 
 C1964jsVideoHLEle::getSetPrimColorR = (pc) ->
-  (@core.memory.u32[(pc+4)>>>2]) >>> 24
+  @core.memory.u8[pc+7]
 
 C1964jsVideoHLEle::getSetPrimColorG = (pc) ->
-  (@core.memory.u32[(pc+4)>>>2]) << 8 >>> 24
+  @core.memory.u8[pc+6]
 
 C1964jsVideoHLEle::getSetPrimColorB = (pc) ->
-  (@core.memory.u32[(pc+4)>>>2]) << 16 >>> 24
+  @core.memory.u8[pc+5]
 
 C1964jsVideoHLEle::getSetPrimColorA = (pc) ->
-  (@core.memory.u32[(pc+4)>>>2]) << 24 >>> 24
+  @core.memory.u8[pc+4]
 
 #SetGeometryMode
 
 C1964jsVideoHLEle::getSetGeometryMode = (pc) ->
-  (@core.memory.u32[(pc+4)>>>2])
+  @core.memory.u32[(pc+4)>>>2]
 
 C1964jsVideoHLEle::getClearGeometryMode = (pc) ->
-  (@core.memory.u32[(pc+4)>>>2])
+  @core.memory.u32[(pc+4)>>>2]
 
 C1964jsVideoHLEle::pow2roundup = (value) ->
   result = 1
@@ -458,30 +458,30 @@ C1964jsVideoHLEle::pow2roundup = (value) ->
 #SetFillColor
 
 C1964jsVideoHLEle::getSetFillColorR = (pc) ->
-  (@core.memory.u32[(pc+4)>>>2]) >>> 24
+  @core.memory.u8[pc+7]
 
 C1964jsVideoHLEle::getSetFillColorG = (pc) ->
-  (@core.memory.u32[(pc+4)>>>2]) << 8 >>> 24
+  @core.memory.u8[pc+6]
 
 C1964jsVideoHLEle::getSetFillColorB = (pc) ->
-  (@core.memory.u32[(pc+4)>>>2]) << 16 >>> 24
+  @core.memory.u8[pc+5]
 
 C1964jsVideoHLEle::getSetFillColorA = (pc) ->
-  (@core.memory.u32[(pc+4)>>>2]) << 24 >>> 24
+  @core.memory.u8[pc+4]
 
 #setEnvColor
 
 C1964jsVideoHLEle::getSetEnvColorR = (pc) ->
-  (@core.memory.u32[(pc+4)>>>2]) >>> 24
+  @core.memory.u8[pc+7]
 
 C1964jsVideoHLEle::getSetEnvColorG = (pc) ->
-  (@core.memory.u32[(pc+4)>>>2]) << 8 >>> 24
+  @core.memory.u8[pc+6]
 
 C1964jsVideoHLEle::getSetEnvColorB = (pc) ->
-  (@core.memory.u32[(pc+4)>>>2]) << 16 >>> 24
+  @core.memory.u8[pc+5]
 
 C1964jsVideoHLEle::getSetEnvColorA = (pc) ->
-  (@core.memory.u32[(pc+4)>>>2]) << 24 >>> 24
+  @core.memory.u8[pc+4]
 
 #hack global space until we export classes properly
 #node.js uses exports; browser uses this (window)

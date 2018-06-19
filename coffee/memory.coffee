@@ -90,6 +90,11 @@ class C1964jsMemory
 
     ###*
      * @const
+    ###    
+    @s8 = new Int8Array(@ramArrayBuffer)
+
+    ###*
+     * @const
     ###
     @spMemUint8ArrayBuffer = new ArrayBuffer(0x10000)
     ###*
