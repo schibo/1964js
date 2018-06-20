@@ -28,15 +28,17 @@ class C1964jsVideoHLEle extends C1964jsVideoHLE
     k = 0
     i = 0
     `const u8 = this.core.memory.u8`
+    `const u16 = this.core.memory.u16`
     `const matToLoad = this.matToLoad`
     while i < 4
       j = 0
       while j < 4
         # 0.0000152587890625 is 1.0/65536.0
-        matToLoad[k] = ((u8[a^3] << 24 | u8[(a + 1)^3] << 16 | u8[(a + 32)^3] << 8 | u8[(a + 32 + 1)^3])>>0) * 0.0000152587890625
-        k += 1
-        a += 2
-        j += 1
+        matToLoad[k] = ((u16[(a>>>1)^1] << 16 | u16[((a + 32)>>>1)^1])>>0) * 0.0000152587890625
+        matToLoad[k+1] = ((u16[a>>>1] << 16 | u16[(a + 32)>>>1])>>0) * 0.0000152587890625
+        k += 2
+        a += 4
+        j += 2
       i += 1
     return
 
@@ -115,11 +117,11 @@ C1964jsVideoHLEle::getVertexW = (pc) ->
 
 C1964jsVideoHLEle::getVertexS = (pc) ->
   #@core.memory.getInt32(@core.memory.u8, pc + 8) >> 16
-  (@core.memory.u8[pc+11]<<8 | @core.memory.u8[pc+10])<<16>>16
+  @core.memory.s16[(pc+10)>>>1]
 
 C1964jsVideoHLEle::getVertexT = (pc) ->
   #@core.memory.getInt32(@core.memory.u8, pc + 8) << 16 >> 16
-  (@core.memory.u8[pc+9]<<8 | @core.memory.u8[pc+8])<<16>>16
+  @core.memory.s16[(pc+8)>>>1]
 
 C1964jsVideoHLEle::getVertexColorR = (pc) ->
   @core.memory.u8[pc+15]
@@ -187,7 +189,7 @@ C1964jsVideoHLEle::getCombineHi = (pc) ->
   @core.memory.u32[(pc+4)>>>2]
 
 C1964jsVideoHLEle::getCombineA0 = (pc) ->
-  ((@core.memory.u32[pc]) >> 20) & 15
+  ((@core.memory.u32[pc>>>2]) >> 20) & 15
 
 C1964jsVideoHLEle::getCombineB0 = (pc) ->
   ((@core.memory.u32[(pc+4)>>>2]) >> 28) & 15
@@ -264,7 +266,7 @@ C1964jsVideoHLEle::getTexRectXh = (pc) ->
 #Y coordinate of lower right
 C1964jsVideoHLEle::getTexRectYh = (pc) ->
   #(@core.memory.u32[pc>>>2]) & 0xFFF
-  (@core.memory.u8[pc+1] << 8 | @core.memory.u8[pc]) & 0xFFF
+  @core.memory.u16[pc>>>1] & 0xFFF
 
 C1964jsVideoHLEle::getTexRectTileNo = (pc) ->
   #(@core.memory.u32[(pc+4)>>>2]) >>> 24 & 7
@@ -272,20 +274,20 @@ C1964jsVideoHLEle::getTexRectTileNo = (pc) ->
 
 #X coordinate of upper left
 C1964jsVideoHLEle::getTexRectXl = (pc) ->
-  (@core.memory.u32[(pc+4)>>>2]) >>> 12 & 0xFFF
+  @core.memory.u32[(pc+4)>>>2] >>> 12 & 0xFFF
 
 #Y coordinate of upper left
 C1964jsVideoHLEle::getTexRectYl = (pc) ->
   #(@core.memory.u32[(pc+4)>>>2]) & 0xFFF
-  (@core.memory.u8[pc+5] << 8 | @core.memory.u8[pc+4]) & 0xFFF
+  @core.memory.u16[(pc+4)>>>1] & 0xFFF
 
 C1964jsVideoHLEle::getTexRectS = (pc) ->
   #(@core.memory.u8[pc+15] << 24 | @core.memory.u8[pc+14] << 16 | @core.memory.u8[pc+13] << 8 | @core.memory.u8[pc+12]) >>> 16 & 0xFFFF
-  @core.memory.u8[pc+15] << 8 | @core.memory.u8[pc+14]
+  @core.memory.u16[(pc+14)>>>1]
 
 C1964jsVideoHLEle::getTexRectT = (pc) ->
   #(@core.memory.u8[pc+15] << 24 | @core.memory.u8[pc+14] << 16 | @core.memory.u8[pc+13] << 8 | @core.memory.u8[pc+12]) & 0xFFFF
-  @core.memory.u8[pc+13] << 8 | @core.memory.u8[pc+12]
+  @core.memory.u16[(pc+12)>>>1]
 
 C1964jsVideoHLEle::getTexRectDsDx = (pc) ->
   @core.memory.getInt32(@core.memory.u8, pc + 20) >>> 16 & 0xFFFF
