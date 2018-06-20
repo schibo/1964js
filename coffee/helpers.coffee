@@ -70,12 +70,12 @@ C1964jsHelpers = (core, isLittleEndian) ->
   @RS = (i) ->
     reg = (i >> 21 & 0x1f)
     return "~-1"  if reg is 0
-    "~~r[" + reg + "]"
+    "r[" + reg + "]"
 
   @RSH = (i) ->
     reg = (i >> 21 & 0x1f)
     return "~-1"  if reg is 0
-    "~~h[" + reg + "]"
+    "h[" + reg + "]"
 
   @uRS = (i) ->
     reg = (i >> 21 & 0x1f)
@@ -120,12 +120,12 @@ C1964jsHelpers = (core, isLittleEndian) ->
   @RD = (i) ->
     reg = (i >> 11 & 0x1f)
     return "~-1"  if reg is 0
-    "~~r[" + reg + "]"
+    "r[" + reg + "]"
 
   @RDH = (i) ->
     reg = (i >> 11 & 0x1f)
     return "~-1"  if reg is 0
-    "~~h[" + reg + "]"
+    "h[" + reg + "]"
 
   @uRD = (i) ->
     reg = (i >> 11 & 0x1f)
@@ -140,12 +140,12 @@ C1964jsHelpers = (core, isLittleEndian) ->
   @RT = (i) ->
     reg = (i >> 16 & 0x1f)
     return "~-1"  if reg is 0
-    "~~r[" + reg + "]"
+    "r[" + reg + "]"
 
   @RTH = (i) ->
     reg = (i >> 16 & 0x1f)
     return "~-1"  if reg is 0
-    "~~h[" + reg + "]"
+    "h[" + reg + "]"
 
   @uRT = (i) ->
     reg = (i >> 16 & 0x1f)
