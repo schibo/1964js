@@ -174,11 +174,11 @@ C1964jsVideoHLEle::getTextureOn = (pc) ->
 
 C1964jsVideoHLEle::getTextureScaleS = (pc) ->
   #(@core.memory.u32[(pc+4)>>>2]) >> 16 & 0xFFFF
-  @core.memory.u8[pc+7] << 8 | @core.memory.u8[pc+6]
+  @core.memory.u16[(pc+6)>>>1]
 
 C1964jsVideoHLEle::getTextureScaleT = (pc) ->
   #(@core.memory.u32[(pc+4)>>>2]) & 0xFFFF
-  @core.memory.u8[pc+5] << 8 | @core.memory.u8[pc+4]
+  @core.memory.u16[(pc+4)>>>1]
 
 #Combine Struct
 

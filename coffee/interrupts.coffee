@@ -518,8 +518,14 @@ C1964jsInterrupts = (core, cp0) ->
       when consts.GFX_TASK
         if core.videoHLE is null or core.videoHLE is `undefined`
           if core.isLittleEndian is 1 and core.useByteCompatibilityMode is false
+            ###*
+             * @const
+            ###            
             core.videoHLE = new C1964jsVideoHLEle(core, core.webGL.gl)
           else
+            ###*
+             * @const
+            ###
             core.videoHLE = new C1964jsVideoHLE(core, core.webGL.gl)
 
         wireframe = document.getElementById("wireframe")

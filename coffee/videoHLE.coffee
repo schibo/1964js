@@ -23,7 +23,10 @@ class C1964jsVideoHLE
   constructor: (core, glx) ->
     @processDisplayList = @callBind @processDisplayList, this
 
-    i = undefined
+    i = undefined    
+    ###*
+     * @const
+    ###
     @core = core #only needed for gfxHelpers prototypes to access.
     ###*
      * @const

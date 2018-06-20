@@ -71,53 +71,228 @@ class C1964jsMemoryLE extends C1964jsMemory
 
     @romUint16Array = `undefined`
     @romUint32Array = `undefined`
-
+    ###*
+     * @const
+    ###
     @u16 = new Uint16Array(@ramArrayBuffer)
+    ###*
+     * @const
+    ###
     @s16 = new Int16Array(@ramArrayBuffer)
+    ###*
+     * @const
+    ###
     @u32 = new Uint32Array(@ramArrayBuffer)
 
+    ###*
+     * @const
+    ###
     @spMemUint16Array = new Uint16Array(@spMemUint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @spReg1Uint16Array = new Uint16Array(@spReg1Uint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @spReg2Uint16Array = new Uint16Array(@spReg2Uint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @dpcUint16Array = new Uint16Array(@dpcUint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @dpsUint16Array = new Uint16Array(@dpsUint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @miUint16Array = new Uint16Array(@miUint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @viUint16Array = new Uint16Array(@viUint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @aiUint16Array = new Uint16Array(@aiUint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @piUint16Array = new Uint16Array(@piUint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @siUint16Array = new Uint16Array(@siUint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @c2a1Uint16Array = new Uint16Array(@c2a1Uint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @c1a1Uint16Array = new Uint16Array(@c1a1Uint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @c2a2Uint16Array = new Uint16Array(@c2a2Uint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @c1a3Uint16Array = new Uint16Array(@c1a3Uint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @riUint16Array = new Uint16Array(@riUint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @pifUint16Array = new Uint16Array(@pifUint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @gioUint16Array = new Uint16Array(@gioUint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @ramRegs0Uint16Array = new Uint16Array(@ramRegs0Uint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @ramRegs4Uint16Array = new Uint16Array(@ramRegs4Uint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @ramRegs8Uint16Array = new Uint16Array(@ramRegs8Uint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @dummyReadWriteUint16Array = new Uint16Array(@dummyReadWriteUint8ArrayBuffer)
 
+
+    ###*
+     * @const
+    ###
     @spMemUint32Array = new Uint32Array(@spMemUint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @spReg1Uint32Array = new Uint32Array(@spReg1Uint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @spReg2Uint32Array = new Uint32Array(@spReg2Uint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @dpcUint32Array = new Uint32Array(@dpcUint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @dpsUint32Array = new Uint32Array(@dpsUint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @miUint32Array = new Uint32Array(@miUint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @viUint32Array = new Uint32Array(@viUint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @aiUint32Array = new Uint32Array(@aiUint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @piUint32Array = new Uint32Array(@piUint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @siUint32Array = new Uint32Array(@siUint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @c2a1Uint32Array = new Uint32Array(@c2a1Uint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @c1a1Uint32Array = new Uint32Array(@c1a1Uint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @c2a2Uint32Array = new Uint32Array(@c2a2Uint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @c1a3Uint32Array = new Uint32Array(@c1a3Uint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @riUint32Array = new Uint32Array(@riUint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @pifUint32Array = new Uint32Array(@pifUint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @gioUint32Array = new Uint32Array(@gioUint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @ramRegs0Uint32Array = new Uint32Array(@ramRegs0Uint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @ramRegs4Uint32Array = new Uint32Array(@ramRegs4Uint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @ramRegs8Uint32Array = new Uint32Array(@ramRegs8Uint8ArrayBuffer)
+
+    ###*
+     * @const
+    ###
     @dummyReadWriteUint32Array = new Uint32Array(@dummyReadWriteUint8ArrayBuffer)
     return
 

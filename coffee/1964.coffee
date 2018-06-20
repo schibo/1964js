@@ -157,16 +157,25 @@ class C1964jsEmulator
 
 
     if @useByteCompatibilityMode is true
+      ###*
+       * @const
+      ###
       @memory = new C1964jsMemory @
       @interrupts = new C1964jsInterrupts @, @cp0
       @pif = new C1964jsPif @memory.pifUint8Array
       @dma = new C1964jsDma @memory, @interrupts, @pif
     else if @isLittleEndian is 1
+      ###*
+       * @const
+      ###
       @memory = new C1964jsMemoryLE @
       @interrupts = new C1964jsInterrupts @, @cp0
       @pif = new C1964jsPifLE @memory.pifUint8Array
       @dma = new C1964jsDmaLE @memory, @interrupts, @pif
     else
+      ###*
+       * @const
+      ###
       @memory = new C1964jsMemory(@)
       @interrupts = new C1964jsInterrupts @, @cp0
       @pif = new C1964jsPif @memory.pifUint8Array
