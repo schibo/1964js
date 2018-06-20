@@ -1,0 +1,8 @@
+title: 1964js
+description: Nintendo64 emulator in JavaScript
+google_analytics: 
+show_downloads: true
+theme: jekyll-theme-cayman
+
+gems:
+  - jekyll-mentions
