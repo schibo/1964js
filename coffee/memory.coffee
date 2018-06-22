@@ -87,7 +87,6 @@ class C1964jsMemory
      * @const
     ###
     @u8 = new Uint8Array(@ramArrayBuffer) # RDRAM
-
     ###*
      * @const
     ###    
@@ -101,6 +100,10 @@ class C1964jsMemory
      * @const
     ###
     @spMemUint8Array = new Uint8Array(@spMemUint8ArrayBuffer)
+    ###*
+     * @const
+    ###
+    @spMemInt8Array = new Int8Array(@spMemUint8ArrayBuffer)
 
     ###*
      * @const
@@ -110,6 +113,10 @@ class C1964jsMemory
      * @const
     ###
     @spReg1Uint8Array = new Uint8Array(@spReg1Uint8ArrayBuffer)
+    ###*
+     * @const
+    ###
+    @spReg1Int8Array = new Int8Array(@spReg1Uint8ArrayBuffer)
 
     ###*
      * @const
@@ -119,6 +126,10 @@ class C1964jsMemory
      * @const
     ###
     @spReg2Uint8Array = new Uint8Array(@spReg2Uint8ArrayBuffer)
+    ###*
+     * @const
+    ###
+    @spReg2Int8Array = new Int8Array(@spReg2Uint8ArrayBuffer)
     
     ###*
      * @const
@@ -128,6 +139,10 @@ class C1964jsMemory
      * @const
     ###
     @dpcUint8Array = new Uint8Array(@dpcUint8ArrayBuffer)
+    ###*
+     * @const
+    ###
+    @dpcInt8Array = new Int8Array(@dpcUint8ArrayBuffer)
     
     ###*
      * @const
@@ -137,6 +152,10 @@ class C1964jsMemory
      * @const
     ###
     @dpsUint8Array = new Uint8Array(@dpsUint8ArrayBuffer)
+    ###*
+     * @const
+    ###
+    @dpsInt8Array = new Int8Array(@dpsUint8ArrayBuffer)
     
     ###*
      * @const
@@ -146,6 +165,10 @@ class C1964jsMemory
      * @const
     ###
     @miUint8Array = new Uint8Array(@miUint8ArrayBuffer)
+    ###*
+     * @const
+    ###
+    @miInt8Array = new Int8Array(@miUint8ArrayBuffer)
     
     ###*
      * @const
@@ -155,6 +178,10 @@ class C1964jsMemory
      * @const
     ###
     @viUint8Array = new Uint8Array(@viUint8ArrayBuffer)
+    ###*
+     * @const
+    ###
+    @viInt8Array = new Int8Array(@viUint8ArrayBuffer)
     
     ###*
      * @const
@@ -164,6 +191,10 @@ class C1964jsMemory
      * @const
     ###
     @aiUint8Array = new Uint8Array(@aiUint8ArrayBuffer)
+    ###*
+     * @const
+    ###
+    @aiInt8Array = new Int8Array(@aiUint8ArrayBuffer)
     
     ###*
      * @const
@@ -173,6 +204,10 @@ class C1964jsMemory
      * @const
     ###
     @piUint8Array = new Uint8Array(@piUint8ArrayBuffer)
+    ###*
+     * @const
+    ###
+    @piInt8Array = new Int8Array(@piUint8ArrayBuffer)
     
     ###*
      * @const
@@ -182,6 +217,10 @@ class C1964jsMemory
      * @const
     ###
     @siUint8Array = new Uint8Array(@siUint8ArrayBuffer)
+    ###*
+     * @const
+    ###
+    @siInt8Array = new Int8Array(@siUint8ArrayBuffer)
     
     ###*
      * @const
@@ -191,6 +230,10 @@ class C1964jsMemory
      * @const
     ###
     @c2a1Uint8Array = new Uint8Array(@c2a1Uint8ArrayBuffer)
+    ###*
+     * @const
+    ###
+    @c2a1Int8Array = new Int8Array(@c2a1Uint8ArrayBuffer)
     
     ###*
      * @const
@@ -200,6 +243,10 @@ class C1964jsMemory
      * @const
     ###
     @c1a1Uint8Array = new Uint8Array(@c1a1Uint8ArrayBuffer)
+    ###*
+     * @const
+    ###
+    @c1a1Uint8Array = new Int8Array(@c1a1Uint8ArrayBuffer)
     
     ###*
      * @const
@@ -209,6 +256,10 @@ class C1964jsMemory
      * @const
     ###
     @c2a2Uint8Array = new Uint8Array(@c2a2Uint8ArrayBuffer)
+    ###*
+     * @const
+    ###
+    @c2a2Int8Array = new Int8Array(@c2a2Uint8ArrayBuffer)
     
     ###*
      * @const
@@ -218,6 +269,10 @@ class C1964jsMemory
      * @const
     ###
     @c1a3Uint8Array = new Uint8Array(@c1a3Uint8ArrayBuffer)
+    ###*
+     * @const
+    ###
+    @c1a3Int8Array = new Int8Array(@c1a3Uint8ArrayBuffer)
     
     ###*
      * @const
@@ -227,6 +282,10 @@ class C1964jsMemory
      * @const
     ###
     @riUint8Array = new Uint8Array(@riUint8ArrayBuffer)
+    ###*
+     * @const
+    ###
+    @riInt8Array = new Int8Array(@riUint8ArrayBuffer)
     
     ###*
      * @const
@@ -236,6 +295,10 @@ class C1964jsMemory
      * @const
     ###
     @pifUint8Array = new Uint8Array(@pifUint8ArrayBuffer)
+    ###*
+     * @const
+    ###
+    @pifInt8Array = new Int8Array(@pifUint8ArrayBuffer)
     
     ###*
      * @const
@@ -245,6 +308,10 @@ class C1964jsMemory
      * @const
     ###
     @gioUint8Array = new Uint8Array(@gioUint8ArrayBuffer)
+    ###*
+     * @const
+    ###
+    @gioInt8Array = new Int8Array(@gioUint8ArrayBuffer)
     
     ###*
      * @const
@@ -254,6 +321,10 @@ class C1964jsMemory
      * @const
     ###
     @ramRegs0Uint8Array = new Uint8Array(@ramRegs0Uint8ArrayBuffer)
+    ###*
+     * @const
+    ###
+    @ramRegs0Int8Array = new Int8Array(@ramRegs0Uint8ArrayBuffer)
     
     ###*
      * @const
@@ -263,6 +334,10 @@ class C1964jsMemory
      * @const
     ###
     @ramRegs4Uint8Array = new Uint8Array(@ramRegs4Uint8ArrayBuffer)
+    ###*
+     * @const
+    ###
+    @ramRegs4Int8Array = new Int8Array(@ramRegs4Uint8ArrayBuffer)
     
     ###*
      * @const
@@ -272,6 +347,10 @@ class C1964jsMemory
      * @const
     ###
     @ramRegs8Uint8Array = new Uint8Array(@ramRegs8Uint8ArrayBuffer)
+    ###*
+     * @const
+    ###
+    @ramRegs8Int8Array = new Uint8Array(@ramRegs8Int8ArrayBuffer)
     
     ###*
      * @const
@@ -281,6 +360,10 @@ class C1964jsMemory
      * @const
     ###
     @dummyReadWriteUint8Array = new Uint8Array(@dummyReadWriteUint8ArrayBuffer)
+    ###*
+     * @const
+    ###
+    @dummyReadWriteInt8Array = new Int8Array(@dummyReadWriteUint8ArrayBuffer)
     
     @lengthy = 50325
 
@@ -292,11 +375,25 @@ class C1964jsMemory
     @LB = Array.apply(@readDummy8, Array(@lengthy))
 
     ###*
+     * Load Byte Unsigned
+     * @type {!Array<!function(!C1964jsMemory, number): number>}
+     * @const
+    ###
+    @LBU = Array.apply(@readDummyU8, Array(@lengthy))
+
+    ###*
      * Load Half
      * @type {!Array<!function(!C1964jsMemory, number): number>}
      * @const
     ###
     @LH = Array.apply(@readDummy16, Array(@lengthy))
+
+    ###*
+     * Load Half Unsigned
+     * @type {!Array<!function(!C1964jsMemory, number): number>}
+     * @const
+    ###
+    @LHU = Array.apply(@readDummyU16, Array(@lengthy))
 
     ###*
      * Load Word
@@ -328,42 +425,44 @@ class C1964jsMemory
 
     #todo: fix overlapping ramregs now that we are 0xffff in lut size instead of 0xfffc in lut size
 
-    @initRegion 0, 0x80000000, @readTLB8, @writeTLB8, @readTLB16, @writeTLB16, @readTLB32, @writeTLB32
-    @initRegion 0x80000000, 0x40000000, @readDummy8, @writeDummy8, @readDummy16, @writeDummy16, @readDummy32, @writeDummy32
-    @initRegion 0xC0000000, 0x40000000, @readTLB8, @writeTLB8, @readTLB16, @writeTLB16, @readTLB32, @writeTLB32
-    @initRegion MEMORY_START_RDRAM, MEMORY_SIZE_RDRAM, @readRdram8, @writeRdram8, @readRdram16, @writeRdram16, @readRdram32, @writeRdram32
-    @initRegion MEMORY_START_RAMREGS4, MEMORY_SIZE_RAMREGS4, @readRamRegs4_8, @writeRamRegs4_8, @readRamRegs4_16, @writeRamRegs4_16, @readRamRegs4_32, @writeRamRegs4_32
-    @initRegion MEMORY_START_SPMEM, MEMORY_SIZE_SPMEM, @readSpMem8, @writeSpMem8, @readSpMem16, @writeSpMem16, @readSpMem32, @writeSpMem32
-    @initRegion MEMORY_START_SPREG_1, MEMORY_SIZE_SPREG_1, @readSpReg1_8, @writeSpReg1_8, @readSpReg1_16, @writeSpReg1_16, @readSpReg1_32, @writeSpReg1_32
-    @initRegion MEMORY_START_SPREG_2, MEMORY_SIZE_SPREG_2, @readSpReg2_8, @writeSpReg2_8, @readSpReg2_16, @writeSpReg2_16, @readSpReg2_32, @writeSpReg2_32
-    @initRegion MEMORY_START_DPC, MEMORY_SIZE_DPC, @readDpc8, @writeDpc8, @readDpc16, @writeDpc16, @readDpc32, @writeDpc32
-    @initRegion MEMORY_START_DPS, MEMORY_SIZE_DPS, @readDps8, @writeDps8, @readDps16, @writeDps16, @readDps32, @writeDps32
-    @initRegion MEMORY_START_MI, MEMORY_SIZE_MI, @readMi8, @writeMi8, @readMi16, @writeMi16, @readMi32, @writeMi32
-    @initRegion MEMORY_START_VI, MEMORY_SIZE_VI, @readVi8, @writeVi8, @readVi16, @writeVi16, @readVi32, @writeVi32
-    @initRegion MEMORY_START_AI, MEMORY_SIZE_AI, @readAi8, @writeAi8, @readAi16, @writeAi16, @readAi32, @writeAi32
-    @initRegion MEMORY_START_PI, MEMORY_SIZE_PI, @readPi8, @writePi8, @readPi16, @writePi16, @readPi32, @writePi32
-    @initRegion MEMORY_START_SI, MEMORY_SIZE_SI, @readSi8, @writeSi8, @readSi16, @writeSi16, @readSi32, @writeSi32
-    @initRegion MEMORY_START_C2A1, MEMORY_SIZE_C2A1, @readC2A1_8, @writeC2A1_8, @readC2A1_16, @writeC2A1_16, @readC2A1_32, @writeC2A1_32
-    @initRegion MEMORY_START_C1A1, MEMORY_SIZE_C1A1, @readC1A1_8, @writeC1A1_8, @readC1A1_16, @writeC1A1_16, @readC1A1_32, @writeC1A1_32
-    @initRegion MEMORY_START_C2A2, MEMORY_SIZE_C2A2, @readC2A2_8, @writeC2A2_8, @readC2A2_16, @writeC2A2_16, @readC2A2_32, @writeC2A2_32
-    @initRegion MEMORY_START_ROM_IMAGE, MEMORY_SIZE_ROM, @readRom8, @writeRom8, @readRom16, @writeRom16, @readRom32, @writeRom32 #todo: could be a problem to use romLength
-    @initRegion MEMORY_START_C1A3, MEMORY_SIZE_C1A3, @readC1A3_8, @writeC1A3_8, @readC1A3_16, @writeC1A3_16, @readC1A3_32, @writeC1A3_32
-    @initRegion MEMORY_START_RI, MEMORY_SIZE_RI, @readRi8, @writeRi8, @readRi16, @writeRi16, @readRi32, @writeRi32
-    @initRegion MEMORY_START_PIF, MEMORY_SIZE_PIF, @readPif8, @writePif8, @readPif16, @writePif16, @readPif32, @writePif32
-    @initRegion MEMORY_START_GIO, MEMORY_SIZE_GIO, @readGio8, @writeGio8, @readGio16, @writeGio16, @readGio32, @writeGio32
-    @initRegion MEMORY_START_RAMREGS0, MEMORY_SIZE_RAMREGS0, @readRamRegs0_8, @writeRamRegs0_8, @readRamRegs0_16, @writeRamRegs0_16, @readRamRegs0_32, @writeRamRegs0_32
-    @initRegion MEMORY_START_RAMREGS8, MEMORY_SIZE_RAMREGS8, @readRamRegs8_8, @writeRamRegs8_8, @readRamRegs8_16, @writeRamRegs8_16, @readRamRegs8_32, @writeRamRegs8_32
+    @initRegion 0,                      0x80000000,           @readTLB8,       @readTLBU8,       @writeTLB8,       @readTLB16,       @readTLBU16,       @writeTLB16,       @readTLB32,       @writeTLB32
+    @initRegion 0x80000000,             0x40000000,           @readDummy8,     @readDummyU8,     @writeDummy8,     @readDummy16,     @readDummyU16,     @writeDummy16,     @readDummy32,     @writeDummy32
+    @initRegion 0xC0000000,             0x40000000,           @readTLB8,       @readTLBU8,       @writeTLB8,       @readTLB16,       @readTLBU16,       @writeTLB16,       @readTLB32,       @writeTLB32
+    @initRegion MEMORY_START_RDRAM,     MEMORY_SIZE_RDRAM,    @readRdram8,     @readRdramU8,     @writeRdram8,     @readRdram16,     @readRdramU16,     @writeRdram16,     @readRdram32,     @writeRdram32
+    @initRegion MEMORY_START_RAMREGS4,  MEMORY_SIZE_RAMREGS4, @readRamRegs4_8, @readRamRegs4_U8, @writeRamRegs4_8, @readRamRegs4_16, @readRamRegs4_U16, @writeRamRegs4_16, @readRamRegs4_32, @writeRamRegs4_32
+    @initRegion MEMORY_START_SPMEM,     MEMORY_SIZE_SPMEM,    @readSpMem8,     @readSpMemU8,     @writeSpMem8,     @readSpMem16,     @readSpMemU16,     @writeSpMem16,     @readSpMem32,     @writeSpMem32
+    @initRegion MEMORY_START_SPREG_1,   MEMORY_SIZE_SPREG_1,  @readSpReg1_8,   @readSpReg1_U8,   @writeSpReg1_8,   @readSpReg1_16,   @readSpReg1_U16,   @writeSpReg1_16,   @readSpReg1_32,   @writeSpReg1_32
+    @initRegion MEMORY_START_SPREG_2,   MEMORY_SIZE_SPREG_2,  @readSpReg2_8,   @readSpReg2_U8,   @writeSpReg2_8,   @readSpReg2_16,   @readSpReg2_U16,   @writeSpReg2_16,   @readSpReg2_32,   @writeSpReg2_32
+    @initRegion MEMORY_START_DPC,       MEMORY_SIZE_DPC,      @readDpc8,       @readDpcU8,       @writeDpc8,       @readDpc16,       @readDpcU16,       @writeDpc16,       @readDpc32,       @writeDpc32
+    @initRegion MEMORY_START_DPS,       MEMORY_SIZE_DPS,      @readDps8,       @readDpsU8,       @writeDps8,       @readDps16,       @readDpsU16,       @writeDps16,       @readDps32,       @writeDps32
+    @initRegion MEMORY_START_MI,        MEMORY_SIZE_MI,       @readMi8,        @readMiU8,        @writeMi8,        @readMi16,        @readMiU16,        @writeMi16,        @readMi32,        @writeMi32
+    @initRegion MEMORY_START_VI,        MEMORY_SIZE_VI,       @readVi8,        @readViU8,        @writeVi8,        @readVi16,        @readViU16,        @writeVi16,        @readVi32,        @writeVi32
+    @initRegion MEMORY_START_AI,        MEMORY_SIZE_AI,       @readAi8,        @readAiU8,        @writeAi8,        @readAi16,        @readAiU16,        @writeAi16,        @readAi32,        @writeAi32
+    @initRegion MEMORY_START_PI,        MEMORY_SIZE_PI,       @readPi8,        @readPiU8,        @writePi8,        @readPi16,        @readPiU16,        @writePi16,        @readPi32,        @writePi32
+    @initRegion MEMORY_START_SI,        MEMORY_SIZE_SI,       @readSi8,        @readSiU8,        @writeSi8,        @readSi16,        @readSiU16,        @writeSi16,        @readSi32,        @writeSi32
+    @initRegion MEMORY_START_C2A1,      MEMORY_SIZE_C2A1,     @readC2A1_8,     @readC2A1_U8,     @writeC2A1_8,     @readC2A1_16,     @readC2A1_U16,     @writeC2A1_16,     @readC2A1_32,     @writeC2A1_32
+    @initRegion MEMORY_START_C1A1,      MEMORY_SIZE_C1A1,     @readC1A1_8,     @readC1A1_U8,     @writeC1A1_8,     @readC1A1_16,     @readC1A1_U16,     @writeC1A1_16,     @readC1A1_32,     @writeC1A1_32
+    @initRegion MEMORY_START_C2A2,      MEMORY_SIZE_C2A2,     @readC2A2_8,     @readC2A2_U8,     @writeC2A2_8,     @readC2A2_16,     @readC2A2_U16,     @writeC2A2_16,     @readC2A2_32,     @writeC2A2_32
+    @initRegion MEMORY_START_ROM_IMAGE, MEMORY_SIZE_ROM,      @readRom8,       @readRomU8,       @writeRom8,       @readRom16,       @readRomU16,       @writeRom16,       @readRom32,       @writeRom32 #todo: could be a problem to use romLength
+    @initRegion MEMORY_START_C1A3,      MEMORY_SIZE_C1A3,     @readC1A3_8,     @readC1A3_U8,     @writeC1A3_8,     @readC1A3_16,     @readC1A3_U16,     @writeC1A3_16,     @readC1A3_32,     @writeC1A3_32
+    @initRegion MEMORY_START_RI,        MEMORY_SIZE_RI,       @readRi8,        @readRiU8,        @writeRi8,        @readRi16,        @readRiU16,        @writeRi16,        @readRi32,        @writeRi32
+    @initRegion MEMORY_START_PIF,       MEMORY_SIZE_PIF,      @readPif8,       @readPifU8,       @writePif8,       @readPif16,       @readPifU16,       @writePif16,       @readPif32,       @writePif32
+    @initRegion MEMORY_START_GIO,       MEMORY_SIZE_GIO,      @readGio8,       @readGioU8,       @writeGio8,       @readGio16,       @readGioU16,       @writeGio16,       @readGio32,       @writeGio32
+    @initRegion MEMORY_START_RAMREGS0,  MEMORY_SIZE_RAMREGS0, @readRamRegs0_8, @readRamRegs0_U8, @writeRamRegs0_8, @readRamRegs0_16, @readRamRegs0_U16, @writeRamRegs0_16, @readRamRegs0_32, @writeRamRegs0_32
+    @initRegion MEMORY_START_RAMREGS8,  MEMORY_SIZE_RAMREGS8, @readRamRegs8_8, @readRamRegs8_U8, @writeRamRegs8_8, @readRamRegs8_16, @readRamRegs8_U16, @writeRamRegs8_16, @readRamRegs8_32, @writeRamRegs8_32
     @t = undefined
     console.log "lengthy0 = " + @lengthy
     return
 
-  initRegion: (start, size, LB, SB, readLH, SH, readLW, SW) ->
+  initRegion: (start, size, LB, LBU, SB, readLH, readLHU, SH, readLW, SW) ->
     end = (start + size) >>> 16
     start >>>= 16
 
     while start < end
       @LB[start] = LB
+      @LBU[start] = LBU
       @LH[start] = readLH
+      @LHU[start] = readLHU
       @LW[start] = readLW
       @SB[start] = SB
       @SH[start] = SH
@@ -374,9 +473,17 @@ class C1964jsMemory
 
   readDummy8: (that, a) ->
     `const off_ = a & 0xFFFC`
+    that.dummyReadWriteInt8Array[off_]
+
+  readDummyU8: (that, a) ->
+    `const off_ = a & 0xFFFC`
     that.dummyReadWriteUint8Array[off_]
 
   readDummy16: (that, a) ->
+    `const off_ = a & 0xFFFC`
+    (that.dummyReadWriteUint8Array[off_] << 8 | that.dummyReadWriteUint8Array[off_ + 1])<<16>>16
+
+  readDummyU16: (that, a) ->
     `const off_ = a & 0xFFFC`
     that.dummyReadWriteUint8Array[off_] << 8 | that.dummyReadWriteUint8Array[off_ + 1]
 
@@ -385,9 +492,16 @@ class C1964jsMemory
     that.dummyReadWriteUint8Array[off_] << 24 | that.dummyReadWriteUint8Array[off_ + 1] << 16 | that.dummyReadWriteUint8Array[off_ + 2] << 8 | that.dummyReadWriteUint8Array[off_ + 3]
 
   readRdram8: (that, a) ->
+    that.s8[a]
+
+  readRdramU8: (that, a) ->
     that.u8[a]
 
   readRdram16: (that, a) ->
+    `const ram = that.u8`
+    (ram[a] << 8 | ram[a + 1])<<16>>16
+
+  readRdramU16: (that, a) ->
     `const ram = that.u8`
     ram[a] << 8 | ram[a + 1]
 
@@ -397,9 +511,17 @@ class C1964jsMemory
 
   readRamRegs0_8: (that, a) ->
     `const off_ = a - MEMORY_START_RAMREGS0`
+    that.ramRegs0Int8Array[off_]
+
+  readRamRegs0_U8: (that, a) ->
+    `const off_ = a - MEMORY_START_RAMREGS0`
     that.ramRegs0Uint8Array[off_]
 
   readRamRegs0_16: (that, a) ->
+    `const off_ = (a-MEMORY_START_RAMREGS0)`
+    (that.ramRegs0Uint8Array[off_] << 8 | that.ramRegs0Uint8Array[off_ + 1])<<16>>16
+
+  readRamRegs0_U16: (that, a) ->
     `const off_ = (a-MEMORY_START_RAMREGS0)`
     that.ramRegs0Uint8Array[off_] << 8 | that.ramRegs0Uint8Array[off_ + 1]
 
@@ -409,9 +531,17 @@ class C1964jsMemory
 
   readRamRegs4_8: (that, a) ->
     `const off_ = a - MEMORY_START_RAMREGS4`
+    that.ramRegs4Int8Array[off_]
+
+  readRamRegs4_U8: (that, a) ->
+    `const off_ = a - MEMORY_START_RAMREGS4`
     that.ramRegs4Uint8Array[off_]
 
   readRamRegs4_16: (that, a) ->
+    `const off_ = (a-MEMORY_START_RAMREGS4)`
+    (that.ramRegs4Uint8Array[off_] << 8 | that.ramRegs4Uint8Array[off_ + 1])<<16>>16
+
+  readRamRegs4_U16: (that, a) ->
     `const off_ = (a-MEMORY_START_RAMREGS4)`
     that.ramRegs4Uint8Array[off_] << 8 | that.ramRegs4Uint8Array[off_ + 1]
 
@@ -421,9 +551,17 @@ class C1964jsMemory
 
   readRamRegs8_8: (that, a) ->
     `const off_ = a - MEMORY_START_RAMREGS8`
+    that.ramRegs8Int8Array[off_]
+
+  readRamRegs8_U8: (that, a) ->
+    `const off_ = a - MEMORY_START_RAMREGS8`
     that.ramRegs8Uint8Array[off_]
 
   readRamRegs8_16: (that, a) ->
+    `const off_ = (a-MEMORY_START_RAMREGS8)`
+    (that.ramRegs8Uint8Array[off_] << 8 | that.ramRegs8Uint8Array[off_ + 1])<<16>>16
+
+  readRamRegs8_U16: (that, a) ->
     `const off_ = (a-MEMORY_START_RAMREGS8)`
     that.ramRegs8Uint8Array[off_] << 8 | that.ramRegs8Uint8Array[off_ + 1]
 
@@ -433,9 +571,17 @@ class C1964jsMemory
 
   readSpMem8: (that, a) ->
     `const off_ = a - MEMORY_START_SPMEM`
+    that.spMemInt8Array[off_]
+
+  readSpMemU8: (that, a) ->
+    `const off_ = a - MEMORY_START_SPMEM`
     that.spMemUint8Array[off_]
 
   readSpMem16: (that, a) ->
+    `const off_ = (a-MEMORY_START_SPMEM)`
+    (that.spMemUint8Array[off_] << 8 | that.spMemUint8Array[off_ + 1])<<16>>16
+
+  readSpMemU16: (that, a) ->
     `const off_ = (a-MEMORY_START_SPMEM)`
     that.spMemUint8Array[off_] << 8 | that.spMemUint8Array[off_ + 1]
 
@@ -445,11 +591,19 @@ class C1964jsMemory
 
   readSpReg1_8: (that, a) ->
     `const off_ = a - MEMORY_START_SPREG_1`
-    that.core.interrupts.readSPReg1 off_
+    (that.core.interrupts.readSPReg1 off_)<<24>>24
+
+  readSpReg1_U8: (that, a) ->
+    `const off_ = a - MEMORY_START_SPREG_1`
+    (that.core.interrupts.readSPReg1 off_)<<24>>>24
 
   readSpReg1_16: (that, a) ->
     `const off_ = a - MEMORY_START_SPREG_1`
-    that.core.interrupts.readSPReg1 off_
+    (that.core.interrupts.readSPReg1 off_)<<16>>16
+
+  readSpReg1_U16: (that, a) ->
+    `const off_ = a - MEMORY_START_SPREG_1`
+    (that.core.interrupts.readSPReg1 off_)<<16>>>16
 
   readSpReg1_32: (that, a) ->
     `const off_ = a - MEMORY_START_SPREG_1`
@@ -457,11 +611,19 @@ class C1964jsMemory
 
   readSpReg2_8: (that, a) ->
     `const off_ = a - MEMORY_START_SPREG_2`
+    that.spReg2Int8Array[off_]
+
+  readSpReg2_U8: (that, a) ->
+    `const off_ = a - MEMORY_START_SPREG_2`
     that.spReg2Uint8Array[off_]
 
   readSpReg2_16: (that, a) ->
     `const off_ = (a-MEMORY_START_SPREG_2)`
-    that.spReg2Uint8Array[off_] << 8 | that.spReg2Uint8Array[off_ + 1]
+    (that.spReg2Uint8Array[off_] << 8 | that.spReg2Uint8Array[off_ + 1])<<16>>16
+
+  readSpReg2_U16: (that, a) ->
+    `const off_ = (a-MEMORY_START_SPREG_2)`
+    that.spReg2UintArray[off_] << 8 | that.spReg2Uint8Array[off_ + 1]
 
   readSpReg2_32: (that, a) ->
     `const off_ = (a-MEMORY_START_SPREG_2)`
@@ -469,9 +631,17 @@ class C1964jsMemory
 
   readDpc8: (that, a) ->
     `const off_ = a - MEMORY_START_DPC`
+    that.dpcInt8Array[off_]
+
+  readDpcU8: (that, a) ->
+    `const off_ = a - MEMORY_START_DPC`
     that.dpcUint8Array[off_]
 
   readDpc16: (that, a) ->
+    `const off_ = (a-MEMORY_START_DPC)`
+    (that.dpcUint8Array[off_] << 8 | that.dpcInt8Array[off_ + 1])<<16>>16
+
+  readDpcU16: (that, a) ->
     `const off_ = (a-MEMORY_START_DPC)`
     that.dpcUint8Array[off_] << 8 | that.dpcUint8Array[off_ + 1]
 
@@ -485,6 +655,10 @@ class C1964jsMemory
 
   readDps16: (that, a) ->
     `const off_ = (a-MEMORY_START_DPS)`
+    (that.dpsUint8Array[off_] << 8 | that.dpsUint8Array[off_ + 1])<<16>>16
+
+  readDpsU16: (that, a) ->
+    `const off_ = (a-MEMORY_START_DPS)`
     that.dpsUint8Array[off_] << 8 | that.dpsUint8Array[off_ + 1]
 
   readDps32: (that, a) ->
@@ -493,9 +667,17 @@ class C1964jsMemory
 
   readMi8: (that, a) ->
     `const off_ = a - MEMORY_START_MI`
+    that.miInt8Array[off_]
+
+  readMiU8: (that, a) ->
+    `const off_ = a - MEMORY_START_MI`
     that.miUint8Array[off_]
 
   readMi16: (that, a) ->
+    `const off_ = (a-MEMORY_START_MI)`
+    (that.miUint8Array[off_] << 8 | that.miUint8Array[off_ + 1])<<16>>16
+
+  readMiU16: (that, a) ->
     `const off_ = (a-MEMORY_START_MI)`
     that.miUint8Array[off_] << 8 | that.miUint8Array[off_ + 1]
 
@@ -505,11 +687,19 @@ class C1964jsMemory
 
   readVi8: (that, a) ->
     `const off_ = a - MEMORY_START_VI`
-    that.core.interrupts.readVI off_
+    (that.core.interrupts.readVI off_)<<24>>24
+
+  readViU8: (that, a) ->
+    `const off_ = a - MEMORY_START_VI`
+    (that.core.interrupts.readVI off_)<<24>>>24
 
   readVi16: (that, a) ->
     `const off_ = a - MEMORY_START_VI`
-    that.core.interrupts.readVI off_
+    (that.core.interrupts.readVI off_)<<16>>16
+
+  readViU16: (that, a) ->
+    `const off_ = a - MEMORY_START_VI`
+    (that.core.interrupts.readVI off_)<<16>>>16
 
   readVi32: (that, a) ->
     `const off_ = a - MEMORY_START_VI`
@@ -517,11 +707,19 @@ class C1964jsMemory
 
   readAi8: (that, a) ->
     `const off_ = a - MEMORY_START_AI`
-    that.core.interrupts.readAI off_
+    (that.core.interrupts.readAI off_)<<24>>24
+
+  readAiU8: (that, a) ->
+    `const off_ = a - MEMORY_START_AI`
+    (that.core.interrupts.readAI off_)<<24>>>24
 
   readAi16: (that, a) ->
     `const off_ = a - MEMORY_START_AI`
-    that.core.interrupts.readAI off_
+    (that.core.interrupts.readAI off_)<<16>>16
+
+  readAiU16: (that, a) ->
+    `const off_ = a - MEMORY_START_AI`
+    (that.core.interrupts.readAI off_)<<16>>>16
 
   readAi32: (that, a) ->
     `const off_ = a - MEMORY_START_AI`
@@ -529,9 +727,17 @@ class C1964jsMemory
 
   readPi8: (that, a) ->
     `const off_ = a - MEMORY_START_PI`
+    that.piInt8Array[off_]
+
+  readPiU8: (that, a) ->
+    `const off_ = a - MEMORY_START_PI`
     that.piUint8Array[off_]
 
   readPi16: (that, a) ->
+    `const off_ = (a-MEMORY_START_PI)`
+    (that.piUint8Array[off_] << 8 | that.piUint8Array[off_ + 1])<<16>>16
+
+  readPiU16: (that, a) ->
     `const off_ = (a-MEMORY_START_PI)`
     that.piUint8Array[off_] << 8 | that.piUint8Array[off_ + 1]
 
@@ -541,11 +747,19 @@ class C1964jsMemory
 
   readSi8: (that, a) ->
     `const off_ = a - MEMORY_START_SI`
-    that.core.interrupts.readSI off_
+    (that.core.interrupts.readSI off_)<<24>>24
+
+  readSiU8: (that, a) ->
+    `const off_ = a - MEMORY_START_SI`
+    (that.core.interrupts.readSI off_)<<24>>>24
 
   readSi16: (that, a) ->
     `const off_ = a - MEMORY_START_SI`
-    that.core.interrupts.readSI off_
+    (that.core.interrupts.readSI off_)<<16>>16
+
+  readSiU16: (that, a) ->
+    `const off_ = a - MEMORY_START_SI`
+    (that.core.interrupts.readSI off_)<<16>>>16
 
   readSi32: (that, a) ->
     `const off_ = a - MEMORY_START_SI`
@@ -553,9 +767,17 @@ class C1964jsMemory
 
   readC2A1_8: (that, a) ->
     `const off_ = a - MEMORY_START_C2A1`
+    that.c2a1Int8Array[off_]
+
+  readC2A1_U8: (that, a) ->
+    `const off_ = a - MEMORY_START_C2A1`
     that.c2a1Uint8Array[off_]
 
   readC2A1_16: (that, a) ->
+    `const off_ = (a-MEMORY_START_C2A1)`
+    (that.c2a1Uint8Array[off_] << 8 | that.c2a1Uint8Array[off_ + 1])<<16>>16
+
+  readC2A1_U16: (that, a) ->
     `const off_ = (a-MEMORY_START_C2A1)`
     that.c2a1Uint8Array[off_] << 8 | that.c2a1Uint8Array[off_ + 1]
 
@@ -565,9 +787,17 @@ class C1964jsMemory
 
   readC1A1_8: (that, a) ->
     `const off_ = a - MEMORY_START_C1A1`
+    that.c1a1Int8Array[off_]
+
+  readC1A1_U8: (that, a) ->
+    `const off_ = a - MEMORY_START_C1A1`
     that.c1a1Uint8Array[off_]
 
   readC1A1_16: (that, a) ->
+    `const off_ = (a-MEMORY_START_C1A1)`
+    (that.c1a1Uint8Array[off_] << 8 | that.c1a1Uint8Array[off_ + 1])<<16>>16
+
+  readC1A1_U16: (that, a) ->
     `const off_ = (a-MEMORY_START_C1A1)`
     that.c1a1Uint8Array[off_] << 8 | that.c1a1Uint8Array[off_ + 1]
 
@@ -577,9 +807,17 @@ class C1964jsMemory
 
   readC2A2_8: (that, a) ->
     `const off_ = a - MEMORY_START_C2A2`
+    that.c2a2Int8Array[off_]
+
+  readC2A2_U8: (that, a) ->
+    `const off_ = a - MEMORY_START_C2A2`
     that.c2a2Uint8Array[off_]
 
   readC2A2_16: (that, a) ->
+    `const off_ = (a-MEMORY_START_C2A2)`
+    (that.c2a2Uint8Array[off_] << 8 | that.c2a2Uint8Array[off_ + 1])<<16>>16
+
+  readC2A2_U16: (that, a) ->
     `const off_ = (a-MEMORY_START_C2A2)`
     that.c2a2Uint8Array[off_] << 8 | that.c2a2Uint8Array[off_ + 1]
 
@@ -589,9 +827,17 @@ class C1964jsMemory
 
   readRom8: (that, a) ->
     `const off_ = a - MEMORY_START_ROM_IMAGE`
+    that.romInt8Array[off_]
+
+  readRomU8: (that, a) ->
+    `const off_ = a - MEMORY_START_ROM_IMAGE`
     that.romUint8Array[off_]
 
   readRom16: (that, a) ->
+    `const off_ = (a-MEMORY_START_ROM_IMAGE)`
+    (that.romUint8Array[off_] << 8 | that.romUint8Array[off_ + 1])<<16>>16
+
+  readRomU16: (that, a) ->
     `const off_ = (a-MEMORY_START_ROM_IMAGE)`
     that.romUint8Array[off_] << 8 | that.romUint8Array[off_ + 1]
 
@@ -601,9 +847,17 @@ class C1964jsMemory
 
   readC1A3_8: (that, a) ->
     `const off_ = a - MEMORY_START_C1A3`
+    that.c1a3Int8Array[off_]
+
+  readC1A3_U8: (that, a) ->
+    `const off_ = a - MEMORY_START_C1A3`
     that.c1a3Uint8Array[off_]
 
   readC1A3_16: (that, a) ->
+    `const off_ = (a-MEMORY_START_C1A3)`
+    (that.c1a3Uint8Array[off_] << 8 | that.c1a3Uint8Array[off_ + 1])<<16>>16
+
+  readC1A3_U16: (that, a) ->
     `const off_ = (a-MEMORY_START_C1A3)`
     that.c1a3Uint8Array[off_] << 8 | that.c1a3Uint8Array[off_ + 1]
 
@@ -613,9 +867,17 @@ class C1964jsMemory
 
   readRi8: (that, a) ->
     `const off_ = a - MEMORY_START_RI`
+    that.riInt8Array[off_]
+
+  readRiU8: (that, a) ->
+    `const off_ = a - MEMORY_START_RI`
     that.riUint8Array[off_]
 
   readRi16: (that, a) ->
+    `const off_ = (a-MEMORY_START_RI)`
+    (that.riUint8Array[off_] << 8 | that.riUint8Array[off_ + 1])<<16>>16
+
+  readRiU16: (that, a) ->
     `const off_ = (a-MEMORY_START_RI)`
     that.riUint8Array[off_] << 8 | that.riUint8Array[off_ + 1]
 
@@ -625,9 +887,17 @@ class C1964jsMemory
 
   readPif8: (that, a) ->
     `const off_ = a - MEMORY_START_PIF`
+    that.pifInt8Array[off_]
+
+  readPifU8: (that, a) ->
+    `const off_ = a - MEMORY_START_PIF`
     that.pifUint8Array[off_]
 
   readPif16: (that, a) ->
+    `const off_ = (a-MEMORY_START_PIF)`
+    (that.pifUint8Array[off_] << 8 | that.pifUint8Array[off_ + 1])<<16>>16
+
+  readPifU16: (that, a) ->
     `const off_ = (a-MEMORY_START_PIF)`
     that.pifUint8Array[off_] << 8 | that.pifUint8Array[off_ + 1]
 
@@ -637,9 +907,17 @@ class C1964jsMemory
 
   readGio8: (that, a) ->
     `const off_ = a - MEMORY_START_GIO`
+    that.gioInt8Array[off_]
+
+  readGioU8: (that, a) ->
+    `const off_ = a - MEMORY_START_GIO`
     that.gioUint8Array[off_]
 
   readGio16: (that, a) ->
+    `const off_ = (a-MEMORY_START_GIO)`
+    (that.gioInt8Array[off_] << 8 | that.gioInt8Array[off_ + 1])<<16>>16
+
+  readGioU16: (that, a) ->
     `const off_ = (a-MEMORY_START_GIO)`
     that.gioUint8Array[off_] << 8 | that.gioUint8Array[off_ + 1]
 
@@ -1074,6 +1352,16 @@ class C1964jsMemory
 
     region(that, a)
 
+  readTLBU8: (that, b) ->
+    `const a = that.virtualToPhysical(b)`
+
+    region = that.LBU[a>>>16]
+
+    if region is that.readTLBU8
+      region = that.readDummyU8
+
+    region(that, a)
+
   writeTLB8: (that, val, b, pc, isDelaySlot) ->
     `const a = that.virtualToPhysical(b)`
 
@@ -1092,6 +1380,16 @@ class C1964jsMemory
 
     if region is that.readTLB16
       region = that.readDummy16
+
+    region(that, a)
+
+  readTLBU16: (that, b) ->
+    `const a = that.virtualToPhysical(b)`
+
+    region = that.LHU[a>>>16]
+
+    if region is that.readTLBU16
+      region = that.readDummyU16
 
     region(that, a)
 

@@ -388,7 +388,6 @@ class C1964jsEmulator
     k = @memory.getInt32(@memory.viUint8Array, consts.VI_ORIGIN_REG) & 0x00FFFFFF
     out = ImDat.data
 
-    #endian-safe blit: rgba5551
     y = -240 * 320
     `const u8 = this.memory.u8`
     while y isnt 0
@@ -523,7 +522,7 @@ class C1964jsEmulator
     return fn
 
   repaintWrapper: ->
-    if @isLittleEndian is 1
+    if @isLittleEndian is 1 and @useByteCompatibilityMode is false
       @repaintLE @ctx, @ImDat
     else
       @repaint @ctx, @ImDat
@@ -941,16 +940,16 @@ class C1964jsEmulator
     string += @helpers.tRT(i) + "=t.cp0[" + @helpers.fs(i) + "];" + @helpers.tRTH(i) + "=t.cp0[" + @helpers.fs(i) + "]>>31;"
 
   r4300i_lb: (i) ->
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.LB[r[36]>>>16](m,r[36])<<24>>24;" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>8;"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.LB[r[36]>>>16](m,r[36]);" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>8;"
 
   r4300i_lbu: (i) ->
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.LB[r[36]>>>16](m,r[36]);" + @helpers.tRTH(i) + "=0;"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.LBU[r[36]>>>16](m,r[36]);" + @helpers.tRTH(i) + "=0;"
 
   r4300i_lh: (i) ->
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.LH[r[36]>>>16](m,r[36])<<16>>16;" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>16;";
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.LH[r[36]>>>16](m,r[36]);" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>16;";
 
   r4300i_lhu: (i) ->
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.LH[r[36]>>>16](m,r[36]);" + @helpers.tRTH(i) + "=0;"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.LHU[r[36]>>>16](m,r[36]);" + @helpers.tRTH(i) + "=0;"
 
   r4300i_sb: (i, isDelaySlot) ->
     #"m.sb(" + @helpers.RT(i) + "," + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");"
