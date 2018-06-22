@@ -910,8 +910,8 @@ class C1964jsMemoryLE extends C1964jsMemory
     return
 
   #getInt32 and getUint32 are identical. they both return signed.
-  getInt32: (uregion, off_) ->
-    uregion[off_ + 3] << 24 | uregion[off_ + 2] << 16 | uregion[off_ + 1] << 8 | uregion[off_]
+  getInt32: (uregion, off_, u32region) ->
+    u32region[off_ >>>2]
 
   getUint32: (uregion, off_) ->
     uregion[off_ + 3] << 24 | uregion[off_ + 2] << 16 | uregion[off_ + 1] << 8 | uregion[off_]

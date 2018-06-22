@@ -50,7 +50,6 @@ C1964jsVideoHLEle::getGbi0MoveWordType = (pc) ->
   @core.memory.u8[pc]
 
 C1964jsVideoHLEle::getGbi0MoveWordValue = (pc) ->
-  #@core.memory.getInt32 @core.memory.u8, pc + 4
   @core.memory.u32[(pc+4)>>>2]
 
 #GBI0 Dlist struct
@@ -59,7 +58,6 @@ C1964jsVideoHLEle::getGbi0DlistParam = (pc) ->
   @core.memory.u8[pc+2]
 
 C1964jsVideoHLEle::getGbi0DlistAddr = (pc) -> #this will probably be generic getGbi0Addr
-  #@core.memory.getInt32 @core.memory.u8, pc + 4
   @core.memory.u32[(pc+4)>>>2]
 
 C1964jsVideoHLEle::getCommand = (pc) ->
@@ -116,11 +114,9 @@ C1964jsVideoHLEle::getVertexW = (pc) ->
 
 
 C1964jsVideoHLEle::getVertexS = (pc) ->
-  #@core.memory.getInt32(@core.memory.u8, pc + 8) >> 16
   @core.memory.u16[(pc+10)>>>1]<<16>>16
 
 C1964jsVideoHLEle::getVertexT = (pc) ->
-  #@core.memory.getInt32(@core.memory.u8, pc + 8) << 16 >> 16
   @core.memory.u16[(pc+8)>>>1]<<16>>16
 
 C1964jsVideoHLEle::getVertexColorR = (pc) ->
@@ -290,10 +286,10 @@ C1964jsVideoHLEle::getTexRectT = (pc) ->
   @core.memory.u16[(pc+12)>>>1]
 
 C1964jsVideoHLEle::getTexRectDsDx = (pc) ->
-  @core.memory.getInt32(@core.memory.u8, pc + 20) >>> 16 & 0xFFFF
+  @core.memory.getInt32(@core.memory.u8, pc + 20, @core.memory.u32) >>> 16 & 0xFFFF
 
 C1964jsVideoHLEle::getTexRectDtDy = (pc) ->
-  @core.memory.getInt32(@core.memory.u8, pc + 20) & 0xFFFF
+  @core.memory.getInt32(@core.memory.u8, pc + 20, @core.memory.u32) & 0xFFFF
 
 #is this right?
 C1964jsVideoHLEle::getGbi1Type = (pc) ->

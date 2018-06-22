@@ -22,7 +22,6 @@ C1964jsVideoHLE::getGbi0MoveWordType = (pc) ->
   @core.memory.u8[pc+3]
 
 C1964jsVideoHLE::getGbi0MoveWordValue = (pc) ->
-  #@core.memory.getInt32 @core.memory.u8, pc + 4
   @core.memory.u8[pc+4]<<24 | @core.memory.u8[pc+5]<<16 | @core.memory.u8[pc+6]<<8 | @core.memory.u8[pc+7]
 
 #GBI0 Dlist struct
@@ -31,7 +30,6 @@ C1964jsVideoHLE::getGbi0DlistParam = (pc) ->
   @core.memory.u8[pc + 1]
 
 C1964jsVideoHLE::getGbi0DlistAddr = (pc) -> #this will probably be generic getGbi0Addr
-  #@core.memory.getInt32 @core.memory.u8, pc + 4
   @core.memory.u8[pc+4]<<24 | @core.memory.u8[pc+5]<<16 | @core.memory.u8[pc+6]<<8 | @core.memory.u8[pc+7]
 
 C1964jsVideoHLE::getCommand = (pc) ->
@@ -88,11 +86,9 @@ C1964jsVideoHLE::getVertexW = (pc) ->
 
 
 C1964jsVideoHLE::getVertexS = (pc) ->
-  #@core.memory.getInt32(@core.memory.u8, pc + 8) >> 16
   (@core.memory.u8[pc + 8]<<8 | @core.memory.u8[pc + 9])<<16>>16
 
 C1964jsVideoHLE::getVertexT = (pc) ->
-  #@core.memory.getInt32(@core.memory.u8, pc + 8) << 16 >> 16
   (@core.memory.u8[pc + 10]<<8 | @core.memory.u8[pc + 11])<<16>>16
 
 C1964jsVideoHLE::getVertexColorR = (pc) ->

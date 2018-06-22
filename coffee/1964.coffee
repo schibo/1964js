@@ -385,7 +385,7 @@ class C1964jsEmulator
     y = undefined
     return  unless @showFB
     #get origin
-    k = @memory.getInt32(@memory.viUint8Array, consts.VI_ORIGIN_REG) & 0x00FFFFFF
+    k = @memory.getInt32(@memory.viUint8Array, consts.VI_ORIGIN_REG, @memory.viUint32Array) & 0x00FFFFFF
     out = ImDat.data
 
     #endian-safe blit: rgba5551
@@ -523,7 +523,7 @@ class C1964jsEmulator
     return fn
 
   repaintWrapper: ->
-    if @isLittleEndian is 1
+    if @isLittleEndian is 1 and @useByteCompatibilityMode is false
       @repaintLE @ctx, @ImDat
     else
       @repaint @ctx, @ImDat

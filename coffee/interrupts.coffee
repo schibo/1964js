@@ -112,49 +112,49 @@ C1964jsInterrupts = (core, cp0) ->
 
   @triggerPIInterrupt = (pc, isFromDelaySlot) ->
     @setFlag core.memory.miUint8Array, consts.MI_INTR_REG, consts.MI_INTR_PI
-    value = core.memory.getInt32 core.memory.miUint8Array, consts.MI_INTR_MASK_REG
+    value = core.memory.getInt32 core.memory.miUint8Array, consts.MI_INTR_MASK_REG, core.memory.miUint32Array
     @setException consts.EXC_INT, consts.CAUSE_IP3, pc, isFromDelaySlot  if (value & consts.MI_INTR_MASK_PI) isnt 0
     return
 
   @triggerSPInterrupt = (pc, isFromDelaySlot) ->
     @setFlag core.memory.miUint8Array, consts.MI_INTR_REG, consts.MI_INTR_SP
-    value = core.memory.getInt32 core.memory.miUint8Array, consts.MI_INTR_MASK_REG
+    value = core.memory.getInt32 core.memory.miUint8Array, consts.MI_INTR_MASK_REG, core.memory.miUint32Array
     @setException consts.EXC_INT, consts.CAUSE_IP3, pc, isFromDelaySlot  if (value & consts.MI_INTR_MASK_SP) isnt 0
     return
 
   @triggerVIInterrupt = (pc, isFromDelaySlot) ->
     @setFlag core.memory.miUint8Array, consts.MI_INTR_REG, consts.MI_INTR_VI
-    value = core.memory.getInt32 core.memory.miUint8Array, consts.MI_INTR_MASK_REG
+    value = core.memory.getInt32 core.memory.miUint8Array, consts.MI_INTR_MASK_REG, core.memory.miUint32Array
     @setException consts.EXC_INT, consts.CAUSE_IP3, pc, isFromDelaySlot  if (value & consts.MI_INTR_MASK_VI) isnt 0
     return
 
   @triggerSIInterrupt = (pc, isFromDelaySlot) ->
     @setFlag core.memory.miUint8Array, consts.MI_INTR_REG, consts.MI_INTR_SI
-    value = core.memory.getInt32 core.memory.miUint8Array, consts.MI_INTR_MASK_REG
+    value = core.memory.getInt32 core.memory.miUint8Array, consts.MI_INTR_MASK_REG, core.memory.miUint32Array
     @setException consts.EXC_INT, consts.CAUSE_IP3, pc, isFromDelaySlot  if (value & consts.MI_INTR_MASK_SI) isnt 0
     return
 
   @triggerAIInterrupt = (pc, isFromDelaySlot) ->
     @setFlag core.memory.miUint8Array, consts.MI_INTR_REG, consts.MI_INTR_AI
-    value = core.memory.getInt32 core.memory.miUint8Array, consts.MI_INTR_MASK_REG
+    value = core.memory.getInt32 core.memory.miUint8Array, consts.MI_INTR_MASK_REG, core.memory.miUint32Array
     @setException consts.EXC_INT, consts.CAUSE_IP3, pc, isFromDelaySlot  if (value & consts.MI_INTR_MASK_AI) isnt 0
     return
 
   @triggerDPInterrupt = (pc, isFromDelaySlot) ->
     @setFlag core.memory.miUint8Array, consts.MI_INTR_REG, consts.MI_INTR_DP
-    value = core.memory.getInt32 core.memory.miUint8Array, consts.MI_INTR_MASK_REG
+    value = core.memory.getInt32 core.memory.miUint8Array, consts.MI_INTR_MASK_REG, core.memory.miUint32Array
     @setException consts.EXC_INT, consts.CAUSE_IP3, pc, isFromDelaySlot  if (value & consts.MI_INTR_MASK_DP) isnt 0
     return
 
   @triggerRspBreak = ->
     @setFlag core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_TASKDONE | consts.SP_STATUS_BROKE | consts.SP_STATUS_HALT
-    value = core.memory.getInt32 core.memory.spReg1Uint8Array, consts.SP_STATUS_REG
+    value = core.memory.getInt32 core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, core.memory.spReg1Uint32Array
     @triggerSPInterrupt 0, false  if (value & consts.SP_STATUS_INTR_BREAK) isnt 0
     return
 
   @clearMIInterrupt = (flag) ->
     @clrFlag core.memory.miUint8Array, consts.MI_INTR_REG, flag
-    miIntrMaskReg = core.memory.getInt32 core.memory.miUint8Array, consts.MI_INTR_MASK_REG
+    miIntrMaskReg = core.memory.getInt32 core.memory.miUint8Array, consts.MI_INTR_MASK_REG, core.memory.miUint32Array
     cp0[consts.CAUSE] &= ~consts.CAUSE_IP3  if (miIntrMaskReg & (core.memory.getUint32(core.memory.miUint8Array, consts.MI_INTR_REG))) is 0
     return
 
@@ -172,7 +172,7 @@ C1964jsInterrupts = (core, cp0) ->
         #can service an interrupt immediately without setting rt[i]
 
         #return currentHack;
-        return ((core.memory.getInt32(core.memory.viUint8Array, offset) & 0xfffffffe) + currentHack) | 0
+        return ((core.memory.getInt32(core.memory.viUint8Array, offset, core.memory.viUint32Array) & 0xfffffffe) + currentHack) | 0
       else
         #log "unhandled video interface for vi offset: " + offset
         return core.memory.getInt32 core.memory.viUint8Array, offset
@@ -236,14 +236,14 @@ C1964jsInterrupts = (core, cp0) ->
     switch offset
       when consts.SI_STATUS_REG
         @readSIStatusReg()
-        return core.memory.getInt32 core.memory.siUint8Array, offset
+        return core.memory.getInt32 core.memory.siUint8Array, offset, core.memory.siUint32Array
       else
         #log "unhandled si read: " + offset
-        return core.memory.getInt32 core.memory.siUint8Array, offset
+        return core.memory.getInt32 core.memory.siUint8Array, offset, core.memory.siUint32Array
     return
 
   @readSIStatusReg = ->
-    if (core.memory.getUint32(core.memory.miUint8Array, consts.MI_INTR_REG) & consts.MI_INTR_SI) isnt 0
+    if (core.memory.getUint32(core.memory.miUint8Array, consts.MI_INTR_REG, core.memory.miUint32Array) & consts.MI_INTR_SI) isnt 0
       @setFlag core.memory.siUint8Array, consts.SI_STATUS_REG, consts.SI_STATUS_INTERRUPT
     else
       @clrFlag core.memory.siUint8Array, consts.SI_STATUS_REG, consts.SI_STATUS_INTERRUPT
@@ -264,10 +264,10 @@ C1964jsInterrupts = (core, cp0) ->
       #return kfi;
       #return getInt32(aiUint8Array, offset);
       when consts.AI_STATUS_REG
-        return core.memory.getInt32 core.memory.aiUint8Array, offset
+        return core.memory.getInt32 core.memory.aiUint8Array, offset, core.memory.aiUint32Array
       else
         #log "unhandled read ai reg " + offset
-        return core.memory.getInt32 core.memory.aiUint8Array, offset
+        return core.memory.getInt32 core.memory.aiUint8Array, offset, core.memory.aiUint32Array
     return
 
   @writeAI = (offset, value, pc, isFromDelaySlot) ->
@@ -306,14 +306,14 @@ C1964jsInterrupts = (core, cp0) ->
   @readSPReg1 = (offset) ->
     switch offset
       when consts.SP_STATUS_REG
-        return core.memory.getInt32 core.memory.spReg1Uint8Array, offset
+        return core.memory.getInt32 core.memory.spReg1Uint8Array, offset, core.memory.spReg1Uint32Array
       when consts.SP_SEMAPHORE_REG
-        temp = core.memory.getInt32(core.memory.aiUint8Array, offset)
+        temp = core.memory.getInt32(core.memory.aiUint8Array, offset, core.memory.aiUint32Array)
         core.memory.setInt32 core.memory.spReg1Uint8Array, offset, 1
         return temp
       else
         #log "unhandled read sp reg1 " + offset
-        return core.memory.getInt32 core.memory.spReg1Uint8Array, offset
+        return core.memory.getInt32 core.memory.spReg1Uint8Array, offset, core.memory.spReg1Uint32Array
     return
 
   @writeSPReg1 = (offset, value, pc, isFromDelaySlot) ->
