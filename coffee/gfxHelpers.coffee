@@ -61,16 +61,6 @@ C1964jsVideoHLE::getGbi0Vertex0 = (pc) ->
   (@core.memory.u8[pc + 1]) & 0x0F
 
 
-#Fiddled vertex struct - Legacy
-C1964jsVideoHLE::getFiddledVertexX = (pc) ->
-  (@core.memory.u8[pc] << 24 | @core.memory.u8[pc + 1] << 16 | @core.memory.u8[pc + 2] << 8 | @core.memory.u8[pc + 3]) >> 16
-
-C1964jsVideoHLE::getFiddledVertexY = (pc) ->
-  (@core.memory.u8[pc] << 24 | @core.memory.u8[pc + 1] << 16 | @core.memory.u8[pc + 2] << 8 | @core.memory.u8[pc + 3]) << 16 >> 16
-
-C1964jsVideoHLE::getFiddledVertexZ = (pc) ->
-  (@core.memory.u8[pc+4] << 24 | @core.memory.u8[pc+5] << 16 | @core.memory.u8[pc+6] << 8 | @core.memory.u8[pc+7]) >> 16
-
 #Vertex Struct
 C1964jsVideoHLE::getVertexX = (pc) ->
   #if ((pc>>>0) > 0x00800000)

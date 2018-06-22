@@ -32,14 +32,14 @@ class C1964jsVideoHLEle extends C1964jsVideoHLE
     `const matToLoad = this.matToLoad`
     while i < 4
       j = 0
-      while j < 4
+      while j < 2
         # 0.0000152587890625 is 1.0/65536.0
         matToLoad[k] = ((u16[(a>>>1)^1] << 16 | u16[((a + 32)>>>1)^1])>>0) * 0.0000152587890625
         matToLoad[k+1] = ((u16[a>>>1] << 16 | u16[(a + 32)>>>1])>>0) * 0.0000152587890625
         k += 2
         a += 4
-        j += 2
-      i += 1
+        j++
+      i++
     return
 
 
@@ -87,17 +87,6 @@ C1964jsVideoHLEle::getGbi0NumVertices = (pc) ->
 C1964jsVideoHLEle::getGbi0Vertex0 = (pc) ->
   #(@core.memory.u32[pc>>>2]) >>> 16 & 0x0F
   @core.memory.u8[pc+2] & 0x0F
-
-
-#Fiddled vertex struct - Legacy
-C1964jsVideoHLEle::getFiddledVertexX = (pc) ->
-  @core.memory.u32[pc>>>2] >> 16
-
-C1964jsVideoHLEle::getFiddledVertexY = (pc) ->
-  @core.memory.u32[pc>>>2] << 16 >> 16
-
-C1964jsVideoHLEle::getFiddledVertexZ = (pc) ->
-  @core.memory.u32[(pc+4)>>>2] >> 16
 
 #Vertex Struct
 C1964jsVideoHLEle::getVertexX = (pc) ->
