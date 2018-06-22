@@ -103,25 +103,25 @@ C1964jsVideoHLEle::getFiddledVertexZ = (pc) ->
 C1964jsVideoHLEle::getVertexX = (pc) ->
   #if ((pc>>>0) > 0x00800000)
   #  alert "oops"
-  @core.memory.s16[(pc>>>1)^1]
+  @core.memory.u16[(pc>>>1)^1]<<16>>16
 
 C1964jsVideoHLEle::getVertexY = (pc) ->
-  @core.memory.s16[pc>>>1]
+  @core.memory.u16[pc>>>1]<<16>>16
 
 C1964jsVideoHLEle::getVertexZ = (pc) ->
-  @core.memory.s16[((pc+4)>>>1)^1]
+  @core.memory.u16[((pc+4)>>>1)^1]<<16>>16
 
 C1964jsVideoHLEle::getVertexW = (pc) ->
-  @core.memory.s16[(pc+4)>>>1]
+  @core.memory.u16[(pc+4)>>>1]<<16>>16
 
 
 C1964jsVideoHLEle::getVertexS = (pc) ->
   #@core.memory.getInt32(@core.memory.u8, pc + 8) >> 16
-  @core.memory.s16[(pc+10)>>>1]
+  @core.memory.u16[(pc+10)>>>1]<<16>>16
 
 C1964jsVideoHLEle::getVertexT = (pc) ->
   #@core.memory.getInt32(@core.memory.u8, pc + 8) << 16 >> 16
-  @core.memory.s16[(pc+8)>>>1]
+  @core.memory.u16[(pc+8)>>>1]<<16>>16
 
 C1964jsVideoHLEle::getVertexColorR = (pc) ->
   @core.memory.u8[pc+15]
@@ -137,27 +137,27 @@ C1964jsVideoHLEle::getVertexAlpha = (pc) ->
 
 C1964jsVideoHLEle::getVertexNormalX = (pc) ->
   #(@core.memory.u8[pc+15] << 24 | @core.memory.u8[pc+14] << 16 | @core.memory.u8[pc+13] << 8 | @core.memory.u8[pc+12]) >> 24
-  @core.memory.s8[pc+15]
+  @core.memory.u8[pc+15]<<24>>24
 
 C1964jsVideoHLEle::getVertexNormalY = (pc) ->
   #(@core.memory.u8[pc+15] << 24 | @core.memory.u8[pc+14] << 16 | @core.memory.u8[pc+13] << 8 | @core.memory.u8[pc+12]) << 8 >> 24
-  @core.memory.s8[pc+14]
+  @core.memory.u8[pc+14]<<24>>24
 
 C1964jsVideoHLEle::getVertexNormalZ = (pc) ->
   #(@core.memory.u8[pc+15] << 24 | @core.memory.u8[pc+14] << 16 | @core.memory.u8[pc+13] << 8 | @core.memory.u8[pc+12]) << 16 >> 24
-  @core.memory.s8[pc+13]
+  @core.memory.u8[pc+13]<<24>>24
 
 C1964jsVideoHLEle::getVertexNormalA = (pc) ->
-  @core.memory.s8[pc+12]
+  @core.memory.u8[pc+12]<<24>>24
 
 C1964jsVideoHLEle::getVertexLightX = (pc) ->
-  @core.memory.s8[pc+11]
+  @core.memory.u8[pc+11]<<24>>24
 
 C1964jsVideoHLEle::getVertexLightY = (pc) ->
-  @core.memory.s8[pc+10]
+  @core.memory.u8[pc+10]<<24>>24
 
 C1964jsVideoHLEle::getVertexLightZ = (pc) ->
-  @core.memory.s8[pc+9]
+  @core.memory.u8[pc+9]<<24>>24
 
 
 #Texture Struct

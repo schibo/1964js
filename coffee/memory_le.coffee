@@ -78,10 +78,6 @@ class C1964jsMemoryLE extends C1964jsMemory
     ###*
      * @const
     ###
-    @s16 = new Int16Array(@ramArrayBuffer)
-    ###*
-     * @const
-    ###
     @u32 = new Uint32Array(@ramArrayBuffer)
 
     ###*
