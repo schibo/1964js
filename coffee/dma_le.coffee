@@ -48,11 +48,19 @@ class C1964jsDmaLE
         remaining = end - transfer
       `const d = this.memory.u8`
       `const r = this.memory.romUint8Array`
-      while transfer >= 0
-        d[to^3] = r[from^3]
-        to++
-        from++
-        --transfer
+      if (to & 3 is 0) and (from & 3 is 0)
+        while transfer >= 0
+          d[to] = r[from]
+          to++
+          from++
+          --transfer
+      else
+        while transfer >= 0
+          d[to^3] = r[from^3]
+          to++
+          from++
+          --transfer
+
 
     #if (remaining !== -1)
     #    alert('doh!' + remaining);
@@ -135,11 +143,19 @@ class C1964jsDmaLE
     end &= 0x00000FFF
     to &= 0x00001fff
     from &= 0x00ffffff
-    while end >= 0
-      @memory.spMemUint8Array[to^3] = @memory.u8[from^3]
-      to++
-      from++
-      --end
+
+    if (to & 3 is 0) and (from & 3 is 0)
+      while end >= 0
+        @memory.spMemUint8Array[to^3] = @memory.u8[from^3]
+        to++
+        from++
+        --end
+    else
+      while end >= 0
+        @memory.spMemUint8Array[to^3] = @memory.u8[from^3]
+        to++
+        from++
+        --end
     @memory.setInt32 @memory.spReg1Uint8Array, consts.SP_DMA_BUSY_REG, 0
     alert "hmm..todo: an sp fp status flag is blocking from continuing"  if @memory.getInt32(@memory.spReg1Uint8Array, consts.SP_STATUS_REG, @memory.spReg1Uint32Array) & (consts.SP_STATUS_DMA_BUSY | consts.SP_STATUS_IO_FULL | consts.SP_STATUS_DMA_FULL)
     @interrupts.clrFlag @memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_DMA_BUSY

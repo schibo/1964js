@@ -484,7 +484,7 @@ class C1964jsEmulator
           #@cp0[consts.COUNT] += 625000*2 #todo: set count to count + @m*2 when count is requested in code
           @cp0[consts.COUNT] += 625000*2 #todo: set count to count + @m*2 when count is requested in code
           @interrupts.triggerCompareInterrupt 0, false
-          @interrupts.triggerVIInterrupt 0, false #if ((@memory.getUint32(@memory.miUint8Array, consts.MI_INTR_REG) & consts.MI_INTR_VI) isnt 0)
+          @interrupts.triggerVIInterrupt 0, false #if ((@memory.getInt32(@memory.miUint8Array, consts.MI_INTR_REG, core.memory.miUint32Array) & consts.MI_INTR_VI) isnt 0)
         else if @interval is 2
           @interrupts.checkInterrupts()
           if pc isnt p[0]

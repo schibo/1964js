@@ -155,7 +155,7 @@ C1964jsInterrupts = (core, cp0) ->
   @clearMIInterrupt = (flag) ->
     @clrFlag core.memory.miUint8Array, consts.MI_INTR_REG, flag
     miIntrMaskReg = core.memory.getInt32 core.memory.miUint8Array, consts.MI_INTR_MASK_REG, core.memory.miUint32Array
-    cp0[consts.CAUSE] &= ~consts.CAUSE_IP3  if (miIntrMaskReg & (core.memory.getUint32(core.memory.miUint8Array, consts.MI_INTR_REG))) is 0
+    cp0[consts.CAUSE] &= ~consts.CAUSE_IP3  if (miIntrMaskReg & (core.memory.getInt32(core.memory.miUint8Array, consts.MI_INTR_REG, core.memory.miUint32Array))) is 0
     return
 
   #if((cp0[CAUSE] & cp0[STATUS] & SR_IMASK) == 0)
@@ -243,7 +243,7 @@ C1964jsInterrupts = (core, cp0) ->
     return
 
   @readSIStatusReg = ->
-    if (core.memory.getUint32(core.memory.miUint8Array, consts.MI_INTR_REG, core.memory.miUint32Array) & consts.MI_INTR_SI) isnt 0
+    if (core.memory.getInt32(core.memory.miUint8Array, consts.MI_INTR_REG, core.memory.miUint32Array) & consts.MI_INTR_SI) isnt 0
       @setFlag core.memory.siUint8Array, consts.SI_STATUS_REG, consts.SI_STATUS_INTERRUPT
     else
       @clrFlag core.memory.siUint8Array, consts.SI_STATUS_REG, consts.SI_STATUS_INTERRUPT
@@ -369,7 +369,7 @@ C1964jsInterrupts = (core, cp0) ->
     else @clrFlag core.memory.miUint8Array, consts.MI_INIT_MODE_REG, consts.MI_MODE_EBUS  if value & consts.MI_CLR_EBUS
 
     #this.clrFlag(miUint8Array, consts.MI_INTR_REG, consts.MI_INTR_DP);
-    #setInt32(miUint8Array, MI_INIT_MODE_REG, core.memory.getUint32(miUint8Array, MI_INIT_MODE_REG)|(value&0x7f));
+    #setInt32(miUint8Array, MI_INIT_MODE_REG, core.memory.getInt32(miUint8Array, MI_INIT_MODE_REG, miUint32Array)|(value&0x7f));
     @clearMIInterrupt consts.MI_INTR_DP  if value & consts.MI_CLR_DP_INTR
     return
 
@@ -396,7 +396,7 @@ C1964jsInterrupts = (core, cp0) ->
     #Check MI interrupt again. This is important, otherwise we will lose interrupts.
 
     #Trigger an MI interrupt since we don't know what it is.
-    @setException consts.EXC_INT, consts.CAUSE_IP3, pc, isFromDelaySlot  if (core.memory.getUint32(core.memory.miUint8Array, consts.MI_INTR_MASK_REG) & 0x0000003F & core.memory.getUint32(core.memory.miUint8Array, consts.MI_INTR_REG)) isnt 0
+    @setException consts.EXC_INT, consts.CAUSE_IP3, pc, isFromDelaySlot  if (core.memory.getInt32(core.memory.miUint8Array, consts.MI_INTR_MASK_REG, core.memory.miUint32Array) & 0x0000003F & core.memory.getInt32(core.memory.miUint8Array, consts.MI_INTR_REG, core.memory.miUint32Array)) isnt 0
     return
 
   @writeSIStatusReg = (value, pc, isFromDelaySlot) ->
@@ -406,7 +406,7 @@ C1964jsInterrupts = (core, cp0) ->
     return
 
   @writeSPStatusReg = (value, pc, isFromDelaySlot) ->
-    tempSr = core.memory.getUint32(core.memory.spReg1Uint8Array, consts.SP_STATUS_REG)
+    tempSr = core.memory.getInt32(core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, core.memory.spReg1Uint32Array)
     tempSr &= ~consts.SP_STATUS_BROKE if value & SP_CLR_BROKE
     if value & SP_SET_INTR
       @triggerSPInterrupt pc, isFromDelaySlot
@@ -450,7 +450,7 @@ C1964jsInterrupts = (core, cp0) ->
       if (tempSr & SP_STATUS_BROKE) is 0 #bugfix.
         tempSr &= ~SP_STATUS_HALT
         core.memory.setInt32 core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, tempSr
-        spDmemTask = core.memory.getUint32(core.memory.spMemUint8Array, consts.SP_DMEM_TASK)
+        spDmemTask = core.memory.getInt32(core.memory.spMemUint8Array, consts.SP_DMEM_TASK, core.memory.spMemUint32Array)
         #log "SP Task triggered. SP_DMEM_TASK=" + spDmemTask
         @runSPTask spDmemTask
       else
@@ -497,7 +497,7 @@ C1964jsInterrupts = (core, cp0) ->
       #When PIC is reset, if PIC happens to be busy, an interrupt will be generated
       #as PIC returns to idle. Otherwise, no interrupt will be generated and PIC
       #remains idle.
-      if core.memory.getUint32(core.memory.piUint8Array, consts.PI_STATUS_REG) & (consts.PI_STATUS_IO_BUSY | consts.PI_STATUS_DMA_BUSY) #Is PI busy?
+      if core.memory.getInt32(core.memory.piUint8Array, consts.PI_STATUS_REG, core.memory.piUint32Array) & (consts.PI_STATUS_IO_BUSY | consts.PI_STATUS_DMA_BUSY) #Is PI busy?
         #Reset the PIC
         core.memory.setInt32 core.memory.piUint8Array, consts.PI_STATUS_REG, 0
 
@@ -576,11 +576,11 @@ C1964jsInterrupts = (core, cp0) ->
     return
 
   @checkInterrupts = ->
-    @triggerDPInterrupt 0, false  if (core.memory.getUint32(core.memory.miUint8Array, consts.MI_INTR_REG) & consts.MI_INTR_DP) isnt 0
-    @triggerAIInterrupt 0, false  if (core.memory.getUint32(core.memory.miUint8Array, consts.MI_INTR_REG) & consts.MI_INTR_AI) isnt 0
-    @triggerSIInterrupt 0, false  if (core.memory.getUint32(core.memory.miUint8Array, consts.MI_INTR_REG) & consts.MI_INTR_SI) isnt 0
-    @triggerRspBreak 0, false  if (core.memory.getUint32(core.memory.miUint8Array, consts.MI_INTR_REG) & consts.MI_INTR_SP) isnt 0
-    #if ((core.memory.getUint32(miUint8Array, consts.MI_INTR_REG) & consts.MI_INTR_VI) !== 0)
+    @triggerDPInterrupt 0, false  if (core.memory.getInt32(core.memory.miUint8Array, consts.MI_INTR_REG, core.memory.miUint32Array) & consts.MI_INTR_DP) isnt 0
+    @triggerAIInterrupt 0, false  if (core.memory.getInt32(core.memory.miUint8Array, consts.MI_INTR_REG, core.memory.miUint32Array) & consts.MI_INTR_AI) isnt 0
+    @triggerSIInterrupt 0, false  if (core.memory.getInt32(core.memory.miUint8Array, consts.MI_INTR_REG, core.memory.miUint8Array) & consts.MI_INTR_SI) isnt 0
+    @triggerRspBreak 0, false  if (core.memory.getInt32(core.memory.miUint8Array, consts.MI_INTR_REG, core.memory.miUint32Array) & consts.MI_INTR_SP) isnt 0
+    #if ((core.memory.getInt32(miUint8Array, consts.MI_INTR_REG, miUint32Array) & consts.MI_INTR_VI) !== 0)
     #    this.triggerVIInterrupt(0, false);
     @setException consts.EXC_INT, 0, core.p, false  if (cp0[consts.CAUSE] & cp0[consts.STATUS] & 0x0000FF00) isnt 0
 

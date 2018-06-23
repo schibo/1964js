@@ -290,7 +290,7 @@ class C1964jsVideoHLE
 
   dlParserProcess: ->
     @dlistStackPointer = 0
-    @dlistStack[@dlistStackPointer].pc = @core.memory.getUint32(@core.memory.spMemUint8Array, consts.TASK_DATA_PTR)>>>0
+    @dlistStack[@dlistStackPointer].pc = @core.memory.getInt32(@core.memory.spMemUint8Array, consts.TASK_DATA_PTR, @core.memory.spMemUint32Array)>>>0
     @dlistStack[@dlistStackPointer].countdown = consts.MAX_DL_COUNT
 
     #see RSP_Parser.cpp
