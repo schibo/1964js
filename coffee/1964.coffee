@@ -90,7 +90,7 @@ class C1964jsEmulator
     @NUM_CHANNELS = 1
     @NUM_SAMPLES = 40000
     @SAMPLE_RATE = 40000
-    @useByteCompatibilityMode = false #if true, slower, but works for any endian system because memory loads and stores are accessed one byte at a time. Overrides endian check if true.
+    @useByteCompatibilityMode = true #if true, slower, but works for any endian system because memory loads and stores are accessed one byte at a time. Overrides endian check if true.
     @isLittleEndian = 0 # determined by the system. If is little endian, memory is reordered to little-endian to optimize loads and stores.
     @isBigEndian = 0
     @interval = 0
@@ -180,6 +180,7 @@ class C1964jsEmulator
       @interrupts = new C1964jsInterrupts @, @cp0
       @pif = new C1964jsPif @memory.pifUint8Array
       @dma = new C1964jsDma @memory, @interrupts, @pif
+    @memory.initRegions()
     
     @webGL = new C1964jsWebGL @, userSettings.wireframe
     @helpers = new C1964jsHelpers @, @isLittleEndian

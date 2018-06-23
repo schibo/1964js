@@ -290,624 +290,625 @@ class C1964jsMemoryLE extends C1964jsMemory
      * @const
     ###
     @dummyReadWriteUint32Array = new Uint32Array(@dummyReadWriteUint8ArrayBuffer)
-    return
 
-  readDummy8: (that, a) ->
-    `const off_ = a & 0xFFFC`
-    that.dummyReadWriteUint8Array[off_^3]
+    @readDummy8 = (that, a) =>
+      `const off_ = a & 0xFFFC`
+      @dummyReadWriteUint8Array[off_^3]
 
-  readDummy16: (that, a) ->
-    `const off_ = a & 0xFFFC`
-    that.dummyReadWriteUint16Array[(off_>>>1)^1]
+    @readDummy16 = (that, a) =>
+      `const off_ = a & 0xFFFC`
+      @dummyReadWriteUint16Array[(off_>>>1)^1]
 
-  readDummy32: (that, a) ->
-    `const off_ = a & 0xFFFC`
-    that.dummyReadWriteUint32Array[off_>>>2]
+    @readDummy32 = (that, a) =>
+      `const off_ = a & 0xFFFC`
+      @dummyReadWriteUint32Array[off_>>>2]
 
-  readRdram8: (that, a) ->
-    that.u8[a^3]
+    @readRdram8 = (that, a) =>
+      @u8[a^3]
 
-  readRdram16: (that, a) ->
-    that.u16[(a>>>1)^1]
+    @readRdram16 = (that, a) => @u16[(a>>>1)^1];
 
-  readRdram32: (that, a) ->
-    that.u32[a>>>2]
 
-  readRamRegs0_8: (that, a) ->
-    `const off_ = a - MEMORY_START_RAMREGS0`
-    that.ramRegs0Uint8Array[off_^3]
+    @readRdram32 = (that, a) =>
+      @u32[a>>>2]
 
-  readRamRegs0_16: (that, a) ->
-    `const off_ = (a-MEMORY_START_RAMREGS0)`
-    that.ramRegs0Uint16Array[(off_>>>1)^1]
+    @readRamRegs0_8 = (that, a) =>
+      `const off_ = a - MEMORY_START_RAMREGS0`
+      @ramRegs0Uint8Array[off_^3]
 
-  readRamRegs0_32: (that, a) ->
-    `const off_ = (a-MEMORY_START_RAMREGS0)`
-    that.ramRegs0Uint32Array[off_>>>2]
+    @readRamRegs0_16 = (that, a) =>
+      `const off_ = (a-MEMORY_START_RAMREGS0)`
+      @ramRegs0Uint16Array[(off_>>>1)^1]
 
-  readRamRegs4_8: (that, a) ->
-    `const off_ = a - MEMORY_START_RAMREGS4`
-    that.ramRegs4Uint8Array[off_^3]
+    @readRamRegs0_32 = (that, a) =>
+      `const off_ = (a-MEMORY_START_RAMREGS0)`
+      @ramRegs0Uint32Array[off_>>>2]
 
-  readRamRegs4_16: (that, a) ->
-    `const off_ = (a-MEMORY_START_RAMREGS4)`
-    that.ramRegs4Uint16Array[(off_>>>1)^1]
+    @readRamRegs4_8 = (that, a) =>
+      `const off_ = a - MEMORY_START_RAMREGS4`
+      @ramRegs4Uint8Array[off_^3]
 
-  readRamRegs4_32: (that, a) ->
-    `const off_ = (a-MEMORY_START_RAMREGS4)`
-    that.ramRegs4Uint32Array[off_>>>2]
+    @readRamRegs4_16 = (that, a) =>
+      `const off_ = (a-MEMORY_START_RAMREGS4)`
+      @ramRegs4Uint16Array[(off_>>>1)^1]
 
-  readRamRegs8_8: (that, a) ->
-    `const off_ = a - MEMORY_START_RAMREGS8`
-    that.ramRegs8Uint8Array[off_^3]
+    @readRamRegs4_32 = (that, a) =>
+      `const off_ = (a-MEMORY_START_RAMREGS4)`
+      @ramRegs4Uint32Array[off_>>>2]
 
-  readRamRegs8_16: (that, a) ->
-    `const off_ = (a-MEMORY_START_RAMREGS8)`
-    that.ramRegs8Uint16Array[(off_>>>1)^1]
+    @readRamRegs8_8 = (that, a) =>
+      `const off_ = a - MEMORY_START_RAMREGS8`
+      @ramRegs8Uint8Array[off_^3]
 
-  readRamRegs8_32: (that, a) ->
-    `const off_ = (a-MEMORY_START_RAMREGS8)`
-    that.ramRegs8Uint32Array[off_>>>2]
+    @readRamRegs8_16 = (that, a) =>
+      `const off_ = (a-MEMORY_START_RAMREGS8)`
+      @ramRegs8Uint16Array[(off_>>>1)^1]
 
-  readSpMem8: (that, a) ->
-    `const off_ = a - MEMORY_START_SPMEM`
-    that.spMemUint8Array[off_^3]
+    @readRamRegs8_32 = (that, a) =>
+      `const off_ = (a-MEMORY_START_RAMREGS8)`
+      @ramRegs8Uint32Array[off_>>>2]
 
-  readSpMem16: (that, a) ->
-    `const off_ = (a-MEMORY_START_SPMEM)`
-    that.spMemUint16Array[(off_>>>1)^1]
+    @readSpMem8 = (that, a) =>
+      `const off_ = a - MEMORY_START_SPMEM`
+      @spMemUint8Array[off_^3]
 
-  readSpMem32: (that, a) ->
-    `const off_ = (a-MEMORY_START_SPMEM)`
-    that.spMemUint32Array[off_>>>2]
+    @readSpMem16 = (that, a) =>
+      `const off_ = (a-MEMORY_START_SPMEM)`
+      @spMemUint16Array[(off_>>>1)^1]
 
-  readSpReg1_8: (that, a) ->
-    `const off_ = a - MEMORY_START_SPREG_1`
-    that.core.interrupts.readSPReg1 off_
+    @readSpMem32 = (that, a) =>
+      `const off_ = (a-MEMORY_START_SPMEM)`
+      @spMemUint32Array[off_>>>2]
 
-  readSpReg1_16: (that, a) ->
-    `const off_ = a - MEMORY_START_SPREG_1`
-    that.core.interrupts.readSPReg1 off_
+    @readSpReg1_8 = (that, a) =>
+      `const off_ = a - MEMORY_START_SPREG_1`
+      @core.interrupts.readSPReg1 off_
 
-  readSpReg1_32: (that, a) ->
-    `const off_ = a - MEMORY_START_SPREG_1`
-    that.core.interrupts.readSPReg1 off_
+    @readSpReg1_16 = (that, a) =>
+      `const off_ = a - MEMORY_START_SPREG_1`
+      @core.interrupts.readSPReg1 off_
 
-  readSpReg2_8: (that, a) ->
-    `const off_ = a - MEMORY_START_SPREG_2`
-    that.spReg2Uint8Array[off_^3]
+    @readSpReg1_32 = (that, a) =>
+      `const off_ = a - MEMORY_START_SPREG_1`
+      @core.interrupts.readSPReg1 off_
 
-  readSpReg2_16: (that, a) ->
-    `const off_ = (a-MEMORY_START_SPREG_2)`
-    that.spReg2Uint16Array[(off_>>>1)^1]
+    @readSpReg2_8 = (that, a) =>
+      `const off_ = a - MEMORY_START_SPREG_2`
+      @spReg2Uint8Array[off_^3]
 
-  readSpReg2_32: (that, a) ->
-    `const off_ = (a-MEMORY_START_SPREG_2)`
-    that.spReg2Uint32Array[off_>>>2]
+    @readSpReg2_16 = (that, a) =>
+      `const off_ = (a-MEMORY_START_SPREG_2)`
+      @spReg2Uint16Array[(off_>>>1)^1]
 
-  readDpc8: (that, a) ->
-    `const off_ = a - MEMORY_START_DPC`
-    that.dpcUint8Array[off_^3]
+    @readSpReg2_32 = (that, a) =>
+      `const off_ = (a-MEMORY_START_SPREG_2)`
+      @spReg2Uint32Array[off_>>>2]
 
-  readDpc16: (that, a) ->
-    `const off_ = (a-MEMORY_START_DPC)`
-    that.dpcUint16Array[(off_>>>1)^1]
-
-  readDpc32: (that, a) ->
-    `const off_ = (a-MEMORY_START_DPC)`
-    that.dpcUint32Array[off_>>>2]
-
-  readDps8: (that, a) ->
-    `const off_ = a - MEMORY_START_DPS`
-    that.dpsUint8Array[off_^3]
-
-  readDps16: (that, a) ->
-    `const off_ = (a-MEMORY_START_DPS)`
-    that.dpsUint16Array[(off_>>>1)^1]
-
-  readDps32: (that, a) ->
-    `const off_ = (a-MEMORY_START_DPS)`
-    that.dpsUint32Array[off_>>>2]
-
-  readMi8: (that, a) ->
-    `const off_ = a - MEMORY_START_MI`
-    that.miUint8Array[off_^3]
-
-  readMi16: (that, a) ->
-    `const off_ = (a-MEMORY_START_MI)`
-    that.miUint16Array[(off_>>>1)^1]
-
-  readMi32: (that, a) ->
-    `const off_ = (a-MEMORY_START_MI)`
-    that.miUint32Array[off_>>>2]
-
-  readVi8: (that, a) ->
-    `const off_ = a - MEMORY_START_VI`
-    that.core.interrupts.readVI off_
-
-  readVi16: (that, a) ->
-    `const off_ = a - MEMORY_START_VI`
-    that.core.interrupts.readVI off_
-
-  readVi32: (that, a) ->
-    `const off_ = a - MEMORY_START_VI`
-    that.core.interrupts.readVI off_
-
-  readAi8: (that, a) ->
-    `const off_ = a - MEMORY_START_AI`
-    that.core.interrupts.readAI off_
-
-  readAi16: (that, a) ->
-    `const off_ = a - MEMORY_START_AI`
-    that.core.interrupts.readAI off_
-
-  readAi32: (that, a) ->
-    `const off_ = a - MEMORY_START_AI`
-    that.core.interrupts.readAI off_
-
-  readPi8: (that, a) ->
-    `const off_ = a - MEMORY_START_PI`
-    that.piUint8Array[off_^3]
-
-  readPi16: (that, a) ->
-    `const off_ = (a-MEMORY_START_PI)`
-    that.piUint16Array[(off_>>>1)^1]
-
-  readPi32: (that, a) ->
-    `const off_ = (a-MEMORY_START_PI)`
-    that.piUint32Array[off_>>>2]
-
-  readSi8: (that, a) ->
-    `const off_ = a - MEMORY_START_SI`
-    that.core.interrupts.readSI off_
-
-  readSi16: (that, a) ->
-    `const off_ = a - MEMORY_START_SI`
-    that.core.interrupts.readSI off_
-
-  readSi32: (that, a) ->
-    `const off_ = a - MEMORY_START_SI`
-    that.core.interrupts.readSI off_
-
-  readC2A1_8: (that, a) ->
-    `const off_ = a - MEMORY_START_C2A1`
-    that.c2a1Uint8Array[off_^3]
-
-  readC2A1_16: (that, a) ->
-    `const off_ = (a-MEMORY_START_C2A1)`
-    that.c2a1Uint16Array[(off_>>>1)^1]
-
-  readC2A1_32: (that, a) ->
-    `const off_ = (a-MEMORY_START_C2A1)`
-    that.c2a1Uint32Array[off_>>>2]
-
-  readC1A1_8: (that, a) ->
-    `const off_ = a - MEMORY_START_C1A1`
-    that.c1a1Uint8Array[off_^3]
-
-  readC1A1_16: (that, a) ->
-    `const off_ = (a-MEMORY_START_C1A1)`
-    that.c1a1Uint16Array[(off_>>>1)^1]
-
-  readC1A1_32: (that, a) ->
-    `const off_ = (a-MEMORY_START_C1A1)`
-    that.c1a1Uint32Array[off_>>>2]
-
-  readC2A2_8: (that, a) ->
-    `const off_ = a - MEMORY_START_C2A2`
-    that.c2a2Uint8Array[off_^3]
-
-  readC2A2_16: (that, a) ->
-    `const off_ = (a-MEMORY_START_C2A2)`
-    that.c2a2Uint16Array[(off_>>>1)^1]
-
-  readC2A2_32: (that, a) ->
-    `const off_ = (a-MEMORY_START_C2A2)`
-    that.c2a2Uint32Array[off_>>>2]
-
-  readRom8: (that, a) ->
-    `const off_ = a - MEMORY_START_ROM_IMAGE`
-    that.romUint8Array[off_^3]
-
-  readRom16: (that, a) ->
-    `const off_ = (a-MEMORY_START_ROM_IMAGE)`
-    that.romUint16Array[(off_>>>1)^1]
-
-  readRom32: (that, a) ->
-    `const off_ = (a-MEMORY_START_ROM_IMAGE)`
-    that.romUint32Array[off_>>>2]
-
-  readC1A3_8: (that, a) ->
-    `const off_ = a - MEMORY_START_C1A3`
-    that.c1a3Uint8Array[off_^3]
-
-  readC1A3_16: (that, a) ->
-    `const off_ = (a-MEMORY_START_C1A3)`
-    that.c1a3Uint16Array[(off_>>>1)^1]
-
-  readC1A3_32: (that, a) ->
-    `const off_ = (a-MEMORY_START_C1A3)`
-    that.c1a3Uint32Array[off_>>>2]
-
-  readRi8: (that, a) ->
-    `const off_ = a - MEMORY_START_RI`
-    that.riUint8Array[off_^3]
-
-  readRi16: (that, a) ->
-    `const off_ = (a-MEMORY_START_RI)`
-    that.riUint16Array[(off_>>>1)^1]
-
-  readRi32: (that, a) ->
-    `const off_ = (a-MEMORY_START_RI)`
-    that.riUint32Array[off_>>>2]
-
-  readPif8: (that, a) ->
-    `const off_ = a - MEMORY_START_PIF`
-    that.pifUint8Array[off_^3]
-
-  readPif16: (that, a) ->
-    `const off_ = (a-MEMORY_START_PIF)`
-    that.pifUint16Array[(off_>>>1)^1]
-
-  readPif32: (that, a) ->
-    `const off_ = (a-MEMORY_START_PIF)`
-    that.pifUint32Array[off_>>>2]
-
-  readGio8: (that, a) ->
-    `const off_ = a - MEMORY_START_GIO`
-    that.gioUint8Array[off_^3]
-
-  readGio16: (that, a) ->
-    `const off_ = (a-MEMORY_START_GIO)`
-    that.gioUint16Array[(off_>>>1)^1]
-
-  readGio32: (that, a) ->
-    `const off_ = (a-MEMORY_START_GIO)`
-    that.gioUint32Array[off_>>>2]
-
-  writeRdram8: (that, val, a) ->
-    that.u8[a^3] = val
-    return
-
-  writeRdram16: (that, val, a) ->
-    that.u16[(a>>>1)^1] = val
-    return
-
-  writeRdram32: (that, val, a) ->
-    that.u32[a>>>2] = val
-    return
-
-  writeSpMem8: (that, val, a) ->
-    `const off_ = a - MEMORY_START_SPMEM`
-    that.spMemUint8Array[off_^3] = val
-    return
-
-  writeSpMem16: (that, val, a) ->
-    `const off_ = a - MEMORY_START_SPMEM`
-    that.spMemUint16Array[(off_>>>1)^1] = val
-    return
-
-  writeSpMem32: (that, val, a) ->
-    `const off_ = a - MEMORY_START_SPMEM`
-    that.spMemUint32Array[off_>>>2] = val
-    return
-
-  writeRi8: (that, val, a) ->
-    `const off_ = a - MEMORY_START_RI`
-    that.riUint8Array[off_^3] = val
-    return
-
-  writeRi16: (that, val, a) ->
-    `const off_ = a - MEMORY_START_RI`
-    that.riUint16Array[(off_>>>1)^1] = val
-    return
-
-  writeRi32: (that, val, a) ->
-    `const off_ = a - MEMORY_START_RI`
-    that.riUint32Array[off_>>>2] = val
-    return
-
-  writeMi8: (that, val, a, pc, isDelaySlot) ->
-    `const off_ = a - MEMORY_START_MI`
-    that.core.interrupts.writeMI off_, val, pc, isDelaySlot
-    return
-
-  writeMi16: (that, val, a, pc, isDelaySlot) ->
-    `const off_ = a - MEMORY_START_MI`
-    that.core.interrupts.writeMI off_, val, pc, isDelaySlot
-    return
-
-  writeMi32: (that, val, a, pc, isDelaySlot) ->
-    `const off_ = a - MEMORY_START_MI`
-    that.core.interrupts.writeMI off_, val, pc, isDelaySlot
-    return
-
-  writeRamRegs8_8: (that, val, a) ->
-    `const off_ = a - MEMORY_START_RAMREGS8`
-    that.ramRegs8Uint8Array[off_^3] = val
-    return
-
-  writeRamRegs8_16: (that, val, a) ->
-    `const off_ = a - MEMORY_START_RAMREGS8`
-    that.ramRegs8Uint16Array[(off_>>>1)^1] = val
-    return
-
-  writeRamRegs8_32: (that, val, a) ->
-    `const off_ = a - MEMORY_START_RAMREGS8`
-    that.ramRegs8Uint32Array[off_>>>2] = val
-    return
-
-  writeRamRegs4_8: (that, val, a) ->
-    `const off_ = a - MEMORY_START_RAMREGS4`
-    that.ramRegs4Uint8Array[off_^3] = val
-    return
-
-  writeRamRegs4_16: (that, val, a) ->
-    `const off_ = a - MEMORY_START_RAMREGS4`
-    that.ramRegs4Uint16Array[(off_>>>1)^1] = val
-    return
-
-  writeRamRegs4_32: (that, val, a) ->
-    `const off_ = a - MEMORY_START_RAMREGS4`
-    that.ramRegs4Uint32Array[off_>>>2] = val
-    return
-
-  writeRamRegs0_8: (that, val, a) ->
-    `const off_ = a - MEMORY_START_RAMREGS0`
-    that.ramRegs0Uint8Array[off_^3] = val
-    return
-
-  writeRamRegs0_16: (that, val, a) ->
-    `const off_ = a - MEMORY_START_RAMREGS0`
-    that.ramRegs0Uint16Array[(off_>>>1)^1] = val
-    return
-
-  writeRamRegs0_32: (that, val, a) ->
-    `const off_ = a - MEMORY_START_RAMREGS0`
-    that.ramRegs0Uint32Array[off_>>>2] = val
-    return
-
-  writeSpReg1_8: (that, val, a, pc, isDelaySlot) ->
-    `const off_ = a - MEMORY_START_SPREG_1`
-    that.core.interrupts.writeSPReg1 off_, val, pc, isDelaySlot
-    return
-
-  writeSpReg1_16: (that, val, a, pc, isDelaySlot) ->
-    `const off_ = a - MEMORY_START_SPREG_1`
-    that.core.interrupts.writeSPReg1 off_, val, pc, isDelaySlot
-    return
-
-  writeSpReg1_32: (that, val, a, pc, isDelaySlot) ->
-    `const off_ = a - MEMORY_START_SPREG_1`
-    that.core.interrupts.writeSPReg1 off_, val, pc, isDelaySlot
-    return
-
-  writePi8: (that, val, a, pc, isDelaySlot) ->
-    `const off_ = a - MEMORY_START_PI`
-    that.core.interrupts.writePI off_, val, pc, isDelaySlot
-    return
-
-  writePi16: (that, val, a, pc, isDelaySlot) ->
-    `const off_ = a - MEMORY_START_PI`
-    that.core.interrupts.writePI off_, val, pc, isDelaySlot
-    return
-
-  writePi32: (that, val, a, pc, isDelaySlot) ->
-    `const off_ = a - MEMORY_START_PI`
-    that.core.interrupts.writePI off_, val, pc, isDelaySlot
-    return
-
-  writeSi8: (that, val, a, pc, isDelaySlot) ->
-    `const off_ = a - MEMORY_START_SI`
-    that.core.interrupts.writeSI off_, val, pc, isDelaySlot
-    return
-
-  writeSi16: (that, val, a, pc, isDelaySlot) ->
-    `const off_ = a - MEMORY_START_SI`
-    that.core.interrupts.writeSI off_, val, pc, isDelaySlot
-    return
-
-  writeSi32: (that, val, a, pc, isDelaySlot) ->
-    `const off_ = a - MEMORY_START_SI`
-    that.core.interrupts.writeSI off_, val, pc, isDelaySlot
-    return
-
-  writeAi8: (that, val, a, pc, isDelaySlot) ->
-    `const off_ = a - MEMORY_START_AI`
-    that.core.interrupts.writeAI off_, val, pc, isDelaySlot
-    return
-
-  writeAi16: (that, val, a, pc, isDelaySlot) ->
-    `const off_ = a - MEMORY_START_AI`
-    that.core.interrupts.writeAI off_, val, pc, isDelaySlot
-    return
-
-  writeAi32: (that, val, a, pc, isDelaySlot) ->
-    `const off_ = a - MEMORY_START_AI`
-    that.core.interrupts.writeAI off_, val, pc, isDelaySlot
-    return
-
-  writeVi8: (that, val, a, pc, isDelaySlot) ->
-    `const off_ = a - MEMORY_START_VI`
-    that.core.interrupts.writeVI off_, val, pc, isDelaySlot
-    return
-
-  writeVi16: (that, val, a, pc, isDelaySlot) ->
-    `const off_ = a - MEMORY_START_VI`
-    that.core.interrupts.writeVI off_, val, pc, isDelaySlot
-    return
-
-  writeVi32: (that, val, a, pc, isDelaySlot) ->
-    `const off_ = a - MEMORY_START_VI`
-    that.core.interrupts.writeVI off_, val, pc, isDelaySlot
-    return
-
-  writeSpReg2_8: (that, val, a, pc, isDelaySlot) ->
-    `const off_ = a - MEMORY_START_SPREG_2`
-    that.core.interrupts.writeSPReg2 off_, val, pc, isDelaySlot
-    return
-
-  writeSpReg2_16: (that, val, a, pc, isDelaySlot) ->
-    `const off_ = a - MEMORY_START_SPREG_2`
-    that.core.interrupts.writeSPReg2 off_, val, pc, isDelaySlot
-    return
-
-  writeSpReg2_32: (that, val, a, pc, isDelaySlot) ->
-    `const off_ = a - MEMORY_START_SPREG_2`
-    that.core.interrupts.writeSPReg2 off_, val, pc, isDelaySlot
-    return
-
-  writeDpc8: (that, val, a, pc, isDelaySlot) ->
-    `const off_ = a - MEMORY_START_DPC`
-    that.core.interrupts.writeDPC off_, val, pc, isDelaySlot
-    return
-
-  writeDpc16: (that, val, a, pc, isDelaySlot) ->
-    `const off_ = a - MEMORY_START_DPC`
-    that.core.interrupts.writeDPC off_, val, pc, isDelaySlot
-    return
-
-  writeDpc32: (that, val, a, pc, isDelaySlot) ->
-    `const off_ = a - MEMORY_START_DPC`
-    that.core.interrupts.writeDPC off_, val, pc, isDelaySlot
-    return
-
-  writeDps8: (that, val, a) ->
-    `const off_ = a - MEMORY_START_DPS`
-    that.dpsUint8Array[off_^3] = val
-    return
-
-  writeDps16: (that, val, a) ->
-    `const off_ = a - MEMORY_START_DPS`
-    that.dpsUint16Array[(off_>>>1)^1] = val
-    return
-
-  writeDps32: (that, val, a) ->
-    `const off_ = a - MEMORY_START_DPS`
-    that.dpsUint32Array[off_>>>2] = val
-    return
-
-  writeC2A1_8: (that, val, a) ->
-    `const off_ = a - MEMORY_START_C2A1`
-    that.c2a1Uint8Array[off_^3] = val
-    return
-
-  writeC2A1_16: (that, val, a) ->
-    `const off_ = a - MEMORY_START_C2A1`
-    that.c2a1Uint16Array[(off_>>>1)^1] = val
-    return
-
-  writeC2A1_32: (that, val, a) ->
-    `const off_ = a - MEMORY_START_C2A1`
-    that.c2a1Uint32Array[off_>>>2] = val
-    return
-
-  writeC1A1_8: (that, val, a) ->
-    `const off_ = a - MEMORY_START_C1A1`
-    that.c1a1Uint8Array[off_^3] = val
-    return
-
-  writeC1A1_16: (that, val, a) ->
-    `const off_ = a - MEMORY_START_C1A1`
-    that.c1a1Uint16Array[(off_>>>1)^1] = val
-    return
-
-  writeC1A1_32: (that, val, a) ->
-    `const off_ = a - MEMORY_START_C1A1`
-    that.c1a1Uint32Array[off_>>>2] = val
-    return
-
-  writeC2A2_8: (that, val, a) ->
-    `const off_ = a - MEMORY_START_C2A2`
-    that.c2a2Uint8Array[off_^3] = val
-    return
-
-  writeC2A2_16: (that, val, a) ->
-    `const off_ = a - MEMORY_START_C2A2`
-    that.c2a2Uint16Array[(off_>>>1)^1] = val
-    return
-
-  writeC2A2_32: (that, val, a) ->
-    `const off_ = a - MEMORY_START_C2A2`
-    that.c2a2Uint32Array[off_>>>2] = val
-    return
-
-  writeRom8: (that, val, a) ->
-    alert "attempt to overwrite rom!"
-    `const off_ = a - MEMORY_START_ROM_IMAGE`
-    that.romUint8Array[off_^3] = val
-    return
-
-  writeRom16: (that, val, a) ->
-    `const off_ = a - MEMORY_START_ROM_IMAGE`
-    that.romUint16Array[(off_>>>1)^1] = val
-    return
-
-  writeRom32: (that, val, a) ->
-    `const off_ = a - MEMORY_START_ROM_IMAGE`
-    that.romUint32Array[off_>>>2] = val
-    return
-
-  writeC1A3_8: (that, val, a) ->
-    `const off_ = a - MEMORY_START_C1A3`
-    that.c1a3Uint8Array[off_^3] = val
-    return
-
-  writeC1A3_16: (that, val, a) ->
-    `const off_ = a - MEMORY_START_C1A3`
-    that.c1a3Uint16Array[(off_>>>1)^1] = val
-    return
-
-  writeC1A3_32: (that, val, a) ->
-    `const off_ = a - MEMORY_START_C1A3`
-    that.c1a3Uint32Array[off_>>>2] = val
-    return
-
-  writePif8: (that, val, a) ->
-    `const off_ = a - MEMORY_START_PIF`
-    that.pifUint8Array[off_^3] = val
-    return
-
-  writePif16: (that, val, a) ->
-    `const off_ = a - MEMORY_START_PIF`
-    that.pifUint16Array[(off_>>>1)^1] = val
-    return
-
-  writePif32: (that, val, a) ->
-    `const off_ = a - MEMORY_START_PIF`
-    that.pifUint32Array[off_>>>2] = val
-    return
-
-  writeGio8: (that, val, a) ->
-    `const off_ = a - MEMORY_START_GIO`
-    that.gioUint8Array[off_^3] = val
-    return
-
-  writeGio16: (that, val, a) ->
-    `const off_ = a - MEMORY_START_GIO`
-    that.gioUint16Array[(off_>>>1)^1] = val
-    return
-
-  writeGio32: (that, val, a) ->
-    `const off_ = a - MEMORY_START_GIO`
-    that.gioUint32Array[off_>>>2] = val
-    return
-
-  writeDummy8: (that, val, a) ->
-    #log "writing to invalid memory at " + dec2hex(a)
-    `const off_ = a & 0x0000fffc`
-    that.dummyReadWriteUint8Array[off_^3] = val
-    return
-
-  writeDummy16: (that, val, a) ->
-    `const off_ = a & 0x0000fffc`
-    that.dummyReadWriteUint16Array[(off_>>>1)^1] = val
-    return
-
-  writeDummy32: (that, val, a) ->
-    `const off_ = a & 0x0000fffc`
-    that.dummyReadWriteUint32Array[off_>>>2] = val
-    return
+    @readDpc8 = (that, a) =>
+      `const off_ = a - MEMORY_START_DPC`
+      @dpcUint8Array[off_^3]
+
+    @readDpc16 = (that, a) =>
+      `const off_ = (a-MEMORY_START_DPC)`
+      @dpcUint16Array[(off_>>>1)^1]
+
+    @readDpc32 = (that, a) =>
+      `const off_ = (a-MEMORY_START_DPC)`
+      @dpcUint32Array[off_>>>2]
+
+    @readDps8 = (that, a) =>
+      `const off_ = a - MEMORY_START_DPS`
+      @dpsUint8Array[off_^3]
+
+    @readDps16 = (that, a) =>
+      `const off_ = (a-MEMORY_START_DPS)`
+      @dpsUint16Array[(off_>>>1)^1]
+
+    @readDps32 = (that, a) =>
+      `const off_ = (a-MEMORY_START_DPS)`
+      @dpsUint32Array[off_>>>2]
+
+    @readMi8 = (that, a) =>
+      `const off_ = a - MEMORY_START_MI`
+      @miUint8Array[off_^3]
+
+    @readMi16 = (that, a) =>
+      `const off_ = (a-MEMORY_START_MI)`
+      @miUint16Array[(off_>>>1)^1]
+
+    @readMi32 = (that, a) =>
+      `const off_ = (a-MEMORY_START_MI)`
+      @miUint32Array[off_>>>2]
+
+    @readVi8 = (that, a) =>
+      `const off_ = a - MEMORY_START_VI`
+      @core.interrupts.readVI off_
+
+    @readVi16 = (that, a) =>
+      `const off_ = a - MEMORY_START_VI`
+      @core.interrupts.readVI off_
+
+    @readVi32 = (that, a) =>
+      `const off_ = a - MEMORY_START_VI`
+      @core.interrupts.readVI off_
+
+    @readAi8 = (that, a) =>
+      `const off_ = a - MEMORY_START_AI`
+      @core.interrupts.readAI off_
+
+    @readAi16 = (that, a) =>
+      `const off_ = a - MEMORY_START_AI`
+      @core.interrupts.readAI off_
+
+    @readAi32 = (that, a) =>
+      `const off_ = a - MEMORY_START_AI`
+      @core.interrupts.readAI off_
+
+    @readPi8 = (that, a) =>
+      `const off_ = a - MEMORY_START_PI`
+      @piUint8Array[off_^3]
+
+    @readPi16 = (that, a) =>
+      `const off_ = (a-MEMORY_START_PI)`
+      @piUint16Array[(off_>>>1)^1]
+
+    @readPi32 = (that, a) =>
+      `const off_ = (a-MEMORY_START_PI)`
+      @piUint32Array[off_>>>2]
+
+    @readSi8 = (that, a) =>
+      `const off_ = a - MEMORY_START_SI`
+      @core.interrupts.readSI off_
+
+    @readSi16 = (that, a) =>
+      `const off_ = a - MEMORY_START_SI`
+      @core.interrupts.readSI off_
+
+    @readSi32 = (that, a) =>
+      `const off_ = a - MEMORY_START_SI`
+      @core.interrupts.readSI off_
+
+    @readC2A1_8 = (that, a) =>
+      `const off_ = a - MEMORY_START_C2A1`
+      @c2a1Uint8Array[off_^3]
+
+    @readC2A1_16 = (that, a) =>
+      `const off_ = (a-MEMORY_START_C2A1)`
+      @c2a1Uint16Array[(off_>>>1)^1]
+
+    @readC2A1_32 = (that, a) =>
+      `const off_ = (a-MEMORY_START_C2A1)`
+      @c2a1Uint32Array[off_>>>2]
+
+    @readC1A1_8 = (that, a) =>
+      `const off_ = a - MEMORY_START_C1A1`
+      @c1a1Uint8Array[off_^3]
+
+    @readC1A1_16 = (that, a) =>
+      `const off_ = (a-MEMORY_START_C1A1)`
+      @c1a1Uint16Array[(off_>>>1)^1]
+
+    @readC1A1_32 = (that, a) =>
+      `const off_ = (a-MEMORY_START_C1A1)`
+      @c1a1Uint32Array[off_>>>2]
+
+    @readC2A2_8 = (that, a) =>
+      `const off_ = a - MEMORY_START_C2A2`
+      @c2a2Uint8Array[off_^3]
+
+    @readC2A2_16 = (that, a) =>
+      `const off_ = (a-MEMORY_START_C2A2)`
+      @c2a2Uint16Array[(off_>>>1)^1]
+
+    @readC2A2_32 = (that, a) =>
+      `const off_ = (a-MEMORY_START_C2A2)`
+      @c2a2Uint32Array[off_>>>2]
+
+    @readRom8 = (that, a) =>
+      `const off_ = a - MEMORY_START_ROM_IMAGE`
+      @romUint8Array[off_^3]
+
+    @readRom16 = (that, a) =>
+      `const off_ = (a-MEMORY_START_ROM_IMAGE)`
+      @romUint16Array[(off_>>>1)^1]
+
+    @readRom32 = (that, a) =>
+      `const off_ = (a-MEMORY_START_ROM_IMAGE)`
+      @romUint32Array[off_>>>2]
+
+    @readC1A3_8 = (that, a) =>
+      `const off_ = a - MEMORY_START_C1A3`
+      @c1a3Uint8Array[off_^3]
+
+    @readC1A3_16 = (that, a) =>
+      `const off_ = (a-MEMORY_START_C1A3)`
+      @c1a3Uint16Array[(off_>>>1)^1]
+
+    @readC1A3_32 = (that, a) =>
+      `const off_ = (a-MEMORY_START_C1A3)`
+      @c1a3Uint32Array[off_>>>2]
+
+    @readRi8 = (that, a) =>
+      `const off_ = a - MEMORY_START_RI`
+      @riUint8Array[off_^3]
+
+    @readRi16 = (that, a) =>
+      `const off_ = (a-MEMORY_START_RI)`
+      @riUint16Array[(off_>>>1)^1]
+
+    @readRi32 = (that, a) =>
+      `const off_ = (a-MEMORY_START_RI)`
+      @riUint32Array[off_>>>2]
+
+    @readPif8 = (that, a) =>
+      `const off_ = a - MEMORY_START_PIF`
+      @pifUint8Array[off_^3]
+
+    @readPif16 = (that, a) =>
+      `const off_ = (a-MEMORY_START_PIF)`
+      @pifUint16Array[(off_>>>1)^1]
+
+    @readPif32 = (that, a) =>
+      `const off_ = (a-MEMORY_START_PIF)`
+      @pifUint32Array[off_>>>2]
+
+    @readGio8 = (that, a) =>
+      `const off_ = a - MEMORY_START_GIO`
+      @gioUint8Array[off_^3]
+
+    @readGio16 = (that, a) =>
+      `const off_ = (a-MEMORY_START_GIO)`
+      @gioUint16Array[(off_>>>1)^1]
+
+    @readGio32 = (that, a) =>
+      `const off_ = (a-MEMORY_START_GIO)`
+      @gioUint32Array[off_>>>2]
+
+    @writeRdram8 = (that, val, a) =>
+      @u8[a^3] = val
+      return
+
+    @writeRdram16 = (that, val, a) =>
+      @u16[(a>>>1)^1] = val
+      return
+
+    @writeRdram32 = (that, val, a) =>
+      @u32[a>>>2] = val
+      return
+
+    @writeSpMem8 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_SPMEM`
+      @spMemUint8Array[off_^3] = val
+      return
+
+    @writeSpMem16 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_SPMEM`
+      @spMemUint16Array[(off_>>>1)^1] = val
+      return
+
+    @writeSpMem32 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_SPMEM`
+      @spMemUint32Array[off_>>>2] = val
+      return
+
+    @writeRi8 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_RI`
+      @riUint8Array[off_^3] = val
+      return
+
+    @writeRi16 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_RI`
+      @riUint16Array[(off_>>>1)^1] = val
+      return
+
+    @writeRi32 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_RI`
+      @riUint32Array[off_>>>2] = val
+      return
+
+    @writeMi8 = (that, val, a, pc, isDelaySlot) =>
+      `const off_ = a - MEMORY_START_MI`
+      @core.interrupts.writeMI off_, val, pc, isDelaySlot
+      return
+
+    @writeMi16 = (that, val, a, pc, isDelaySlot) =>
+      `const off_ = a - MEMORY_START_MI`
+      @core.interrupts.writeMI off_, val, pc, isDelaySlot
+      return
+
+    @writeMi32 = (that, val, a, pc, isDelaySlot) =>
+      `const off_ = a - MEMORY_START_MI`
+      @core.interrupts.writeMI off_, val, pc, isDelaySlot
+      return
+
+    @writeRamRegs8_8 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_RAMREGS8`
+      @ramRegs8Uint8Array[off_^3] = val
+      return
+
+    @writeRamRegs8_16 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_RAMREGS8`
+      @ramRegs8Uint16Array[(off_>>>1)^1] = val
+      return
+
+    @writeRamRegs8_32 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_RAMREGS8`
+      @ramRegs8Uint32Array[off_>>>2] = val
+      return
+
+    @writeRamRegs4_8 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_RAMREGS4`
+      @ramRegs4Uint8Array[off_^3] = val
+      return
+
+    @writeRamRegs4_16 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_RAMREGS4`
+      @ramRegs4Uint16Array[(off_>>>1)^1] = val
+      return
+
+    @writeRamRegs4_32 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_RAMREGS4`
+      @ramRegs4Uint32Array[off_>>>2] = val
+      return
+
+    @writeRamRegs0_8 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_RAMREGS0`
+      @ramRegs0Uint8Array[off_^3] = val
+      return
+
+    @writeRamRegs0_16 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_RAMREGS0`
+      @ramRegs0Uint16Array[(off_>>>1)^1] = val
+      return
+
+    @writeRamRegs0_32 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_RAMREGS0`
+      @ramRegs0Uint32Array[off_>>>2] = val
+      return
+
+    @writeSpReg1_8 = (that, val, a, pc, isDelaySlot) =>
+      `const off_ = a - MEMORY_START_SPREG_1`
+      @core.interrupts.writeSPReg1 off_, val, pc, isDelaySlot
+      return
+
+    @writeSpReg1_16 = (that, val, a, pc, isDelaySlot) =>
+      `const off_ = a - MEMORY_START_SPREG_1`
+      @core.interrupts.writeSPReg1 off_, val, pc, isDelaySlot
+      return
+
+    @writeSpReg1_32 = (that, val, a, pc, isDelaySlot) =>
+      `const off_ = a - MEMORY_START_SPREG_1`
+      @core.interrupts.writeSPReg1 off_, val, pc, isDelaySlot
+      return
+
+    @writePi8 = (that, val, a, pc, isDelaySlot) =>
+      `const off_ = a - MEMORY_START_PI`
+      @core.interrupts.writePI off_, val, pc, isDelaySlot
+      return
+
+    @writePi16 = (that, val, a, pc, isDelaySlot) =>
+      `const off_ = a - MEMORY_START_PI`
+      @core.interrupts.writePI off_, val, pc, isDelaySlot
+      return
+
+    @writePi32 = (that, val, a, pc, isDelaySlot) =>
+      `const off_ = a - MEMORY_START_PI`
+      @core.interrupts.writePI off_, val, pc, isDelaySlot
+      return
+
+    @writeSi8 = (that, val, a, pc, isDelaySlot) =>
+      `const off_ = a - MEMORY_START_SI`
+      @core.interrupts.writeSI off_, val, pc, isDelaySlot
+      return
+
+    @writeSi16 = (that, val, a, pc, isDelaySlot) =>
+      `const off_ = a - MEMORY_START_SI`
+      @core.interrupts.writeSI off_, val, pc, isDelaySlot
+      return
+
+    @writeSi32 = (that, val, a, pc, isDelaySlot) =>
+      `const off_ = a - MEMORY_START_SI`
+      @core.interrupts.writeSI off_, val, pc, isDelaySlot
+      return
+
+    @writeAi8 = (that, val, a, pc, isDelaySlot) =>
+      `const off_ = a - MEMORY_START_AI`
+      @core.interrupts.writeAI off_, val, pc, isDelaySlot
+      return
+
+    @writeAi16 = (that, val, a, pc, isDelaySlot) =>
+      `const off_ = a - MEMORY_START_AI`
+      @core.interrupts.writeAI off_, val, pc, isDelaySlot
+      return
+
+    @writeAi32 = (that, val, a, pc, isDelaySlot) =>
+      `const off_ = a - MEMORY_START_AI`
+      @core.interrupts.writeAI off_, val, pc, isDelaySlot
+      return
+
+    @writeVi8 = (that, val, a, pc, isDelaySlot) =>
+      `const off_ = a - MEMORY_START_VI`
+      @core.interrupts.writeVI off_, val, pc, isDelaySlot
+      return
+
+    @writeVi16 = (that, val, a, pc, isDelaySlot) =>
+      `const off_ = a - MEMORY_START_VI`
+      @core.interrupts.writeVI off_, val, pc, isDelaySlot
+      return
+
+    @writeVi32 = (that, val, a, pc, isDelaySlot) =>
+      `const off_ = a - MEMORY_START_VI`
+      @core.interrupts.writeVI off_, val, pc, isDelaySlot
+      return
+
+    @writeSpReg2_8 = (that, val, a, pc, isDelaySlot) =>
+      `const off_ = a - MEMORY_START_SPREG_2`
+      @core.interrupts.writeSPReg2 off_, val, pc, isDelaySlot
+      return
+
+    @writeSpReg2_16 = (that, val, a, pc, isDelaySlot) =>
+      `const off_ = a - MEMORY_START_SPREG_2`
+      @core.interrupts.writeSPReg2 off_, val, pc, isDelaySlot
+      return
+
+    @writeSpReg2_32 = (that, val, a, pc, isDelaySlot) =>
+      `const off_ = a - MEMORY_START_SPREG_2`
+      @core.interrupts.writeSPReg2 off_, val, pc, isDelaySlot
+      return
+
+    @writeDpc8 = (that, val, a, pc, isDelaySlot) =>
+      `const off_ = a - MEMORY_START_DPC`
+      @core.interrupts.writeDPC off_, val, pc, isDelaySlot
+      return
+
+    @writeDpc16 = (that, val, a, pc, isDelaySlot) =>
+      `const off_ = a - MEMORY_START_DPC`
+      @core.interrupts.writeDPC off_, val, pc, isDelaySlot
+      return
+
+    @writeDpc32 = (that, val, a, pc, isDelaySlot) =>
+      `const off_ = a - MEMORY_START_DPC`
+      @core.interrupts.writeDPC off_, val, pc, isDelaySlot
+      return
+
+    @writeDps8 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_DPS`
+      @dpsUint8Array[off_^3] = val
+      return
+
+    @writeDps16 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_DPS`
+      @dpsUint16Array[(off_>>>1)^1] = val
+      return
+
+    @writeDps32 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_DPS`
+      @dpsUint32Array[off_>>>2] = val
+      return
+
+    @writeC2A1_8 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_C2A1`
+      @c2a1Uint8Array[off_^3] = val
+      return
+
+    @writeC2A1_16 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_C2A1`
+      @c2a1Uint16Array[(off_>>>1)^1] = val
+      return
+
+    @writeC2A1_32 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_C2A1`
+      @c2a1Uint32Array[off_>>>2] = val
+      return
+
+    @writeC1A1_8 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_C1A1`
+      @c1a1Uint8Array[off_^3] = val
+      return
+
+    @writeC1A1_16 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_C1A1`
+      @c1a1Uint16Array[(off_>>>1)^1] = val
+      return
+
+    @writeC1A1_32 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_C1A1`
+      @c1a1Uint32Array[off_>>>2] = val
+      return
+
+    @writeC2A2_8 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_C2A2`
+      @c2a2Uint8Array[off_^3] = val
+      return
+
+    @writeC2A2_16 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_C2A2`
+      @c2a2Uint16Array[(off_>>>1)^1] = val
+      return
+
+    @writeC2A2_32 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_C2A2`
+      @c2a2Uint32Array[off_>>>2] = val
+      return
+
+    @writeRom8 = (that, val, a) =>
+      alert "attempt to overwrite rom!"
+      `const off_ = a - MEMORY_START_ROM_IMAGE`
+      @romUint8Array[off_^3] = val
+      return
+
+    @writeRom16 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_ROM_IMAGE`
+      @romUint16Array[(off_>>>1)^1] = val
+      return
+
+    @writeRom32 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_ROM_IMAGE`
+      @romUint32Array[off_>>>2] = val
+      return
+
+    @writeC1A3_8 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_C1A3`
+      @c1a3Uint8Array[off_^3] = val
+      return
+
+    @writeC1A3_16 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_C1A3`
+      @c1a3Uint16Array[(off_>>>1)^1] = val
+      return
+
+    @writeC1A3_32 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_C1A3`
+      @c1a3Uint32Array[off_>>>2] = val
+      return
+
+    @writePif8 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_PIF`
+      @pifUint8Array[off_^3] = val
+      return
+
+    @writePif16 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_PIF`
+      @pifUint16Array[(off_>>>1)^1] = val
+      return
+
+    @writePif32 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_PIF`
+      @pifUint32Array[off_>>>2] = val
+      return
+
+    @writeGio8 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_GIO`
+      @gioUint8Array[off_^3] = val
+      return
+
+    @writeGio16 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_GIO`
+      @gioUint16Array[(off_>>>1)^1] = val
+      return
+
+    @writeGio32 = (that, val, a) =>
+      `const off_ = a - MEMORY_START_GIO`
+      @gioUint32Array[off_>>>2] = val
+      return
+
+    @writeDummy8 = (that, val, a) =>
+      #log "writing to invalid memory at " + dec2hex(a)
+      `const off_ = a & 0x0000fffc`
+      @dummyReadWriteUint8Array[off_^3] = val
+      return
+
+    @writeDummy16 = (that, val, a) =>
+      `const off_ = a & 0x0000fffc`
+      @dummyReadWriteUint16Array[(off_>>>1)^1] = val
+      return
+
+    @writeDummy32 = (that, val, a) =>
+      `const off_ = a & 0x0000fffc`
+      @dummyReadWriteUint32Array[off_>>>2] = val
+      return
+    
+    return #constructor
 
   #getInt32 and getUint32 are identical. they both return signed.
   getInt32: (uregion, off_, u32region) ->
