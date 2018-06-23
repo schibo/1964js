@@ -1518,8 +1518,9 @@ class C1964jsVideoHLE
       tileWidth = ((tile.lrs >> 2) + 1) - tile.uls
       tileHeight = ((tile.lrt >> 2) + 1) - tile.ult
       tData = @renderer.formatTexture(tile, @tmem, this)
-      textureData = tData.textureData
-      if textureData isnt undefined
+
+      if tData isnt undefined and tData.textureData isnt undefined
+        textureData = tData.textureData
         @gl.activeTexture(@gl.TEXTURE0 + tileno)
         @gl.bindTexture(@gl.TEXTURE_2D, @colorsTexture0)
         wrapS = @gl.REPEAT
