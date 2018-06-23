@@ -288,10 +288,6 @@ class C1964jsVideoHLE
     #console.log msg
     return
 
-  sleep: (ms) ->
-    return new Promise(resolve => setTimeout(resolve, ms))
-
-
   dlParserProcess: ->
     @dlistStackPointer = 0
     @dlistStack[@dlistStackPointer].pc = @core.memory.getInt32(@core.memory.spMemUint8Array, consts.TASK_DATA_PTR, @core.memory.spMemUint32Array)>>>0
@@ -321,7 +317,8 @@ class C1964jsVideoHLE
         @dlistStackPointer -= 1  if @dlistStack[@dlistStackPointer].countdown < 0
 
     if aa <= 0
-      @sleep(10)
+      alert "Too many dlist calls"
+      @core.terminate = true
     return
 
   #TODO: end rendering

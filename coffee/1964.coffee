@@ -593,7 +593,9 @@ class C1964jsEmulator
       @cnt += 1
       string += @CPU_instruction(instruction)
       offset += 4
-      throw Error "too many instructions! bailing."  if offset > 10000
+      if offset > 10000
+        @terminate = true
+        throw Error "too many instructions! bailing."  
     @stopCompiling = false
 
     #close out the function

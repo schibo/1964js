@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export version1964="0.4.4"
+export version1964="0.4.5"
 minified="1964js-$version1964.min.js"
 closure="closure-compiler-v20180610"
 

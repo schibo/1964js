@@ -178,7 +178,7 @@ handleFileSelect = (evt) ->
       @progress.style.width = "100%"
       @progress.textContent = "100%"
     #setTimeout "document.getElementById('progress_bar').className='';document.getElementById('user_panel').className='';", 1000  unless @progressBar is `undefined`
-    setTimeout "document.getElementById('files').disabled = true;document.getElementById('user_panel').className='';", 1000
+    setTimeout "document.getElementById('user_panel').disabled = true;document.getElementById('user_panel').className='';", 1000
     uncompressAndRun fileName, reader.result
     return
 
@@ -191,6 +191,7 @@ document.getElementById("user_panel").ontouchend = (event) ->
 
 showUserPanel = () ->
   document.getElementById("user_panel").className = "show"
+  document.getElementById('user_panel').disabled = false
   self.startGradientBackground()
 
 hideUserPanel = () ->
