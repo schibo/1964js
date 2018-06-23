@@ -498,22 +498,8 @@ class C1964jsEmulator
           pc = p[0] >>> 2
           fn = @fnLut[pc]
       else
-      #  @interrupts.processException @p[0]
-
-        #this is broken-up so that we can process more interrupts. If we freeze,
-        #we probably need to split this up more.
-        try
-          fn = @run fn, r, h
-        catch e
-          #so, we really need to know what type of exception this is,
-          #but right now, we're assuming that we need to compile a block due to
-          #an attempt to call an undefined function. Are there standard exception types
-          #in javascript?
-          if e instanceof TypeError
-            fn = @decompileBlock(p[0])
-            #fn = fn(r, h, @memory, this)
-          else
-            throw e
+        fn = @run fn, r, h
+          
     @fn = fn
     @
 
@@ -522,7 +508,10 @@ class C1964jsEmulator
     `const mem = this.memory`
     `const t = this`
     while m[0] < 0
-      fn = fn(r, h, mem, t)
+      if typeof fn is 'function'
+        fn = fn(r, h, mem, t)
+      else
+        fn = @decompileBlock(t.p[0])
     return fn
 
   repaintWrapper: ->
