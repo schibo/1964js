@@ -180,55 +180,55 @@ C1964jsInterrupts = (core, cp0) ->
   @writeVI = (offset, value, pc, isFromDelaySlot) ->
     switch offset
       when consts.VI_ORIGIN_REG
-        core.memory.setInt32 core.memory.viUint8Array, offset, value
+        core.memory.setInt32 core.memory.viUint8Array, offset, value, core.memory.viUint32Array
       #var c = document.getElementById("Canvas");
       #var ctx = c.getContext("2d");
       #repaint(ctx,ImDat,value & 0x00FFFFFF);
       #alert('origin changed' + dec2hex(value));
       when consts.VI_CURRENT_REG
         @clearMIInterrupt consts.MI_INTR_VI
-        core.memory.setInt32 core.memory.viUint8Array, offset, value
+        core.memory.setInt32 core.memory.viUint8Array, offset, value, core.memory.viUint32Array
       when consts.VI_INTR_REG
-        core.memory.setInt32 core.memory.viUint8Array, offset, value
+        core.memory.setInt32 core.memory.viUint8Array, offset, value, core.memory.viUint32Array
       else
-        core.memory.setInt32 core.memory.viUint8Array, offset, value
+        core.memory.setInt32 core.memory.viUint8Array, offset, value, core.memory.viUint32Array
     return
 
   #log('unhandled vi write: ' + offset);
   @writePI = (offset, value, pc, isFromDelaySlot) ->
     switch offset
       when consts.PI_WR_LEN_REG
-        core.memory.setInt32 core.memory.piUint8Array, offset, value
+        core.memory.setInt32 core.memory.piUint8Array, offset, value, core.memory.piUint32Array
         core.dma.copyCartToDram pc, isFromDelaySlot
       when consts.PI_RD_LEN_REG
-        core.memory.setInt32 core.memory.piUint8Array, offset, value
+        core.memory.setInt32 core.memory.piUint8Array, offset, value, core.memory.piUint32Array
         alert "write to PI_RD_LEN_REG"
         core.dma.copyDramToCart pc, isFromDelaySlot
       when consts.PI_DRAM_ADDR_REG
-        core.memory.setInt32 core.memory.piUint8Array, offset, value
+        core.memory.setInt32 core.memory.piUint8Array, offset, value, core.memory.piUint32Array
       when consts.PI_CART_ADDR_REG
-        core.memory.setInt32 core.memory.piUint8Array, offset, value
+        core.memory.setInt32 core.memory.piUint8Array, offset, value, core.memory.piUint32Array
       when consts.PI_STATUS_REG
         @writePIStatusReg value, pc, isFromDelaySlot
       else
-        core.memory.setInt32 core.memory.piUint8Array, offset, value
+        core.memory.setInt32 core.memory.piUint8Array, offset, value, core.memory.piUint32Array
         #log "unhandled pi write: " + offset
     return
 
   @writeSI = (offset, value, pc, isFromDelaySlot) ->
     switch offset
       when consts.SI_DRAM_ADDR_REG
-        core.memory.setInt32 core.memory.siUint8Array, offset, value
+        core.memory.setInt32 core.memory.siUint8Array, offset, value, core.memory.siUint32Array
       when consts.SI_STATUS_REG
         @writeSIStatusReg value, pc, isFromDelaySlot
       when consts.SI_PIF_ADDR_RD64B_REG
-        core.memory.setInt32 core.memory.siUint8Array, offset, value
+        core.memory.setInt32 core.memory.siUint8Array, offset, value, core.memory.siUint32Array
         core.dma.copySiToDram pc, isFromDelaySlot
       when consts.SI_PIF_ADDR_WR64B_REG
-        core.memory.setInt32 core.memory.siUint8Array, offset, value
+        core.memory.setInt32 core.memory.siUint8Array, offset, value, core.memory.siUint32Array
         core.dma.copyDramToSi pc, isFromDelaySlot
       else
-        core.memory.setInt32 core.memory.siUint8Array, offset, value
+        core.memory.setInt32 core.memory.siUint8Array, offset, value, core.memory.siUint32Array
         #log "unhandled si write: " + offset
     return
 
@@ -273,20 +273,20 @@ C1964jsInterrupts = (core, cp0) ->
   @writeAI = (offset, value, pc, isFromDelaySlot) ->
     switch offset
       when consts.AI_DRAM_ADDR_REG
-        core.memory.setInt32 core.memory.aiUint8Array, offset, value
+        core.memory.setInt32 core.memory.aiUint8Array, offset, value, core.memory.aiUint32Array
       when consts.AI_LEN_REG
-        core.memory.setInt32 core.memory.aiUint8Array, offset, value
+        core.memory.setInt32 core.memory.aiUint8Array, offset, value, core.memory.aiUint32Array
         core.dma.copyDramToAi pc, isFromDelaySlot
       when consts.AI_STATUS_REG
         @clearMIInterrupt consts.MI_INTR_AI
       when consts.AI_DACRATE_REG
         # log("todo: write AI_DACRATE_REG");
-        core.memory.setInt32 core.memory.aiUint8Array, offset, value
+        core.memory.setInt32 core.memory.aiUint8Array, offset, value, core.memory.aiUint32Array
       when consts.AI_CONTROL_REG
-        core.memory.setInt32 core.memory.aiUint8Array, offset, value & 1
+        core.memory.setInt32 core.memory.aiUint8Array, offset, value & 1, core.memory.aiUint32Array
       else
         #log('unhandled write ai reg ' + offset);
-        core.memory.setInt32 core.memory.aiUint8Array, offset, value
+        core.memory.setInt32 core.memory.aiUint8Array, offset, value, core.memory.aiUint32Array
     return
 
   @writeMI = (offset, value, pc, isFromDelaySlot) ->
@@ -299,7 +299,7 @@ C1964jsInterrupts = (core, cp0) ->
 
       #do nothing. read-only
       else
-        core.memory.setInt32 core.memory.miUint8Array, offset, value
+        core.memory.setInt32 core.memory.miUint8Array, offset, value, core.memory.miUint32Array
         #log "unhandled mips interface for mi offset: " + offset
     return
 
@@ -309,7 +309,7 @@ C1964jsInterrupts = (core, cp0) ->
         return core.memory.getInt32 core.memory.spReg1Uint8Array, offset, core.memory.spReg1Uint32Array
       when consts.SP_SEMAPHORE_REG
         temp = core.memory.getInt32(core.memory.aiUint8Array, offset, core.memory.aiUint32Array)
-        core.memory.setInt32 core.memory.spReg1Uint8Array, offset, 1
+        core.memory.setInt32 core.memory.spReg1Uint8Array, offset, 1, core.memory.spReg1Uint32Array
         return temp
       else
         #log "unhandled read sp reg1 " + offset
@@ -321,15 +321,15 @@ C1964jsInterrupts = (core, cp0) ->
       when consts.SP_STATUS_REG
         @writeSPStatusReg value, pc, isFromDelaySlot
       when consts.SP_SEMAPHORE_REG
-        core.memory.setInt32 core.memory.spReg1Uint8Array, offset, 0
+        core.memory.setInt32 core.memory.spReg1Uint8Array, offset, 0, core.memory.spReg1Uint32Array
       when consts.SP_WR_LEN_REG
-        core.memory.setInt32 core.memory.spReg1Uint8Array, offset, value
+        core.memory.setInt32 core.memory.spReg1Uint8Array, offset, value, core.memory.spReg1Uint32Array
         core.dma.copySpToDram pc, isFromDelaySlot
       when consts.SP_RD_LEN_REG
-        core.memory.setInt32 core.memory.spReg1Uint8Array, offset, value
+        core.memory.setInt32 core.memory.spReg1Uint8Array, offset, value, core.memory.spReg1Uint32Array
         core.dma.copyDramToSp pc, isFromDelaySlot
       else
-        core.memory.setInt32 core.memory.spReg1Uint8Array, offset, value
+        core.memory.setInt32 core.memory.spReg1Uint8Array, offset, value, core.memory.spReg1Uint32Array
         #log "unhandled sp reg1 write: " + offset
     return
 
@@ -337,9 +337,9 @@ C1964jsInterrupts = (core, cp0) ->
     switch offset
       when consts.SP_PC_REG
         #log "writing sp pc: " + value
-        core.memory.setInt32 core.memory.spReg2Uint8Array, offset, value & 0x00000FFC
+        core.memory.setInt32 core.memory.spReg2Uint8Array, offset, value & 0x00000FFC, core.memory.spReg2Uint32Array
       else
-        core.memory.setInt32 core.memory.spReg2Uint8Array, offset, value
+        core.memory.setInt32 core.memory.spReg2Uint8Array, offset, value, core.memory.spReg2Uint32Array
         #log "unhandled sp reg2 write: " + offset
     return
 
@@ -347,14 +347,14 @@ C1964jsInterrupts = (core, cp0) ->
   @setFlag = (where, offset, flag) ->
     value = core.memory.getUint32(where, offset)
     value |= flag
-    core.memory.setInt32 where, offset, value
+    core.memory.setUint32 where, offset, value
     return
 
   #Clear flag for memory register
   @clrFlag = (where, offset, flag) ->
     value = core.memory.getUint32(where, offset)
     value &= ~flag
-    core.memory.setInt32 where, offset, value
+    core.memory.setUint32 where, offset, value
     return
 
   @writeMIModeReg = (value) ->
@@ -369,7 +369,7 @@ C1964jsInterrupts = (core, cp0) ->
     else @clrFlag core.memory.miUint8Array, consts.MI_INIT_MODE_REG, consts.MI_MODE_EBUS  if value & consts.MI_CLR_EBUS
 
     #this.clrFlag(miUint8Array, consts.MI_INTR_REG, consts.MI_INTR_DP);
-    #setInt32(miUint8Array, MI_INIT_MODE_REG, core.memory.getInt32(miUint8Array, MI_INIT_MODE_REG, miUint32Array)|(value&0x7f));
+    #setInt32(miUint8Array, MI_INIT_MODE_REG, core.memory.getInt32(miUint8Array, MI_INIT_MODE_REG, miUint32Array)|(value&0x7f), miUint32Array);
     @clearMIInterrupt consts.MI_INTR_DP  if value & consts.MI_CLR_DP_INTR
     return
 
@@ -445,16 +445,16 @@ C1964jsInterrupts = (core, cp0) ->
     else tempSr &= ~SP_STATUS_SIG7  if value & SP_CLR_SIG7
     if value & SP_SET_HALT
       tempSr |= SP_STATUS_HALT
-      core.memory.setInt32 core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, tempSr
+      core.memory.setInt32 core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, tempSr, core.memory.spReg1Uint32Array
     else if value & SP_CLR_HALT
       if (tempSr & SP_STATUS_BROKE) is 0 #bugfix.
         tempSr &= ~SP_STATUS_HALT
-        core.memory.setInt32 core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, tempSr
+        core.memory.setInt32 core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, tempSr, core.memory.spReg1Uint32Array
         spDmemTask = core.memory.getInt32(core.memory.spMemUint8Array, consts.SP_DMEM_TASK, core.memory.spMemUint32Array)
         #log "SP Task triggered. SP_DMEM_TASK=" + spDmemTask
         @runSPTask spDmemTask
       else
-        core.memory.setInt32 core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, tempSr
+        core.memory.setInt32 core.memory.spReg1Uint8Array, consts.SP_STATUS_REG, tempSr, core.memory.spReg1Uint32Array
     return
 
   #Added by Rice, 2001.08.10
@@ -480,14 +480,14 @@ C1964jsInterrupts = (core, cp0) ->
       when consts.DPC_STATUS_REG
         @writeDPCStatusReg value, pc, isFromDelaySlot
       when consts.DPC_START_REG
-        core.memory.setInt32 core.memory.dpcUint8Array, offset, value
+        core.memory.setInt32 core.memory.dpcUint8Array, offset, value, core.memory.dpcUint32Array
       when consts.DPC_END_REG
-        core.memory.setInt32 core.memory.dpcUint8Array, offset, value
+        core.memory.setInt32 core.memory.dpcUint8Array, offset, value, core.memory.dpcUint32Array
         @processRDPList()
       when consts.DPC_CLOCK_REG, consts.DPC_BUFBUSY_REG, consts.DPC_PIPEBUSY_REG, consts.DPC_TMEM_REG
         break
       else
-        core.memory.setInt32 core.memory.dpcUint8Array, offset, value
+        core.memory.setInt32 core.memory.dpcUint8Array, offset, value, core.memory.dpcUint32Array
         #log "unhandled dpc write: " + offset
     return
 
@@ -499,13 +499,13 @@ C1964jsInterrupts = (core, cp0) ->
       #remains idle.
       if core.memory.getInt32(core.memory.piUint8Array, consts.PI_STATUS_REG, core.memory.piUint32Array) & (consts.PI_STATUS_IO_BUSY | consts.PI_STATUS_DMA_BUSY) #Is PI busy?
         #Reset the PIC
-        core.memory.setInt32 core.memory.piUint8Array, consts.PI_STATUS_REG, 0
+        core.memory.setInt32 core.memory.piUint8Array, consts.PI_STATUS_REG, 0, core.memory.piUint32Array
 
         #Reset finished, set PI Interrupt
         @triggerPIInterrupt pc, isFromDelaySlot
       else
         #Reset the PIC
-        core.memory.setInt32 core.memory.piUint8Array, consts.PI_STATUS_REG, 0
+        core.memory.setInt32 core.memory.piUint8Array, consts.PI_STATUS_REG, 0, core.memory.piUint32Array
     return
 
   #Does not actually write into the PI_STATUS_REG

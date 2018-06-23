@@ -916,12 +916,17 @@ class C1964jsMemoryLE extends C1964jsMemory
   getUint32: (uregion, off_) ->
     uregion[off_ + 3] << 24 | uregion[off_ + 2] << 16 | uregion[off_ + 1] << 8 | uregion[off_]
 
-  setInt32: (uregion, off_, val) ->
+  setInt32: (uregion, off_, val, u32region) ->
+    u32region[off_>>>2] = val
+    return
+
+  setUint32: (uregion, off_, val) ->
     uregion[off_ + 3] = val >> 24
     uregion[off_ + 2] = val >> 16
     uregion[off_ + 1] = val >> 8
     uregion[off_] = val
     return
+
 
 #hack global space until we export classes properly
 #node.js uses exports; browser uses this (window)

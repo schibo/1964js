@@ -140,7 +140,7 @@ class C1964jsDma
       to++
       from++
       --end
-    @memory.setInt32 @memory.spReg1Uint8Array, consts.SP_DMA_BUSY_REG, 0
+    @memory.setInt32 @memory.spReg1Uint8Array, consts.SP_DMA_BUSY_REG, 0, @memory.spReg1Uint32Array
     alert "hmm..todo: an sp fp status flag is blocking from continuing"  if @memory.getInt32(@memory.spReg1Uint8Array, consts.SP_STATUS_REG) & (consts.SP_STATUS_DMA_BUSY | consts.SP_STATUS_IO_FULL | consts.SP_STATUS_DMA_FULL)
     @interrupts.clrFlag @memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_DMA_BUSY
     @interrupts.setFlag @memory.spReg1Uint8Array, consts.SP_STATUS_REG, consts.SP_STATUS_HALT

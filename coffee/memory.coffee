@@ -1146,6 +1146,13 @@ class C1964jsMemory
     uregion[off_ + 3] = val
     return
 
+  setUint32: (uregion, off_, val) ->
+    uregion[off_] = val >> 24
+    uregion[off_ + 1] = val >> 16
+    uregion[off_ + 2] = val >> 8
+    uregion[off_ + 3] = val
+    return
+
   lb: (addr) ->
     #throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
     `const a = this.virtualToPhysical(addr)`

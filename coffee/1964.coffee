@@ -31,7 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 # - shift amounts of 0 truncate 64bit registers to 32bit. This is a possible bug in the original 1964cpp.
 # 1964 Masked loads and store addresses to make them aligned in load/store opcodes.
 # Check_SW, setting DPC_END_REG equal to DPC_START_REG is risky initialization:
-# setInt32(spReg1Uint8Array, SP_STATUS_REG, SP_STATUS_HALT);
+# setInt32(spReg1Uint8Array, SP_STATUS_REG, SP_STATUS_HALT, spReg1Uint32Array);
 # 1964cpp's init sets SP_STATUS_REG to SP_STATUS_HALT but then clears it in RCP_Reset() !
 # call to tlbwi masked index with &31 .. (seems wrong)
 #
@@ -268,11 +268,11 @@ class C1964jsEmulator
     @cp1Con[0] = 0x00000511
 
     @p[0] = 0xA4000040 #set programCounter to start of SP_MEM and after the 64 byte ROM header.
-    @memory.setInt32 @memory.miUint8Array, consts.MI_VERSION_REG, 0x01010101
-    @memory.setInt32 @memory.riUint8Array, consts.RI_CONFIG_REG, 0x00000001
-    @memory.setInt32 @memory.viUint8Array, consts.VI_INTR_REG, 0x000003FF
-    @memory.setInt32 @memory.viUint8Array, consts.VI_V_SYNC_REG, 0x000000D1
-    @memory.setInt32 @memory.viUint8Array, consts.VI_H_SYNC_REG, 0x000D2047
+    @memory.setInt32 @memory.miUint8Array, consts.MI_VERSION_REG, 0x01010101, @memory.miUint32Array
+    @memory.setInt32 @memory.riUint8Array, consts.RI_CONFIG_REG, 0x00000001, @memory.riUint32Array
+    @memory.setInt32 @memory.viUint8Array, consts.VI_INTR_REG, 0x000003FF, @memory.viUint32Array
+    @memory.setInt32 @memory.viUint8Array, consts.VI_V_SYNC_REG, 0x000000D1, @memory.viUint32Array
+    @memory.setInt32 @memory.viUint8Array, consts.VI_H_SYNC_REG, 0x000D2047, @memory.viUint32Array
     
     # rom header
     #copy rom name
@@ -292,9 +292,9 @@ class C1964jsEmulator
 
     console.log "EEPRom name = " + @pif.eepromName
     
-    @memory.setInt32 @memory.u8, bootCode.rdramSizeAddress, @currentRdramSize 
+    @memory.setInt32 @memory.u8, bootCode.rdramSizeAddress, @currentRdramSize, @memory.u32
 
-    #this.memory.setInt32(this.memory.spReg1Uint8Array, SP_STATUS_REG, SP_STATUS_HALT);
+    #this.memory.setInt32(this.memory.spReg1Uint8Array, SP_STATUS_REG, SP_STATUS_HALT, this.memory.spReg1Uint32Array);
     #1964cpp sets this then clears it in RCP_Reset() !
 
     #set hi vals
