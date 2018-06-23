@@ -288,6 +288,10 @@ class C1964jsVideoHLE
     #console.log msg
     return
 
+  sleep: (ms) ->
+    return new Promise(resolve => setTimeout(resolve, ms))
+
+
   dlParserProcess: ->
     @dlistStackPointer = 0
     @dlistStack[@dlistStackPointer].pc = @core.memory.getInt32(@core.memory.spMemUint8Array, consts.TASK_DATA_PTR, @core.memory.spMemUint32Array)>>>0
@@ -304,7 +308,9 @@ class C1964jsVideoHLE
     #TODO: begin rendering
     #TODO: set viewport
     #TODO: set fill mode
-    while @dlistStackPointer >= 0
+    aa = 10000
+    while @dlistStackPointer >= 0 and aa > 0
+      aa--
       pc = @dlistStack[@dlistStackPointer].pc
       cmd = @getCommand(pc)
       func = @currentMicrocodeMap[cmd]
@@ -313,6 +319,9 @@ class C1964jsVideoHLE
       if @dlistStackPointer >= 0
         @dlistStack[@dlistStackPointer].countdown -= 1
         @dlistStackPointer -= 1  if @dlistStack[@dlistStackPointer].countdown < 0
+
+    if aa <= 0
+      @sleep(10)
     return
 
   #TODO: end rendering

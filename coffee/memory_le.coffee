@@ -297,7 +297,7 @@ class C1964jsMemoryLE extends C1964jsMemory
 
     @readDummy16 = (a) =>
       `const off_ = a & 0xFFFC`
-      @dummyReadWriteUint16Array[(off_>>>1)^1]
+      @dummyReadWriteUint16Array[off_>>>1^1]
 
     @readDummy32 = (a) =>
       `const off_ = a & 0xFFFC`
@@ -306,8 +306,8 @@ class C1964jsMemoryLE extends C1964jsMemory
     @readRdram8 = (a) =>
       @u8[a^3]
 
-    @readRdram16 = (a) => @u16[(a>>>1)^1];
-
+    @readRdram16 = (a) =>
+      @u16[a>>>1^1]
 
     @readRdram32 = (a) =>
       @u32[a>>>2]
@@ -317,11 +317,11 @@ class C1964jsMemoryLE extends C1964jsMemory
       @ramRegs0Uint8Array[off_^3]
 
     @readRamRegs0_16 = (a) =>
-      `const off_ = (a-MEMORY_START_RAMREGS0)`
-      @ramRegs0Uint16Array[(off_>>>1)^1]
+      `const off_ = a-MEMORY_START_RAMREGS0`
+      @ramRegs0Uint16Array[off_>>>1^1]
 
     @readRamRegs0_32 = (a) =>
-      `const off_ = (a-MEMORY_START_RAMREGS0)`
+      `const off_ = a-MEMORY_START_RAMREGS0`
       @ramRegs0Uint32Array[off_>>>2]
 
     @readRamRegs4_8 = (a) =>
@@ -329,11 +329,11 @@ class C1964jsMemoryLE extends C1964jsMemory
       @ramRegs4Uint8Array[off_^3]
 
     @readRamRegs4_16 = (a) =>
-      `const off_ = (a-MEMORY_START_RAMREGS4)`
-      @ramRegs4Uint16Array[(off_>>>1)^1]
+      `const off_ = a-MEMORY_START_RAMREGS4`
+      @ramRegs4Uint16Array[off_>>>1^1]
 
     @readRamRegs4_32 = (a) =>
-      `const off_ = (a-MEMORY_START_RAMREGS4)`
+      `const off_ = a-MEMORY_START_RAMREGS4`
       @ramRegs4Uint32Array[off_>>>2]
 
     @readRamRegs8_8 = (a) =>
@@ -341,11 +341,11 @@ class C1964jsMemoryLE extends C1964jsMemory
       @ramRegs8Uint8Array[off_^3]
 
     @readRamRegs8_16 = (a) =>
-      `const off_ = (a-MEMORY_START_RAMREGS8)`
-      @ramRegs8Uint16Array[(off_>>>1)^1]
+      `const off_ = a-MEMORY_START_RAMREGS8`
+      @ramRegs8Uint16Array[off_>>>1^1]
 
     @readRamRegs8_32 = (a) =>
-      `const off_ = (a-MEMORY_START_RAMREGS8)`
+      `const off_ = a-MEMORY_START_RAMREGS8`
       @ramRegs8Uint32Array[off_>>>2]
 
     @readSpMem8 = (a) =>
@@ -353,11 +353,11 @@ class C1964jsMemoryLE extends C1964jsMemory
       @spMemUint8Array[off_^3]
 
     @readSpMem16 = (a) =>
-      `const off_ = (a-MEMORY_START_SPMEM)`
-      @spMemUint16Array[(off_>>>1)^1]
+      `const off_ = a-MEMORY_START_SPMEM`
+      @spMemUint16Array[off_>>>1^1]
 
     @readSpMem32 = (a) =>
-      `const off_ = (a-MEMORY_START_SPMEM)`
+      `const off_ = a-MEMORY_START_SPMEM`
       @spMemUint32Array[off_>>>2]
 
     @readSpReg1_8 = (a) =>
@@ -378,7 +378,7 @@ class C1964jsMemoryLE extends C1964jsMemory
 
     @readSpReg2_16 = (a) =>
       `const off_ = (a-MEMORY_START_SPREG_2)`
-      @spReg2Uint16Array[(off_>>>1)^1]
+      @spReg2Uint16Array[off_>>>1^1]
 
     @readSpReg2_32 = (a) =>
       `const off_ = (a-MEMORY_START_SPREG_2)`
@@ -389,11 +389,11 @@ class C1964jsMemoryLE extends C1964jsMemory
       @dpcUint8Array[off_^3]
 
     @readDpc16 = (a) =>
-      `const off_ = (a-MEMORY_START_DPC)`
-      @dpcUint16Array[(off_>>>1)^1]
+      `const off_ = a-MEMORY_START_DPC`
+      @dpcUint16Array[off_>>>1^1]
 
     @readDpc32 = (a) =>
-      `const off_ = (a-MEMORY_START_DPC)`
+      `const off_ = a-MEMORY_START_DPC`
       @dpcUint32Array[off_>>>2]
 
     @readDps8 = (a) =>
@@ -401,11 +401,11 @@ class C1964jsMemoryLE extends C1964jsMemory
       @dpsUint8Array[off_^3]
 
     @readDps16 = (a) =>
-      `const off_ = (a-MEMORY_START_DPS)`
-      @dpsUint16Array[(off_>>>1)^1]
+      `const off_ = a-MEMORY_START_DPS`
+      @dpsUint16Array[off_>>>1^1]
 
     @readDps32 = (a) =>
-      `const off_ = (a-MEMORY_START_DPS)`
+      `const off_ = a-MEMORY_START_DPS`
       @dpsUint32Array[off_>>>2]
 
     @readMi8 = (a) =>
@@ -413,11 +413,11 @@ class C1964jsMemoryLE extends C1964jsMemory
       @miUint8Array[off_^3]
 
     @readMi16 = (a) =>
-      `const off_ = (a-MEMORY_START_MI)`
-      @miUint16Array[(off_>>>1)^1]
+      `const off_ = a-MEMORY_START_MI`
+      @miUint16Array[off_>>>1^1]
 
     @readMi32 = (a) =>
-      `const off_ = (a-MEMORY_START_MI)`
+      `const off_ = a-MEMORY_START_MI`
       @miUint32Array[off_>>>2]
 
     @readVi8 = (a) =>
@@ -450,7 +450,7 @@ class C1964jsMemoryLE extends C1964jsMemory
 
     @readPi16 = (a) =>
       `const off_ = (a-MEMORY_START_PI)`
-      @piUint16Array[(off_>>>1)^1]
+      @piUint16Array[off_>>>1^1]
 
     @readPi32 = (a) =>
       `const off_ = (a-MEMORY_START_PI)`
@@ -473,11 +473,11 @@ class C1964jsMemoryLE extends C1964jsMemory
       @c2a1Uint8Array[off_^3]
 
     @readC2A1_16 = (a) =>
-      `const off_ = (a-MEMORY_START_C2A1)`
-      @c2a1Uint16Array[(off_>>>1)^1]
+      `const off_ = a-MEMORY_START_C2A1`
+      @c2a1Uint16Array[off_>>>1^1]
 
     @readC2A1_32 = (a) =>
-      `const off_ = (a-MEMORY_START_C2A1)`
+      `const off_ = a-MEMORY_START_C2A1`
       @c2a1Uint32Array[off_>>>2]
 
     @readC1A1_8 = (a) =>
@@ -485,11 +485,11 @@ class C1964jsMemoryLE extends C1964jsMemory
       @c1a1Uint8Array[off_^3]
 
     @readC1A1_16 = (a) =>
-      `const off_ = (a-MEMORY_START_C1A1)`
-      @c1a1Uint16Array[(off_>>>1)^1]
+      `const off_ = a-MEMORY_START_C1A1`
+      @c1a1Uint16Array[off_>>>1^1]
 
     @readC1A1_32 = (a) =>
-      `const off_ = (a-MEMORY_START_C1A1)`
+      `const off_ = a-MEMORY_START_C1A1`
       @c1a1Uint32Array[off_>>>2]
 
     @readC2A2_8 = (a) =>
@@ -498,7 +498,7 @@ class C1964jsMemoryLE extends C1964jsMemory
 
     @readC2A2_16 = (a) =>
       `const off_ = (a-MEMORY_START_C2A2)`
-      @c2a2Uint16Array[(off_>>>1)^1]
+      @c2a2Uint16Array[off_>>>1^1]
 
     @readC2A2_32 = (a) =>
       `const off_ = (a-MEMORY_START_C2A2)`
@@ -509,11 +509,11 @@ class C1964jsMemoryLE extends C1964jsMemory
       @romUint8Array[off_^3]
 
     @readRom16 = (a) =>
-      `const off_ = (a-MEMORY_START_ROM_IMAGE)`
-      @romUint16Array[(off_>>>1)^1]
+      `const off_ = a-MEMORY_START_ROM_IMAGE`
+      @romUint16Array[off_>>>1^1]
 
     @readRom32 = (a) =>
-      `const off_ = (a-MEMORY_START_ROM_IMAGE)`
+      `const off_ = a-MEMORY_START_ROM_IMAGE`
       @romUint32Array[off_>>>2]
 
     @readC1A3_8 = (a) =>
@@ -521,11 +521,11 @@ class C1964jsMemoryLE extends C1964jsMemory
       @c1a3Uint8Array[off_^3]
 
     @readC1A3_16 = (a) =>
-      `const off_ = (a-MEMORY_START_C1A3)`
-      @c1a3Uint16Array[(off_>>>1)^1]
+      `const off_ = a-MEMORY_START_C1A3`
+      @c1a3Uint16Array[off_>>>1^1]
 
     @readC1A3_32 = (a) =>
-      `const off_ = (a-MEMORY_START_C1A3)`
+      `const off_ = a-MEMORY_START_C1A3`
       @c1a3Uint32Array[off_>>>2]
 
     @readRi8 = (a) =>
@@ -533,11 +533,11 @@ class C1964jsMemoryLE extends C1964jsMemory
       @riUint8Array[off_^3]
 
     @readRi16 = (a) =>
-      `const off_ = (a-MEMORY_START_RI)`
-      @riUint16Array[(off_>>>1)^1]
+      `const off_ = a-MEMORY_START_RI`
+      @riUint16Array[off_>>>1^1]
 
     @readRi32 = (a) =>
-      `const off_ = (a-MEMORY_START_RI)`
+      `const off_ = a-MEMORY_START_RI`
       @riUint32Array[off_>>>2]
 
     @readPif8 = (a) =>
@@ -545,11 +545,11 @@ class C1964jsMemoryLE extends C1964jsMemory
       @pifUint8Array[off_^3]
 
     @readPif16 = (a) =>
-      `const off_ = (a-MEMORY_START_PIF)`
-      @pifUint16Array[(off_>>>1)^1]
+      `const off_ = a-MEMORY_START_PIF`
+      @pifUint16Array[off_>>>1^1]
 
     @readPif32 = (a) =>
-      `const off_ = (a-MEMORY_START_PIF)`
+      `const off_ = a-MEMORY_START_PIF`
       @pifUint32Array[off_>>>2]
 
     @readGio8 = (a) =>
@@ -557,11 +557,11 @@ class C1964jsMemoryLE extends C1964jsMemory
       @gioUint8Array[off_^3]
 
     @readGio16 = (a) =>
-      `const off_ = (a-MEMORY_START_GIO)`
-      @gioUint16Array[(off_>>>1)^1]
+      `const off_ = a-MEMORY_START_GIO`
+      @gioUint16Array[off_>>>1^1]
 
     @readGio32 = (a) =>
-      `const off_ = (a-MEMORY_START_GIO)`
+      `const off_ = a-MEMORY_START_GIO`
       @gioUint32Array[off_>>>2]
 
     @writeRdram8 = (val, a) =>
@@ -569,7 +569,7 @@ class C1964jsMemoryLE extends C1964jsMemory
       return
 
     @writeRdram16 = (val, a) =>
-      @u16[(a>>>1)^1] = val
+      @u16[a>>>1^1] = val
       return
 
     @writeRdram32 = (val, a) =>
@@ -583,7 +583,7 @@ class C1964jsMemoryLE extends C1964jsMemory
 
     @writeSpMem16 = (val, a) =>
       `const off_ = a - MEMORY_START_SPMEM`
-      @spMemUint16Array[(off_>>>1)^1] = val
+      @spMemUint16Array[off_>>>1^1] = val
       return
 
     @writeSpMem32 = (val, a) =>
@@ -598,7 +598,7 @@ class C1964jsMemoryLE extends C1964jsMemory
 
     @writeRi16 = (val, a) =>
       `const off_ = a - MEMORY_START_RI`
-      @riUint16Array[(off_>>>1)^1] = val
+      @riUint16Array[off_>>>1^1] = val
       return
 
     @writeRi32 = (val, a) =>
@@ -628,7 +628,7 @@ class C1964jsMemoryLE extends C1964jsMemory
 
     @writeRamRegs8_16 = (val, a) =>
       `const off_ = a - MEMORY_START_RAMREGS8`
-      @ramRegs8Uint16Array[(off_>>>1)^1] = val
+      @ramRegs8Uint16Array[off_>>>1^1] = val
       return
 
     @writeRamRegs8_32 = (val, a) =>
@@ -643,7 +643,7 @@ class C1964jsMemoryLE extends C1964jsMemory
 
     @writeRamRegs4_16 = (val, a) =>
       `const off_ = a - MEMORY_START_RAMREGS4`
-      @ramRegs4Uint16Array[(off_>>>1)^1] = val
+      @ramRegs4Uint16Array[off_>>>1^1] = val
       return
 
     @writeRamRegs4_32 = (val, a) =>
@@ -658,7 +658,7 @@ class C1964jsMemoryLE extends C1964jsMemory
 
     @writeRamRegs0_16 = (val, a) =>
       `const off_ = a - MEMORY_START_RAMREGS0`
-      @ramRegs0Uint16Array[(off_>>>1)^1] = val
+      @ramRegs0Uint16Array[off_>>>1^1] = val
       return
 
     @writeRamRegs0_32 = (val, a) =>
@@ -778,7 +778,7 @@ class C1964jsMemoryLE extends C1964jsMemory
 
     @writeDps16 = (val, a) =>
       `const off_ = a - MEMORY_START_DPS`
-      @dpsUint16Array[(off_>>>1)^1] = val
+      @dpsUint16Array[off_>>>1^1] = val
       return
 
     @writeDps32 = (val, a) =>
@@ -793,7 +793,7 @@ class C1964jsMemoryLE extends C1964jsMemory
 
     @writeC2A1_16 = (val, a) =>
       `const off_ = a - MEMORY_START_C2A1`
-      @c2a1Uint16Array[(off_>>>1)^1] = val
+      @c2a1Uint16Array[off_>>>1^1] = val
       return
 
     @writeC2A1_32 = (val, a) =>
@@ -808,7 +808,7 @@ class C1964jsMemoryLE extends C1964jsMemory
 
     @writeC1A1_16 = (val, a) =>
       `const off_ = a - MEMORY_START_C1A1`
-      @c1a1Uint16Array[(off_>>>1)^1] = val
+      @c1a1Uint16Array[off_>>>1^1] = val
       return
 
     @writeC1A1_32 = (val, a) =>
@@ -823,7 +823,7 @@ class C1964jsMemoryLE extends C1964jsMemory
 
     @writeC2A2_16 = (val, a) =>
       `const off_ = a - MEMORY_START_C2A2`
-      @c2a2Uint16Array[(off_>>>1)^1] = val
+      @c2a2Uint16Array[off_>>>1^1] = val
       return
 
     @writeC2A2_32 = (val, a) =>
@@ -839,7 +839,7 @@ class C1964jsMemoryLE extends C1964jsMemory
 
     @writeRom16 = (val, a) =>
       `const off_ = a - MEMORY_START_ROM_IMAGE`
-      @romUint16Array[(off_>>>1)^1] = val
+      @romUint16Array[off_>>>1^1] = val
       return
 
     @writeRom32 = (val, a) =>
@@ -854,7 +854,7 @@ class C1964jsMemoryLE extends C1964jsMemory
 
     @writeC1A3_16 = (val, a) =>
       `const off_ = a - MEMORY_START_C1A3`
-      @c1a3Uint16Array[(off_>>>1)^1] = val
+      @c1a3Uint16Array[off_>>>1^1] = val
       return
 
     @writeC1A3_32 = (val, a) =>
@@ -869,7 +869,7 @@ class C1964jsMemoryLE extends C1964jsMemory
 
     @writePif16 = (val, a) =>
       `const off_ = a - MEMORY_START_PIF`
-      @pifUint16Array[(off_>>>1)^1] = val
+      @pifUint16Array[off_>>>1^1] = val
       return
 
     @writePif32 = (val, a) =>
@@ -884,7 +884,7 @@ class C1964jsMemoryLE extends C1964jsMemory
 
     @writeGio16 = (val, a) =>
       `const off_ = a - MEMORY_START_GIO`
-      @gioUint16Array[(off_>>>1)^1] = val
+      @gioUint16Array[off_>>>1^1] = val
       return
 
     @writeGio32 = (val, a) =>
@@ -900,7 +900,7 @@ class C1964jsMemoryLE extends C1964jsMemory
 
     @writeDummy16 = (val, a) =>
       `const off_ = a & 0x0000fffc`
-      @dummyReadWriteUint16Array[(off_>>>1)^1] = val
+      @dummyReadWriteUint16Array[off_>>>1^1] = val
       return
 
     @writeDummy32 = (val, a) =>
@@ -912,7 +912,7 @@ class C1964jsMemoryLE extends C1964jsMemory
 
   #getInt32 and getUint32 are identical. they both return signed.
   getInt32: (uregion, off_, u32region) ->
-    u32region[off_ >>>2]
+    u32region[off_>>>2]
 
   getUint32: (uregion, off_) ->
     uregion[off_ + 3] << 24 | uregion[off_ + 2] << 16 | uregion[off_ + 1] << 8 | uregion[off_]

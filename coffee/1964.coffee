@@ -471,7 +471,9 @@ class C1964jsEmulator
 
     fn = @fn
 
-    while @terminate is false
+    aa = 10000
+    while @terminate is false and aa != 0
+      aa--
       #@interrupts.checkInterrupts()
       if m[0] >= 0
         @interval += 1
