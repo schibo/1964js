@@ -90,7 +90,7 @@ class C1964jsEmulator
     @NUM_CHANNELS = 1
     @NUM_SAMPLES = 40000
     @SAMPLE_RATE = 40000
-    @useByteCompatibilityMode = true #if true, slower, but works for any endian system because memory loads and stores are accessed one byte at a time. Overrides endian check if true.
+    @useByteCompatibilityMode = false #if true, slower, but works for any endian system because memory loads and stores are accessed one byte at a time. Overrides endian check if true.
     @isLittleEndian = 0 # determined by the system. If is little endian, memory is reordered to little-endian to optimize loads and stores.
     @isBigEndian = 0
     @interval = 0
@@ -635,15 +635,15 @@ class C1964jsEmulator
     @helpers.tRT(i) + "=" + temp + ";" + @helpers.tRTH(i) + "=" + tempHi + ";" 
 
   r4300i_lw: (i) ->
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.LW[r[36]>>>16](m,r[36]);" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31;"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.LW[r[36]>>>16](r[36]);" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>31;"
 
   r4300i_lwu: (i) ->
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.LW[r[36]>>>16](m,r[36]);" + @helpers.tRTH(i) + "=0;"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.LW[r[36]>>>16](r[36]);" + @helpers.tRTH(i) + "=0;"
 
   r4300i_sw: (i, isDelaySlot) ->
     a = undefined
 #    string = "m.sw(" + @helpers.RT(i) + ";" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i)
-    string = @helpers.virtualToPhysical("" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + "") + "m.SW[r[36]>>>16](m," + @helpers.RT(i) + ",r[36]"
+    string = @helpers.virtualToPhysical("" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + "") + "m.SW[r[36]>>>16](" + @helpers.RT(i) + ",r[36]"
 
     #So we can process exceptions
     if isDelaySlot is true
@@ -942,21 +942,21 @@ class C1964jsEmulator
     string += @helpers.tRT(i) + "=t.cp0[" + @helpers.fs(i) + "];" + @helpers.tRTH(i) + "=t.cp0[" + @helpers.fs(i) + "]>>31;"
 
   r4300i_lb: (i) ->
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.LB[r[36]>>>16](m,r[36])<<24>>24;" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>8;"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.LB[r[36]>>>16](r[36])<<24>>24;" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>8;"
 
   r4300i_lbu: (i) ->
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.LB[r[36]>>>16](m,r[36]);" + @helpers.tRTH(i) + "=0;"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.LB[r[36]>>>16](r[36]);" + @helpers.tRTH(i) + "=0;"
 
   r4300i_lh: (i) ->
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.LH[r[36]>>>16](m,r[36])<<16>>16;" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>16;";
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.LH[r[36]>>>16](r[36])<<16>>16;" + @helpers.tRTH(i) + "=" + @helpers.RT(i) + ">>16;";
 
   r4300i_lhu: (i) ->
-    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.LH[r[36]>>>16](m,r[36]);" + @helpers.tRTH(i) + "=0;"
+    @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + @helpers.tRT(i) + "=m.LH[r[36]>>>16](r[36]);" + @helpers.tRTH(i) + "=0;"
 
   r4300i_sb: (i, isDelaySlot) ->
     #"m.sb(" + @helpers.RT(i) + "," + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");"
-    #string = "a = m.virtualToPhysical(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");m.SB[a>>>16](m," + @helpers.RT(i) + ",a"
-    string = @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + "m.SB[r[36]>>>16](m," + @helpers.RT(i) + ",r[36]"
+    #string = "a = m.virtualToPhysical(" + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");m.SB[a>>>16](" + @helpers.RT(i) + ",a"
+    string = @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + "m.SB[r[36]>>>16](" + @helpers.RT(i) + ",r[36]"
 
     #So we can process exceptions
     if isDelaySlot is true
@@ -969,7 +969,7 @@ class C1964jsEmulator
 
   r4300i_sh: (i, isDelaySlot) ->
     #"m.sh(" + @helpers.RT(i) + "," + @helpers.RS(i) + "+" + @helpers.soffset_imm(i) + ");"
-    string = @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + "m.SH[r[36]>>>16](m," + @helpers.RT(i) + ",r[36]"
+    string = @helpers.virtualToPhysical(@helpers.RS(i) + "+" + @helpers.soffset_imm(i)) + "m.SH[r[36]>>>16](" + @helpers.RT(i) + ",r[36]"
 
     #So we can process exceptions
     if isDelaySlot is true
