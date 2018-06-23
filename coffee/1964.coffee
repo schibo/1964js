@@ -455,53 +455,57 @@ class C1964jsEmulator
     return
 
   runLoop: () =>
-    #setTimeout to be a good citizen..don't allow for the cpu to be pegged at 100%.
-    #8ms idle time will be 50% cpu max if a 60FPS game is slow.
-    if @startTime is undefined
-      @startTime = Date.now();
-    #@request = requestAnimFrame(@runLoop)  if @terminate is false
-    if @terminate is true
-      clearInterval @mySetInterval
-      return
+    try
+      #setTimeout to be a good citizen..don't allow for the cpu to be pegged at 100%.
+      #8ms idle time will be 50% cpu max if a 60FPS game is slow.
+      if @startTime is undefined
+        @startTime = Date.now();
+      #@request = requestAnimFrame(@runLoop)  if @terminate is false
+      if @terminate is true
+        clearInterval @mySetInterval
+        return
 
-    `const m = this.m`
-    `const r = this.r`
-    `const h = this.h`
-    `const p = this.p`
+      `const m = this.m`
+      `const r = this.r`
+      `const h = this.h`
+      `const p = this.p`
 
-    fn = @fn
+      fn = @fn
 
-    aa = 10000
-    while @terminate is false and aa != 0
-      aa--
-      #@interrupts.checkInterrupts()
-      if m[0] >= 0
-        @interval += 1
-        #@m[0] = -125000 # which is -625000 / (interval+1)
-        m[0] = -156250 # which is -625000 / (interval+1) / 2
-        pc = p[0]
-        @interrupts.processException p[0]
-        if @interval is 4
-          @interval = 0
-          @repaintWrapper()
-          #@cp0[consts.COUNT] += 625000*2 #todo: set count to count + @m*2 when count is requested in code
-          @cp0[consts.COUNT] += 625000*2 #todo: set count to count + @m*2 when count is requested in code
-          @interrupts.triggerCompareInterrupt 0, false
-          @interrupts.triggerVIInterrupt 0, false #if ((@memory.getInt32(@memory.miUint8Array, consts.MI_INTR_REG, core.memory.miUint32Array) & consts.MI_INTR_VI) isnt 0)
-        else if @interval is 2
-          @interrupts.checkInterrupts()
+      aa = 10000
+      while @terminate is false and aa != 0
+        aa--
+        #@interrupts.checkInterrupts()
+        if m[0] >= 0
+          @interval += 1
+          #@m[0] = -125000 # which is -625000 / (interval+1)
+          m[0] = -156250 # which is -625000 / (interval+1) / 2
+          pc = p[0]
+          @interrupts.processException p[0]
+          if @interval is 4
+            @interval = 0
+            @repaintWrapper()
+            #@cp0[consts.COUNT] += 625000*2 #todo: set count to count + @m*2 when count is requested in code
+            @cp0[consts.COUNT] += 625000*2 #todo: set count to count + @m*2 when count is requested in code
+            @interrupts.triggerCompareInterrupt 0, false
+            @interrupts.triggerVIInterrupt 0, false #if ((@memory.getInt32(@memory.miUint8Array, consts.MI_INTR_REG, core.memory.miUint32Array) & consts.MI_INTR_VI) isnt 0)
+          else if @interval is 2
+            @interrupts.checkInterrupts()
+            if pc isnt p[0]
+              pc = p[0] >>> 2
+              fn = @fnLut[pc]
+            break
           if pc isnt p[0]
             pc = p[0] >>> 2
             fn = @fnLut[pc]
-          break
-        if pc isnt p[0]
-          pc = p[0] >>> 2
-          fn = @fnLut[pc]
-      else
-        fn = @run fn, r, h
-          
-    @fn = fn
-    @
+        else
+          fn = @run fn, r, h
+            
+      @fn = fn
+      @
+    catch e
+      @terminate = true
+      throw e
 
   run: (fn, r, h) ->
     `const m = this.m`
