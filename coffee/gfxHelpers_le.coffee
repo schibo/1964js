@@ -87,6 +87,16 @@ C1964jsVideoHLEle::getGbi0Vertex0 = (pc) ->
   @core.memory.u8[pc+2] & 0x0F
 
 
+#GBI1 vertex struct
+C1964jsVideoHLE::getGbi1NumVertices = (pc) ->
+  #(@core.memory.u8[pc] << 24 | @core.memory.u8[pc + 1] << 16 | @core.memory.u8[pc + 2] << 8 | @core.memory.u8[pc + 3]) >>> 20 & 0x0F
+  (@core.memory.u8[pc + 1]) & 0x3F
+
+C1964jsVideoHLE::getGbi1Vertex0 = (pc) ->
+  #(@core.memory.u8[pc] << 24 | @core.memory.u8[pc + 1] << 16 | @core.memory.u8[pc + 2] << 8 | @core.memory.u8[pc + 3]) >>> 16 & 0x0F
+  (@core.memory.u8[pc + 2]) & 0x7F
+
+
 #Fiddled vertex struct - Legacy
 C1964jsVideoHLEle::getFiddledVertexX = (pc) ->
   @core.memory.u32[pc>>>2] >> 16

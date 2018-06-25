@@ -192,6 +192,7 @@ class C1964jsVideoHLE
     @resetMatrices()
     @combine = new Uint32Array(16)
     @makeUcodeData()
+    @makeUcodeMap()
     @crcTable = @makeCRCTable()
 
     @vertexMultVals = [
@@ -219,6 +220,75 @@ class C1964jsVideoHLE
       2,  # ucode 20 - ZSortp
     ]
     return
+
+  makeUcodeMap: () ->
+    @microcodeMap0 = [@RSP_GBI1_SpNoop, @RSP_GBI0_Mtx, @RSP_GBI1_Reserved, @RSP_GBI1_MoveMem,
+      @RSP_GBI0_Vtx, @RSP_GBI1_Reserved, @RSP_GBI0_DL, @RSP_GBI1_Reserved,
+      @RSP_GBI1_Reserved, @RSP_GBI0_Sprite2DBase, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_GBI0_Tri4, @RSP_GBI1_RDPHalf_Cont, @RSP_GBI1_RDPHalf_2,
+      @RSP_GBI1_RDPHalf_1, @RSP_GBI1_Line3D, @RSP_GBI1_ClearGeometryMode, @RSP_GBI1_SetGeometryMode,
+      @RSP_GBI1_EndDL, @RSP_GBI1_SetOtherModeL, @RSP_GBI1_SetOtherModeH, @RSP_GBI1_Texture,
+      @RSP_GBI1_MoveWord, @RSP_GBI1_PopMtx, @RSP_GBI1_CullDL, @RSP_GBI1_Tri1,
+      @RSP_GBI1_Noop, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RDP_TriFill, @RDP_TriFillZ, @RDP_TriTxtr, @RDP_TriTxtrZ,
+      @RDP_TriShade, @RDP_TriShadeZ, @RDP_TriShadeTxtr, @RDP_TriShadeTxtrZ,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
+      @DLParser_TexRect, @DLParser_TexRectFlip, @DLParser_RDPLoadSynch, @DLParser_RDPPipeSynch,
+      @DLParser_RDPTileSynch, @DLParser_RDPFullSynch, @DLParser_SetKeyGB, @DLParser_SetKeyR,
+      @DLParser_SetConvert, @DLParser_SetScissor, @DLParser_SetPrimDepth, @DLParser_RDPSetOtherMode,
+      @DLParser_LoadTLut, @RSP_RDP_Nothing, @DLParser_SetTileSize, @DLParser_LoadBlock,
+      @DLParser_LoadTile, @DLParser_SetTile, @DLParser_FillRect, @DLParser_SetFillColor,
+      @DLParser_SetFogColor, @DLParser_SetBlendColor, @DLParser_SetPrimColor, @DLParser_SetEnvColor,
+      @DLParser_SetCombine, @DLParser_SetTImg, @DLParser_SetZImg, @DLParser_SetCImg]
+    return
+
+
 
   makeUcodeData: () ->
     @ucodeData = [
@@ -360,10 +430,19 @@ class C1964jsVideoHLE
   computeCRC32: (crc, base, len) ->
     crc ^= 0xffffffff
     crc >>>= 0
-    while (len > 0)
-      crc = (@crcTable[(crc ^ @core.memory.u8[base]) & 0xff] ^ (crc >>> 8))>>>0
-      base++
-      len--
+
+    # the crcs hat 1964 made were based on little-endian memory layout, so 
+    # for big endian and byteCompatibility mode, we need to ^3 to each byte.
+    if @core.useByteCompatibilityMode is true or @core.isLittleEndian is 0
+      while (len > 0)
+        crc = (@crcTable[(crc ^ @core.memory.u8[base^3]) & 0xff] ^ (crc >>> 8))>>>0
+        base++
+        len--
+    else
+      while (len > 0)
+        crc = (@crcTable[(crc ^ @core.memory.u8[base]) & 0xff] ^ (crc >>> 8))>>>0
+        base++
+        len--
     return (crc ^ 0xffffffff)>>>0
 
   DLParser_CheckUCode: (start, dStart, size, dSize) ->
@@ -373,7 +452,7 @@ class C1964jsVideoHLE
     if base < @core.currentRdramSize+0x1000
       for i in [0...(0x1000-2)]
         # check for 'R' 'S' 'P' ("RSP") ascii 82, 83, 80
-        if @core.memory.u8[base + ((i+0)^3)] is 82 and @core.memory.u8[base + ((i+1)^3) ] is 83 and @core.memory.u8[base + ((i+2)^3) ] is 80
+        if @core.memory.readRdram8(base + i) is 82 and @core.memory.readRdram8(base + i + 1) is 83 and @core.memory.readRdram8(base + i + 2) is 80
           #concat chars (32 is ascii for space character)
           while @core.memory.u8[ base + (i ^ 3) ] >= 32
             str += String.fromCharCode(@core.memory.u8[ base + (i ^ 3) ])
@@ -382,12 +461,25 @@ class C1964jsVideoHLE
           crc800 = @computeCRC32 0, start, 0x800
           ucode = @DLParser_IdentifyUcode crc800
           if ucode != -1 
-            alert "Found ucode " + ucode
+            console.log "Detected microcode " + ucode
           else
-            alert "unknown ucode"
+            console.log "Unknown ucode. Using microcode #5"
             ucode = 5
+          @RDP_SetUcodeMap ucode
           break
     return ucode
+
+  RDP_SetUcodeMap: (ucode) ->
+    switch ucode
+      when 1
+        @microcodeMap0[4] = @RSP_GBI1_Vtx
+        @microcodeMap0[9] = @RSP_GBI1_Sprite2DBase
+        @microcodeMap0[0xaf] = @RSP_GBI1_LoadUCode
+        @microcodeMap0[0xb0] = @RSP_GBI1_BranchZ
+        @microcodeMap0[0xb1] = @RSP_GBI1_Tri2
+        @microcodeMap0[0xb2] = @RSP_GBI1_ModifyVtx
+        @microcodeMap0[0xc1] = @RSP_S2DEX_SPObjLoadTxtr_Ucode1
+    return
 
   DLParser_IdentifyUcode: (crc800) ->
     for i in [0...@ucodeData.length]
@@ -421,7 +513,7 @@ class C1964jsVideoHLE
     return
 
   checkUcode: ->
-    if @microcodeMap0 is undefined
+    if @currentMicrocodeMap is undefined
 
       tUcode = @core.memory.getInt32(@core.memory.spMemUint8Array, consts.TASK_MICROCODE, @core.memory.spMemUint32Array)
       tUcodeData = @core.memory.getInt32(@core.memory.spMemUint8Array, consts.TASK_MICROCODE_DATA, @core.memory.spMemUint32Array)
@@ -429,76 +521,8 @@ class C1964jsVideoHLE
       tUcodeDataSize = @core.memory.getInt32(@core.memory.spMemUint8Array, consts.TASK_MICROCODE_DATA_SIZE, @core.memory.spMemUint32Array)
 
       @ucode = @DLParser_CheckUCode tUcode, tUcodeData, tUcodeSize, tUcodeDataSize
-      if @ucode is 0 or @ucode is 1 or @ucode is 20
-        @microcodeMap0 = [@RSP_GBI1_SpNoop, @RSP_GBI0_Mtx, @RSP_GBI1_Reserved, @RSP_GBI1_MoveMem,
-        @RSP_GBI0_Vtx, @RSP_GBI1_Reserved, @RSP_GBI0_DL, @RSP_GBI1_Reserved,
-        @RSP_GBI1_Reserved, @RSP_GBI0_Sprite2DBase, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_GBI0_Tri4, @RSP_GBI1_RDPHalf_Cont, @RSP_GBI1_RDPHalf_2,
-        @RSP_GBI1_RDPHalf_1, @RSP_GBI1_Line3D, @RSP_GBI1_ClearGeometryMode, @RSP_GBI1_SetGeometryMode,
-        @RSP_GBI1_EndDL, @RSP_GBI1_SetOtherModeL, @RSP_GBI1_SetOtherModeH, @RSP_GBI1_Texture,
-        @RSP_GBI1_MoveWord, @RSP_GBI1_PopMtx, @RSP_GBI1_CullDL, @RSP_GBI1_Tri1,
-        @RSP_GBI1_Noop, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RDP_TriFill, @RDP_TriFillZ, @RDP_TriTxtr, @RDP_TriTxtrZ,
-        @RDP_TriShade, @RDP_TriShadeZ, @RDP_TriShadeTxtr, @RDP_TriShadeTxtrZ,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing, @RSP_RDP_Nothing,
-        @DLParser_TexRect, @DLParser_TexRectFlip, @DLParser_RDPLoadSynch, @DLParser_RDPPipeSynch,
-        @DLParser_RDPTileSynch, @DLParser_RDPFullSynch, @DLParser_SetKeyGB, @DLParser_SetKeyR,
-        @DLParser_SetConvert, @DLParser_SetScissor, @DLParser_SetPrimDepth, @DLParser_RDPSetOtherMode,
-        @DLParser_LoadTLut, @RSP_RDP_Nothing, @DLParser_SetTileSize, @DLParser_LoadBlock,
-        @DLParser_LoadTile, @DLParser_SetTile, @DLParser_FillRect, @DLParser_SetFillColor,
-        @DLParser_SetFogColor, @DLParser_SetBlendColor, @DLParser_SetPrimColor, @DLParser_SetEnvColor,
-        @DLParser_SetCombine, @DLParser_SetTImg, @DLParser_SetZImg, @DLParser_SetCImg]
-        @currentMicrocodeMap = @microcodeMap0
-      else
-        @microcodeMap0 = []
-        alert "unsupported microcode"
-
+      @currentMicrocodeMap = @microcodeMap0 # to only execute this once
+    return
 
   dlParserProcess: ->
 
@@ -719,9 +743,6 @@ class C1964jsVideoHLE
   #this.videoLog('Texture: format=' + this.texImg.format + ' size=' + this.texImg.size + ' ' + 'width=' + this.texImg.width + ' addr=' + this.texImg.addr + ' bpl=' + this.texImg.bpl);
 
   RSP_GBI0_Vtx: (pc) ->
-    v0 = undefined
-    seg = undefined
-    addr = undefined
     num = @getGbi0NumVertices(pc) + 1
     v0 = @getGbi0Vertex0(pc)
     seg = @getGbi0DlistAddr(pc)
@@ -734,6 +755,45 @@ class C1964jsVideoHLE
     else
       @processVertexData addr, v0, num
     return
+
+  RSP_GBI1_Vtx: (pc) ->
+    num = @getGbi1NumVertices(pc) + 1
+    v0 = @getGbi1Vertex0(pc)
+    seg = @getGbi0DlistAddr(pc)
+    addr = @getRspSegmentAddr(seg)
+    num = 32 - v0  if (v0 + num) > @MAX_VERTICES
+
+    #Check that the address is valid
+    if (addr + num*16) > @core.currentRdramSize
+      console.warn "vertex is beyond ram size"
+    else
+      @processVertexData addr, v0, num
+    return
+
+  RSP_GBI1_Sprite2DBase: (pc) ->
+    alert "todo: RSP_GBI1_Sprite2DBase"
+    return
+
+  RSP_GBI1_LoadUCode: (pc) ->
+    alert "todo: RSP_GBI1_LoadUCode"
+    return
+
+  RSP_GBI1_BranchZ: (pc) ->
+    alert "todo: RSP_GBI1_BranchZ"
+    return
+
+  RSP_GBI1_Tri2: (pc) ->
+    alert "todo: RSP_GBI1_Tri2"
+    return
+
+  RSP_GBI1_ModifyVtx: (pc) ->
+    alert "todo: RSP_GBI1_ModifyVtx"
+    return
+
+  RSP_S2DEX_SPObjLoadTxtr_Ucode1: (pc) ->
+    alert "todo: RSP_S2DEX_SPObjLoadTxtr_Ucode1"
+    return
+
 
   processLights: (vo, i, a, sMult, tMult) ->
     `const n = this.normalMat`

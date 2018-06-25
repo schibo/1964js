@@ -277,7 +277,7 @@ class C1964jsEmulator
     
     # rom header
     #copy rom name
-    if @isLittleEndian is 1
+    if @isLittleEndian is 1 and @useByteCompatibilityMode is false
       for i in [0...20]
         @romName[i] = @memory.rom[(32+i)^3]
     else
