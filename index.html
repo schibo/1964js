@@ -46,7 +46,7 @@
       function updateGradient()
       {
       
-        if ( $===undefined ) return;
+        if ( this['$'] === undefined || this['$'] === null) return;
       
       var c0_0 = colors[colorIndices[0]];
       var c0_1 = colors[colorIndices[1]];
