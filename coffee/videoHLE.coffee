@@ -195,6 +195,8 @@ class C1964jsVideoHLE
     @makeUcodeMap()
     @crcTable = @makeCRCTable()
 
+    @vertexMult = 0
+
     @vertexMultVals = [
       10, # ucode 0 - Mario
       2,  # ucode 1 - GBI1
@@ -213,11 +215,10 @@ class C1964jsVideoHLE
       2,  # ucode 14 - OgreBattle Background
       10, # ucode 15 - ucode 0 with sprite2D
       5,  # ucode 16 - Star War, Shadow of Empire
-
       2,  # ucode 17 - Star Wars - Rogue Squadron, 
       2,  # ucode 18 - World Driver Championship, check me here
       2,  # ucode 19 - Last Legion UX, check me here
-      2,  # ucode 20 - ZSortp
+      2   # ucode 20 - ZSortp
     ]
     return
 
@@ -454,19 +455,18 @@ class C1964jsVideoHLE
         # check for 'R' 'S' 'P' ("RSP") ascii 82, 83, 80
         if @core.memory.readRdram8(base + i) is 82 and @core.memory.readRdram8(base + i + 1) is 83 and @core.memory.readRdram8(base + i + 2) is 80
           #concat chars (32 is ascii for space character)
-          while @core.memory.u8[ base + (i ^ 3) ] >= 32
-            str += String.fromCharCode(@core.memory.u8[ base + (i ^ 3) ])
+          while @core.memory.readRdram8(base + i) >= 32
+            str += String.fromCharCode(@core.memory.readRdram8(base + i))
             i++
           crcSize = @computeCRC32 0, start, 8
           crc800 = @computeCRC32 0, start, 0x800
           ucode = @DLParser_IdentifyUcode crc800
-          if ucode != -1 
-            console.log "Detected microcode " + ucode
-          else
-            console.log "Unknown ucode. Using microcode #5"
-            ucode = 5
-          @RDP_SetUcodeMap ucode
           break
+    if ucode != -1 
+      console.log "Detected microcode " + ucode
+    else
+      console.log "Unknown ucode. Using microcode #5"
+      ucode = 5
     return ucode
 
   RDP_SetUcodeMap: (ucode) ->
@@ -508,7 +508,7 @@ class C1964jsVideoHLE
     @core.interrupts.triggerDPInterrupt 0, false
     return
 
-  videoLog : (msg) ->
+  videoLog: (msg) ->
     #console.log msg
     return
 
@@ -521,6 +521,8 @@ class C1964jsVideoHLE
       tUcodeDataSize = @core.memory.getInt32(@core.memory.spMemUint8Array, consts.TASK_MICROCODE_DATA_SIZE, @core.memory.spMemUint32Array)
 
       @ucode = @DLParser_CheckUCode tUcode, tUcodeData, tUcodeSize, tUcodeDataSize
+      @RDP_SetUcodeMap @ucode
+      @vertexMult = 1.0 / @vertexMultVals[@ucode]
       @currentMicrocodeMap = @microcodeMap0 # to only execute this once
     return
 
@@ -571,8 +573,6 @@ class C1964jsVideoHLE
     return
 
   RSP_GBI1_MoveMem: (pc) ->
-    addr = undefined
-    length = undefined
     type = @getGbi1Type(pc)
     seg = @getGbi0DlistAddr(pc)
     addr = @getRspSegmentAddr(seg)
@@ -757,43 +757,78 @@ class C1964jsVideoHLE
     return
 
   RSP_GBI1_Vtx: (pc) ->
-    num = @getGbi1NumVertices(pc) + 1
+    num = @getGbi1NumVertices(pc)
     v0 = @getGbi1Vertex0(pc)
     seg = @getGbi0DlistAddr(pc)
     addr = @getRspSegmentAddr(seg)
-    num = 32 - v0  if (v0 + num) > @MAX_VERTICES
+    return  if (v0 + num) > @MAX_VERTICES
 
     #Check that the address is valid
-    if (addr + num*16) > @core.currentRdramSize
+    if addr > @core.currentRdramSize
       console.warn "vertex is beyond ram size"
     else
       @processVertexData addr, v0, num
     return
 
   RSP_GBI1_Sprite2DBase: (pc) ->
-    alert "todo: RSP_GBI1_Sprite2DBase"
+    @videoLog  "todo: RSP_GBI1_Sprite2DBase"
     return
 
   RSP_GBI1_LoadUCode: (pc) ->
-    alert "todo: RSP_GBI1_LoadUCode"
+    @videoLog  "todo: RSP_GBI1_LoadUCode"
     return
 
   RSP_GBI1_BranchZ: (pc) ->
-    alert "todo: RSP_GBI1_BranchZ"
+    @videoLog  "todo: RSP_GBI1_BranchZ"
     return
 
   RSP_GBI1_Tri2: (pc) ->
-    alert "todo: RSP_GBI1_Tri2"
+    mult = @vertexMult
+    v0 = @getGbi0Tri1V0(pc) * mult
+    v1 = @getGbi0Tri1V1(pc) * mult
+    v2 = @getGbi0Tri1V2(pc) * mult
+    #flag = @getGbi0Tri1Flag(pc)
+    didSucceed = @prepareTriangle v0, v1, v2
+
+    if didSucceed is false
+      return
+
+    v3 = @getGbi1Tri2V3(pc) * mult
+    v4 = @getGbi1Tri2V4(pc) * mult
+    v5 = @getGbi1Tri2V5(pc) * mult
+    #flag = @getGbi0Tri1Flag(pc)
+    didSucceed = @prepareTriangle v3, v4, v5
+
+    if didSucceed is false
+      return
+
+    pc = @dlistStack[@dlistStackPointer].pc
+    cmd = @getCommand(pc)
+    func = @currentMicrocodeMap[cmd]
+    if func is @RSP_GBI1_Tri2
+      return #loops until not tri2, then it will drawScene
+
+    if @renderStateChanged is true
+      @drawScene false, @activeTile
     return
 
   RSP_GBI1_ModifyVtx: (pc) ->
-    alert "todo: RSP_GBI1_ModifyVtx"
+    type = @getGbi1Type(pc)
+    vtx = (@getWord0(pc) & 0xFFFF) >>> 1
+    value = @getWord1(pc)
+
+    if vtx > 80
+      return
+
+    switch type
+      when consts.RSP_MV_WORD_OFFSET_POINT_RGBA, consts.RSP_MV_WORD_OFFSET_POINT_XYSCREEN, consts.RSP_MV_WORD_OFFSET_POINT_ZSCREEN, consts.RSP_MV_WORD_OFFSET_POINT_ST
+        @modifyVertexInfo type, vtx, value
+
     return
 
   RSP_S2DEX_SPObjLoadTxtr_Ucode1: (pc) ->
-    alert "todo: RSP_S2DEX_SPObjLoadTxtr_Ucode1"
+    @videoLog  "todo: RSP_S2DEX_SPObjLoadTxtr_Ucode1"
     return
-
 
   processLights: (vo, i, a, sMult, tMult) ->
     `const n = this.normalMat`
@@ -876,6 +911,56 @@ class C1964jsVideoHLE
       @processShades vo, i, a, sMult, tMult
     else
       @processPrims vo, i, a, sMult, tMult
+    return
+
+  modifyVertexInfo: (type, vtx, value) ->
+    switch type
+      when consts.RSP_MV_WORD_OFFSET_POINT_RGBA   # Modify RGBA
+        alert "RSP_MV_WORD_OFFSET_POINT_RGBA"
+        # uint32 r = (value>>24)&0xFF
+        # uint32 g = (value>>16)&0xFF
+        # uint32 b = (value>>8)&0xFF
+        # uint32 a = val&0xFF
+        # g_dwVtxDifColor[vertex] = COLOR_RGBA(r, g, b, a);
+      when consts.RSP_MV_WORD_OFFSET_POINT_XYSCREEN   # Modify X,Y
+        alert "RSP_MV_WORD_OFFSET_POINT_XYSCREEN"
+        # uint16 nX = (uint16)(val>>16);
+        # short x = *((short*)&nX);
+        # x /= 4;
+
+        # uint16 nY = uint16(val&0xFFFF);
+        # short y = *((short*)&nY);
+        # y /= 4;
+
+        # # Should do viewport transform.
+
+        # x -= windowSetting.uViWidth/2;
+        # y = windowSetting.uViHeight/2-y;
+
+        # # if( options.bEnableHacks && ((*g_GraphicsInfo.VI_X_SCALE_REG)&0xF) != 0 )
+        # # {
+        # #   # Tarzan
+        # #   # I don't know why Tarzan is different
+        # #   SetVertexXYZ(vertex, x/windowSetting.fViWidth, y/windowSetting.fViHeight, g_vecProjected[vertex].z);
+        # # }
+        # # else
+        # # {
+        #   # Toy Story 2 and other games
+        # SetVertexXYZ(vertex, x*2/windowSetting.fViWidth, y*2/windowSetting.fViHeight, g_vecProjected[vertex].z);
+        # # }
+
+      when consts.RSP_MV_WORD_OFFSET_POINT_ZSCREEN    # Modify C
+        alert "RSP_MV_WORD_OFFSET_POINT_XYSCREEN"
+        # int z = val>>16;
+
+        # SetVertexXYZ(vertex, g_vecProjected[vertex].x, g_vecProjected[vertex].y, (((float)z/0x03FF)+0.5f)/2.0f );
+      when consts.RSP_MV_WORD_OFFSET_POINT_ST   # Texture
+        alert "RSP_MV_WORD_OFFSET_POINT_ST"
+        # short tu = short(val>>16);
+        # short tv = short(val & 0xFFFF);
+        # float ftu = tu / 32.0f;
+        # float ftv = tv / 32.0f;
+        # CRender::g_pRender->SetVtxTextureCoord(vertex, ftu/gRSP.fTexScaleX, ftv/gRSP.fTexScaleY);
     return
 
   DLParser_SetCImg: (pc) ->
@@ -977,6 +1062,8 @@ class C1964jsVideoHLE
             @setAmbientLight @getGbi0MoveWordValue(pc)
           else
             @setLightCol light, @getGbi0MoveWordValue(pc)
+      when consts.RSP_MOVE_WORD_POINTS
+        alert "RSP_MOVE_WORD_POINTS"
     return
 
   setAmbientLight: (col) ->
@@ -1172,11 +1259,11 @@ class C1964jsVideoHLE
     return
 
   RSP_GBI1_RDPHalf_Cont: (pc) ->
-    @videoLog "TODO: RSP_GBI1_RDPHalf_Cont"
+    #@videoLog "TODO: RSP_GBI1_RDPHalf_Cont"
     return
 
   RSP_GBI1_RDPHalf_2: (pc) ->
-    @videoLog "TODO: RSP_GBI1_RDPHalf_2"
+    #@videoLog "TODO: RSP_GBI1_RDPHalf_2"
     return
 
   RSP_GBI1_RDPHalf_1: (pc) ->
@@ -1184,7 +1271,31 @@ class C1964jsVideoHLE
     return
 
   RSP_GBI1_Line3D: (pc) ->
-    @videoLog "TODO: RSP_GBI1_Line3D"
+    mult = @vertexMult
+    v0 = @getGbi1Line3dV0(pc) * mult
+    v1 = @getGbi1Line3dV1(pc) * mult
+    v2 = @getGbi1Line3dV2(pc) * mult
+    v3 = @getGbi1Line3dV3(pc) * mult
+    #flag = @getGbi0Tri1Flag(pc)
+    didSucceed = @prepareTriangle v0, v1, v2
+
+    if didSucceed is false
+      return
+
+    #flag = @getGbi0Tri1Flag(pc)
+    didSucceed = @prepareTriangle v2, v3, v0
+
+    if didSucceed is false
+      return
+
+    pc = @dlistStack[@dlistStackPointer].pc
+    cmd = @getCommand(pc)
+    func = @currentMicrocodeMap[cmd]
+    if func is @RSP_GBI1_Line3D
+      return #loops until not tri2, then it will drawScene
+
+    if @renderStateChanged is true
+      @drawScene false, @activeTile
     return
 
   RSP_GBI1_ClearGeometryMode: (pc) ->
@@ -1291,7 +1402,7 @@ class C1964jsVideoHLE
     return
 
   RSP_GBI1_Tri1: (pc) ->
-    mult = 1.0 / @vertexMultVals[@ucode]
+    mult = @vertexMult
     v0 = @getGbi0Tri1V0(pc) * mult
     v1 = @getGbi0Tri1V1(pc) * mult
     v2 = @getGbi0Tri1V2(pc) * mult
@@ -1387,15 +1498,15 @@ class C1964jsVideoHLE
 
   DLParser_RDPLoadSynch: (pc) ->
     @renderStateChanged = true
-    @videoLog "TODO: DLParser_RDPLoadSynch"
+    #@videoLog "TODO: DLParser_RDPLoadSynch"
     return
 
   DLParser_RDPPipeSynch: (pc) ->
-    @videoLog "TODO: DLParser_RDPPipeSynch"
+    #@videoLog "TODO: DLParser_RDPPipeSynch"
     return
 
   DLParser_RDPTileSynch: (pc) ->
-    @videoLog "TODO: DLParser_RDPTileSynch"
+    #@videoLog "TODO: DLParser_RDPTileSynch"
     return
 
   DLParser_RDPFullSynch: (pc) ->
@@ -1579,7 +1690,7 @@ class C1964jsVideoHLE
     @triVertices[offset+1] = vertex.y
     @triVertices[offset+2] = vertex.z
     @triVertices[offset+3] = vertex.w
-    @triVertices[offset+3] = 1.0 if vertex.w == 0
+    @triVertices[offset+3] = 1.0 if vertex.w is 0
 
     colorOffset = @triangleVertexColorBuffer.numItems++ << 2 # postfix addition is intentional for performance
     @triColorVertices[colorOffset]     = vertex.r
