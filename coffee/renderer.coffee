@@ -148,6 +148,8 @@ class C1964jsRenderer
           switch tile.siz
             when consts.TXT_SIZE_16b # rgba5551
               @convertRGBA16 texture, tmem, tileWidth, tileHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride
+            when consts.TXT_SIZE_32b # rgba32
+              @convertRGBA32 texture, tmem, tileWidth, tileHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride
             else
               console.error "TODO: tile format " + tile.fmt + ", tile.size:" + tile.siz
         when consts.TXT_FMT_IA # ia
@@ -222,6 +224,33 @@ class C1964jsRenderer
       j++
       srcRowOffset += srcRowStride
       dstRowOffset += dstRowStride
+    return
+
+  convertRGBA32: (texture, tm, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
+    `const tmem = tm` 
+    `const height = texHeight|0`
+    `const width = texWidth|0`
+
+    j=-height
+    while j < 0
+      i=-width
+      srcOffset = srcRowOffset|0
+      dstOffset = dstRowOffset|0
+      while i < 0
+        r = tmem[srcOffset]|0
+        g = tmem[srcOffset+1]|0
+        b = tmem[srcOffset+2]|0
+        a = tmem[srcOffset+3]|0
+        i++
+        texture[dstOffset] = r
+        srcOffset += 4
+        texture[dstOffset + 1] = g
+        texture[dstOffset + 2] = b
+        texture[dstOffset + 3] = a
+        dstOffset += 4
+      j++
+      srcRowOffset += srcRowStride<<1
+      dstRowOffset += dstRowStride<<1
     return
 
   convertIA8: (texture, tm, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->

@@ -21,10 +21,7 @@ class C1964jsVideoHLEle extends C1964jsVideoHLE
     if (addr + 64 > @core.currentRdramSize)
       console.warn "loading matrix beyond ram size"
       return
-    i = undefined
-    j = undefined
     a = addr
-    b = undefined
     k = 0
     i = 0
     `const u8 = this.core.memory.u8`
@@ -44,7 +41,7 @@ class C1964jsVideoHLEle extends C1964jsVideoHLE
 
 
 C1964jsVideoHLEle::getGbi0MoveWordOffset = (pc) ->
-  @core.memory.u8[pc+2]<<8 | @core.memory.u8[pc+1]
+  @core.memory.u32[pc>>2]>>>8&0xffff
 
 C1964jsVideoHLEle::getGbi0MoveWordType = (pc) ->
   @core.memory.u8[pc]
@@ -163,15 +160,12 @@ C1964jsVideoHLEle::getVertexAlpha = (pc) ->
   @core.memory.u8[pc+12]
 
 C1964jsVideoHLEle::getVertexNormalX = (pc) ->
-  #(@core.memory.u8[pc+15] << 24 | @core.memory.u8[pc+14] << 16 | @core.memory.u8[pc+13] << 8 | @core.memory.u8[pc+12]) >> 24
   @core.memory.u8[pc+15]<<24>>24
 
 C1964jsVideoHLEle::getVertexNormalY = (pc) ->
-  #(@core.memory.u8[pc+15] << 24 | @core.memory.u8[pc+14] << 16 | @core.memory.u8[pc+13] << 8 | @core.memory.u8[pc+12]) << 8 >> 24
   @core.memory.u8[pc+14]<<24>>24
 
 C1964jsVideoHLEle::getVertexNormalZ = (pc) ->
-  #(@core.memory.u8[pc+15] << 24 | @core.memory.u8[pc+14] << 16 | @core.memory.u8[pc+13] << 8 | @core.memory.u8[pc+12]) << 16 >> 24
   @core.memory.u8[pc+13]<<24>>24
 
 C1964jsVideoHLEle::getVertexNormalA = (pc) ->
@@ -305,22 +299,19 @@ C1964jsVideoHLEle::getTexRectXl = (pc) ->
 
 #Y coordinate of upper left
 C1964jsVideoHLEle::getTexRectYl = (pc) ->
-  #(@core.memory.u32[(pc+4)>>>2]) & 0xFFF
   @core.memory.u16[(pc+4)>>>1] & 0xFFF
 
 C1964jsVideoHLEle::getTexRectS = (pc) ->
-  #(@core.memory.u8[pc+15] << 24 | @core.memory.u8[pc+14] << 16 | @core.memory.u8[pc+13] << 8 | @core.memory.u8[pc+12]) >>> 16 & 0xFFFF
   @core.memory.u16[(pc+14)>>>1]
 
 C1964jsVideoHLEle::getTexRectT = (pc) ->
-  #(@core.memory.u8[pc+15] << 24 | @core.memory.u8[pc+14] << 16 | @core.memory.u8[pc+13] << 8 | @core.memory.u8[pc+12]) & 0xFFFF
   @core.memory.u16[(pc+12)>>>1]
 
 C1964jsVideoHLEle::getTexRectDsDx = (pc) ->
-  @core.memory.getInt32(@core.memory.u8, pc + 20, @core.memory.u32) >>> 16 & 0xFFFF
+  @core.memory.u32[(pc + 20)>>>2] >>> 16 & 0xFFFF
 
 C1964jsVideoHLEle::getTexRectDtDy = (pc) ->
-  @core.memory.getInt32(@core.memory.u8, pc + 20, @core.memory.u32) & 0xFFFF
+  @core.memory.u32[(pc + 20)>>>2] & 0xFFFF
 
 #is this right?
 C1964jsVideoHLEle::getGbi1Type = (pc) ->

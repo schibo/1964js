@@ -485,7 +485,6 @@ class C1964jsEmulator
           if @interval is 4
             @interval = 0
             @repaintWrapper()
-            #@cp0[consts.COUNT] += 625000*2 #todo: set count to count + @m*2 when count is requested in code
             @cp0[consts.COUNT] += 625000*2 #todo: set count to count + @m*2 when count is requested in code
             @interrupts.triggerCompareInterrupt 0, false
             @interrupts.triggerVIInterrupt 0, false #if ((@memory.getInt32(@memory.miUint8Array, consts.MI_INTR_REG, core.memory.miUint32Array) & consts.MI_INTR_VI) isnt 0)
