@@ -1580,13 +1580,15 @@ class C1964jsVideoHLE
     if bytesToXfer > 4096
       console.error "LoadTile is making too large of a transfer. "+bytesToXfer+" bytes"
     i=0
-    `const u8 = this.core.memory.u8
-    addr = this.texImg.addr|0
-    const tmem = this.tmem`
-    while i < bytesToXfer
-      tmem[i] = u8[addr]
-      i++
-      addr++
+
+    if typeof @texImg.addr isnt 'undefined'
+      `const u8 = this.core.memory.u8
+      var addr = this.texImg.addr|0
+      const tmem = this.tmem`
+      while i < bytesToXfer
+        tmem[i] = u8[addr]
+        i++
+        addr++
     return
 
   DLParser_SetTile: (pc) ->

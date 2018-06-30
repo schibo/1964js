@@ -85,8 +85,8 @@ class C1964jsRendererLE extends C1964jsRenderer
         texture[dstOffset + 3] = a
         dstOffset += 4
       j++
-      srcRowOffset += srcRowStride<<1
-      dstRowOffset += dstRowStride<<1
+      srcRowOffset += srcRowStride
+      dstRowOffset += dstRowStride
     return
 
 
@@ -117,10 +117,8 @@ class C1964jsRendererLE extends C1964jsRenderer
 
   convertI4: (texture, tm, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
     `const tmem = tm`
-    `const pal = palette`
     `const height = texHeight|0`
     `const width = texWidth|0`
-    `const u8 = ram`
 
     j=-height
     while j < 0
@@ -128,13 +126,13 @@ class C1964jsRendererLE extends C1964jsRenderer
       srcOffset = srcRowOffset
       dstOffset = dstRowOffset
       while i < 0
-        bHi = tmem[srcOffset^3]&0xF0 >>> 4
+        bHi = tmem[srcOffset^3]&0xF0
         bLo = tmem[srcOffset^3]&0xF
-        colorHi = fourtoeight[bHi]
-        colorLo = fourtoeight[bLo]
+        colorHi = bHi | (bHi>>>4)
+        colorLo = bLo | (bLo<<4)
         i++
         texture[dstOffset] = colorHi
-        srcOffset += 2
+        srcOffset++
         texture[dstOffset + 1] = colorHi
         texture[dstOffset + 2] = colorHi
         texture[dstOffset + 3] = colorHi
@@ -145,7 +143,7 @@ class C1964jsRendererLE extends C1964jsRenderer
         dstOffset += 8
       j++
       srcRowOffset += srcRowStride
-      dstRowOffset += dstRowStride<<2
+      dstRowOffset += dstRowStride
     return
 
   convertI8: (texture, tm, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
@@ -193,14 +191,14 @@ class C1964jsRendererLE extends C1964jsRenderer
         colorLo = u8[pal+bLo]<<8 | u8[pal+bLo+1]
         i++
         texture[dstOffset] = fivetoeight[colorHi >> 11 & 0x1F]
-        srcOffset += 2
+        srcOffset += 1
         texture[dstOffset + 1] = fivetoeight[colorHi >> 6 & 0x1F]
         texture[dstOffset + 2] = fivetoeight[colorHi >> 1 & 0x1F]
-        texture[dstOffset + 3] = 255 #colorHi << 31 >> 31
+        texture[dstOffset + 3] = colorHi << 31 >> 31
         texture[dstOffset + 4] = fivetoeight[colorLo >> 11 & 0x1F]
         texture[dstOffset + 5] = fivetoeight[colorLo >> 6 & 0x1F]
         texture[dstOffset + 6] = fivetoeight[colorLo >> 1 & 0x1F]
-        texture[dstOffset + 7] = 255 # colorLo << 31 >> 31
+        texture[dstOffset + 7] = colorLo << 31 >> 31
         dstOffset += 8
       j++
       srcRowOffset += srcRowStride
@@ -227,7 +225,7 @@ class C1964jsRendererLE extends C1964jsRenderer
         texture[dstOffset] = fivetoeight[color >> 11 & 0x1F]
         texture[dstOffset + 1] = fivetoeight[color >> 6 & 0x1F]
         texture[dstOffset + 2] = fivetoeight[color >> 1 & 0x1F]
-        texture[dstOffset + 3] = 255 # colorLo << 31 >> 31
+        texture[dstOffset + 3] = color << 31 >> 31
         dstOffset += 4
       j++
       srcRowOffset += srcRowStride
@@ -314,7 +312,6 @@ class C1964jsRendererLE extends C1964jsRenderer
     `const tmem = tm` 
     `const height = texHeight|0`
     `const width = texWidth|0`
-
     j=-height
     while j < 0
       i=-width
