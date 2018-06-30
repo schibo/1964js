@@ -115,6 +115,65 @@ class C1964jsRendererLE extends C1964jsRenderer
       dstRowOffset += dstRowStride
     return
 
+  convertI4: (texture, tm, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
+    `const tmem = tm`
+    `const pal = palette`
+    `const height = texHeight|0`
+    `const width = texWidth|0`
+    `const u8 = ram`
+
+    j=-height
+    while j < 0
+      i=-width
+      srcOffset = srcRowOffset
+      dstOffset = dstRowOffset
+      while i < 0
+        bHi = tmem[srcOffset^3]&0xF0 >>> 4
+        bLo = tmem[srcOffset^3]&0xF
+        colorHi = fourtoeight[bHi]
+        colorLo = fourtoeight[bLo]
+        i++
+        texture[dstOffset] = colorHi
+        srcOffset += 2
+        texture[dstOffset + 1] = colorHi
+        texture[dstOffset + 2] = colorHi
+        texture[dstOffset + 3] = colorHi
+        texture[dstOffset + 4] = colorLo
+        texture[dstOffset + 5] = colorLo
+        texture[dstOffset + 6] = colorLo
+        texture[dstOffset + 7] = colorLo
+        dstOffset += 8
+      j++
+      srcRowOffset += srcRowStride
+      dstRowOffset += dstRowStride<<2
+    return
+
+  convertI8: (texture, tm, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
+    `const tmem = tm` 
+    `const height = texHeight|0`
+    `const width = texWidth|0`
+
+    j=-height
+    while j < 0
+      i=-width
+      srcOffset = srcRowOffset
+      dstOffset = dstRowOffset
+      while i < 0
+        b = tmem[srcOffset^3]|0
+        i++
+        I = b
+        srcOffset += 1
+        texture[dstOffset] = I
+        texture[dstOffset + 1] = I
+        texture[dstOffset + 2] = I
+        texture[dstOffset + 3] = I
+        dstOffset += 4
+      j++
+      srcRowOffset += srcRowStride
+      dstRowOffset += dstRowStride
+    return
+
+
   convertCI4_RGBA16: (texture, tm, palette, ram, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
     `const tmem = tm`
     `const pal = palette`
