@@ -500,6 +500,11 @@ class C1964jsVideoHLE
       @core.showFB = false
       @resetState()
 
+    wireframe = document.getElementById("wireframe")
+    @core.settings.wireframe = false
+    @core.settings.wireframe = true if wireframe isnt null and wireframe.checked
+
+
     @core.webGL.beginDList()
     @dlParserProcess()
 
