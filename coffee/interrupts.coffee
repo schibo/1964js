@@ -528,9 +528,6 @@ C1964jsInterrupts = (core, cp0) ->
             ###
             core.videoHLE = new C1964jsVideoHLE(core, core.webGL.gl)
 
-        wireframe = document.getElementById("wireframe")
-        core.settings.wireframe = false
-        core.settings.wireframe = true if wireframe isnt null and wireframe.checked
         repeatDList = document.getElementById("repeatDList")
         core.settings.repeatDList = false
         core.settings.repeatDList = true if repeatDList isnt null and repeatDList.checked
