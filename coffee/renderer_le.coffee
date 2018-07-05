@@ -185,10 +185,10 @@ class C1964jsRendererLE extends C1964jsRenderer
       srcOffset = srcRowOffset
       dstOffset = dstRowOffset
       while i < 0
-        bHi = tmem[srcOffset^3]&0xF0 >>> 4
-        bLo = tmem[srcOffset^3]&0xF
-        colorHi = u8[(pal+bHi)^3]<<8 | u8[(pal+bHi+1)^3]
-        colorLo = u8[(pal+bLo)^3]<<8 | u8[(pal+bLo+1)^3]
+        bHi = u8[srcOffset^3]&0xF0 >>> 4
+        bLo = u8[srcOffset^3]&0xF
+        colorHi = tlut[(pal+bHi)^3]<<8 | tlut[(pal+bHi+1)^3]
+        colorLo = tlut[(pal+bLo)^3]<<8 | tlut[(pal+bLo+1)^3]
         i++
         texture[dstOffset] = fivetoeight[colorHi >> 11 & 0x1F]
         srcOffset += 1
@@ -205,12 +205,13 @@ class C1964jsRendererLE extends C1964jsRenderer
       dstRowOffset += dstRowStride
     return
 
-  convertCI8_RGBA16: (texture, tm, palette, ram, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
+  convertCI8_RGBA16: (texture, tm, palette, tlut, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
     `const tmem = tm`
-    `const pal = palette`
     `const height = texHeight|0`
     `const width = texWidth|0`
-    `const u8 = ram`
+    pal = new Uint16Array(256)
+    for i in [0...256]
+      pal[i] = (tlut[(palette + (i<<1) + 0)^3]<<8) | tlut[(palette + (i<<1) + 1)^3]
 
     j=-height
     while j < 0
@@ -218,8 +219,7 @@ class C1964jsRendererLE extends C1964jsRenderer
       srcOffset = srcRowOffset
       dstOffset = dstRowOffset
       while i < 0
-        off16 = pal + (tmem[srcOffset^3]<<1)
-        color = u8[off16^3]<<8 | u8[(off16+1)^3]
+        color = pal[tmem[srcOffset^3]]
         i++
         srcOffset += 1
         texture[dstOffset] = fivetoeight[color >> 11 & 0x1F]

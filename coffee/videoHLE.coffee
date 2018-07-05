@@ -42,6 +42,7 @@ class C1964jsVideoHLE
     @MAX_VERTICES = 80
     @MAX_TILES = 8
     @tmem = new Uint8Array(1024 * 4)
+    @tlut = new Uint8Array(1024 * 4)
     @activeTile = 0
     @textureTile = []
     @zDepthImage = {fmt: 0, siz: 0, width: 0, addr: 0}
@@ -1542,7 +1543,20 @@ class C1964jsVideoHLE
     return
 
   DLParser_LoadTLut: (pc) ->
-    @videoLog "TODO: DLParser_LoadTLut"
+    tile = @getSetTileSizeTile(pc)
+    uls = @textureTile[tile].uls = @getSetTileSizeUls(pc)
+    ult = @textureTile[tile].ult = @getSetTileSizeUlt(pc)
+    lrs = @textureTile[tile].lrs = @getSetTileSizeLrs(pc)
+    lrt = @textureTile[tile].lrt = @getSetTileSizeLrt(pc)
+
+    ramOffset = @texImg.addr + (ult>>>2) * ((@texImg.width << consts.TXT_SIZE_16b)>>>1) + (((uls>>>2)<<consts.TXT_SIZE_16b)>>>1)
+    bytes = (((lrs - uls)>>>2)+1)<<1
+    tmemOffset = @textureTile[tile].tmem<<3
+
+    `const tlut = this.tlut`
+    `const ram = this.core.memory.u8`
+    for i in [0...bytes]
+      tlut[tmemOffset+i] = ram[ramOffset+i]
     return
 
   DLParser_SetTileSize: (pc) ->
@@ -1911,8 +1925,9 @@ class C1964jsVideoHLE
       tile = @textureTile[tileno]
       tileWidth = ((tile.lrs >> 2) + 1) - tile.uls
       tileHeight = ((tile.lrt >> 2) + 1) - tile.ult
-      tData = @renderer.formatTexture(tile, @tmem, this)
-
+      tData = undefined
+      if tileWidth > 0 and tileHeight > 0
+        tData = @renderer.formatTexture(tile, @tmem, this)
       if tData isnt undefined and tData.textureData isnt undefined
         textureData = tData.textureData
         @gl.activeTexture(@gl.TEXTURE0 + tileno)
@@ -1933,20 +1948,35 @@ class C1964jsVideoHLE
         @gl.texParameterf(@gl.TEXTURE_2D, @gl.TEXTURE_MIN_FILTER, @gl.NEAREST)
         @gl.texImage2D(@gl.TEXTURE_2D, 0, @gl.RGBA, tileWidth, tileHeight, 0, @gl.RGBA, @gl.UNSIGNED_BYTE, textureData)
 
-    #@gl.uniform1i @core.webGL.shaderProgram.otherModeL, @otherModeL
-    #@gl.uniform1i @core.webGL.shaderProgram.otherModeH, @otherModeH
-    @gl.uniform1i @core.webGL.shaderProgram.cycleType, @cycleType
-    @gl.uniform1i @core.webGL.shaderProgram.uAlphaTestEnabled, @alphaTestEnabled
+      # if @primColor.length > 0
+      #   @gl.uniform4fv @core.webGL.shaderProgram.uPrimColor, @primColor
 
-    # Matrix Uniforms
-    @gl.uniformMatrix4fv(@core.webGL.shaderProgram.pMatrixUniform, false, @gRSP.projectionMtxs[@gRSP.projectionMtxTop]);
-    @gl.uniformMatrix4fv(@core.webGL.shaderProgram.mvMatrixUniform, false, @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop]);
+      # if @fillColor.length > 0
+      #   @gl.uniform4fv @core.webGL.shaderProgram.uFillColor, @fillColor
 
-    if @triangleVertexPositionBuffer.numItems > 0
-      if @core.settings.wireframe is true
-        @gl.drawArrays @gl.LINES, 0, @triangleVertexPositionBuffer.numItems
-      else
-        @gl.drawArrays @gl.TRIANGLES, 0, @triangleVertexPositionBuffer.numItems
+      # if @blendColor.length > 0
+      #   @gl.uniform4fv @core.webGL.shaderProgram.uBlendColor, @blendColor
+
+      # if @envColor.length > 0
+      #   @gl.uniform4fv @core.webGL.shaderProgram.uEnvColor, @envColor
+
+      # if isFillRect is true
+      #   @cycleType = 3
+
+      #@gl.uniform1i @core.webGL.shaderProgram.otherModeL, @otherModeL
+      #@gl.uniform1i @core.webGL.shaderProgram.otherModeH, @otherModeH
+      @gl.uniform1i @core.webGL.shaderProgram.cycleType, @cycleType
+      @gl.uniform1i @core.webGL.shaderProgram.uAlphaTestEnabled, @alphaTestEnabled
+
+      # Matrix Uniforms
+      @gl.uniformMatrix4fv(@core.webGL.shaderProgram.pMatrixUniform, false, @gRSP.projectionMtxs[@gRSP.projectionMtxTop]);
+      @gl.uniformMatrix4fv(@core.webGL.shaderProgram.mvMatrixUniform, false, @gRSP.modelviewMtxs[@gRSP.modelViewMtxTop]);
+
+      if @triangleVertexPositionBuffer.numItems > 0
+        if @core.settings.wireframe is true
+          @gl.drawArrays @gl.LINES, 0, @triangleVertexPositionBuffer.numItems
+        else
+          @gl.drawArrays @gl.TRIANGLES, 0, @triangleVertexPositionBuffer.numItems
 
     @triangleVertexPositionBuffer.numItems = 0
     @triangleVertexColorBuffer.numItems = 0
