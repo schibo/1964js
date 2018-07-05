@@ -400,7 +400,7 @@ class C1964jsRenderer
         texture[dstOffset] = fivetoeight[color >>> 11 & 0x1F]
         texture[dstOffset + 1] = fivetoeight[color >>> 6 & 0x1F]
         texture[dstOffset + 2] = fivetoeight[color >>> 1 & 0x1F]
-        texture[dstOffset + 3] = colorLo << 31 >> 31
+        texture[dstOffset + 3] = color << 31 >> 31
         dstOffset += 4
       j++
       srcRowOffset += srcRowStride

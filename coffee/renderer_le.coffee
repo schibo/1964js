@@ -172,12 +172,11 @@ class C1964jsRendererLE extends C1964jsRenderer
     return
 
 
-  convertCI4_RGBA16: (texture, tm, palette, ram, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
+  convertCI4_RGBA16: (texture, tm, palette, tlut, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
     `const tmem = tm`
     `const pal = palette`
     `const height = texHeight|0`
     `const width = texWidth|0`
-    `const u8 = ram`
 
     j=-height
     while j < 0
@@ -185,8 +184,8 @@ class C1964jsRendererLE extends C1964jsRenderer
       srcOffset = srcRowOffset
       dstOffset = dstRowOffset
       while i < 0
-        bHi = u8[srcOffset^3]&0xF0 >>> 4
-        bLo = u8[srcOffset^3]&0xF
+        bHi = tmem[srcOffset^3]&0xF0 >>> 4
+        bLo = tmem[srcOffset^3]&0xF
         colorHi = tlut[(pal+bHi)^3]<<8 | tlut[(pal+bHi+1)^3]
         colorLo = tlut[(pal+bLo)^3]<<8 | tlut[(pal+bLo+1)^3]
         i++

@@ -17,7 +17,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 
 #segments must be at least 64KB in size for lookup table.
 `const MEMORY_START_RDRAM = 0x00000000`
-`const MEMORY_SIZE_RDRAM = 0x800000` #4MB RDRAM + 4MB Expansion = 8MB
 `const MEMORY_START_RAMREGS4 = 0x03F04000`
 `const MEMORY_SIZE_RAMREGS4 = 0x10000`
 `const MEMORY_START_RAMREGS0 = 0x03F00000`
@@ -913,22 +912,24 @@ class C1964jsMemory
 
     @writeRom8 = (val, a) =>
       alert "attempt to overwrite rom!"
-      `const off_ = a - MEMORY_START_ROM_IMAGE`
-      this.romUint8Array[off_] = val
+      # `const off_ = a - MEMORY_START_ROM_IMAGE`
+      # this.romUint8Array[off_] = val
       return
 
     @writeRom16 = (val, a) =>
-      `const off_ = a - MEMORY_START_ROM_IMAGE`
-      this.romUint8Array[off_] = val >> 8
-      this.romUint8Array[off_ + 1] = val
+      alert "attempt to overwrite rom!"
+      # `const off_ = a - MEMORY_START_ROM_IMAGE`
+      # this.romUint8Array[off_] = val >> 8
+      # this.romUint8Array[off_ + 1] = val
       return
 
     @writeRom32 = (val, a) =>
-      `const off_ = a - MEMORY_START_ROM_IMAGE`
-      this.romUint8Array[off_] = val >> 24
-      this.romUint8Array[off_ + 1] = val >> 16
-      this.romUint8Array[off_ + 2] = val >> 8
-      this.romUint8Array[off_ + 3] = val
+      alert "attempt to overwrite rom!"
+      # `const off_ = a - MEMORY_START_ROM_IMAGE`
+      # this.romUint8Array[off_] = val >> 24
+      # this.romUint8Array[off_ + 1] = val >> 16
+      # this.romUint8Array[off_ + 2] = val >> 8
+      # this.romUint8Array[off_ + 3] = val
       return
 
     @writeC1A3_8 = (val, a) =>
@@ -1087,7 +1088,7 @@ class C1964jsMemory
     @initRegion 0, 0x80000000, @readTLB8, @writeTLB8, @readTLB16, @writeTLB16, @readTLB32, @writeTLB32
     @initRegion 0x80000000, 0x40000000, @readDummy8, @writeDummy8, @readDummy16, @writeDummy16, @readDummy32, @writeDummy32
     @initRegion 0xC0000000, 0x40000000, @readTLB8, @writeTLB8, @readTLB16, @writeTLB16, @readTLB32, @writeTLB32
-    @initRegion MEMORY_START_RDRAM, MEMORY_SIZE_RDRAM, @readRdram8, @writeRdram8, @readRdram16, @writeRdram16, @readRdram32, @writeRdram32
+    @initRegion MEMORY_START_RDRAM, @core.getRdramSize(), @readRdram8, @writeRdram8, @readRdram16, @writeRdram16, @readRdram32, @writeRdram32
     @initRegion MEMORY_START_RAMREGS4, MEMORY_SIZE_RAMREGS4, @readRamRegs4_8, @writeRamRegs4_8, @readRamRegs4_16, @writeRamRegs4_16, @readRamRegs4_32, @writeRamRegs4_32
     @initRegion MEMORY_START_SPMEM, MEMORY_SIZE_SPMEM, @readSpMem8, @writeSpMem8, @readSpMem16, @writeSpMem16, @readSpMem32, @writeSpMem32
     @initRegion MEMORY_START_SPREG_1, MEMORY_SIZE_SPREG_1, @readSpReg1_8, @writeSpReg1_8, @readSpReg1_16, @writeSpReg1_16, @readSpReg1_32, @writeSpReg1_32

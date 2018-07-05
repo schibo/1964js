@@ -48,7 +48,7 @@ class C1964jsDmaLE
         remaining = end - transfer
       `const d = this.memory.u8`
       `const r = this.memory.romUint8Array`
-      if (to & 3 is 0) and (from & 3 is 0)
+      if ((to & 3) is 0) and ((from & 3) is 0)
         while transfer >= 0
           d[to] = r[from]
           to++
@@ -75,6 +75,9 @@ class C1964jsDmaLE
     @interrupts.clrFlag @memory.piUint8Array, consts.PI_STATUS_REG, consts.PI_STATUS_IO_BUSY | consts.PI_STATUS_DMA_BUSY
     @interrupts.triggerPIInterrupt pc, isDelaySlot
     return
+
+  copyDramToCart: (pc, isDelaySlot) ->
+    alert "copyDramToCart"
 
   copySiToDram: (pc, isDelaySlot) ->
     end = 63 #read 64 bytes. Is there an si_wr_len_reg?
@@ -107,9 +110,9 @@ class C1964jsDmaLE
 
     if @audio.processAudio(@memory, from, length) is false
       @interrupts.clrFlag @memory.aiUint8Array, consts.AI_STATUS_REG, consts.AI_STATUS_FIFO_FULL
- 
-    @interrupts.setFlag @memory.aiUint8Array, consts.AI_STATUS_REG, consts.AI_STATUS_FIFO_FULL
-    #@interrupts.triggerAIInterrupt 0, false
+      @interrupts.triggerAIInterrupt 0, false
+    else
+      @interrupts.setFlag @memory.aiUint8Array, consts.AI_STATUS_REG, consts.AI_STATUS_FIFO_FULL
     return
 
   copyDramToSi: (pc, isDelaySlot) ->
@@ -144,9 +147,9 @@ class C1964jsDmaLE
     to &= 0x00001fff
     from &= 0x00ffffff
 
-    if (to & 3 is 0) and (from & 3 is 0)
+    if ((to & 3) is 0) and ((from & 3) is 0)
       while end >= 0
-        @memory.spMemUint8Array[to^3] = @memory.u8[from^3]
+        @memory.spMemUint8Array[to] = @memory.u8[from]
         to++
         from++
         --end

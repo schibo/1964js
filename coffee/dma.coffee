@@ -68,6 +68,9 @@ class C1964jsDma
     @interrupts.triggerPIInterrupt pc, isDelaySlot
     return
 
+  copyDramToCart: (pc, isDelaySlot) ->
+    alert "copyDramToCart"
+
   copySiToDram: (pc, isDelaySlot) ->
     end = 63 #read 64 bytes. Is there an si_wr_len_reg?
     to = @memory.getInt32(@memory.siUint8Array, consts.SI_DRAM_ADDR_REG)

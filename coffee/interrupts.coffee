@@ -202,7 +202,6 @@ C1964jsInterrupts = (core, cp0) ->
         core.dma.copyCartToDram pc, isFromDelaySlot
       when consts.PI_RD_LEN_REG
         core.memory.setInt32 core.memory.piUint8Array, offset, value, core.memory.piUint32Array
-        alert "write to PI_RD_LEN_REG"
         core.dma.copyDramToCart pc, isFromDelaySlot
       when consts.PI_DRAM_ADDR_REG
         core.memory.setInt32 core.memory.piUint8Array, offset, value, core.memory.piUint32Array

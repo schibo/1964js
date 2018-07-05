@@ -210,9 +210,7 @@ class C1964jsEmulator
     @errorElement = document.getElementById("error")
     @p = new Int32Array(1)
     #set ram size
-    MEMORY_SIZE_NO_EXPANSION = 0x400000
-    MEMORY_SIZE_WITH_EXPANSION = 0x800000
-    @currentRdramSize = MEMORY_SIZE_WITH_EXPANSION
+    @currentRdramSize = @getRdramSize()
     @crc1 = 0
     @crc2 = 0
     @romName = new Uint8Array 20
@@ -304,6 +302,9 @@ class C1964jsEmulator
       @h[i] = @r[i] >> 31
       i += 1
     return
+
+  getRdramSize: () ->
+    return 0x800000 #4MB RDRAM + 4MB Expansion = 8MB
 
   #swap to 0x80371240
   byteSwap: (rom) ->

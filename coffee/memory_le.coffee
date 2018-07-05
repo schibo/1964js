@@ -17,7 +17,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.#
 
 #segments must be at least 64KB in size for lookup table.
 `const MEMORY_START_RDRAM = 0x00000000`
-`const MEMORY_SIZE_RDRAM = 0x800000` #4MB RDRAM + 4MB Expansion = 8MB
 `const MEMORY_START_RAMREGS4 = 0x03F04000`
 `const MEMORY_SIZE_RAMREGS4 = 0x10000`
 `const MEMORY_START_RAMREGS0 = 0x03F00000`
@@ -833,18 +832,20 @@ class C1964jsMemoryLE extends C1964jsMemory
 
     @writeRom8 = (val, a) =>
       alert "attempt to overwrite rom!"
-      `const off_ = a - MEMORY_START_ROM_IMAGE`
-      @romUint8Array[off_^3] = val
+      # `const off_ = a - MEMORY_START_ROM_IMAGE`
+      # @romUint8Array[off_^3] = val
       return
 
     @writeRom16 = (val, a) =>
-      `const off_ = a - MEMORY_START_ROM_IMAGE`
-      @romUint16Array[off_>>>1^1] = val
+      alert "attempt to overwrite rom!"
+      # `const off_ = a - MEMORY_START_ROM_IMAGE`
+      # @romUint16Array[off_>>>1^1] = val
       return
 
     @writeRom32 = (val, a) =>
-      `const off_ = a - MEMORY_START_ROM_IMAGE`
-      @romUint32Array[off_>>>2] = val
+      alert "attempt to overwrite rom!"
+      # `const off_ = a - MEMORY_START_ROM_IMAGE`
+      # @romUint32Array[off_>>>2] = val
       return
 
     @writeC1A3_8 = (val, a) =>
