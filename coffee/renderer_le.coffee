@@ -85,7 +85,7 @@ class C1964jsRendererLE extends C1964jsRenderer
         texture[dstOffset + 3] = a
         dstOffset += 4
       j++
-      srcRowOffset += srcRowStride
+      srcRowOffset += srcRowStride<<1
       dstRowOffset += dstRowStride
     return
 

@@ -327,18 +327,18 @@ class C1964jsMemory
 
     @readDummy8 = (a) =>
       `const off_ = a & 0xFFFC`
-      this.dummyReadWriteUint8Array[off_]
+      @dummyReadWriteUint8Array[off_]
 
     @readDummy16 = (a) =>
       `const off_ = a & 0xFFFC`
-      this.dummyReadWriteUint8Array[off_] << 8 | this.dummyReadWriteUint8Array[off_ + 1]
+      @dummyReadWriteUint8Array[off_] << 8 | @dummyReadWriteUint8Array[off_ + 1]
 
     @readDummy32 = (a) =>
       `const off_ = a & 0xFFFC`
-      this.dummyReadWriteUint8Array[off_] << 24 | this.dummyReadWriteUint8Array[off_ + 1] << 16 | this.dummyReadWriteUint8Array[off_ + 2] << 8 | this.dummyReadWriteUint8Array[off_ + 3]
+      @dummyReadWriteUint8Array[off_] << 24 | @dummyReadWriteUint8Array[off_ + 1] << 16 | @dummyReadWriteUint8Array[off_ + 2] << 8 | @dummyReadWriteUint8Array[off_ + 3]
 
     @readRdram8 = (a) =>
-      this.u8[a]
+      @u8[a]
 
     @readRdram16 = (a) =>
       `const ram = this.u8`
@@ -350,258 +350,258 @@ class C1964jsMemory
 
     @readRamRegs0_8 = (a) =>
       `const off_ = a - MEMORY_START_RAMREGS0`
-      this.ramRegs0Uint8Array[off_]
+      @ramRegs0Uint8Array[off_]
 
     @readRamRegs0_16 = (a) =>
       `const off_ = (a-MEMORY_START_RAMREGS0)`
-      this.ramRegs0Uint8Array[off_] << 8 | this.ramRegs0Uint8Array[off_ + 1]
+      @ramRegs0Uint8Array[off_] << 8 | @ramRegs0Uint8Array[off_ + 1]
 
     @readRamRegs0_32 = (a) =>
       `const off_ = (a-MEMORY_START_RAMREGS0)`
-      this.ramRegs0Uint8Array[off_] << 24 | this.ramRegs0Uint8Array[off_ + 1] << 16 | this.ramRegs0Uint8Array[off_ + 2] << 8 | this.ramRegs0Uint8Array[off_ + 3]
+      @ramRegs0Uint8Array[off_] << 24 | @ramRegs0Uint8Array[off_ + 1] << 16 | @ramRegs0Uint8Array[off_ + 2] << 8 | @ramRegs0Uint8Array[off_ + 3]
 
     @readRamRegs4_8 = (a) =>
       `const off_ = a - MEMORY_START_RAMREGS4`
-      this.ramRegs4Uint8Array[off_]
+      @ramRegs4Uint8Array[off_]
 
     @readRamRegs4_16 = (a) =>
       `const off_ = (a-MEMORY_START_RAMREGS4)`
-      this.ramRegs4Uint8Array[off_] << 8 | this.ramRegs4Uint8Array[off_ + 1]
+      @ramRegs4Uint8Array[off_] << 8 | @ramRegs4Uint8Array[off_ + 1]
 
     @readRamRegs4_32 = (a) =>
       `const off_ = (a-MEMORY_START_RAMREGS4)`
-      this.ramRegs4Uint8Array[off_] << 24 | this.ramRegs4Uint8Array[off_ + 1] << 16 | this.ramRegs4Uint8Array[off_ + 2] << 8 | this.ramRegs4Uint8Array[off_ + 3]
+      @ramRegs4Uint8Array[off_] << 24 | @ramRegs4Uint8Array[off_ + 1] << 16 | @ramRegs4Uint8Array[off_ + 2] << 8 | @ramRegs4Uint8Array[off_ + 3]
 
     @readRamRegs8_8 = (a) =>
       `const off_ = a - MEMORY_START_RAMREGS8`
-      this.ramRegs8Uint8Array[off_]
+      @ramRegs8Uint8Array[off_]
 
     @readRamRegs8_16 = (a) =>
       `const off_ = (a-MEMORY_START_RAMREGS8)`
-      this.ramRegs8Uint8Array[off_] << 8 | this.ramRegs8Uint8Array[off_ + 1]
+      @ramRegs8Uint8Array[off_] << 8 | @ramRegs8Uint8Array[off_ + 1]
 
     @readRamRegs8_32 = (a) =>
       `const off_ = (a-MEMORY_START_RAMREGS8)`
-      this.ramRegs8Uint8Array[off_] << 24 | this.ramRegs8Uint8Array[off_ + 1] << 16 | this.ramRegs8Uint8Array[off_ + 2] << 8 | this.ramRegs8Uint8Array[off_ + 3]
+      @ramRegs8Uint8Array[off_] << 24 | @ramRegs8Uint8Array[off_ + 1] << 16 | @ramRegs8Uint8Array[off_ + 2] << 8 | @ramRegs8Uint8Array[off_ + 3]
 
     @readSpMem8 = (a) =>
       `const off_ = a - MEMORY_START_SPMEM`
-      this.spMemUint8Array[off_]
+      @spMemUint8Array[off_]
 
     @readSpMem16 = (a) =>
       `const off_ = (a-MEMORY_START_SPMEM)`
-      this.spMemUint8Array[off_] << 8 | this.spMemUint8Array[off_ + 1]
+      @spMemUint8Array[off_] << 8 | @spMemUint8Array[off_ + 1]
 
     @readSpMem32 = (a) =>
       `const off_ = (a-MEMORY_START_SPMEM)`
-      this.spMemUint8Array[off_] << 24 | this.spMemUint8Array[off_ + 1] << 16 | this.spMemUint8Array[off_ + 2] << 8 | this.spMemUint8Array[off_ + 3]
+      @spMemUint8Array[off_] << 24 | @spMemUint8Array[off_ + 1] << 16 | @spMemUint8Array[off_ + 2] << 8 | @spMemUint8Array[off_ + 3]
 
     @readSpReg1_8 = (a) =>
       `const off_ = a - MEMORY_START_SPREG_1`
-      this.core.interrupts.readSPReg1 off_
+      @core.interrupts.readSPReg1 off_
 
     @readSpReg1_16 = (a) =>
       `const off_ = a - MEMORY_START_SPREG_1`
-      this.core.interrupts.readSPReg1 off_
+      @core.interrupts.readSPReg1 off_
 
     @readSpReg1_32 = (a) =>
       `const off_ = a - MEMORY_START_SPREG_1`
-      this.core.interrupts.readSPReg1 off_
+      @core.interrupts.readSPReg1 off_
 
     @readSpReg2_8 = (a) =>
       `const off_ = a - MEMORY_START_SPREG_2`
-      this.spReg2Uint8Array[off_]
+      @spReg2Uint8Array[off_]
 
     @readSpReg2_16 = (a) =>
       `const off_ = (a-MEMORY_START_SPREG_2)`
-      this.spReg2Uint8Array[off_] << 8 | this.spReg2Uint8Array[off_ + 1]
+      @spReg2Uint8Array[off_] << 8 | @spReg2Uint8Array[off_ + 1]
 
     @readSpReg2_32 = (a) =>
       `const off_ = (a-MEMORY_START_SPREG_2)`
-      this.spReg2Uint8Array[off_] << 24 | this.spReg2Uint8Array[off_ + 1] << 16 | this.spReg2Uint8Array[off_ + 2] << 8 | this.spReg2Uint8Array[off_ + 3]
+      @spReg2Uint8Array[off_] << 24 | @spReg2Uint8Array[off_ + 1] << 16 | @spReg2Uint8Array[off_ + 2] << 8 | @spReg2Uint8Array[off_ + 3]
 
     @readDpc8 = (a) =>
       `const off_ = a - MEMORY_START_DPC`
-      this.dpcUint8Array[off_]
+      @dpcUint8Array[off_]
 
     @readDpc16 = (a) =>
       `const off_ = (a-MEMORY_START_DPC)`
-      this.dpcUint8Array[off_] << 8 | this.dpcUint8Array[off_ + 1]
+      @dpcUint8Array[off_] << 8 | @dpcUint8Array[off_ + 1]
 
     @readDpc32 = (a) =>
       `const off_ = (a-MEMORY_START_DPC)`
-      this.dpcUint8Array[off_] << 24 | this.dpcUint8Array[off_ + 1] << 16 | this.dpcUint8Array[off_ + 2] << 8 | this.dpcUint8Array[off_ + 3]
+      @dpcUint8Array[off_] << 24 | @dpcUint8Array[off_ + 1] << 16 | @dpcUint8Array[off_ + 2] << 8 | @dpcUint8Array[off_ + 3]
 
     @readDps8 = (a) =>
       `const off_ = a - MEMORY_START_DPS`
-      this.dpsUint8Array[off_]
+      @dpsUint8Array[off_]
 
     @readDps16 = (a) =>
       `const off_ = (a-MEMORY_START_DPS)`
-      this.dpsUint8Array[off_] << 8 | this.dpsUint8Array[off_ + 1]
+      @dpsUint8Array[off_] << 8 | @dpsUint8Array[off_ + 1]
 
     @readDps32 = (a) =>
       `const off_ = (a-MEMORY_START_DPS)`
-      this.dpsUint8Array[off_] << 24 | this.dpsUint8Array[off_ + 1] << 16 | this.dpsUint8Array[off_ + 2] << 8 | this.dpsUint8Array[off_ + 3]
+      @dpsUint8Array[off_] << 24 | @dpsUint8Array[off_ + 1] << 16 | @dpsUint8Array[off_ + 2] << 8 | @dpsUint8Array[off_ + 3]
 
     @readMi8 = (a) =>
       `const off_ = a - MEMORY_START_MI`
-      this.miUint8Array[off_]
+      @miUint8Array[off_]
 
     @readMi16 = (a) =>
       `const off_ = (a-MEMORY_START_MI)`
-      this.miUint8Array[off_] << 8 | this.miUint8Array[off_ + 1]
+      @miUint8Array[off_] << 8 | @miUint8Array[off_ + 1]
 
     @readMi32 = (a) =>
       `const off_ = (a-MEMORY_START_MI)`
-      this.miUint8Array[off_] << 24 | this.miUint8Array[off_ + 1] << 16 | this.miUint8Array[off_ + 2] << 8 | this.miUint8Array[off_ + 3]
+      @miUint8Array[off_] << 24 | @miUint8Array[off_ + 1] << 16 | @miUint8Array[off_ + 2] << 8 | @miUint8Array[off_ + 3]
 
     @readVi8 = (a) =>
       `const off_ = a - MEMORY_START_VI`
-      this.core.interrupts.readVI off_
+      @core.interrupts.readVI off_
 
     @readVi16 = (a) =>
       `const off_ = a - MEMORY_START_VI`
-      this.core.interrupts.readVI off_
+      @core.interrupts.readVI off_
 
     @readVi32 = (a) =>
       `const off_ = a - MEMORY_START_VI`
-      this.core.interrupts.readVI off_
+      @core.interrupts.readVI off_
 
     @readAi8 = (a) =>
       `const off_ = a - MEMORY_START_AI`
-      this.core.interrupts.readAI off_
+      @core.interrupts.readAI off_
 
     @readAi16 = (a) =>
       `const off_ = a - MEMORY_START_AI`
-      this.core.interrupts.readAI off_
+      @core.interrupts.readAI off_
 
     @readAi32 = (a) =>
       `const off_ = a - MEMORY_START_AI`
-      this.core.interrupts.readAI off_
+      @core.interrupts.readAI off_
 
     @readPi8 = (a) =>
       `const off_ = a - MEMORY_START_PI`
-      this.piUint8Array[off_]
+      @piUint8Array[off_]
 
     @readPi16 = (a) =>
       `const off_ = (a-MEMORY_START_PI)`
-      this.piUint8Array[off_] << 8 | this.piUint8Array[off_ + 1]
+      @piUint8Array[off_] << 8 | @piUint8Array[off_ + 1]
 
     @readPi32 = (a) =>
       `const off_ = (a-MEMORY_START_PI)`
-      this.piUint8Array[off_] << 24 | this.piUint8Array[off_ + 1] << 16 | this.piUint8Array[off_ + 2] << 8 | this.piUint8Array[off_ + 3]
+      @piUint8Array[off_] << 24 | @piUint8Array[off_ + 1] << 16 | @piUint8Array[off_ + 2] << 8 | @piUint8Array[off_ + 3]
 
     @readSi8 = (a) =>
       `const off_ = a - MEMORY_START_SI`
-      this.core.interrupts.readSI off_
+      @core.interrupts.readSI off_
 
     @readSi16 = (a) =>
       `const off_ = a - MEMORY_START_SI`
-      this.core.interrupts.readSI off_
+      @core.interrupts.readSI off_
 
     @readSi32 = (a) =>
       `const off_ = a - MEMORY_START_SI`
-      this.core.interrupts.readSI off_
+      @core.interrupts.readSI off_
 
     @readC2A1_8 = (a) =>
       `const off_ = a - MEMORY_START_C2A1`
-      this.c2a1Uint8Array[off_]
+      @c2a1Uint8Array[off_]
 
     @readC2A1_16 = (a) =>
       `const off_ = (a-MEMORY_START_C2A1)`
-      this.c2a1Uint8Array[off_] << 8 | this.c2a1Uint8Array[off_ + 1]
+      @c2a1Uint8Array[off_] << 8 | @c2a1Uint8Array[off_ + 1]
 
     @readC2A1_32 = (a) =>
       `const off_ = (a-MEMORY_START_C2A1)`
-      this.c2a1Uint8Array[off_] << 24 | this.c2a1Uint8Array[off_ + 1] << 16 | this.c2a1Uint8Array[off_ + 2] << 8 | this.c2a1Uint8Array[off_ + 3]
+      @c2a1Uint8Array[off_] << 24 | @c2a1Uint8Array[off_ + 1] << 16 | @c2a1Uint8Array[off_ + 2] << 8 | @c2a1Uint8Array[off_ + 3]
 
     @readC1A1_8 = (a) =>
       `const off_ = a - MEMORY_START_C1A1`
-      this.c1a1Uint8Array[off_]
+      @c1a1Uint8Array[off_]
 
     @readC1A1_16 = (a) =>
       `const off_ = (a-MEMORY_START_C1A1)`
-      this.c1a1Uint8Array[off_] << 8 | this.c1a1Uint8Array[off_ + 1]
+      @c1a1Uint8Array[off_] << 8 | @c1a1Uint8Array[off_ + 1]
 
     @readC1A1_32 = (a) =>
       `const off_ = (a-MEMORY_START_C1A1)`
-      this.c1a1Uint8Array[off_] << 24 | this.c1a1Uint8Array[off_ + 1] << 16 | this.c1a1Uint8Array[off_ + 2] << 8 | this.c1a1Uint8Array[off_ + 3]
+      @c1a1Uint8Array[off_] << 24 | @c1a1Uint8Array[off_ + 1] << 16 | @c1a1Uint8Array[off_ + 2] << 8 | @c1a1Uint8Array[off_ + 3]
 
     @readC2A2_8 = (a) =>
       `const off_ = a - MEMORY_START_C2A2`
-      this.c2a2Uint8Array[off_]
+      @c2a2Uint8Array[off_]
 
     @readC2A2_16 = (a) =>
       `const off_ = (a-MEMORY_START_C2A2)`
-      this.c2a2Uint8Array[off_] << 8 | this.c2a2Uint8Array[off_ + 1]
+      @c2a2Uint8Array[off_] << 8 | @c2a2Uint8Array[off_ + 1]
 
     @readC2A2_32 = (a) =>
       `const off_ = (a-MEMORY_START_C2A2)`
-      this.c2a2Uint8Array[off_] << 24 | this.c2a2Uint8Array[off_ + 1] << 16 | this.c2a2Uint8Array[off_ + 2] << 8 | this.c2a2Uint8Array[off_ + 3]
+      @c2a2Uint8Array[off_] << 24 | @c2a2Uint8Array[off_ + 1] << 16 | @c2a2Uint8Array[off_ + 2] << 8 | @c2a2Uint8Array[off_ + 3]
 
     @readRom8 = (a) =>
       `const off_ = a - MEMORY_START_ROM_IMAGE`
-      this.romUint8Array[off_]
+      @romUint8Array[off_]
 
     @readRom16 = (a) =>
       `const off_ = (a-MEMORY_START_ROM_IMAGE)`
-      this.romUint8Array[off_] << 8 | this.romUint8Array[off_ + 1]
+      @romUint8Array[off_] << 8 | @romUint8Array[off_ + 1]
 
     @readRom32 = (a) =>
       `const off_ = (a-MEMORY_START_ROM_IMAGE)`
-      this.romUint8Array[off_] << 24 | this.romUint8Array[off_ + 1] << 16 | this.romUint8Array[off_ + 2] << 8 | this.romUint8Array[off_ + 3]
+      @romUint8Array[off_] << 24 | @romUint8Array[off_ + 1] << 16 | @romUint8Array[off_ + 2] << 8 | @romUint8Array[off_ + 3]
 
     @readC1A3_8 = (a) =>
       `const off_ = a - MEMORY_START_C1A3`
-      this.c1a3Uint8Array[off_]
+      @c1a3Uint8Array[off_]
 
     @readC1A3_16 = (a) =>
       `const off_ = (a-MEMORY_START_C1A3)`
-      this.c1a3Uint8Array[off_] << 8 | this.c1a3Uint8Array[off_ + 1]
+      @c1a3Uint8Array[off_] << 8 | @c1a3Uint8Array[off_ + 1]
 
     @readC1A3_32 = (a) =>
       `const off_ = (a-MEMORY_START_C1A3)`
-      this.c1a3Uint8Array[off_] << 24 | this.c1a3Uint8Array[off_ + 1] << 16 | this.c1a3Uint8Array[off_ + 2] << 8 | this.c1a3Uint8Array[off_ + 3]
+      @c1a3Uint8Array[off_] << 24 | @c1a3Uint8Array[off_ + 1] << 16 | @c1a3Uint8Array[off_ + 2] << 8 | @c1a3Uint8Array[off_ + 3]
 
     @readRi8 = (a) =>
       `const off_ = a - MEMORY_START_RI`
-      this.riUint8Array[off_]
+      @riUint8Array[off_]
 
     @readRi16 = (a) =>
       `const off_ = (a-MEMORY_START_RI)`
-      this.riUint8Array[off_] << 8 | this.riUint8Array[off_ + 1]
+      @riUint8Array[off_] << 8 | @riUint8Array[off_ + 1]
 
     @readRi32 = (a) =>
       `const off_ = (a-MEMORY_START_RI)`
-      this.riUint8Array[off_] << 24 | this.riUint8Array[off_ + 1] << 16 | this.riUint8Array[off_ + 2] << 8 | this.riUint8Array[off_ + 3]
+      @riUint8Array[off_] << 24 | @riUint8Array[off_ + 1] << 16 | @riUint8Array[off_ + 2] << 8 | @riUint8Array[off_ + 3]
 
     @readPif8 = (a) =>
       `const off_ = a - MEMORY_START_PIF`
-      this.pifUint8Array[off_]
+      @pifUint8Array[off_]
 
     @readPif16 = (a) =>
       `const off_ = (a-MEMORY_START_PIF)`
-      this.pifUint8Array[off_] << 8 | this.pifUint8Array[off_ + 1]
+      @pifUint8Array[off_] << 8 | @pifUint8Array[off_ + 1]
 
     @readPif32 = (a) =>
       `const off_ = (a-MEMORY_START_PIF)`
-      this.pifUint8Array[off_] << 24 | this.pifUint8Array[off_ + 1] << 16 | this.pifUint8Array[off_ + 2] << 8 | this.pifUint8Array[off_ + 3]
+      @pifUint8Array[off_] << 24 | @pifUint8Array[off_ + 1] << 16 | @pifUint8Array[off_ + 2] << 8 | @pifUint8Array[off_ + 3]
 
     @readGio8 = (a) =>
       `const off_ = a - MEMORY_START_GIO`
-      this.gioUint8Array[off_]
+      @gioUint8Array[off_]
 
     @readGio16 = (a) =>
       `const off_ = (a-MEMORY_START_GIO)`
-      this.gioUint8Array[off_] << 8 | this.gioUint8Array[off_ + 1]
+      @gioUint8Array[off_] << 8 | @gioUint8Array[off_ + 1]
 
     @readGio32 = (a) =>
       `const off_ = (a-MEMORY_START_GIO)`
-      this.gioUint8Array[off_] << 24 | this.gioUint8Array[off_ + 1] << 16 | this.gioUint8Array[off_ + 2] << 8 | this.gioUint8Array[off_ + 3]
+      @gioUint8Array[off_] << 24 | @gioUint8Array[off_ + 1] << 16 | @gioUint8Array[off_ + 2] << 8 | @gioUint8Array[off_ + 3]
 
     @writeRdram8 = (val, a) =>
-      this.u8[a] = val
+      @u8[a] = val
       return
 
     @writeRdram16 = (val, a) =>
@@ -620,13 +620,13 @@ class C1964jsMemory
 
     @writeSpMem8 = (val, a) =>
       `const off_ = a - MEMORY_START_SPMEM`
-      this.spMemUint8Array[off_] = val
+      @spMemUint8Array[off_] = val
       return
 
     @writeSpMem16 = (val, a) =>
       `const off_ = a - MEMORY_START_SPMEM`
-      this.spMemUint8Array[off_] = val >> 8
-      this.spMemUint8Array[off_ + 1] = val
+      @spMemUint8Array[off_] = val >> 8
+      @spMemUint8Array[off_ + 1] = val
       return
 
     @writeSpMem32 = (val, a) =>
@@ -640,373 +640,373 @@ class C1964jsMemory
 
     @writeRi8 = (val, a) =>
       `const off_ = a - MEMORY_START_RI`
-      this.riUint8Array[off_] = val
+      @riUint8Array[off_] = val
       return
 
     @writeRi16 = (val, a) =>
       `const off_ = a - MEMORY_START_RI`
-      this.riUint8Array[off_] = val >> 8
-      this.riUint8Array[off_ + 1] = val
+      @riUint8Array[off_] = val >> 8
+      @riUint8Array[off_ + 1] = val
       return
 
     @writeRi32 = (val, a) =>
       `const off_ = a - MEMORY_START_RI`
-      this.riUint8Array[off_] = val >> 24
-      this.riUint8Array[off_ + 1] = val >> 16
-      this.riUint8Array[off_ + 2] = val >> 8
-      this.riUint8Array[off_ + 3] = val
+      @riUint8Array[off_] = val >> 24
+      @riUint8Array[off_ + 1] = val >> 16
+      @riUint8Array[off_ + 2] = val >> 8
+      @riUint8Array[off_ + 3] = val
       return
 
     @writeMi8 = (val, a, pc, isDelaySlot) =>
       `const off_ = a - MEMORY_START_MI`
-      this.core.interrupts.writeMI off_, val, pc, isDelaySlot
+      @core.interrupts.writeMI off_, val, pc, isDelaySlot
       return
 
     @writeMi16 = (val, a, pc, isDelaySlot) =>
       `const off_ = a - MEMORY_START_MI`
-      this.core.interrupts.writeMI off_, val, pc, isDelaySlot
+      @core.interrupts.writeMI off_, val, pc, isDelaySlot
       return
 
     @writeMi32 = (val, a, pc, isDelaySlot) =>
       `const off_ = a - MEMORY_START_MI`
-      this.core.interrupts.writeMI off_, val, pc, isDelaySlot
+      @core.interrupts.writeMI off_, val, pc, isDelaySlot
       return
 
     @writeRamRegs8_8 = (val, a) =>
       `const off_ = a - MEMORY_START_RAMREGS8`
-      this.ramRegs8Uint8Array[off_] = val
+      @ramRegs8Uint8Array[off_] = val
       return
 
     @writeRamRegs8_16 = (val, a) =>
       `const off_ = a - MEMORY_START_RAMREGS8`
-      this.ramRegs8Uint8Array[off_] = val >> 8
-      this.ramRegs8Uint8Array[off_ + 1] = val
+      @ramRegs8Uint8Array[off_] = val >> 8
+      @ramRegs8Uint8Array[off_ + 1] = val
       return
 
     @writeRamRegs8_32 = (val, a) =>
       `const off_ = a - MEMORY_START_RAMREGS8`
-      this.ramRegs8Uint8Array[off_] = val >> 24
-      this.ramRegs8Uint8Array[off_ + 1] = val >> 16
-      this.ramRegs8Uint8Array[off_ + 2] = val >> 8
-      this.ramRegs8Uint8Array[off_ + 3] = val
+      @ramRegs8Uint8Array[off_] = val >> 24
+      @ramRegs8Uint8Array[off_ + 1] = val >> 16
+      @ramRegs8Uint8Array[off_ + 2] = val >> 8
+      @ramRegs8Uint8Array[off_ + 3] = val
       return
 
     @writeRamRegs4_8 = (val, a) =>
       `const off_ = a - MEMORY_START_RAMREGS4`
-      this.ramRegs4Uint8Array[off_] = val
+      @ramRegs4Uint8Array[off_] = val
       return
 
     @writeRamRegs4_16 = (val, a) =>
       `const off_ = a - MEMORY_START_RAMREGS4`
-      this.ramRegs4Uint8Array[off_] = val >> 8
-      this.ramRegs4Uint8Array[off_ + 1] = val
+      @ramRegs4Uint8Array[off_] = val >> 8
+      @ramRegs4Uint8Array[off_ + 1] = val
       return
 
     @writeRamRegs4_32 = (val, a) =>
       `const off_ = a - MEMORY_START_RAMREGS4`
-      this.ramRegs4Uint8Array[off_] = val >> 24
-      this.ramRegs4Uint8Array[off_ + 1] = val >> 16
-      this.ramRegs4Uint8Array[off_ + 2] = val >> 8
-      this.ramRegs4Uint8Array[off_ + 3] = val
+      @ramRegs4Uint8Array[off_] = val >> 24
+      @ramRegs4Uint8Array[off_ + 1] = val >> 16
+      @ramRegs4Uint8Array[off_ + 2] = val >> 8
+      @ramRegs4Uint8Array[off_ + 3] = val
       return
 
     @writeRamRegs0_8 = (val, a) =>
       `const off_ = a - MEMORY_START_RAMREGS0`
-      this.ramRegs0Uint8Array[off_] = val
+      @ramRegs0Uint8Array[off_] = val
       return
 
     @writeRamRegs0_16 = (val, a) =>
       `const off_ = a - MEMORY_START_RAMREGS0`
-      this.ramRegs0Uint8Array[off_] = val >> 8
-      this.ramRegs0Uint8Array[off_ + 1] = val
+      @ramRegs0Uint8Array[off_] = val >> 8
+      @ramRegs0Uint8Array[off_ + 1] = val
       return
 
     @writeRamRegs0_32 = (val, a) =>
       `const off_ = a - MEMORY_START_RAMREGS0`
-      this.ramRegs0Uint8Array[off_] = val >> 24
-      this.ramRegs0Uint8Array[off_ + 1] = val >> 16
-      this.ramRegs0Uint8Array[off_ + 2] = val >> 8
-      this.ramRegs0Uint8Array[off_ + 3] = val
+      @ramRegs0Uint8Array[off_] = val >> 24
+      @ramRegs0Uint8Array[off_ + 1] = val >> 16
+      @ramRegs0Uint8Array[off_ + 2] = val >> 8
+      @ramRegs0Uint8Array[off_ + 3] = val
       return
 
     @writeSpReg1_8 = (val, a, pc, isDelaySlot) =>
       `const off_ = a - MEMORY_START_SPREG_1`
-      this.core.interrupts.writeSPReg1 off_, val, pc, isDelaySlot
+      @core.interrupts.writeSPReg1 off_, val, pc, isDelaySlot
       return
 
     @writeSpReg1_16 = (val, a, pc, isDelaySlot) =>
       `const off_ = a - MEMORY_START_SPREG_1`
-      this.core.interrupts.writeSPReg1 off_, val, pc, isDelaySlot
+      @core.interrupts.writeSPReg1 off_, val, pc, isDelaySlot
       return
 
     @writeSpReg1_32 = (val, a, pc, isDelaySlot) =>
       `const off_ = a - MEMORY_START_SPREG_1`
-      this.core.interrupts.writeSPReg1 off_, val, pc, isDelaySlot
+      @core.interrupts.writeSPReg1 off_, val, pc, isDelaySlot
       return
 
     @writePi8 = (val, a, pc, isDelaySlot) =>
       `const off_ = a - MEMORY_START_PI`
-      this.core.interrupts.writePI off_, val, pc, isDelaySlot
+      @core.interrupts.writePI off_, val, pc, isDelaySlot
       return
 
     @writePi16 = (val, a, pc, isDelaySlot) =>
       `const off_ = a - MEMORY_START_PI`
-      this.core.interrupts.writePI off_, val, pc, isDelaySlot
+      @core.interrupts.writePI off_, val, pc, isDelaySlot
       return
 
     @writePi32 = (val, a, pc, isDelaySlot) =>
       `const off_ = a - MEMORY_START_PI`
-      this.core.interrupts.writePI off_, val, pc, isDelaySlot
+      @core.interrupts.writePI off_, val, pc, isDelaySlot
       return
 
     @writeSi8 = (val, a, pc, isDelaySlot) =>
       `const off_ = a - MEMORY_START_SI`
-      this.core.interrupts.writeSI off_, val, pc, isDelaySlot
+      @core.interrupts.writeSI off_, val, pc, isDelaySlot
       return
 
     @writeSi16 = (val, a, pc, isDelaySlot) =>
       `const off_ = a - MEMORY_START_SI`
-      this.core.interrupts.writeSI off_, val, pc, isDelaySlot
+      @core.interrupts.writeSI off_, val, pc, isDelaySlot
       return
 
     @writeSi32 = (val, a, pc, isDelaySlot) =>
       `const off_ = a - MEMORY_START_SI`
-      this.core.interrupts.writeSI off_, val, pc, isDelaySlot
+      @core.interrupts.writeSI off_, val, pc, isDelaySlot
       return
 
     @writeAi8 = (val, a, pc, isDelaySlot) =>
       `const off_ = a - MEMORY_START_AI`
-      this.core.interrupts.writeAI off_, val, pc, isDelaySlot
+      @core.interrupts.writeAI off_, val, pc, isDelaySlot
       return
 
     @writeAi16 = (val, a, pc, isDelaySlot) =>
       `const off_ = a - MEMORY_START_AI`
-      this.core.interrupts.writeAI off_, val, pc, isDelaySlot
+      @core.interrupts.writeAI off_, val, pc, isDelaySlot
       return
 
     @writeAi32 = (val, a, pc, isDelaySlot) =>
       `const off_ = a - MEMORY_START_AI`
-      this.core.interrupts.writeAI off_, val, pc, isDelaySlot
+      @core.interrupts.writeAI off_, val, pc, isDelaySlot
       return
 
     @writeVi8 = (val, a, pc, isDelaySlot) =>
       `const off_ = a - MEMORY_START_VI`
-      this.core.interrupts.writeVI off_, val, pc, isDelaySlot
+      @core.interrupts.writeVI off_, val, pc, isDelaySlot
       return
 
     @writeVi16 = (val, a, pc, isDelaySlot) =>
       `const off_ = a - MEMORY_START_VI`
-      this.core.interrupts.writeVI off_, val, pc, isDelaySlot
+      @core.interrupts.writeVI off_, val, pc, isDelaySlot
       return
 
     @writeVi32 = (val, a, pc, isDelaySlot) =>
       `const off_ = a - MEMORY_START_VI`
-      this.core.interrupts.writeVI off_, val, pc, isDelaySlot
+      @core.interrupts.writeVI off_, val, pc, isDelaySlot
       return
 
     @writeSpReg2_8 = (val, a, pc, isDelaySlot) =>
       `const off_ = a - MEMORY_START_SPREG_2`
-      this.core.interrupts.writeSPReg2 off_, val, pc, isDelaySlot
+      @core.interrupts.writeSPReg2 off_, val, pc, isDelaySlot
       return
 
     @writeSpReg2_16 = (val, a, pc, isDelaySlot) =>
       `const off_ = a - MEMORY_START_SPREG_2`
-      this.core.interrupts.writeSPReg2 off_, val, pc, isDelaySlot
+      @core.interrupts.writeSPReg2 off_, val, pc, isDelaySlot
       return
 
     @writeSpReg2_32 = (val, a, pc, isDelaySlot) =>
       `const off_ = a - MEMORY_START_SPREG_2`
-      this.core.interrupts.writeSPReg2 off_, val, pc, isDelaySlot
+      @core.interrupts.writeSPReg2 off_, val, pc, isDelaySlot
       return
 
     @writeDpc8 = (val, a, pc, isDelaySlot) =>
       `const off_ = a - MEMORY_START_DPC`
-      this.core.interrupts.writeDPC off_, val, pc, isDelaySlot
+      @core.interrupts.writeDPC off_, val, pc, isDelaySlot
       return
 
     @writeDpc16 = (val, a, pc, isDelaySlot) =>
       `const off_ = a - MEMORY_START_DPC`
-      this.core.interrupts.writeDPC off_, val, pc, isDelaySlot
+      @core.interrupts.writeDPC off_, val, pc, isDelaySlot
       return
 
     @writeDpc32 = (val, a, pc, isDelaySlot) =>
       `const off_ = a - MEMORY_START_DPC`
-      this.core.interrupts.writeDPC off_, val, pc, isDelaySlot
+      @core.interrupts.writeDPC off_, val, pc, isDelaySlot
       return
 
     @writeDps8 = (val, a) =>
       `const off_ = a - MEMORY_START_DPS`
-      this.dpsUint8Array[off_] = val
+      @dpsUint8Array[off_] = val
       return
 
     @writeDps16 = (val, a) =>
       `const off_ = a - MEMORY_START_DPS`
-      this.dpsUint8Array[off_] = val >> 8
-      this.dpsUint8Array[off_ + 1] = val
+      @dpsUint8Array[off_] = val >> 8
+      @dpsUint8Array[off_ + 1] = val
       return
 
     @writeDps32 = (val, a) =>
       `const off_ = a - MEMORY_START_DPS`
-      this.dpsUint8Array[off_] = val >> 24
-      this.dpsUint8Array[off_ + 1] = val >> 16
-      this.dpsUint8Array[off_ + 2] = val >> 8
-      this.dpsUint8Array[off_ + 3] = val
+      @dpsUint8Array[off_] = val >> 24
+      @dpsUint8Array[off_ + 1] = val >> 16
+      @dpsUint8Array[off_ + 2] = val >> 8
+      @dpsUint8Array[off_ + 3] = val
       return
 
     @writeC2A1_8 = (val, a) =>
       `const off_ = a - MEMORY_START_C2A1`
-      this.c2a1Uint8Array[off_] = val
+      @c2a1Uint8Array[off_] = val
       return
 
     @writeC2A1_16 = (val, a) =>
       `const off_ = a - MEMORY_START_C2A1`
-      this.c2a1Uint8Array[off_] = val >> 8
-      this.c2a1Uint8Array[off_ + 1] = val
+      @c2a1Uint8Array[off_] = val >> 8
+      @c2a1Uint8Array[off_ + 1] = val
       return
 
     @writeC2A1_32 = (val, a) =>
       `const off_ = a - MEMORY_START_C2A1`
-      this.c2a1Uint8Array[off_] = val >> 24
-      this.c2a1Uint8Array[off_ + 1] = val >> 16
-      this.c2a1Uint8Array[off_ + 2] = val >> 8
-      this.c2a1Uint8Array[off_ + 3] = val
+      @c2a1Uint8Array[off_] = val >> 24
+      @c2a1Uint8Array[off_ + 1] = val >> 16
+      @c2a1Uint8Array[off_ + 2] = val >> 8
+      @c2a1Uint8Array[off_ + 3] = val
       return
 
     @writeC1A1_8 = (val, a) =>
       `const off_ = a - MEMORY_START_C1A1`
-      this.c1a1Uint8Array[off_] = val
+      @c1a1Uint8Array[off_] = val
       return
 
     @writeC1A1_16 = (val, a) =>
       `const off_ = a - MEMORY_START_C1A1`
-      this.c1a1Uint8Array[off_] = val >> 8
-      this.c1a1Uint8Array[off_ + 1] = val
+      @c1a1Uint8Array[off_] = val >> 8
+      @c1a1Uint8Array[off_ + 1] = val
       return
 
     @writeC1A1_32 = (val, a) =>
       `const off_ = a - MEMORY_START_C1A1`
-      this.c1a1Uint8Array[off_] = val >> 24
-      this.c1a1Uint8Array[off_ + 1] = val >> 16
-      this.c1a1Uint8Array[off_ + 2] = val >> 8
-      this.c1a1Uint8Array[off_ + 3] = val
+      @c1a1Uint8Array[off_] = val >> 24
+      @c1a1Uint8Array[off_ + 1] = val >> 16
+      @c1a1Uint8Array[off_ + 2] = val >> 8
+      @c1a1Uint8Array[off_ + 3] = val
       return
 
     @writeC2A2_8 = (val, a) =>
       `const off_ = a - MEMORY_START_C2A2`
-      this.c2a2Uint8Array[off_] = val
+      @c2a2Uint8Array[off_] = val
       return
 
     @writeC2A2_16 = (val, a) =>
       `const off_ = a - MEMORY_START_C2A2`
-      this.c2a2Uint8Array[off_] = val >> 8
-      this.c2a2Uint8Array[off_ + 1] = val
+      @c2a2Uint8Array[off_] = val >> 8
+      @c2a2Uint8Array[off_ + 1] = val
       return
 
     @writeC2A2_32 = (val, a) =>
       `const off_ = a - MEMORY_START_C2A2`
-      this.c2a2Uint8Array[off_] = val >> 24
-      this.c2a2Uint8Array[off_ + 1] = val >> 16
-      this.c2a2Uint8Array[off_ + 2] = val >> 8
-      this.c2a2Uint8Array[off_ + 3] = val
+      @c2a2Uint8Array[off_] = val >> 24
+      @c2a2Uint8Array[off_ + 1] = val >> 16
+      @c2a2Uint8Array[off_ + 2] = val >> 8
+      @c2a2Uint8Array[off_ + 3] = val
       return
 
     @writeRom8 = (val, a) =>
       alert "attempt to overwrite rom!"
       # `const off_ = a - MEMORY_START_ROM_IMAGE`
-      # this.romUint8Array[off_] = val
+      # @romUint8Array[off_] = val
       return
 
     @writeRom16 = (val, a) =>
       alert "attempt to overwrite rom!"
       # `const off_ = a - MEMORY_START_ROM_IMAGE`
-      # this.romUint8Array[off_] = val >> 8
-      # this.romUint8Array[off_ + 1] = val
+      # @romUint8Array[off_] = val >> 8
+      # @romUint8Array[off_ + 1] = val
       return
 
     @writeRom32 = (val, a) =>
       alert "attempt to overwrite rom!"
       # `const off_ = a - MEMORY_START_ROM_IMAGE`
-      # this.romUint8Array[off_] = val >> 24
-      # this.romUint8Array[off_ + 1] = val >> 16
-      # this.romUint8Array[off_ + 2] = val >> 8
-      # this.romUint8Array[off_ + 3] = val
+      # @romUint8Array[off_] = val >> 24
+      # @romUint8Array[off_ + 1] = val >> 16
+      # @romUint8Array[off_ + 2] = val >> 8
+      # @romUint8Array[off_ + 3] = val
       return
 
     @writeC1A3_8 = (val, a) =>
       `const off_ = a - MEMORY_START_C1A3`
-      this.c1a3Uint8Array[off_] = val
+      @c1a3Uint8Array[off_] = val
       return
 
     @writeC1A3_16 = (val, a) =>
       `const off_ = a - MEMORY_START_C1A3`
-      this.c1a3Uint8Array[off_] = val >> 8
-      this.c1a3Uint8Array[off_ + 1] = val
+      @c1a3Uint8Array[off_] = val >> 8
+      @c1a3Uint8Array[off_ + 1] = val
       return
 
     @writeC1A3_32 = (val, a) =>
       `const off_ = a - MEMORY_START_C1A3`
-      this.c1a3Uint8Array[off_] = val >> 24
-      this.c1a3Uint8Array[off_ + 1] = val >> 16
-      this.c1a3Uint8Array[off_ + 2] = val >> 8
-      this.c1a3Uint8Array[off_ + 3] = val
+      @c1a3Uint8Array[off_] = val >> 24
+      @c1a3Uint8Array[off_ + 1] = val >> 16
+      @c1a3Uint8Array[off_ + 2] = val >> 8
+      @c1a3Uint8Array[off_ + 3] = val
       return
 
     @writePif8 = (val, a) =>
       `const off_ = a - MEMORY_START_PIF`
-      this.pifUint8Array[off_] = val
+      @pifUint8Array[off_] = val
       return
 
     @writePif16 = (val, a) =>
       `const off_ = a - MEMORY_START_PIF`
-      this.pifUint8Array[off_] = val >> 8
-      this.pifUint8Array[off_ + 1] = val
+      @pifUint8Array[off_] = val >> 8
+      @pifUint8Array[off_ + 1] = val
       return
 
     @writePif32 = (val, a) =>
       `const off_ = a - MEMORY_START_PIF`
-      this.pifUint8Array[off_] = val >> 24
-      this.pifUint8Array[off_ + 1] = val >> 16
-      this.pifUint8Array[off_ + 2] = val >> 8
-      this.pifUint8Array[off_ + 3] = val
+      @pifUint8Array[off_] = val >> 24
+      @pifUint8Array[off_ + 1] = val >> 16
+      @pifUint8Array[off_ + 2] = val >> 8
+      @pifUint8Array[off_ + 3] = val
       return
 
     @writeGio8 = (val, a) =>
       `const off_ = a - MEMORY_START_GIO`
-      this.gioUint8Array[off_] = val
+      @gioUint8Array[off_] = val
       return
 
     @writeGio16 = (val, a) =>
       `const off_ = a - MEMORY_START_GIO`
-      this.gioUint8Array[off_] = val >> 8
-      this.gioUint8Array[off_ + 1] = val
+      @gioUint8Array[off_] = val >> 8
+      @gioUint8Array[off_ + 1] = val
       return
 
     @writeGio32 = (val, a) =>
       `const off_ = a - MEMORY_START_GIO`
-      this.gioUint8Array[off_] = val >> 24
-      this.gioUint8Array[off_ + 1] = val >> 16
-      this.gioUint8Array[off_ + 2] = val >> 8
-      this.gioUint8Array[off_ + 3] = val
+      @gioUint8Array[off_] = val >> 24
+      @gioUint8Array[off_ + 1] = val >> 16
+      @gioUint8Array[off_ + 2] = val >> 8
+      @gioUint8Array[off_ + 3] = val
       return
 
     @writeDummy8 = (val, a) =>
       #log "writing to invalid memory at " + dec2hex(a)
       `const off_ = a & 0x0000fffc`
-      this.dummyReadWriteUint8Array[off_] = val
+      @dummyReadWriteUint8Array[off_] = val
       return
 
     @writeDummy16 = (val, a) =>
       `const off_ = a & 0x0000fffc`
-      this.dummyReadWriteUint8Array[off_] = val >> 8
-      this.dummyReadWriteUint8Array[off_ + 1] = val
+      @dummyReadWriteUint8Array[off_] = val >> 8
+      @dummyReadWriteUint8Array[off_ + 1] = val
       return
 
     @writeDummy32 = (val, a) =>
       `const off_ = a & 0x0000fffc`
-      this.dummyReadWriteUint8Array[off_] = val >> 24
-      this.dummyReadWriteUint8Array[off_ + 1] = val >> 16
-      this.dummyReadWriteUint8Array[off_ + 2] = val >> 8
-      this.dummyReadWriteUint8Array[off_ + 3] = val
+      @dummyReadWriteUint8Array[off_] = val >> 24
+      @dummyReadWriteUint8Array[off_ + 1] = val >> 16
+      @dummyReadWriteUint8Array[off_ + 2] = val >> 8
+      @dummyReadWriteUint8Array[off_ + 3] = val
       return
 
     @virtualToPhysical = (a) =>
@@ -1015,27 +1015,27 @@ class C1964jsMemory
       #  alert(dec2hex(a))
 
       #uncomment to verify non-tlb lookup.
-      #if dec2hex(a) != dec2hex(((t[a>>>12]<<16) | a&0x0000ffff))
-      #  alert dec2hex(a) + ' ' + dec2hex(((t[a>>>12]<<16) | a&0x0000ffff))
+      #if dec2hex(a) != dec2hex(((@t[a>>>12]<<16) | a&0x0000ffff))
+      #  alert dec2hex(a) + ' ' + dec2hex(((@t[a>>>12]<<16) | a&0x0000ffff))
       return ((@t[a>>>12]<<16) | (a&0x0000ffff))
 
     @readTLB8 = (b) =>
       `const a = this.virtualToPhysical(b)`
 
-      region = this.LB[a>>>16]
+      region = @LB[a>>>16]
 
-      if region is this.readTLB8
-        region = this.readDummy8
+      if region is @readTLB8
+        region = @readDummy8
 
       region(a)
 
     @writeTLB8 = (val, b, pc, isDelaySlot) =>
       `const a = this.virtualToPhysical(b)`
 
-      region = this.SB[a>>>16]
+      region = @SB[a>>>16]
 
-      if region is this.writeTLB8
-        region = this.writeDummy8
+      if region is @writeTLB8
+        region = @writeDummy8
 
       region(val, a, pc, isDelaySlot)
       return
@@ -1043,20 +1043,20 @@ class C1964jsMemory
     @readTLB16 = (b) =>
       `const a = this.virtualToPhysical(b)`
 
-      region = this.LH[a>>>16]
+      region = @LH[a>>>16]
 
-      if region is this.readTLB16
-        region = this.readDummy16
+      if region is @readTLB16
+        region = @readDummy16
 
       region(a)
 
     @writeTLB16 = (val, b, pc, isDelaySlot) =>
       `const a = this.virtualToPhysical(b)`
 
-      region = this.SH[a>>>16]
+      region = @SH[a>>>16]
 
-      if region is this.writeTLB16
-        region = this.writeDummy16
+      if region is @writeTLB16
+        region = @writeDummy16
 
       region(val, a, pc, isDelaySlot)
       return
@@ -1064,20 +1064,20 @@ class C1964jsMemory
     @readTLB32 = (b) =>
       `const a = this.virtualToPhysical(b)`
 
-      region = this.LW[a>>>16]
+      region = @LW[a>>>16]
 
-      if region is this.readTLB32
-        region = this.readDummy32
+      if region is @readTLB32
+        region = @readDummy32
 
       region(a)
 
     @writeTLB32 = (val, b, pc, isDelaySlot) =>
       `const a = this.virtualToPhysical(b)`
 
-      region = this.SW[a>>>16]
+      region = @SW[a>>>16]
 
-      if region is this.writeTLB32
-        region = this.writeDummy32
+      if region is @writeTLB32
+        region = @writeDummy32
 
       region(val, a, pc, isDelaySlot)
       return
