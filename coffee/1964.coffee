@@ -1056,16 +1056,19 @@ class C1964jsEmulator
 
 
   r4300i_dsllv: (i) ->
+    @log "todo: fix r4300i_dsllv"
     string = "{var temp=" + @helpers.RT(i) + ">>>(64-" + @helpers.RS(i) + ");"
     string += @helpers.tRDH(i) + "=" + @helpers.RTH(i) + "<<" + @helpers.RS(i) + ";" + @helpers.tRD(i) + "=" + @helpers.RT(i) + "<<" + @helpers.RS(i) + ";"
     string += @helpers.tRDH(i) + "|=temp;}" 
 
   r4300i_dsrlv: (i) ->
-    string = "{var temp=" + @helpers.RTH(i) + "<<(64" + @helpers.RS(i) + ");"
+    @log "todo: fix r4300i_dsrlv"
+    string = "{var temp=" + @helpers.RTH(i) + "<<(64-" + @helpers.RS(i) + ");"
     string += @helpers.tRDH(i) + "=" + @helpers.RTH(i) + ">>>" + @helpers.RS(i) + ";" + @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>>" + @helpers.RS(i) + ";"
     string += @helpers.tRD(i) + "|=temp;}" 
 
   r4300i_dsrav: (i) ->
+    @log "todo: fix r4300i_dsrav"
     string = "{var temp=" + @helpers.RTH(i) + "<<(64-" + @helpers.RS(i) + ");"
     string += @helpers.tRDH(i) + "=" + @helpers.RTH(i) + ">>" + @helpers.RS(i) + ";" + @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>>" + @helpers.RS(i) + ";"
     string += @helpers.tRD(i) + "|=temp;}" 
