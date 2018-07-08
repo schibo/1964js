@@ -480,7 +480,6 @@ class C1964jsEmulator
         @interval += 1
         #@m[0] = -125000 # which is -625000 / (interval+1)
         m[0] = -156250 # which is -625000 / (interval+1) / 2
-        pc = p[0]
         @interrupts.processException p[0]
         if @interval is 4
           @interval = 0
@@ -490,15 +489,10 @@ class C1964jsEmulator
           @interrupts.triggerVIInterrupt 0, false #if ((@memory.getInt32(@memory.miUint8Array, consts.MI_INTR_REG, core.memory.miUint32Array) & consts.MI_INTR_VI) isnt 0)
         else if @interval is 2
           @interrupts.checkInterrupts()
-          if pc isnt p[0]
-            pc = p[0] >>> 2
-            fn = @fnLut[pc]
+          fn = @fnLut[p[0] >>> 2]
           break
-        if pc isnt p[0]
-          pc = p[0] >>> 2
-          fn = @fnLut[pc]
-      else
-        fn = @run fn, r, h
+        fn = @fnLut[p[0] >>> 2]
+      fn = @run fn, r, h
           
     @fn = fn
     @
@@ -577,7 +571,7 @@ class C1964jsEmulator
     fnName = "_" + (pc >>> 2)
 
     #Syntax: function(register, hiRegister, this.memory, this)
-    string = "var " + fnName + "=(r,h,m,t)=>{"
+    string = fnName + "=(r,h,m,t)=>{"
     until @stopCompiling
       instruction = @memory.lw(pc + offset)
       @cnt += 1
