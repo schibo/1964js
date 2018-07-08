@@ -44,7 +44,7 @@ class C1964jsPifLE extends C1964jsPif
           break  if @processController(count, device, pifRamStart) is false
           device += 1
 
-          #size of Command-Bytes + size of Answer-Bytes + 2 for the 2 size Bytes (1 is in count++)
+          #size of Command-Bytes + size of Answer-Bytes + 2 for the 2 size Bytes (1 is in count+=1)
           count += cmd + (@pifUint8Array[(pifRamStart + count + 1)^3] & 0x3F) + 1
         else
           log "Device > 4. Device = " + device

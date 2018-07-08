@@ -48,6 +48,29 @@ C1964jsVideoHLE::getGbi0Tri1V1 = (pc) ->
 C1964jsVideoHLE::getGbi0Tri1V2 = (pc) ->
   @core.memory.u8[pc + 7]
 
+#GBI1 Tri2 struct
+C1964jsVideoHLE::getGbi1Tri2V3 = (pc) ->
+  @core.memory.u8[pc + 1]
+
+C1964jsVideoHLE::getGbi1Tri2V4 = (pc) ->
+  @core.memory.u8[pc + 2]
+
+C1964jsVideoHLE::getGbi1Tri2V5 = (pc) ->
+  @core.memory.u8[pc + 3]
+
+#GBI1 Line3D
+C1964jsVideoHLE::getGbi1Line3dV0 = (pc) ->
+  @core.memory.u8[pc + 5]
+
+C1964jsVideoHLE::getGbi1Line3dV1 = (pc) ->
+  @core.memory.u8[pc + 6]
+
+C1964jsVideoHLE::getGbi1Line3dV2 = (pc) ->
+  @core.memory.u8[pc + 7]
+
+C1964jsVideoHLE::getGbi1Line3dV3 = (pc) ->
+  @core.memory.u8[pc + 4]
+
 
 #GBI0 vertex struct
 C1964jsVideoHLE::getGbi0NumVertices = (pc) ->
@@ -57,6 +80,14 @@ C1964jsVideoHLE::getGbi0NumVertices = (pc) ->
 C1964jsVideoHLE::getGbi0Vertex0 = (pc) ->
   #(@core.memory.u8[pc] << 24 | @core.memory.u8[pc + 1] << 16 | @core.memory.u8[pc + 2] << 8 | @core.memory.u8[pc + 3]) >>> 16 & 0x0F
   (@core.memory.u8[pc + 1]) & 0x0F
+
+
+#GBI1 vertex struct
+C1964jsVideoHLE::getGbi1NumVertices = (pc) ->
+  ((@core.memory.u8[pc + 2])>>>2) & 0x3F
+
+C1964jsVideoHLE::getGbi1Vertex0 = (pc) ->
+  (@core.memory.u8[pc + 1]>>>1) & 0x7F
 
 
 #Fiddled vertex struct - Legacy

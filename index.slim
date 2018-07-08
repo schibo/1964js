@@ -50,7 +50,7 @@ html
       function updateGradient()
       {
         
-        if ( $===undefined ) return;
+        if ( this['$'] === undefined || this['$'] === null) return;
         
       var c0_0 = colors[colorIndices[0]];
       var c0_1 = colors[colorIndices[1]];
@@ -575,7 +575,7 @@ html
       /     .fb-like data-colorscheme="dark" data-send="false" data-show-faces="false" data-width="300"
 
 
-    script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.2/jquery.min.js'
+    script src='lib/jquery.min.js'
     - outputMode = "release"
     - ARGV.each do|a|
       - if a == "debug.html"

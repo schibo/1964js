@@ -46,7 +46,7 @@
       function updateGradient()
       {
       
-        if ( $===undefined ) return;
+        if ( this['$'] === undefined || this['$'] === null) return;
       
       var c0_0 = colors[colorIndices[0]];
       var c0_1 = colors[colorIndices[1]];
@@ -535,7 +535,7 @@
         <a href="https://www.google.com/chrome/" style="font-align:left;">Best with Chrome</a>
       </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+    <script src="lib/jquery.min.js"></script>
     <script src="lib/1964js-0.4.6.min.js"></script>
   </body>
 </html>

@@ -57,7 +57,7 @@ class C1964jsDma
     #if (remaining !== -1)
     #    alert('doh!' + remaining);
     else
-      alert "pi reading from somewhere other than cartridge domain"
+      `const d = this.memory.u8`
       while end-- >= 0
         d[to] = @memory.lb(from)
         from++
@@ -67,6 +67,9 @@ class C1964jsDma
     @interrupts.clrFlag @memory.piUint8Array, consts.PI_STATUS_REG, consts.PI_STATUS_IO_BUSY | consts.PI_STATUS_DMA_BUSY
     @interrupts.triggerPIInterrupt pc, isDelaySlot
     return
+
+  copyDramToCart: (pc, isDelaySlot) ->
+    alert "copyDramToCart"
 
   copySiToDram: (pc, isDelaySlot) ->
     end = 63 #read 64 bytes. Is there an si_wr_len_reg?

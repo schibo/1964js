@@ -148,6 +148,8 @@ class C1964jsRenderer
           switch tile.siz
             when consts.TXT_SIZE_16b # rgba5551
               @convertRGBA16 texture, tmem, tileWidth, tileHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride
+            when consts.TXT_SIZE_32b # rgba32
+              @convertRGBA32 texture, tmem, tileWidth, tileHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride
             else
               console.error "TODO: tile format " + tile.fmt + ", tile.size:" + tile.siz
         when consts.TXT_FMT_IA # ia
@@ -163,16 +165,28 @@ class C1964jsRenderer
         when consts.TXT_FMT_CI
           switch tile.siz
             when consts.TXT_SIZE_8b
-              if tile.otherModeL & consts.TLUT_FMT_RGBA16
+              if tile.otherModeH & consts.TLUT_FMT_IA16
                 ram = videoHLE.core.memory.u8
-                @convertCI8_RGBA16 texture, tmem, tile.pal, ram, tileWidth, tileHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride
-              else if tile.otherModeL & consts.TLUT_FMT_IA16
+                @convertCI8_IA16 texture, tmem, 0x800, videoHLE.tlut, tileWidth, tileHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride
+              else # tile.otherModeL & consts.TLUT_FMT_RGBA16 is true or false (TLUT_FMT_UNKNOWN, TLUT_FMT_NONE)
                 ram = videoHLE.core.memory.u8
-                @convertCI8_IA16 texture, tmem, tile.pal, ram, tileWidth, tileHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride
-              else
-                console.error "TODO: tile format " + tile.fmt + ", tile.otherModeL" + tile.otherModeL  
+                @convertCI8_RGBA16 texture, tmem, 0x800, videoHLE.tlut, tileWidth, tileHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride
             when consts.TXT_SIZE_16b
               console.error "TODO: tile format " + tile.fmt + ", tile.size" + tile.siz
+            when consts.TXT_SIZE_4b
+              if tile.otherModeH & consts.TLUT_FMT_IA16
+                console.error "TODO: tile format " + tile.fmt + ", consts.TLUT_FMT_IA16"
+              else
+                ram = videoHLE.core.memory.u8
+                @convertCI4_RGBA16 texture, tmem, 0x800 + (tile.pal << 4), videoHLE.tlut, tileWidth, tileHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride
+            else
+              console.error "TODO: tile format " + tile.fmt + ", tile.size" + tile.siz
+        when consts.TXT_FMT_I
+          switch tile.siz
+            when consts.TXT_SIZE_4b
+              @convertI4 texture, tmem, tileWidth, tileHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride
+            when consts.TXT_SIZE_8b
+              @convertI8 texture, tmem, tileWidth, tileHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride
             else
               console.error "TODO: tile format " + tile.fmt + ", tile.size" + tile.siz
         else
@@ -224,6 +238,33 @@ class C1964jsRenderer
       dstRowOffset += dstRowStride
     return
 
+  convertRGBA32: (texture, tm, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
+    `const tmem = tm` 
+    `const height = texHeight|0`
+    `const width = texWidth|0`
+
+    j=-height
+    while j < 0
+      i=-width
+      srcOffset = srcRowOffset|0
+      dstOffset = dstRowOffset|0
+      while i < 0
+        r = tmem[srcOffset]|0
+        g = tmem[srcOffset+1]|0
+        b = tmem[srcOffset+2]|0
+        a = tmem[srcOffset+3]|0
+        i++
+        texture[dstOffset] = r
+        srcOffset += 4
+        texture[dstOffset + 1] = g
+        texture[dstOffset + 2] = b
+        texture[dstOffset + 3] = a
+        dstOffset += 4
+      j++
+      srcRowOffset += srcRowStride<<1
+      dstRowOffset += dstRowStride
+    return
+
   convertIA8: (texture, tm, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
     `const tmem = tm` 
     `const height = texHeight|0`
@@ -249,6 +290,63 @@ class C1964jsRenderer
       dstRowOffset += dstRowStride
     return
 
+  convertI4: (texture, tm, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
+    `const tmem = tm`
+    `const height = texHeight|0`
+    `const width = texWidth|0`
+
+    j=-height
+    while j < 0
+      i=-width
+      srcOffset = srcRowOffset
+      dstOffset = dstRowOffset
+      while i < 0
+        bHi = tmem[srcOffset]&0xF0 >>> 4
+        bLo = tmem[srcOffset]&0xF
+        colorHi = fourtoeight[bHi]
+        colorLo = fourtoeight[bLo]
+        i++
+        texture[dstOffset] = colorHi
+        srcOffset++
+        texture[dstOffset + 1] = colorHi
+        texture[dstOffset + 2] = colorHi
+        texture[dstOffset + 3] = colorHi
+        texture[dstOffset + 4] = colorLo
+        texture[dstOffset + 5] = colorLo
+        texture[dstOffset + 6] = colorLo
+        texture[dstOffset + 7] = colorLo
+        dstOffset += 8
+      j++
+      srcRowOffset += srcRowStride
+      dstRowOffset += dstRowStride
+    return
+
+  convertI8: (texture, tm, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
+    `const tmem = tm` 
+    `const height = texHeight|0`
+    `const width = texWidth|0`
+
+    j=-height
+    while j < 0
+      i=-width
+      srcOffset = srcRowOffset
+      dstOffset = dstRowOffset
+      while i < 0
+        b = tmem[srcOffset]|0
+        i++
+        I = b
+        srcOffset += 1
+        texture[dstOffset] = I
+        texture[dstOffset + 1] = I
+        texture[dstOffset + 2] = I
+        texture[dstOffset + 3] = I
+        dstOffset += 4
+      j++
+      srcRowOffset += srcRowStride
+      dstRowOffset += dstRowStride
+    return
+
+
   convertCI4_RGBA16: (texture, tm, palette, ram, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
     `const tmem = tm`
     `const pal = palette`
@@ -268,26 +366,26 @@ class C1964jsRenderer
         colorLo = u8[pal+bLo]<<8 | u8[pal+bLo+1]
         i++
         texture[dstOffset] = fivetoeight[colorHi >> 11 & 0x1F]
-        srcOffset += 2
+        srcOffset += 1
         texture[dstOffset + 1] = fivetoeight[colorHi >> 6 & 0x1F]
         texture[dstOffset + 2] = fivetoeight[colorHi >> 1 & 0x1F]
-        texture[dstOffset + 3] = 255 #colorHi << 31 >> 31
+        texture[dstOffset + 3] = colorHi << 31 >> 31
         texture[dstOffset + 4] = fivetoeight[colorLo >> 11 & 0x1F]
         texture[dstOffset + 5] = fivetoeight[colorLo >> 6 & 0x1F]
         texture[dstOffset + 6] = fivetoeight[colorLo >> 1 & 0x1F]
-        texture[dstOffset + 7] = 255 # colorLo << 31 >> 31
+        texture[dstOffset + 7] = colorLo << 31 >> 31
         dstOffset += 8
       j++
       srcRowOffset += srcRowStride
       dstRowOffset += dstRowStride
     return
 
-  convertCI8_RGBA16: (texture, tm, palette, ram, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
+  convertCI8_RGBA16: (texture, tm, palette, tlut, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
     `const tmem = tm`
     `const pal = palette`
     `const height = texHeight|0`
     `const width = texWidth|0`
-    `const u8 = ram`
+    `const u8 = tlut`
 
     j=-height
     while j < 0
@@ -299,10 +397,10 @@ class C1964jsRenderer
         color = u8[pal+b]<<8 | u8[pal+b+1]
         i++
         srcOffset += 1
-        texture[dstOffset] = fivetoeight[color >> 11 & 0x1F]
-        texture[dstOffset + 1] = fivetoeight[color >> 6 & 0x1F]
-        texture[dstOffset + 2] = fivetoeight[color >> 1 & 0x1F]
-        texture[dstOffset + 3] = 255 # colorLo << 31 >> 31
+        texture[dstOffset] = fivetoeight[color >>> 11 & 0x1F]
+        texture[dstOffset + 1] = fivetoeight[color >>> 6 & 0x1F]
+        texture[dstOffset + 2] = fivetoeight[color >>> 1 & 0x1F]
+        texture[dstOffset + 3] = color << 31 >> 31
         dstOffset += 4
       j++
       srcRowOffset += srcRowStride
@@ -310,12 +408,12 @@ class C1964jsRenderer
     return
 
 
-  convertCI8_IA16: (texture, tm, palette, ram, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
+  convertCI8_IA16: (texture, tm, palette, tlut, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
     `const tmem = tm`
     `const pal = palette`
     `const height = texHeight|0`
     `const width = texWidth|0`
-    `const u8 = ram`
+    `const u8 = tlut`
 
     j=-height
     while j < 0
@@ -425,7 +523,8 @@ class C1964jsRenderer
 
     tData = @formatTexture(tile, tmem, videoHLE, isFillRect)
 
-    if tData isnt undefined and tData.textureData isnt undefined
+    if tileWidth <= 0 or tileHeight <= 0
+    else if tData isnt undefined and tData.textureData isnt undefined
       textureData = tData.textureData
 
       gl.activeTexture(gl.TEXTURE0 + tileno)
@@ -447,26 +546,26 @@ class C1964jsRenderer
 
       gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
       gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-      gl.uniform1i @webGL.shaderProgram.samplerUniform, @colorsTexture0
+    gl.uniform1i @webGL.shaderProgram.samplerUniform, @colorsTexture0
 
-      if videoHLE.primColor.length > 0
-        gl.uniform4fv @webGL.shaderProgram.uPrimColor, videoHLE.primColor
+    if videoHLE.primColor.length > 0
+      gl.uniform4fv @webGL.shaderProgram.uPrimColor, videoHLE.primColor
 
-      if videoHLE.fillColor.length > 0
-        gl.uniform4fv @webGL.shaderProgram.uFillColor, videoHLE.fillColor
+    if videoHLE.fillColor.length > 0
+      gl.uniform4fv @webGL.shaderProgram.uFillColor, videoHLE.fillColor
 
-      if videoHLE.blendColor.length > 0
-        gl.uniform4fv @webGL.shaderProgram.uBlendColor, videoHLE.blendColor
+    if videoHLE.blendColor.length > 0
+      gl.uniform4fv @webGL.shaderProgram.uBlendColor, videoHLE.blendColor
 
-      if videoHLE.envColor.length > 0
-        gl.uniform4fv @webGL.shaderProgram.uEnvColor, videoHLE.envColor
+    if videoHLE.envColor.length > 0
+      gl.uniform4fv @webGL.shaderProgram.uEnvColor, videoHLE.envColor
 
 
-      if isFillRect is true
-        cycleType = 3
-      else 
-        cycleType = videoHLE.cycleType
-      gl.uniform1i @webGL.shaderProgram.cycleType, cycleType
+    if isFillRect is true
+      cycleType = 3
+    else 
+      cycleType = videoHLE.cycleType
+    gl.uniform1i @webGL.shaderProgram.cycleType, cycleType
 
     gl.bindBuffer gl.ELEMENT_ARRAY_BUFFER, @texrectVertexIndexBuffer
     @webGL.setMatrixUniforms @webGL.shaderProgram

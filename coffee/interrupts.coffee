@@ -202,7 +202,6 @@ C1964jsInterrupts = (core, cp0) ->
         core.dma.copyCartToDram pc, isFromDelaySlot
       when consts.PI_RD_LEN_REG
         core.memory.setInt32 core.memory.piUint8Array, offset, value, core.memory.piUint32Array
-        alert "write to PI_RD_LEN_REG"
         core.dma.copyDramToCart pc, isFromDelaySlot
       when consts.PI_DRAM_ADDR_REG
         core.memory.setInt32 core.memory.piUint8Array, offset, value, core.memory.piUint32Array
@@ -528,9 +527,6 @@ C1964jsInterrupts = (core, cp0) ->
             ###
             core.videoHLE = new C1964jsVideoHLE(core, core.webGL.gl)
 
-        wireframe = document.getElementById("wireframe")
-        core.settings.wireframe = false
-        core.settings.wireframe = true if wireframe isnt null and wireframe.checked
         repeatDList = document.getElementById("repeatDList")
         core.settings.repeatDList = false
         core.settings.repeatDList = true if repeatDList isnt null and repeatDList.checked

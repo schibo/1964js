@@ -210,9 +210,7 @@ class C1964jsEmulator
     @errorElement = document.getElementById("error")
     @p = new Int32Array(1)
     #set ram size
-    MEMORY_SIZE_NO_EXPANSION = 0x400000
-    MEMORY_SIZE_WITH_EXPANSION = 0x800000
-    @currentRdramSize = MEMORY_SIZE_WITH_EXPANSION
+    @currentRdramSize = @getRdramSize()
     @crc1 = 0
     @crc2 = 0
     @romName = new Uint8Array 20
@@ -277,7 +275,7 @@ class C1964jsEmulator
     
     # rom header
     #copy rom name
-    if @isLittleEndian is 1
+    if @isLittleEndian is 1 and @useByteCompatibilityMode is false
       for i in [0...20]
         @romName[i] = @memory.rom[(32+i)^3]
     else
@@ -304,6 +302,9 @@ class C1964jsEmulator
       @h[i] = @r[i] >> 31
       i += 1
     return
+
+  getRdramSize: () ->
+    return 0x800000 #4MB RDRAM + 4MB Expansion = 8MB
 
   #swap to 0x80371240
   byteSwap: (rom) ->
@@ -455,57 +456,52 @@ class C1964jsEmulator
     return
 
   runLoop: () =>
-    try
-      #setTimeout to be a good citizen..don't allow for the cpu to be pegged at 100%.
-      #8ms idle time will be 50% cpu max if a 60FPS game is slow.
-      if @startTime is undefined
-        @startTime = Date.now();
-      #@request = requestAnimFrame(@runLoop)  if @terminate is false
-      if @terminate is true
-        clearInterval @mySetInterval
-        return
+    #setTimeout to be a good citizen..don't allow for the cpu to be pegged at 100%.
+    #8ms idle time will be 50% cpu max if a 60FPS game is slow.
+    if @startTime is undefined
+      @startTime = Date.now();
+    #@request = requestAnimFrame(@runLoop)  if @terminate is false
+    if @terminate is true
+      clearInterval @mySetInterval
+      return
 
-      `const m = this.m`
-      `const r = this.r`
-      `const h = this.h`
-      `const p = this.p`
+    `const m = this.m`
+    `const r = this.r`
+    `const h = this.h`
+    `const p = this.p`
 
-      fn = @fn
+    fn = @fn
 
-      aa = 10000
-      while @terminate is false and aa != 0
-        aa--
-        #@interrupts.checkInterrupts()
-        if m[0] >= 0
-          @interval += 1
-          #@m[0] = -125000 # which is -625000 / (interval+1)
-          m[0] = -156250 # which is -625000 / (interval+1) / 2
-          pc = p[0]
-          @interrupts.processException p[0]
-          if @interval is 4
-            @interval = 0
-            @repaintWrapper()
-            #@cp0[consts.COUNT] += 625000*2 #todo: set count to count + @m*2 when count is requested in code
-            @cp0[consts.COUNT] += 625000*2 #todo: set count to count + @m*2 when count is requested in code
-            @interrupts.triggerCompareInterrupt 0, false
-            @interrupts.triggerVIInterrupt 0, false #if ((@memory.getInt32(@memory.miUint8Array, consts.MI_INTR_REG, core.memory.miUint32Array) & consts.MI_INTR_VI) isnt 0)
-          else if @interval is 2
-            @interrupts.checkInterrupts()
-            if pc isnt p[0]
-              pc = p[0] >>> 2
-              fn = @fnLut[pc]
-            break
+    aa = 10000
+    while @terminate is false and aa != 0
+      aa--
+      #@interrupts.checkInterrupts()
+      if m[0] >= 0
+        @interval += 1
+        #@m[0] = -125000 # which is -625000 / (interval+1)
+        m[0] = -156250 # which is -625000 / (interval+1) / 2
+        pc = p[0]
+        @interrupts.processException p[0]
+        if @interval is 4
+          @interval = 0
+          @repaintWrapper()
+          @cp0[consts.COUNT] += 625000*2 #todo: set count to count + @m*2 when count is requested in code
+          @interrupts.triggerCompareInterrupt 0, false
+          @interrupts.triggerVIInterrupt 0, false #if ((@memory.getInt32(@memory.miUint8Array, consts.MI_INTR_REG, core.memory.miUint32Array) & consts.MI_INTR_VI) isnt 0)
+        else if @interval is 2
+          @interrupts.checkInterrupts()
           if pc isnt p[0]
             pc = p[0] >>> 2
             fn = @fnLut[pc]
-        else
-          fn = @run fn, r, h
-            
-      @fn = fn
-      @
-    catch e
-      @terminate = true
-      throw e
+          break
+        if pc isnt p[0]
+          pc = p[0] >>> 2
+          fn = @fnLut[pc]
+      else
+        fn = @run fn, r, h
+          
+    @fn = fn
+    @
 
   run: (fn, r, h) ->
     `const m = this.m`
@@ -548,11 +544,12 @@ class C1964jsEmulator
 
   #make way for another 1964 instance. cleanup old scripts written to the page.
   stopEmulatorAndCleanup: =>
-    MainLoop.stop()
-    @stopCompiling = true
     @terminate = true
     clearInterval @myFastInterval 
+    @m[0] = 0
     @log "stopEmulatorAndCleanup"
+    MainLoop.stop()
+    @stopCompiling = true
     @flushDynaCache()
     return
 
@@ -1032,6 +1029,41 @@ class C1964jsEmulator
   r4300i_dmultu: (i) ->
     "t.helpers.inter_dmultu(r,h," + i + ");"
 
+  r4300i_dsll: (i) ->
+    string = "{var temp=" + @helpers.RT(i) + ">>>" + (32-@helpers.sa(i)) + ";"
+    string += @helpers.tRDH(i) + "=" + @helpers.RTH(i) + "<<" + @helpers.sa(i) + ";" + @helpers.tRD(i) + "=" + @helpers.RT(i) + "<<" + @helpers.sa(i) + ";"
+    string += @helpers.tRDH(i) + "|=temp;}" 
+
+  r4300i_dsrl: (i) ->
+    string = "{var temp=" + @helpers.RTH(i) + "<<" + (32-@helpers.sa(i)) + ";"
+    string += @helpers.tRDH(i) + "=" + @helpers.RTH(i) + ">>>" + @helpers.sa(i) + ";" + @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>>" + @helpers.sa(i) + ";"
+    string += @helpers.tRD(i) + "|=temp;}" 
+
+  r4300i_dsra: (i) ->
+    string = "{var temp=" + @helpers.RTH(i) + "<<" + (32-@helpers.sa(i)) + ";"
+    string += @helpers.tRDH(i) + "=" + @helpers.RTH(i) + ">>" + @helpers.sa(i) + ";" + @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>>" + @helpers.sa(i) + ";"
+    string += @helpers.tRD(i) + "|=temp;}" 
+
+
+
+
+  r4300i_dsllv: (i) ->
+    string = "{var temp=" + @helpers.RT(i) + ">>>(64-" + @helpers.RS(i) + ");"
+    string += @helpers.tRDH(i) + "=" + @helpers.RTH(i) + "<<" + @helpers.RS(i) + ";" + @helpers.tRD(i) + "=" + @helpers.RT(i) + "<<" + @helpers.RS(i) + ";"
+    string += @helpers.tRDH(i) + "|=temp;}" 
+
+  r4300i_dsrlv: (i) ->
+    string = "{var temp=" + @helpers.RTH(i) + "<<(64" + @helpers.RS(i) + ");"
+    string += @helpers.tRDH(i) + "=" + @helpers.RTH(i) + ">>>" + @helpers.RS(i) + ";" + @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>>" + @helpers.RS(i) + ";"
+    string += @helpers.tRD(i) + "|=temp;}" 
+
+  r4300i_dsrav: (i) ->
+    string = "{var temp=" + @helpers.RTH(i) + "<<(64-" + @helpers.RS(i) + ");"
+    string += @helpers.tRDH(i) + "=" + @helpers.RTH(i) + ">>" + @helpers.RS(i) + ";" + @helpers.tRD(i) + "=" + @helpers.RT(i) + ">>>" + @helpers.RS(i) + ";"
+    string += @helpers.tRD(i) + "|=temp;}" 
+
+
+
   r4300i_dsll32: (i) ->
     @helpers.tRDH(i) + "=" + @helpers.RT(i) + "<<" + @helpers.sa(i) + ";" + @helpers.tRD(i) + "=0;"
 
@@ -1076,6 +1108,18 @@ class C1964jsEmulator
 
   r4300i_COP0_tlbr: (i) ->
     "t.helpers.inter_tlbr(t.tlb, t.cp0);"
+
+  r4300i_COP0_tlbwr: (i) ->
+    @log "todo: r4300i_COP0_tlbwr"
+    ""
+
+  r4300i_COP1_dmfc1: (i) ->
+    @log "todo: r4300i_COP1_dmfc1"
+    ""
+
+  r4300i_COP1_dmtc1: (i) ->
+    @log "todo: r4300i_COP1_dmtc1"
+    ""
 
   r4300i_lwl: (i) ->
     string = "{" + @helpers.setVAddr(i)
@@ -1254,6 +1298,72 @@ class C1964jsEmulator
   r4300i_COP1_sqrt_d: (i) ->
     "t.cp1_f64[" + @helpers.FD64ArrayView(i) + "]=Math.sqrt(t.cp1_f64[" + @helpers.FS64ArrayView(i) + "]);"
 
+  r4300i_COP1_cvtl_s: (i) ->
+    @log "todo: r4300i_COP1_cvtl_s"
+    ""
+
+  r4300i_COP1_roundl_s: (i) ->
+    @log "todo: r4300i_COP1_roundl_s"
+    ""
+
+  r4300i_COP1_truncl_s: (i) ->
+    @log "todo: r4300i_COP1_truncl_s"
+    ""
+
+  r4300i_COP1_ceill_s: (i) ->
+    @log "todo: r4300i_COP1_ceill_s"
+    ""
+
+  r4300i_COP1_floorl_s: (i) ->
+    @log "todo: r4300i_COP1_floorl_s"
+    ""
+
+  r4300i_COP1_roundw_s: (i) -> 
+    @log "todo: r4300i_COP1_floorl_s"
+    ""
+
+  r4300i_COP1_ceilw_s: (i) ->
+    @log "todo: r4300i_COP1_floorl_s"
+    ""
+
+  r4300i_COP1_floorw_s: (i) ->
+    @log "todo: r4300i_COP1_floorl_s"
+    ""
+
+  r4300i_COP1_cvtl_d: (i) ->
+    @log "todo: r4300i_COP1_cvtl_s"
+    ""
+
+  r4300i_COP1_roundl_d: (i) ->
+    @log "todo: r4300i_COP1_roundl_d"
+    ""
+
+  r4300i_COP1_truncl_d: (i) ->
+    @log "todo: r4300i_COP1_truncl_d"
+    ""
+
+  r4300i_COP1_ceill_d: (i) ->
+    @log "todo: r4300i_COP1_ceill_d"
+    ""
+
+  r4300i_COP1_floorl_d: (i) ->
+    @log "todo: r4300i_COP1_floorl_d"
+    ""
+
+  r4300i_COP1_roundw_d: (i) -> 
+    @log "todo: r4300i_COP1_floorl_d"
+    ""
+
+  r4300i_COP1_ceilw_d: (i) ->
+    @log "todo: r4300i_COP1_floorl_d"
+    ""
+
+  r4300i_COP1_floorw_d: (i) ->
+    @log "todo: r4300i_COP1_floorl_d"
+    ""
+
+
+
   r4300i_sync: (i) ->
     @log "todo: sync"
     ""
@@ -1293,6 +1403,14 @@ class C1964jsEmulator
     @log "todo: r4300i_tgeu"
     ""
 
+  r4300i_tgei: (i) ->
+    @log "todo: r4300i_tgei"
+    ""
+
+  r4300i_tgeiu: (i) ->
+    @log "todo: r4300i_tgeiu"
+    ""
+
   r4300i_tlt: (i) ->
     @log "todo: r4300i_tlt"
     ""
@@ -1303,6 +1421,30 @@ class C1964jsEmulator
 
   r4300i_tne: (i) ->
     @log "todo: r4300i_tne"
+    ""
+  
+  r4300i_tnei: (i) ->
+    @log "todo: r4300i_tnei"
+    ""
+
+  r4300i_tlti: (i) ->
+    @log "todo: r4300i_tlti"
+    ""
+
+  r4300i_tltiu: (i) ->
+    @log "todo: r4300i_tltiu"
+    ""
+
+  r4300i_teqi: (i) ->
+    @log "todo: r4300i_teqi"
+    ""
+
+  r4300i_bltzal: (i) ->
+    @log "todo: r4300i_bltzal (might be unused)"
+    ""
+
+  r4300i_bltzall: (i) ->
+    @log "todo: r4300i_teqi (might be unused)"
     ""
 
   #using same as daddi
