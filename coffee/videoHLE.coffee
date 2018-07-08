@@ -1710,7 +1710,7 @@ class C1964jsVideoHLE
     @triVertices[offset] = vertex.x
     @triVertices[offset+1] = vertex.y
     @triVertices[offset+2] = vertex.z
-    @triVertices[offset+3] = vertex.w
+    @triVertices[offset+3] = vertex.w * this.vertexMult
     @triVertices[offset+3] = 1.0 if vertex.w is 0
 
     colorOffset = @triangleVertexColorBuffer.numItems++ << 2 # postfix addition is intentional for performance

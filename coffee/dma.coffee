@@ -57,7 +57,7 @@ class C1964jsDma
     #if (remaining !== -1)
     #    alert('doh!' + remaining);
     else
-      alert "pi reading from somewhere other than cartridge domain"
+      `const d = this.memory.u8`
       while end-- >= 0
         d[to] = @memory.lb(from)
         from++
