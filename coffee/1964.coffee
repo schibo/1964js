@@ -817,6 +817,10 @@ class C1964jsEmulator
     @log "warning: UNUSED"
     ""
 
+  r4300i_syscall: (i) ->
+    @log "todo: r4300i_syscall"
+    ""
+
   r4300i_COP0_eret: (i) ->
     @stopCompiling = true
     string = "if((t.cp0[" + consts.STATUS + "]&" + consts.ERL + ")!==0){alert(\"error epc\");t.p[0]=t.cp0[" + consts.ERROREPC + "];"
@@ -1029,6 +1033,10 @@ class C1964jsEmulator
   r4300i_dmultu: (i) ->
     "t.helpers.inter_dmultu(r,h," + i + ");"
 
+  r4300i_dmult: (i) ->
+    @log "todo: r4300i_dmult"
+    ""
+
   r4300i_dsll: (i) ->
     string = "{var temp=" + @helpers.RT(i) + ">>>" + (32-@helpers.sa(i)) + ";"
     string += @helpers.tRDH(i) + "=" + @helpers.RTH(i) + "<<" + @helpers.sa(i) + ";" + @helpers.tRD(i) + "=" + @helpers.RT(i) + "<<" + @helpers.sa(i) + ";"
@@ -1066,6 +1074,11 @@ class C1964jsEmulator
 
   r4300i_dsll32: (i) ->
     @helpers.tRDH(i) + "=" + @helpers.RT(i) + "<<" + @helpers.sa(i) + ";" + @helpers.tRD(i) + "=0;"
+
+
+  r4300i_dsrl32: (i) ->
+    @helpers.tRDH(i) + "=0;" + @helpers.RD(i) + "=" + @helpers.RT(i) + ">>>" + @helpers.sa(i) + ";"
+
 
   r4300i_dsra32: (i) ->
     @helpers.tRD(i) + "=" + @helpers.RTH(i) + ">>" + @helpers.sa(i) + ";" + @helpers.tRDH(i) + "=" + @helpers.RTH(i) + ">>31;"
@@ -1227,6 +1240,14 @@ class C1964jsEmulator
 
   r4300i_COP1_cvts_w: (i) ->
     "t.cp1_f[" + @helpers.FD32ArrayView(i) + "]=t.cp1_i[" + @helpers.FS32ArrayView(i) + "];"
+
+  r4300i_COP1_cvts_l: (i) ->
+    @log "todo: r4300i_COP1_cvts_l"
+    ""
+
+  r4300i_COP1_cvtd_l: (i) ->
+    @log "todo: r4300i_COP1_cvtd_l"
+    ""
 
   r4300i_COP1_cvtw_s: (i) ->
     "t.cp1_i[" + @helpers.FD32ArrayView(i) + "]=t.cp1_f[" + @helpers.FS32ArrayView(i) + "];"
@@ -1453,6 +1474,18 @@ class C1964jsEmulator
 
   r4300i_daddu: (i) ->
     "t.helpers.inter_daddu(r,h," + i + ");"
+
+  r4300i_dsub: (i) ->
+    @log "todo: r4300i_dsub"
+    ""
+
+  r4300i_dsubu: (i) ->
+    @log "todo: r4300i_dsubu"
+    ""
+
+  r4300i_tge: (i) ->
+    @log "todo: r4300i_tge"
+    ""
 
   r4300i_C_F_S: (i) ->
     "t.helpers.inter_r4300i_C_cond_fmt_s(" + i + ",t.cp1Con,t.cp1_f);"
