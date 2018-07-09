@@ -489,8 +489,6 @@ class C1964jsEmulator
           @interrupts.triggerVIInterrupt 0, false #if ((@memory.getInt32(@memory.miUint8Array, consts.MI_INTR_REG, core.memory.miUint32Array) & consts.MI_INTR_VI) isnt 0)
         else if @interval is 2
           @interrupts.checkInterrupts()
-          fn = @fnLut[p[0] >>> 2]
-          break
         fn = @fnLut[p[0] >>> 2]
       fn = @run fn, r, h
           
@@ -587,9 +585,12 @@ class C1964jsEmulator
     string += ";t.p[0]=" + ((pc + offset)|0)
     string += ";return self." + @getFnName((pc + offset)|0) + "}"
     g = document.createElement("script")
-    s = document.getElementsByTagName("script")[@kk]
+    
+    if (!@s)
+      @s = document.getElementsByTagName("script")[0]
+
     @kk += 1
-    s.parentNode.insertBefore g, s
+    @s.parentNode.insertBefore g, @s
     g.text = string
     @fnLut[pc>>>2] = self[fnName]
 
