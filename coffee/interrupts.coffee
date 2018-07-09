@@ -259,7 +259,7 @@ C1964jsInterrupts = (core, cp0) ->
           #@triggerAIInterrupt 0, false
           #checkInterrupts();
           return 0
-        return 0
+        return 2048
       #return kfi;
       #return getInt32(aiUint8Array, offset);
       when consts.AI_STATUS_REG
