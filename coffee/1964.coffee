@@ -593,9 +593,12 @@ class C1964jsEmulator
     string += ";t.p[0]=" + ((pc + offset)|0)
     string += ";return self." + @getFnName((pc + offset)|0) + "}"
     g = document.createElement("script")
-    s = document.getElementsByTagName("script")[0]
+
+    if (!@s)
+      @s = document.getElementsByTagName("script")[0]
+
     @kk += 1
-    s.parentNode.insertBefore g, s
+    @s.parentNode.insertBefore g, @s
     g.text = string
     @fnLut[pc>>>2] = self[fnName]
 
