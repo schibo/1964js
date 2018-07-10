@@ -175,7 +175,7 @@ C1964jsInterrupts = (core, cp0) ->
         return ((core.memory.getInt32(core.memory.viUint8Array, offset, core.memory.viUint32Array) & 0xfffffffe) + currentHack) | 0
       else
         #log "unhandled video interface for vi offset: " + offset
-        return core.memory.getInt32 core.memory.viUint8Array, offset
+        return core.memory.getInt32 core.memory.viUint8Array, offset, core.memory.viUint32Array
 
   @writeVI = (offset, value, pc, isFromDelaySlot) ->
     switch offset
@@ -259,7 +259,7 @@ C1964jsInterrupts = (core, cp0) ->
           #@triggerAIInterrupt 0, false
           #checkInterrupts();
           return 0
-        return 0
+        return 2048
       #return kfi;
       #return getInt32(aiUint8Array, offset);
       when consts.AI_STATUS_REG

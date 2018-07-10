@@ -1017,7 +1017,7 @@ class C1964jsMemory
       #uncomment to verify non-tlb lookup.
       #if dec2hex(a) != dec2hex(((@t[a>>>12]<<16) | a&0x0000ffff))
       #  alert dec2hex(a) + ' ' + dec2hex(((@t[a>>>12]<<16) | a&0x0000ffff))
-      return ((@t[a>>>12]<<16) | (a&0x0000ffff))
+      return ((@t[a>>>12]<<18>>>2) | (a&0x0000ffff)) # removes the upper-2 bits to support kseg mirrors
 
     @readTLB8 = (b) =>
       `const a = this.virtualToPhysical(b)`
@@ -1166,7 +1166,7 @@ class C1964jsMemory
 
   lh: (addr) ->
     #throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
-    `const a = this.virtualToPhysical(addr)`
+    `const a = this.virtualToPhysical(addr)&0x3fffffff`
     @LH[a>>>16](a)
 
   lw: (addr) ->
@@ -1175,17 +1175,20 @@ class C1964jsMemory
     @LW[a>>>16](a)
 
   sw: (val, addr, pc, isDelaySlot) ->
+    #throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
     `const a = this.virtualToPhysical(addr)`
     @SW[a>>>16](val, a, pc, isDelaySlot)
     return
 
   #Same routine as storeWord, but store a byte
   sb: (val, addr, pc, isDelaySlot) ->
+    #throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
     `const a = this.virtualToPhysical(addr)`
     @SB[a>>>16](val, a, pc, isDelaySlot)
     return
 
   sh: (val, addr, pc, isDelaySlot) ->
+    #throw Error "todo: mirrored load address"  if (addr & 0xff000000) is 0x84000000
     `const a = this.virtualToPhysical(addr)`
     @SH[a>>>16](val, a, pc, isDelaySlot)
     return
