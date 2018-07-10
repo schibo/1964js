@@ -20,34 +20,49 @@ C1964jsEmulator::getTVSystem = (countryCode) ->
   system = undefined
   switch countryCode
     when 0 # Demo
+      @log "NTSC 0"
       system = @TV_SYSTEM_NTSC
     when 0x37 # '7'
+      @log "NTSC 7"
       system = @TV_SYSTEM_NTSC
     when 0x41
+      @log "NTSC 0x41"
       system = @TV_SYSTEM_NTSC
     when 0x44 # 'D' Germany
+      @log "PAL (Germany)"
       system = @TV_SYSTEM_PAL
     when 0x45 #'E' United States
+      @log "NTSC (United States)"    
       system = @TV_SYSTEM_NTSC
     when 0x46 # 'F' France
+      @log "PAL (France)"
       system = @TV_SYSTEM_PAL
     when "I" # 'I' Italy
+      @log "PAL (Italy)"
       system = @TV_SYSTEM_PAL
     when 0x4A # 'J' Japan
+      @log "NTSC (Japan)"
       system = @TV_SYSTEM_NTSC
     when 0x50 # 'P' Europe
+      @log "PAL (Europe)"
       system = @TV_SYSTEM_PAL
     when 0x53 #'S' Spain
+      @log "PAL (Spain)"
       system = @TV_SYSTEM_PAL
     when 0x55 # 'U' Australia
+      @log "PAL (Australia)"
       system = @TV_SYSTEM_PAL
     when 0x58 # 'X'
+      @log "PAL (X)"
       system = @TV_SYSTEM_PAL
     when 0x59 # 'Y' Australia
+      @log "PAL (Y Australia)"
       system = @TV_SYSTEM_PAL
     when 0x20, 0x21, 0x38, 0x70
+      @log "PAL 0x" + dec2hex(countryCode)
       system = @TV_SYSTEM_PAL
     else
+      @log "Unknown TV System: " + dec2hex(countryCode) + ". Using PAL."
       system = @TV_SYSTEM_PAL
   system
 

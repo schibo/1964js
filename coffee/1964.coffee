@@ -254,10 +254,10 @@ class C1964jsEmulator
     while k < 0x1000
       @memory.spMemUint8Array[k] = @memory.rom[k]
       k += 1
-    if @isLittleEndian is 1
-      @r[20] = @getTVSystem(@memory.romUint8Array[0x3D^3])
-    else
+    if @isLittleEndian is 1 and @useByteCompatibilityMode is false
       @r[20] = @getTVSystem(@memory.romUint8Array[0x3D])
+    else
+      @r[20] = @getTVSystem(@memory.romUint8Array[0x3E])
     bootCode = @getBootCode()
     @r[22] = bootCode.cic
     @cp0[consts.STATUS] = 0x70400004
