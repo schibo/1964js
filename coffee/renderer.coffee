@@ -178,7 +178,7 @@ class C1964jsRenderer
                 console.error "TODO: tile format " + tile.fmt + ", consts.TLUT_FMT_IA16"
               else
                 ram = videoHLE.core.memory.u8
-                @convertCI4_RGBA16 texture, tmem, 0x800 + (tile.pal << 4), videoHLE.tlut, tileWidth, tileHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride
+                @convertCI4_RGBA16 texture, tmem, 0x800 + (tile.pal<<5), videoHLE.tlut, tileWidth, tileHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride
             else
               console.error "TODO: tile format " + tile.fmt + ", tile.size" + tile.siz
         when consts.TXT_FMT_I
@@ -347,12 +347,13 @@ class C1964jsRenderer
     return
 
 
-  convertCI4_RGBA16: (texture, tm, palette, ram, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
+  convertCI4_RGBA16: (texture, tm, palette, tlut, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
     `const tmem = tm`
-    `const pal = palette`
     `const height = texHeight|0`
     `const width = texWidth|0`
-    `const u8 = ram`
+    pal = new Uint16Array(256);
+    for i in [0...256]
+      pal[i] = (tlut[(palette + (i << 1) + 0)] << 8) | tlut[(palette + (i << 1) + 1)]
 
     j=-height
     while j < 0
@@ -360,21 +361,14 @@ class C1964jsRenderer
       srcOffset = srcRowOffset
       dstOffset = dstRowOffset
       while i < 0
-        bHi = tmem[srcOffset]&0xF0 >>> 4
-        bLo = tmem[srcOffset]&0xF
-        colorHi = u8[pal+bHi]<<8 | u8[pal+bHi+1]
-        colorLo = u8[pal+bLo]<<8 | u8[pal+bLo+1]
+        color = pal[(tmem[srcOffset]>>>((i&1)<<2) & 0xf)]
         i++
-        texture[dstOffset] = fivetoeight[colorHi >> 11 & 0x1F]
+        texture[dstOffset] = color>>>24
         srcOffset += 1
-        texture[dstOffset + 1] = fivetoeight[colorHi >> 6 & 0x1F]
-        texture[dstOffset + 2] = fivetoeight[colorHi >> 1 & 0x1F]
-        texture[dstOffset + 3] = colorHi << 31 >> 31
-        texture[dstOffset + 4] = fivetoeight[colorLo >> 11 & 0x1F]
-        texture[dstOffset + 5] = fivetoeight[colorLo >> 6 & 0x1F]
-        texture[dstOffset + 6] = fivetoeight[colorLo >> 1 & 0x1F]
-        texture[dstOffset + 7] = colorLo << 31 >> 31
-        dstOffset += 8
+        texture[dstOffset + 1] = color>>>16&0xff
+        texture[dstOffset + 2] = color>>>8&0xff
+        texture[dstOffset + 3] = color
+        dstOffset += 4
       j++
       srcRowOffset += srcRowStride
       dstRowOffset += dstRowStride

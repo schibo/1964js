@@ -171,24 +171,24 @@ class C1964jsRendererLE extends C1964jsRenderer
       dstRowOffset += dstRowStride
     return
 
-
+  #todo: fixme
   convertCI4_RGBA16: (texture, tm, palette, tlut, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
     `const tmem = tm`
-    `const pal = palette`
     `const height = texHeight|0`
     `const width = texWidth|0`
+    pal = new Uint16Array(256);
+    for i in [0...256]
+      pal[i] = (tlut[(palette + (i << 1) + 0) ^ 3] << 8) | tlut[(palette + (i << 1) + 1) ^ 3]
 
     j=-height
     while j < 0
       i=-width
       srcOffset = srcRowOffset
       dstOffset = dstRowOffset
-      while i < 0
-        bHi = tmem[srcOffset^3]&0xF0 >>> 4
-        bLo = tmem[srcOffset^3]&0xF
-        colorHi = tlut[(pal+bHi)^3]<<8 | tlut[(pal+bHi+1)^3]
-        colorLo = tlut[(pal+bLo)^3]<<8 | tlut[(pal+bLo+1)^3]
+      while i < -1
+        colorHi = pal[(tmem[srcOffset^3]>>>4 & 0xf)]
         i++
+        colorLo = pal[(tmem[srcOffset^3]>>>0 & 0xf)]
         texture[dstOffset] = fivetoeight[colorHi >> 11 & 0x1F]
         srcOffset += 1
         texture[dstOffset + 1] = fivetoeight[colorHi >> 6 & 0x1F]
@@ -202,7 +202,16 @@ class C1964jsRendererLE extends C1964jsRenderer
       j++
       srcRowOffset += srcRowStride
       dstRowOffset += dstRowStride
+
+    if width & 1
+      colorHi = pal[(tmem[srcOffset^3]>>>4 & 0xf)^3]
+      texture[dstOffset] = colorHi>>>24
+      texture[dstOffset + 1] = colorHi>>>16&0xff
+      texture[dstOffset + 2] = colorHi>>>8&0xff
+      texture[dstOffset + 3] = colorHi&0xff
+
     return
+
 
   convertCI8_RGBA16: (texture, tm, palette, tlut, texWidth, texHeight, srcRowOffset, dstRowOffset, srcRowStride, dstRowStride) ->
     `const tmem = tm`
