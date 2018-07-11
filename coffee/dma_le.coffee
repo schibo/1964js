@@ -110,7 +110,7 @@ class C1964jsDmaLE
 
     if @audio.processAudio(@memory, from, length) is false
       @interrupts.clrFlag @memory.aiUint8Array, consts.AI_STATUS_REG, consts.AI_STATUS_FIFO_FULL
-      #@interrupts.triggerAIInterrupt 0, false
+      @interrupts.triggerAIInterrupt 0, false
     else
       @interrupts.setFlag @memory.aiUint8Array, consts.AI_STATUS_REG, consts.AI_STATUS_FIFO_FULL
     return

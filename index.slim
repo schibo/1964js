@@ -551,7 +551,7 @@ html
             .dropbtn style="position: relative; overflow: hidden; direction: ltr;background-color: #4CAF50; width:10vw; font-size: 1.5vw"
               div style="display: block; text-align: center"
                 | Load ROM
-              input.file#files name="file" type="file"
+              input.file#files name="file" type="file" onclick="this.value=null;"
                     //| *.v64; *.n64; *.z64
             span style="font-size: 10px; font-size: 50%"
               br /

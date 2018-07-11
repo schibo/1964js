@@ -167,6 +167,8 @@ handleFileSelect = (evt) ->
   reader.onabort = (e) ->
     alert "File read cancelled"
     return
+  document.getElementById("files").removeEventListener "change", handleFileSelect, false
+  document.getElementById("files").addEventListener "change", handleFileSelect, false
 
   reader.onloadstart = (e) ->
     document.getElementById("progress_bar").className = "loading"  unless @progressBar is `undefined`
