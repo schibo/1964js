@@ -2,7 +2,7 @@
 
 
 # 1964js
-This is the first Nintendo 64 emulator for JavaScript. Visit the [blog](http://1964js.com/blog/index.html "1964js blog") on [1964js.com](http://1964js.com "1964js website") to see videos and to download the original Windows version of 1964.
+This is the first Nintendo 64 emulator for JavaScript.
 
 # Building the source
 
@@ -51,8 +51,6 @@ The script is known to work on Mac OS X 10.13.4 and Ubuntu 14.04.3 LTS/15.10 64-
 This project is still in the early stages. The initial goal of this project was to see how well Google Chrome's V8 JavaScript compiler performs.
 
 Instead of building a traditional dynamic recompiler (Just-In-Time/JIT compiler) as we did for 1964 on Windows, which translated MIPS instructions directly to x86 instructions, 1964js dynamically writes JavaScript to the web page by reversing MIPS code to JavaScript. This JavaScript represents blocks of ROM code. Then, if using Chrome for instance, Google's V8 compiler compiles the JavaScript to native code for us automatically.
-
-For updates, please check [1964js.com](http://1964js.com "1964js website")!
 
 # Compatibility
 
